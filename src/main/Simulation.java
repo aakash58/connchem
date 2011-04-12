@@ -58,7 +58,6 @@ public class Simulation {
 		// Controller and View Initialization
 		demo.init();
 		
-		
 		// control panel
 		JPanel controlPanel = new JPanel();
 		frmConnectedChemistrySimulations.getContentPane().add(controlPanel, "cell 0 0,grow");
