@@ -53,7 +53,7 @@ public class Simulation {
 		frmConnectedChemistrySimulations.setTitle("Connected Chemistry Simulations");
 		frmConnectedChemistrySimulations.setBounds(100, 100, 450, 300);
 		frmConnectedChemistrySimulations.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmConnectedChemistrySimulations.getContentPane().setLayout(new MigLayout("", "[grow][grow,fill]", "[grow,fill]"));
+		frmConnectedChemistrySimulations.getContentPane().setLayout(new MigLayout("", "[][grow,fill]", "[grow,fill]"));
 		
 		// Controller and View Initialization
 		demo.init();
