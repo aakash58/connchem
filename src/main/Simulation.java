@@ -7,7 +7,8 @@ import net.miginfocom.swing.MigLayout;
 
 import view.*;
 import control.*;
-import model.*;
+//Test comment
+//import model.*;
 
 import java.awt.Canvas;
 import java.awt.Panel;
