@@ -9,5 +9,8 @@
 	<classpathentry kind="lib" path="resources/geomerative.jar"/>
 	<classpathentry kind="lib" path="resources/JBox2D-2.0.1-b250-Library.jar"/>
 	<classpathentry kind="lib" path="resources/miglayout15-swing.jar"/>
+	<classpathentry kind="lib" path="resources/pbox2d.jar"/>
+	<classpathentry kind="lib" path="resources/sqlitejdbc-v056.jar"/>
+	<classpathentry kind="lib" path="resources/yamlbeans-1.06.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
