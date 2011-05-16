@@ -1,7 +1,20 @@
 package model;
 import static model.YAMLinterface.*;
 
+import java.util.ArrayList;
+
+import org.jbox2d.util.sph.Particle;
+
+import view.Boundary;
+import view.Molecule;
+
 public class State {
+	// An ArrayList of particles that will fall on the surface
+	public static ArrayList<Molecule> molecules = new ArrayList<Molecule>();
+	// A list we'll use to track fixed objects
+	public static ArrayList<Boundary> boundaries = new ArrayList<Boundary>();
+	
+	
 	
 	/*
 	 * Unit, set and sim status

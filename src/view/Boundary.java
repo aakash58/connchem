@@ -1,38 +1,30 @@
 package view;
 
 import processing.core.*;
+import p5.Area;
 import pbox2d.*;
+import p5.Region;
 
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.*;
 
-public class Boundary {
+public class Boundary extends Area{
 
-	private PApplet parent;
-	// A boundary is a simple rectangle with x,y,width,and height
-	float x;
-	float y;
-	float w;
-	float h;
-	int myColor;
+	private P5Canvas parent;
 	// But we also have to make a body for box2d to know about it
 	Body b;
 	PBox2D box2d;
 
-	Boundary(float x_,float y_, float w_, float h_, int color_, PBox2D box2d_, PApplet parent_) {
+	Boundary(float x_,float y_, float w_, float h_, PBox2D box2d_, P5Canvas parent_) {
 		this.parent = parent_;
 		this.box2d = box2d_;
-		x = x_;
-		y = y_;
-		w = w_;
-		h = h_;
-		myColor = color_;
+		setDimensions(x_, y_, w_, h_);
 
 		// Figure out the box2d coordinates
-		float box2dW = box2d.scalarPixelsToWorld(w/2);
-		float box2dH = box2d.scalarPixelsToWorld(h/2);
-		Vec2 center = new Vec2(x,y);
+		float box2dW = box2d.scalarPixelsToWorld(w()/2);
+		float box2dH = box2d.scalarPixelsToWorld(h()/2);
+		Vec2 center = new Vec2(x(),y());
 
 		// Define the polygon
 		PolygonDef sd = new PolygonDef();
@@ -48,15 +40,10 @@ public class Boundary {
 		b.setUserData(this);
 	}
 
-	void changeColor(int newColor) {
-		myColor = newColor;
-	}
 	// Draw the boundary, if it were at an angle we'd have to do something fancier
 	void display() {
-		parent.fill(myColor);
-		parent.stroke(myColor);
 		parent.rectMode(PConstants.CENTER);
-		parent.rect(x,y,w,h);
+		parent.rect(x(),y(),w(),h());
 	}
 
 }
