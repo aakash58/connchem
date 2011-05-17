@@ -14,48 +14,77 @@ public class P5Canvas extends Area {
 
 	// A reference to our box2d world
 	PBox2D box2d;
-
+	public int  w,h;
+	
 	public void setup() {
 		//smooth();
-		size(200, 200);
+		w=500;
+		h=500;
+		size(w, h);
 		setDimensions(0, 0, width, height);
+		
 		
 		// Initialize box2d physics and create the world
 		box2d = new PBox2D(this);
 		box2d.createWorld();
-		box2d.setGravity(0f,-100f);
+		box2d.setGravity(0f,-10f);
 		// Turn on collision listening!
 		// TODO turn on collisions by uncommenting below
 		//box2d.listenForCollisions();
 
 		// Add a bunch of fixed boundaries
 		
-		float bW = 10; // boundary width
+		float bW = 1; // boundary width
 		
 		Boundary lBound = new Boundary(x(), mh(), bW, h(), box2d, this);
 		Boundary rBound = new Boundary(r(), mh(), bW, h(), box2d, this);
 		Boundary tBound = new Boundary(mw(), y(), w(), bW, box2d, this);
 		Boundary bBound = new Boundary(mw(), b(), w(), bW, box2d, this);
 
-		boundaries.add(lBound);
-		boundaries.add(rBound);
-		boundaries.add(tBound);
-		boundaries.add(bBound);
+		boundaries[0]=lBound;
+		boundaries[1]=rBound;
+		boundaries[2]=tBound;
+		boundaries[3]=bBound;
+	}
+	public void setup(int ww, int hh) {
+		//smooth();
+		w=ww;
+		h=hh;
+		size(w, h);
+		setDimensions(0, 0, width, height);
+		
+		
+				
+		float bW = 1; // boundary width
+		
+		Boundary lBound = new Boundary(x(), mh(), bW, h(), box2d, this);
+		Boundary rBound = new Boundary(r(), mh(), bW, h(), box2d, this);
+		Boundary tBound = new Boundary(mw(), y(), w(), bW, box2d, this);
+		Boundary bBound = new Boundary(mw(), b(), w(), bW, box2d, this);
 
+		boundaries[0]=lBound;
+		boundaries[1]=rBound;
+		boundaries[2]=tBound;
+		boundaries[3]=bBound;
 	}
 
 	public void draw() {
 		// We must always step through time!
 		box2d.step();
-
+		
+		//if (w!=width || h!=height){
+		//	setup(width, height);
+		//}
+		
+		
 		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
 			m.display();
 		}
 		// Display all boundaries
-		for (int i = 0; i < boundaries.size(); i++) {
-			Boundary b = boundaries.get(i);
+		for (int i = 0; i < boundaries.length; i++) {
+			Boundary b = boundaries[i];
 			b.display();
 		}
 		
@@ -66,8 +95,8 @@ public class P5Canvas extends Area {
 	 * Function to create compounds from outside the PApplet
 	 */
 	public void addMolecule(String compoundName) {
-		float x_ = random(0, x());
-		float y_ = random(0, y());
+		float x_ = 100;
+		float y_ = random(100, y());
 		molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
 	}
 	
@@ -95,11 +124,11 @@ public class P5Canvas extends Area {
 		String c2 = o2.getClass().getName();
 		// If object 1 is a Box, then object 2 must be a particle
 		// Note we are ignoring particle on particle collisions
-		if (c1.contains("Boundary") && ((Boundary)o1).equals(boundaries.get(0))) {
+		if (c1.contains("Boundary") && ((Boundary)o1).equals(boundaries[0])) {
 			Molecule p = (Molecule) o2;
 		} 
 		// If object 2 is a Box, then object 1 must be a particle
-		else if (c2.contains("Boundary")&& ((Boundary)o2).equals(boundaries.get(0))) {
+		else if (c2.contains("Boundary")&& ((Boundary)o2).equals(boundaries[0])) {
 			Molecule p = (Molecule) o1;
 		}
 	}

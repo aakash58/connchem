@@ -38,23 +38,14 @@ public class BouncyBalls extends Area {
 		boundaries = new ArrayList<Boundary>();
 
 		// Add a bunch of fixed boundaries
-		boundaries.add(new Boundary(width/2,height,width,10, color(0,0,0), box2d, this));
-		boundaries.add(new Boundary(width/2,0,width,10, color(0,0,0), box2d, this));
-		boundaries.add(new Boundary(0,height/2,10,height, color(0,0,0), box2d, this));
-		boundaries.add(new Boundary(width,height/2,10,height, color(0,0,0), box2d, this));
+		boundaries.add(new Boundary(width/2,height,width,10, box2d, this));
+		boundaries.add(new Boundary(width/2,0,width,10, box2d, this));
+		boundaries.add(new Boundary(0,height/2,10,height, box2d, this));
+		boundaries.add(new Boundary(width,height/2,10,height, box2d, this));
 
 	}
 
 	public void draw() {
-		if(TEMP_MOD > 1) {
-			boundaries.get(0).changeColor(color(255,0,0));
-		}
-		else if(TEMP_MOD < 1) {
-			boundaries.get(0).changeColor(color(0,0,255));
-		}
-		else {
-			boundaries.get(0).changeColor(color(0,0,0));
-		}
 		background(255);
 
 		// We must always step through time!
