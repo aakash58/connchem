@@ -73,7 +73,7 @@ public class P5Canvas extends Area {
 	
 	private void drawBackground() { // draw background
 		pushStyle();
-		fill(127, 0, 0);
+		fill(0, 0, 127);
 		rect(x(), y(), w(), h());
 		popStyle();
 	}
