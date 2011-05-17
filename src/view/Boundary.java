@@ -39,11 +39,4 @@ public class Boundary extends Area{
 		b.createShape(sd);
 		b.setUserData(this);
 	}
-
-	// Draw the boundary, if it were at an angle we'd have to do something fancier
-	void display() {
-		parent.rectMode(PConstants.CENTER);
-		parent.rect(x(),y(),w(),h());
-	}
-
 }
