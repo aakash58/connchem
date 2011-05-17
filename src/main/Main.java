@@ -267,8 +267,8 @@ public class Main {
 		});
 		controlAddBtn_1.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				mainController.addMolecule("Mercury");
-				mainController.addMolecule(controlCompoundName_1);
+				mainController.addMolecule("Hydronium");
+				mainController.addMolecule("Hydronium");
 				mainController.addMolecule(controlCompoundName_1);
 				mainController.addMolecule(controlCompoundName_1);
 				mainController.addMolecule(controlCompoundName_1);
