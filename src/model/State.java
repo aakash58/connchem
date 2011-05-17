@@ -12,7 +12,7 @@ public class State {
 	// An ArrayList of particles that will fall on the surface
 	public static ArrayList<Molecule> molecules = new ArrayList<Molecule>();
 	// A list we'll use to track fixed objects
-	public static ArrayList<Boundary> boundaries = new ArrayList<Boundary>();
+	public static Boundary[] boundaries = new Boundary[4];
 	
 	
 	

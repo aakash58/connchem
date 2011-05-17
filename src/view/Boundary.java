@@ -11,12 +11,12 @@ import org.jbox2d.dynamics.*;
 
 public class Boundary extends Area{
 
-	private P5Canvas parent;
+	private Area parent;
 	// But we also have to make a body for box2d to know about it
 	Body b;
 	PBox2D box2d;
 
-	Boundary(float x_,float y_, float w_, float h_, PBox2D box2d_, P5Canvas parent_) {
+	Boundary(float x_,float y_, float w_, float h_, PBox2D box2d_, Area parent_) {
 		this.parent = parent_;
 		this.box2d = box2d_;
 		setDimensions(x_, y_, w_, h_);

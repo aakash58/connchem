@@ -90,7 +90,6 @@ public class Simulation {
 		// handle radio button events
 		ActionListener changePanel = new ActionListener() {
 
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				String keyNum = e.getActionCommand();
 				System.out.println(keyNum);

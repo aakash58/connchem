@@ -61,6 +61,7 @@ public class Molecule {
 		parent.stroke(0);
 		parent.strokeWeight(1);
 		parent.ellipse(0,0,r*2,r*2);
+		parent.colorMode(2);
 		// Let's add a line so we can see the rotation
 		parent.line(0,0,r,0);
 		parent.popMatrix();

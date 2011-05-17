@@ -41,7 +41,12 @@ import java.awt.ScrollPane;
 public class Main {
 
 	private JFrame mainFrame;
-
+	public static JMenu simMenu = new JMenu("Choose Simulation");
+	private int selectedUnit=0;
+	private int selectedSim=0;
+	
+	
+	
 	/**
 	 * Launch the application.
 	 */
@@ -77,14 +82,17 @@ public class Main {
 	 */
 	private void initialize() {
 		mainFrame = new JFrame();
-		mainFrame.setBounds(50, 50, 1000, 600);
+		mainFrame.setBounds(0, 0, 1150, 700);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		
+		JMenuBar menuBar = new JMenuBar();
+		mainFrame.setJMenuBar(menuBar);
+		p5Canvas.setBackground(Color.WHITE);
 		
 		// Controller and View Initialization
 		p5Canvas.init();
 		
-		JMenuBar menuBar = new JMenuBar();
-		mainFrame.setJMenuBar(menuBar);
 		
 		JMenu logoMenu = new JMenu("");
 		logoMenu.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconCcLogo.png")));
@@ -100,13 +108,26 @@ public class Main {
 		 * Simulation Menu
 		 */
 
-		JMenu simMenu = new JMenu("Choose Simulation");
+		simMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("TTT:"+simMenu.getSelectedObjects());
+			}
+		});
+		simMenu.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				simMenu.doClick();
+			}
+		});
 		menuBar.add(simMenu);
 
 
 		// populate Units (first level of sim menu)
-		ArrayList units = getUnits();
+		final ArrayList units = getUnits();
+		
 		JMenu[] menuArray = new JMenu[units.size()];
+		final ArrayList[] subMenuArrayList = new ArrayList[units.size()];
+		
 		for (int i = 0; i<units.size(); i++) {
 			try {
 				HashMap unit = (HashMap)units.get(i);
@@ -120,16 +141,34 @@ public class Main {
 				
 				// populate Sims (second level of sim menu)
 				try {
-					ArrayList sims = getSims(unitNo);
-					JMenuItem[] subMenuArray = new JMenuItem[sims.size()];
+					final ArrayList sims = getSims(unitNo);
+					subMenuArrayList[i] =  new ArrayList();
 					for (int j = 0; j<sims.size(); j++) {
 						HashMap sim = (HashMap)sims.get(j);
 						int simNo = Integer.parseInt((String)sim.get("sim"));
 						String simName = getSimName(unitNo, simNo);
-
+						
 						JMenuItem subMenu = new JMenuItem("Sim "+ Integer.toString(simNo) + ": " + simName);
-						subMenuArray[j] = subMenu;
-						menuItem.add(subMenuArray[j]);
+						
+						//Add new subMenuItem
+						menuItem.add(subMenu);
+						subMenuArrayList[i].add(subMenu);
+						                 
+						subMenu.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								for (int i = 0; i<units.size(); i++) {
+									for (int j = 0; j<subMenuArrayList[i].size(); j++) {
+										if (e.getSource()==subMenuArrayList[i].get(j)){
+											selectedUnit = i;
+											selectedSim = j+1;
+											simMenu.setText("Unit "+selectedUnit+": "+getUnitName(selectedUnit)+
+													", Sim "+selectedSim+": "+getSimName(i, j+1));
+										}	
+									}	
+								}
+							}
+						});
+						
 					}
 				} catch (Exception e) {
 					System.out.println("No Submenu Items: " + e);
@@ -222,9 +261,16 @@ public class Main {
 		controlBox_1.add(controlLabel_1, "cell 1 0,alignx center");
 
 		JButton controlAddBtn_1 = new JButton("");
+		controlAddBtn_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		controlAddBtn_1.addMouseListener(new MouseAdapter() {
-			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				mainController.addMolecule("Mercury");
+				mainController.addMolecule(controlCompoundName_1);
+				mainController.addMolecule(controlCompoundName_1);
+				mainController.addMolecule(controlCompoundName_1);
 				mainController.addMolecule(controlCompoundName_1);
 			}
 		});
@@ -245,7 +291,7 @@ public class Main {
 		JPanel controlBox_2 = new JPanel();
 		controlBox_2.setBackground(new Color(211, 211, 211));
 		controlSubpanel.add(controlBox_2, "cell 1 0,alignx center,growy");
-		controlBox_2.setLayout(new MigLayout("insets 2, gap 2", "[grow,center]", "[][]"));
+		controlBox_2.setLayout(new MigLayout("insets 2, gap 2", "[grow,center]", "[][][]"));
 
 		JLabel controlLabel_2 = new JLabel(controlCompoundName_2);
 		controlBox_2.add(controlLabel_2, "cell 0 0,alignx center");
@@ -284,11 +330,10 @@ public class Main {
 		JPanel legendPane_1 = new JPanel();
 		legendScrollContainer_1.setViewportView(legendPane_1);
 		legendPane_1.setLayout(new MigLayout("insets 6", "[grow][][]", "[][][][][]"));
-
-		JButton pane1_row1_compoundButton = new JButton("");
-		pane1_row1_compoundButton.setToolTipText("Water");
-		legendPane_1.add(pane1_row1_compoundButton, "cell 0 0,growx");
-		pane1_row1_compoundButton.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Water.png")));
+		
+		JLabel lblDff = new JLabel("Water");
+		legendPane_1.add(lblDff, "cell 0 0");
+		lblDff.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Water.png")));
 
 		JButton button_5 = new JButton("");
 		legendPane_1.add(button_5, "cell 1 0");
@@ -358,12 +403,12 @@ public class Main {
 		legendScrollContainer_2.setViewportView(legendPane_2);
 		legendPane_2.setLayout(new MigLayout("insets 6", "[grow][][]", "[][][]"));
 
-		JButton btnWater_1 = new JButton("");
+		JButton btnWater_1 = new JButton("Water");
 		btnWater_1.setToolTipText("Water");
 		legendPane_2.add(btnWater_1, "cell 0 0,growx");
 		btnWater_1.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Water.png")));
 
-		JButton button_500 = new JButton("");
+		JButton button_500 = new JButton("sds");
 		legendPane_2.add(button_500, "cell 1 0");
 		button_500.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
 
@@ -371,12 +416,12 @@ public class Main {
 		legendPane_2.add(button_600, "cell 2 0");
 		button_600.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
 
-		JButton button_700 = new JButton("");
+		JButton button_700 = new JButton("Acetate");
 		button_700.setToolTipText("Acetate");
 		legendPane_2.add(button_700, "cell 0 1,growx");
 		button_700.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Acetate.png")));
 
-		JButton button_800 = new JButton("");
+		JButton button_800 = new JButton("dsa");
 		button_800.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
 		legendPane_2.add(button_800, "cell 1 1");
 
@@ -415,7 +460,7 @@ public class Main {
 
 		JPanel canvasPanel_mainView = new JPanel();
 		canvasTabs.addTab("Main Simulation", null, canvasPanel_mainView, null);
-		canvasPanel_mainView.setLayout(new MigLayout("insets 2, gap 2", "[center][]", "[][center]"));
+		canvasPanel_mainView.setLayout(new MigLayout("insets 2, gap 2", "[center][600px]", "[600px][center]"));
 
 		JSlider canvasControl_main_scale = new JSlider();
 		canvasControl_main_scale.setOrientation(SwingConstants.VERTICAL);
@@ -514,6 +559,7 @@ public class Main {
 
 		JLabel totalSystemPressureOutput = new JLabel("100 kPa");
 		dashboard.add(totalSystemPressureOutput, "cell 1 4");
+		
 	}
 
 }
