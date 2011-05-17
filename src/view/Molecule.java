@@ -66,7 +66,7 @@ public class Molecule {
 			if (compoundName.equals("Water")) {
 				parent.fill(25, 25, 127);
 			} else {
-				parent.fill(parent.color(color));
+				parent.fill(0, 127, 0);
 			}
 			
 			
