@@ -13,13 +13,15 @@ public class Molecule {
 	Body body;
 	float r;
 	PBox2D box2d;
-	String file;
+	String compoundName;
+	
+	private int color = 0;
 
-	Molecule(float x_, float y_, String compoundName, PBox2D box2d_, P5Canvas parent_) {
+	Molecule(float x_, float y_, String compoundName_, PBox2D box2d_, P5Canvas parent_) {
 		this.parent = parent_;
 		this.box2d = box2d_;
 		r = 25;
-		file = compoundName;
+		compoundName = compoundName_;
 		
 		// This function puts the particle in the Box2d world
 		makeBody(x_,y_,r);
@@ -51,20 +53,28 @@ public class Molecule {
 
 	// 
 	void display() {
-		// We look at each body and get its screen position
-		Vec2 pos = box2d.getBodyPixelCoord(body);
-		// Get its angle of rotation
-		float a = body.getAngle();
+		parent.pushStyle();
 		parent.pushMatrix();
-		parent.translate(pos.x,pos.y);
-		parent.rotate(a);
-		parent.stroke(0);
-		parent.strokeWeight(1);
-		parent.ellipse(0,0,r*2,r*2);
-		parent.colorMode(2);
-		// Let's add a line so we can see the rotation
-		parent.line(0,0,r,0);
+			// We look at each body and get its screen position
+			Vec2 pos = box2d.getBodyPixelCoord(body);
+			// Get its angle of rotation
+			float a = body.getAngle();
+			parent.translate(pos.x,pos.y);
+			parent.rotate(a);
+			
+			// this is temporary
+			if (compoundName.equals("Water")) {
+				parent.fill(25, 25, 127);
+			} else {
+				parent.fill(parent.color(color));
+			}
+			
+			
+			parent.ellipse(0,0,r*2,r*2);
+			// Let's add a line so we can see the rotation
+			parent.line(0,0,r,0);
 		parent.popMatrix();
+		parent.popStyle();
 	}
 
 	// Here's our function that adds the particle to the Box2D world

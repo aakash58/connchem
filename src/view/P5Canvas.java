@@ -14,15 +14,13 @@ public class P5Canvas extends Area {
 
 	// A reference to our box2d world
 	PBox2D box2d;
-	public int  w,h;
 	
 	public void setup() {
-		//smooth();
-		w=500;
-		h=500;
-		size(w, h);
-		setDimensions(0, 0, width, height);
-		
+		smooth();
+		setW(500);
+		setH(500);
+		setDimensions(0, 0, w(), h());  // this is a custom function from the Region interface, implemented in the Area class
+		size(floor(w()), floor(h()));
 		
 		// Initialize box2d physics and create the world
 		box2d = new PBox2D(this);
@@ -45,30 +43,12 @@ public class P5Canvas extends Area {
 		boundaries[1]=rBound;
 		boundaries[2]=tBound;
 		boundaries[3]=bBound;
-	}
-	public void setup(int ww, int hh) {
-		//smooth();
-		w=ww;
-		h=hh;
-		size(w, h);
-		setDimensions(0, 0, width, height);
 		
-		
-				
-		float bW = 1; // boundary width
-		
-		Boundary lBound = new Boundary(x(), mh(), bW, h(), box2d, this);
-		Boundary rBound = new Boundary(r(), mh(), bW, h(), box2d, this);
-		Boundary tBound = new Boundary(mw(), y(), w(), bW, box2d, this);
-		Boundary bBound = new Boundary(mw(), b(), w(), bW, box2d, this);
-
-		boundaries[0]=lBound;
-		boundaries[1]=rBound;
-		boundaries[2]=tBound;
-		boundaries[3]=bBound;
 	}
 
 	public void draw() {
+		drawBackground();
+		
 		// We must always step through time!
 		box2d.step();
 		
@@ -82,22 +62,38 @@ public class P5Canvas extends Area {
 			Molecule m = molecules.get(i);
 			m.display();
 		}
-		// Display all boundaries
-		for (int i = 0; i < boundaries.length; i++) {
-			Boundary b = boundaries[i];
-			b.display();
-		}
+		// boundaries are not displayed.  If they should be, use a display method in the Boundary class.
+		// System.out.println("x: " + str(boundaries.get(2).x()) +" y: " + str(boundaries.get(2).y()) + " w: " + str(boundaries.get(2).w()) + "  h: " + str(boundaries.get(2).h()) );
 		
-		//System.out.println("x: " + str(boundaries.get(2).x()) +" y: " + str(boundaries.get(2).y()) + " w: " + str(boundaries.get(2).w()) + "  h: " + str(boundaries.get(2).h()) );
+	}
+	
+	/*
+	 * Background methods
+	 */
+	
+	private void drawBackground() { // draw background
+		pushStyle();
+		fill(127, 0, 0);
+		rect(x(), y(), w(), h());
+		popStyle();
 	}
 	
 	/*
 	 * Function to create compounds from outside the PApplet
 	 */
+	
 	public void addMolecule(String compoundName) {
 		float x_ = 100;
 		float y_ = random(100, y());
 		molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
+	}
+	
+	public void addMolecule() {
+		addMolecule("Water");
+	}
+	
+	public void addMolecule(float x_, float y_) {
+		addMolecule(x_, y_, "Water");
 	}
 	
 	public void addMolecule(float x_, float y_, String compoundName) {
@@ -105,7 +101,7 @@ public class P5Canvas extends Area {
 	}
 	
 	public void mousePressed() {
-		addMolecule(mouseX, mouseY, "Default");
+		addMolecule(mouseX, mouseY);
 	}
 	// Collision event functions!
 	public void addContact(ContactPoint cp) {
