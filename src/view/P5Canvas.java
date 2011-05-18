@@ -18,17 +18,17 @@ public class P5Canvas extends Area {
 	
 	public void setup() {
 		smooth();
-		setW(570);
-		setH(556);
+		setW(600);
+		setH(600);
 		setDimensions(0, 0, w(), h());  // this is a custom function from the Region interface, implemented in the Area class
-		size(500, 500);
+		size(600, 600);
 		
 		// Initialize box2d physics and create the world
 		box2d = new PBox2D(this);
 		box2d.createWorld();
 		box2d.setGravity(0f,-10f);
 		// Turn on collision listening!
-		// TODO turn on collisions by uncommenting below
+		// TODO turn on collisions by un-commenting below
 		//box2d.listenForCollisions();
 
 		
