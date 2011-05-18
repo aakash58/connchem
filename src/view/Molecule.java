@@ -149,7 +149,7 @@ public class Molecule {
 	    }
 
 	    // Parameters that affect physics
-	    sd.density = 200.0f;
+	    sd.density = 1.0f;
 	    sd.friction = 0.0f;
 	    sd.restitution = 1.0f;
 
