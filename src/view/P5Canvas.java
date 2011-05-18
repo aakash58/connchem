@@ -3,7 +3,8 @@ package view;
 import java.util.ArrayList;
 
 import pbox2d.*;
-import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 import static model.State.*;
@@ -20,7 +21,7 @@ public class P5Canvas extends Area {
 		setW(570);
 		setH(556);
 		setDimensions(0, 0, w(), h());  // this is a custom function from the Region interface, implemented in the Area class
-		size(floor(w()), floor(h()));
+		size(500, 500);
 		
 		// Initialize box2d physics and create the world
 		box2d = new PBox2D(this);
@@ -30,8 +31,8 @@ public class P5Canvas extends Area {
 		// TODO turn on collisions by uncommenting below
 		//box2d.listenForCollisions();
 
-		// Add a bunch of fixed boundaries
 		
+		// Add a bunch of fixed boundaries
 		float bW = 1; // boundary width
 		
 		Boundary lBound = new Boundary(x(), mh(), bW, h(), box2d, this);
@@ -73,8 +74,8 @@ public class P5Canvas extends Area {
 	
 	private void drawBackground() { // draw background
 		pushStyle();
-		fill(127, 0, 0);
-		rect(x(), y(), w(), h());
+		fill(63, 63, 127);
+		rect(0, 0, width, height);
 		popStyle();
 	}
 	
