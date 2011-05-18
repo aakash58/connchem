@@ -37,6 +37,8 @@ import static model.State.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.ScrollPane;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class Main {
 
@@ -45,7 +47,9 @@ public class Main {
 	private int selectedUnit=0;
 	private int selectedSim=0;
 	private Color selectedColor = new Color(200,200,150);
-	
+	private int[] sliderValues = {3,4,5,6,7};
+	private int minSliderValue = 1;
+	private int maxSliderValue = 9;
 	
 	
 	/**
@@ -252,6 +256,8 @@ public class Main {
 		timerSubpanel.add(timerDisplay, "cell 4 1,alignx center");
 
 		
+		//***************** Add elements Control panel
+		
 		final String controlCompoundName_1 = "Water";
 		final String controlCompoundName_2 = "Hydronium";
 		final String controlCompoundName_3 = "Acetate";
@@ -271,7 +277,7 @@ public class Main {
 		panel_2.setBackground(new Color(192, 192, 192));
 		panel_2.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
-		JLabel label = new JLabel("5");
+		final JLabel label = new JLabel(""+sliderValues[0]);
 		panel_2.add(label, "cell 0 1");
 		
 		JLabel lblWater = new JLabel("Water");
@@ -283,16 +289,19 @@ public class Main {
 		panel_2.add(button, "cell 2 1 1 1,growy");
 		button.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				mainController.addMolecule(controlCompoundName_1);
-				mainController.addMolecule(controlCompoundName_1);
-				mainController.addMolecule(controlCompoundName_1);
-				mainController.addMolecule(controlCompoundName_1);
-				mainController.addMolecule(controlCompoundName_1);
+				for (int i=0;i<Integer.parseInt(label.getText());i++)
+					mainController.addMolecule(controlCompoundName_1);
 			}
 		});
 		
-		JSlider slider_4 = new JSlider();
+		JSlider slider_4 = new JSlider(minSliderValue,maxSliderValue,sliderValues[0]);
 		panel_2.add(slider_4, "cell 1 1");
+		slider_4.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+			int value = ((JSlider) e.getSource()).getValue(); 
+				label.setText(""+value);
+			}
+		});
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.LIGHT_GRAY);
@@ -303,7 +312,7 @@ public class Main {
 		lblHydrochloricAcid_1.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydrochloric-Acid.png")));
 		panel.add(lblHydrochloricAcid_1, "cell 0 0 3 1,growx");
 		
-		JLabel lblNewLabel_1 = new JLabel("5");
+		final JLabel lblNewLabel_1 = new JLabel(""+sliderValues[1]);
 		panel.add(lblNewLabel_1, "cell 0 1");
 		
 		JButton button_1 = new JButton("");
@@ -311,23 +320,26 @@ public class Main {
 		panel.add(button_1, "cell 2 1,growy");
 		button_1.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				mainController.addMolecule(controlCompoundName_2);
-				mainController.addMolecule(controlCompoundName_2);
-				mainController.addMolecule(controlCompoundName_2);
-				mainController.addMolecule(controlCompoundName_2);
-				mainController.addMolecule(controlCompoundName_2);
+				for (int i=0;i<Integer.parseInt(lblNewLabel_1.getText());i++)
+					mainController.addMolecule(controlCompoundName_2);
 			}
 		});
 		
-		JSlider slider = new JSlider();
+		JSlider slider = new JSlider(minSliderValue,maxSliderValue,sliderValues[1]);
 		panel.add(slider, "cell 1 1");
+		slider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+			int value = ((JSlider) e.getSource()).getValue(); 
+			lblNewLabel_1.setText(""+value);
+			}
+		});
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBackground(new Color(192, 192, 192));
 		legendPane_1.add(panel_1, "cell 0 2,grow");
 		panel_1.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
-		JLabel lblNewLabel_2 = new JLabel("5");
+		final JLabel lblNewLabel_2 = new JLabel(""+sliderValues[2]);
 		panel_1.add(lblNewLabel_2, "cell 0 1");
 		
 		JLabel lblNewLabel_3 = new JLabel("Hydronium");
@@ -339,23 +351,26 @@ public class Main {
 		panel_1.add(button_2, "cell 2 1 1 1,growy");
 		button_2.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				mainController.addMolecule(controlCompoundName_3);
-				mainController.addMolecule(controlCompoundName_3);
-				mainController.addMolecule(controlCompoundName_3);
-				mainController.addMolecule(controlCompoundName_3);
-				mainController.addMolecule(controlCompoundName_3);
+				for (int i=0;i<Integer.parseInt(lblNewLabel_2.getText());i++)
+					mainController.addMolecule(controlCompoundName_3);
 			}
 		});
 		
-		JSlider slider_1 = new JSlider();
+		JSlider slider_1 = new JSlider(minSliderValue, maxSliderValue,sliderValues[2]);
 		panel_1.add(slider_1, "cell 1 1");
+		slider_1.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+			int value = ((JSlider) e.getSource()).getValue(); 
+			lblNewLabel_2.setText(""+value);
+			}
+		});
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBackground(new Color(192, 192, 192));
 		legendPane_1.add(panel_3, "cell 0 3,grow");
 		panel_3.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
-		JLabel label_1 = new JLabel("5");
+		final JLabel label_1 = new JLabel(""+sliderValues[3]);
 		panel_3.add(label_1, "cell 0 1");
 		
 		JLabel lblMethylammonium = new JLabel("Methylammonium");
@@ -365,16 +380,29 @@ public class Main {
 		JButton button_3 = new JButton("");
 		button_3.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
 		panel_3.add(button_3, "cell 2 1 1 1,growy");
+		button_3.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				for (int i=0;i<Integer.parseInt(label_1.getText());i++)
+					mainController.addMolecule(controlCompoundName_3);
+			}
+		});
 		
-		JSlider slider_2 = new JSlider();
+		
+		JSlider slider_2 = new JSlider(minSliderValue,maxSliderValue,sliderValues[3]);
 		panel_3.add(slider_2, "cell 1 1");
+		slider_2.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+			int value = ((JSlider) e.getSource()).getValue(); 
+			label_1.setText(""+value);
+			}
+		});
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setBackground(new Color(192, 192, 192));
 		legendPane_1.add(panel_4, "cell 0 4,grow");
 		panel_4.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
-		JLabel label_3 = new JLabel("5");
+		final JLabel label_3 = new JLabel(""+sliderValues[4]);
 		panel_4.add(label_3, "cell 0 1");
 		
 		JLabel lblNewLabel_6 = new JLabel("Phenylpthalein");
@@ -384,14 +412,21 @@ public class Main {
 		JButton button_4 = new JButton("");
 		button_4.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
 		panel_4.add(button_4, "cell 2 1 1 1,growy");
+		button_4.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				for (int i=0;i<Integer.parseInt(label_3.getText());i++)
+					mainController.addMolecule(controlCompoundName_3);
+			}
+		});
 		
-		JSlider slider_3 = new JSlider();
+		JSlider slider_3 = new JSlider(minSliderValue,maxSliderValue,sliderValues[4]);
 		panel_4.add(slider_3, "cell 1 1");
-
-
-
-
-
+		slider_3.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+			int value = ((JSlider) e.getSource()).getValue(); 
+			label_3.setText(""+value);
+			}
+		});
 
 
 		/*
