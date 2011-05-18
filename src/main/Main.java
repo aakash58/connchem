@@ -44,6 +44,7 @@ public class Main {
 	public static JMenu simMenu = new JMenu("Choose Simulation");
 	private int selectedUnit=0;
 	private int selectedSim=0;
+	private Color selectedColor = new Color(200,200,150);
 	
 	
 	
@@ -120,7 +121,8 @@ public class Main {
 			}
 		});
 		menuBar.add(simMenu);
-
+		simMenu.setBackground(selectedColor);
+		
 
 		// populate Units (first level of sim menu)
 		final ArrayList units = getUnits();
@@ -134,6 +136,7 @@ public class Main {
 				int unitNo = Integer.parseInt((String)unit.get("unit"));
 				String unitName = getUnitName(unitNo);
 
+				
 				JMenu menuItem = new JMenu("Unit "+ Integer.toString(unitNo) + ": " + unitName);
 				menuArray[i] = menuItem;
 				simMenu.add(menuArray[i]);
@@ -159,10 +162,16 @@ public class Main {
 								for (int i = 0; i<units.size(); i++) {
 									for (int j = 0; j<subMenuArrayList[i].size(); j++) {
 										if (e.getSource()==subMenuArrayList[i].get(j)){
+											if (selectedUnit>0){
+												simMenu.getItem(selectedUnit).setBackground(Color.WHITE);
+												((JMenuItem) (subMenuArrayList[selectedUnit].get(selectedSim-1))).setBackground(Color.WHITE) ;
+											}
 											selectedUnit = i;
 											selectedSim = j+1;
 											simMenu.setText("Unit "+selectedUnit+": "+getUnitName(selectedUnit)+
 													", Sim "+selectedSim+": "+getSimName(i, j+1));
+											simMenu.getItem(i).setBackground(selectedColor);
+											((JMenuItem) (subMenuArrayList[i].get(j))).setBackground(selectedColor) ;
 										}	
 									}	
 								}
@@ -204,11 +213,11 @@ public class Main {
 		periodicTableBtn.setEnabled(false);
 		periodicTableBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconPeriodicTable.png")));
 		menuBar.add(periodicTableBtn);
-		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[250][480px,grow][250px]", "[grow]"));
+		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[263.00][480px,grow][250px]", "[grow]"));
 
 		JPanel leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
-		leftPanel.setLayout(new MigLayout("insets 6, gap 2", "[grow]", "[][][grow]"));
+		leftPanel.setLayout(new MigLayout("insets 6, gap 2", "14[grow]", "[][][grow]"));
 
 		JPanel timerSubpanel = new JPanel();
 		timerSubpanel.setBackground(new Color(211, 211, 211));
@@ -242,86 +251,12 @@ public class Main {
 		timerDisplay.setFont(new Font("Digital", Font.PLAIN, 30));
 		timerSubpanel.add(timerDisplay, "cell 4 1,alignx center");
 
-		JPanel controlSubpanel = new JPanel();
-		leftPanel.add(controlSubpanel, "cell 0 1,grow");
-		controlSubpanel.setLayout(new MigLayout("insets 0", "[50%,fill][50%,fill]", "[][fill]"));
-
 		
-		/*
-		 * Control Box 1
-		 */
 		final String controlCompoundName_1 = "Water";
-		
-		JPanel controlBox_1 = new JPanel();
-		controlBox_1.setBackground(new Color(211, 211, 211));
-		controlSubpanel.add(controlBox_1, "cell 0 0,growy");
-		controlBox_1.setLayout(new MigLayout("insets 2, gap 2", "[][grow,center][][]", "[][][]"));
-
-		JLabel controlLabel_1 = new JLabel(controlCompoundName_1);
-		controlBox_1.add(controlLabel_1, "cell 1 0,alignx center");
-
-		JButton controlAddBtn_1 = new JButton("");
-		controlAddBtn_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		controlAddBtn_1.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				mainController.addMolecule("Hydronium");
-				mainController.addMolecule("Hydronium");
-				mainController.addMolecule(controlCompoundName_1);
-				mainController.addMolecule(controlCompoundName_1);
-				mainController.addMolecule(controlCompoundName_1);
-			}
-		});
-		controlAddBtn_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		controlBox_1.add(controlAddBtn_1, "flowx,cell 1 1");
-
-		JLabel controlAddQtyLabel_1 = new JLabel("5");
-		controlBox_1.add(controlAddQtyLabel_1, "cell 1 1");
-
-		JSlider controlAddQtySlider_1 = new JSlider();
-		controlBox_1.add(controlAddQtySlider_1, "cell 1 2,growx");
-
-		/*
-		 * Control Box 2
-		 */
-		final String controlCompoundName_2 = "Acetate";
-		
-		JPanel controlBox_2 = new JPanel();
-		controlBox_2.setBackground(new Color(211, 211, 211));
-		controlSubpanel.add(controlBox_2, "cell 1 0,alignx center,growy");
-		controlBox_2.setLayout(new MigLayout("insets 2, gap 2", "[grow,center]", "[][][]"));
-
-		JLabel controlLabel_2 = new JLabel(controlCompoundName_2);
-		controlBox_2.add(controlLabel_2, "cell 0 0,alignx center");
-
-		JButton controlAddBtn_2 = new JButton("");
-		controlAddBtn_2.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		controlBox_2.add(controlAddBtn_2, "flowx,cell 0 1");
-
-		JLabel controlAddQtyLabel_2 = new JLabel("5");
-		controlBox_2.add(controlAddQtyLabel_2, "cell 0 1");
-
-		/*
-		 * Control Box 3
-		 */
-		JPanel controlBox_3 = new JPanel();
-		controlBox_3.setBackground(new Color(211, 211, 211));
-		controlSubpanel.add(controlBox_3, "cell 0 1,grow");
-
-		/*
-		 * Control Box 4
-		 */
-		JPanel controlBox_4 = new JPanel();
-		controlBox_4.setBackground(new Color(211, 211, 211));
-		controlSubpanel.add(controlBox_4, "cell 1 1,grow");
-
-		/*
-		 * Legend
-		 */
+		final String controlCompoundName_2 = "Hydronium";
+		final String controlCompoundName_3 = "Acetate";
 		JPanel legendSubpanel = new JPanel();
-		leftPanel.add(legendSubpanel, "cell 0 2,grow");
+		leftPanel.add(legendSubpanel, "cell 0 1,grow");
 		legendSubpanel.setLayout(new CardLayout(0, 0));
 
 		JScrollPane legendScrollContainer_1 = new JScrollPane();
@@ -329,118 +264,129 @@ public class Main {
 
 		JPanel legendPane_1 = new JPanel();
 		legendScrollContainer_1.setViewportView(legendPane_1);
-		legendPane_1.setLayout(new MigLayout("insets 6", "[grow][][]", "[][][][][]"));
+		legendPane_1.setLayout(new MigLayout("insets 6", "[174.00,grow]", "[53.00,grow][grow][grow][grow][grow]"));
 		
-		JLabel lblDff = new JLabel("Water");
-		legendPane_1.add(lblDff, "cell 0 0");
-		lblDff.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Water.png")));
-
-		JButton button_5 = new JButton("");
-		legendPane_1.add(button_5, "cell 1 0");
-		button_5.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-
-		JButton button_6 = new JButton("");
-		legendPane_1.add(button_6, "cell 2 0");
-		button_6.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
-
-		JButton pane1_row2_compoundButton = new JButton("");
-		pane1_row2_compoundButton.setToolTipText("Hydrochloric Acid");
-		legendPane_1.add(pane1_row2_compoundButton, "cell 0 1,growx");
-		pane1_row2_compoundButton.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydrochloric-Acid.png")));
-
-		JButton button_8 = new JButton("");
-		button_8.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		legendPane_1.add(button_8, "cell 1 1");
-
-		JButton button_9 = new JButton("");
-		button_9.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
-		legendPane_1.add(button_9, "cell 2 1");
-
-		JButton button_10 = new JButton("");
-		button_10.setToolTipText("Hydronium");
-		button_10.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydronium.png")));
-		legendPane_1.add(button_10, "cell 0 2,growx");
-
-		JButton button_11 = new JButton("");
-		button_11.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		legendPane_1.add(button_11, "cell 1 2");
-
-		JButton button_12 = new JButton("");
-		button_12.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
-		legendPane_1.add(button_12, "cell 2 2");
-
-		JButton button_15 = new JButton("");
-		button_15.setToolTipText("Methylammonium");
-		button_15.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Methylammonium.png")));
-		legendPane_1.add(button_15, "cell 0 3,growx");
-
+		JPanel panel_2 = new JPanel();
+		legendPane_1.add(panel_2, "cell 0 0");
+		panel_2.setBackground(new Color(192, 192, 192));
+		panel_2.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+		
+		JLabel label = new JLabel("5");
+		panel_2.add(label, "cell 0 1");
+		
+		JLabel lblWater = new JLabel("Water");
+		lblWater.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydroxide.png")));
+		panel_2.add(lblWater, "cell 0 0 3 1,growx");
+		
+		JButton button = new JButton("");
+		button .setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
+		panel_2.add(button, "cell 2 1 1 1,growy");
+		button.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				mainController.addMolecule(controlCompoundName_1);
+				mainController.addMolecule(controlCompoundName_1);
+				mainController.addMolecule(controlCompoundName_1);
+				mainController.addMolecule(controlCompoundName_1);
+				mainController.addMolecule(controlCompoundName_1);
+			}
+		});
+		
+		JSlider slider_4 = new JSlider();
+		panel_2.add(slider_4, "cell 1 1");
+		
+		JPanel panel = new JPanel();
+		panel.setBackground(Color.LIGHT_GRAY);
+		legendPane_1.add(panel, "cell 0 1,grow");
+		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+		
+		JLabel lblHydrochloricAcid_1 = new JLabel("Hydrochloric Acid");
+		lblHydrochloricAcid_1.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydrochloric-Acid.png")));
+		panel.add(lblHydrochloricAcid_1, "cell 0 0 3 1,growx");
+		
+		JLabel lblNewLabel_1 = new JLabel("5");
+		panel.add(lblNewLabel_1, "cell 0 1");
+		
+		JButton button_1 = new JButton("");
+		button_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
+		panel.add(button_1, "cell 2 1,growy");
+		button_1.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				mainController.addMolecule(controlCompoundName_2);
+				mainController.addMolecule(controlCompoundName_2);
+				mainController.addMolecule(controlCompoundName_2);
+				mainController.addMolecule(controlCompoundName_2);
+				mainController.addMolecule(controlCompoundName_2);
+			}
+		});
+		
+		JSlider slider = new JSlider();
+		panel.add(slider, "cell 1 1");
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBackground(new Color(192, 192, 192));
+		legendPane_1.add(panel_1, "cell 0 2,grow");
+		panel_1.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+		
+		JLabel lblNewLabel_2 = new JLabel("5");
+		panel_1.add(lblNewLabel_2, "cell 0 1");
+		
+		JLabel lblNewLabel_3 = new JLabel("Hydronium");
+		lblNewLabel_3.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydronium.png")));
+		panel_1.add(lblNewLabel_3, "cell 0 0 3 1,growx");
+		
+		JButton button_2 = new JButton("");
+		button_2.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
+		panel_1.add(button_2, "cell 2 1 1 1,growy");
+		button_2.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				mainController.addMolecule(controlCompoundName_3);
+				mainController.addMolecule(controlCompoundName_3);
+				mainController.addMolecule(controlCompoundName_3);
+				mainController.addMolecule(controlCompoundName_3);
+				mainController.addMolecule(controlCompoundName_3);
+			}
+		});
+		
+		JSlider slider_1 = new JSlider();
+		panel_1.add(slider_1, "cell 1 1");
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setBackground(new Color(192, 192, 192));
+		legendPane_1.add(panel_3, "cell 0 3,grow");
+		panel_3.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+		
+		JLabel label_1 = new JLabel("5");
+		panel_3.add(label_1, "cell 0 1");
+		
+		JLabel lblMethylammonium = new JLabel("Methylammonium");
+		lblMethylammonium.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Methylammonium.png")));
+		panel_3.add(lblMethylammonium, "cell 0 0 3 1,growx");
+		
+		JButton button_3 = new JButton("");
+		button_3.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
+		panel_3.add(button_3, "cell 2 1 1 1,growy");
+		
+		JSlider slider_2 = new JSlider();
+		panel_3.add(slider_2, "cell 1 1");
+		
+		JPanel panel_4 = new JPanel();
+		panel_4.setBackground(new Color(192, 192, 192));
+		legendPane_1.add(panel_4, "cell 0 4,grow");
+		panel_4.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+		
+		JLabel label_3 = new JLabel("5");
+		panel_4.add(label_3, "cell 0 1");
+		
+		JLabel lblNewLabel_6 = new JLabel("Phenylpthalein");
+		lblNewLabel_6.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Phenylpthalein.png")));
+		panel_4.add(lblNewLabel_6, "cell 0 0 3 1,growx");
+		
 		JButton button_4 = new JButton("");
 		button_4.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		legendPane_1.add(button_4, "cell 1 3");
-
-		JButton button_17 = new JButton("");
-		button_17.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
-		legendPane_1.add(button_17, "cell 2 3");
-
-		JButton btnPhenylpthalein = new JButton("");
-		btnPhenylpthalein.setToolTipText("Phenylpthalein");
-		btnPhenylpthalein.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Phenylpthalein.png")));
-		legendPane_1.add(btnPhenylpthalein, "cell 0 4,growx");
-
-		JButton button_16 = new JButton("");
-		button_16.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		legendPane_1.add(button_16, "cell 1 4");
-
-		JButton button_18 = new JButton("");
-		button_18.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
-		legendPane_1.add(button_18, "cell 2 4");
-
-		JScrollPane legendScrollContainer_2 = new JScrollPane();
-		legendSubpanel.add(legendScrollContainer_2, "name_1303765387334599000");
-
-
-		JPanel legendPane_2 = new JPanel();
-		legendScrollContainer_2.setViewportView(legendPane_2);
-		legendPane_2.setLayout(new MigLayout("insets 6", "[grow][][]", "[][][]"));
-
-		JButton btnWater_1 = new JButton("Water");
-		btnWater_1.setToolTipText("Water");
-		legendPane_2.add(btnWater_1, "cell 0 0,growx");
-		btnWater_1.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Water.png")));
-
-		JButton button_500 = new JButton("sds");
-		legendPane_2.add(button_500, "cell 1 0");
-		button_500.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-
-		JButton button_600 = new JButton("");
-		legendPane_2.add(button_600, "cell 2 0");
-		button_600.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
-
-		JButton button_700 = new JButton("Acetate");
-		button_700.setToolTipText("Acetate");
-		legendPane_2.add(button_700, "cell 0 1,growx");
-		button_700.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Acetate.png")));
-
-		JButton button_800 = new JButton("dsa");
-		button_800.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		legendPane_2.add(button_800, "cell 1 1");
-
-		JButton button_900 = new JButton("");
-		button_900.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
-		legendPane_2.add(button_900, "cell 2 1");
-
-		JButton button_1000 = new JButton("");
-		button_1000.setToolTipText("Butane");
-		button_1000.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Butane.png")));
-		legendPane_2.add(button_1000, "cell 0 2,growx");
-
-		JButton button_1100 = new JButton("");
-		button_1100.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		legendPane_2.add(button_1100, "cell 1 2");
-
-		JButton button_1200 = new JButton("");
-		button_1200.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/minus.png")));
-		legendPane_2.add(button_1200, "cell 2 2");
+		panel_4.add(button_4, "cell 2 1 1 1,growy");
+		
+		JSlider slider_3 = new JSlider();
+		panel_4.add(slider_3, "cell 1 1");
 
 
 

@@ -17,8 +17,8 @@ public class P5Canvas extends Area {
 	
 	public void setup() {
 		smooth();
-		setW(500);
-		setH(500);
+		setW(570);
+		setH(556);
 		setDimensions(0, 0, w(), h());  // this is a custom function from the Region interface, implemented in the Area class
 		size(floor(w()), floor(h()));
 		
@@ -83,8 +83,8 @@ public class P5Canvas extends Area {
 	 */
 	
 	public void addMolecule(String compoundName) {
-		float x_ = 100;
-		float y_ = random(100, y());
+		float x_ = 200;
+		float y_ = random(200, y());
 		molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
 	}
 	
