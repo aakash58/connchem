@@ -35,32 +35,54 @@ public class Molecule {
 		
 		vertices = new ArrayList<PVector>();
 		
-		ResourceReader reader = new ResourceReader("resources/compoundsSvg/Water.svg");
-		shapeString = reader.read();
+		//ResourceReader reader = new ResourceReader("resources/compoundsSvg/Water.svg");
+		//shapeString = reader.read();
 		
-		XMLElement svg = new XMLElement();
-		svg.parse(shapeString);
-		System.out.println("the content is: " + svg.getContent());
+		//XMLElement svg = new XMLElement();
+		//svg.parse(shapeString);
+		//System.out.println("the content is: " + svg.getContent());
 		//moleculeShape = new PShapeSVG(svg);
 		
 		// TODO this needs to be converted to read "shapeString", but I don't know how to make it read a string rather than a file.  Exported Jars will break!
-		moleculeShape = (PShapeSVG)parent.loadShape("/resources/compoundsSvg/Water.svg");
+		moleculeShape = (PShapeSVG)parent.loadShape("resources/compoundsSvg/Water.svg");
 		
 		PShape outline = moleculeShape.findChild("outline");
-		System.out.println(outline);
+
+		for (int i = 0; i<outline.getChild(0).getVertexCount(); i++) {
+			try {
+				PVector vertex = new PVector(outline.getChild(0).getVertexX(i), outline.getChild(0).getVertexY(i));
+				vertices.add(vertex);
+			} catch (Exception e) {
+				System.out.println(i + ": " + e);
+			}
+		} 
 		
-		PVector v1 = new PVector(-30, 25);
+		for (int i = 0; i<outline.getChild(0).getVertexCount(); i++) {
+			//System.out.println(outline.getChild(0).getVertexY(i));
+		}
+		
+		
+		/*PVector v1 = new PVector(-30, 25);
 		PVector v2 = new PVector(10,15);
 		PVector v3 = new PVector(15,5);
 		PVector v4 = new PVector(30,-15);
 		PVector v5 = new PVector(-10,-20);
+		PVector v11 = new PVector(-30, 25);
+		PVector v21 = new PVector(10,15);
+		PVector v31 = new PVector(15,5);
+		PVector v41 = new PVector(30,-15);
 		
 		vertices.add(v1);
 		vertices.add(v2);
 		vertices.add(v3);
 		vertices.add(v4);
 		vertices.add(v5);
-		
+		vertices.add(v11);
+		vertices.add(v21);
+		vertices.add(v31);
+		vertices.add(v41);*/
+	
+	
 		// This function puts the particle in the Box2d world
 		makeBody(new Vec2(x_,y_));
 		
@@ -163,9 +185,9 @@ public class Molecule {
 	    // Define a polygon (this is what we use for a rectangle)
 	    PolygonDef sd = new PolygonDef();
 	    
-	    for (int i = 0; i < vertices.size();i++) {
+/*	    for (int i = 0; i < vertices.size();i++) {
 	    	sd.addVertex(box2d.vectorPixelsToWorld(new Vec2(vertices.get(i).x,vertices.get(i).y)));
-	    }
+	    } */
 
 	    // Parameters that affect physics
 	    sd.density = 1.0f;
