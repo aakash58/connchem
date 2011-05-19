@@ -3,6 +3,7 @@ package view;
 import java.util.ArrayList;
 
 import processing.core.*;
+import processing.xml.XMLElement;
 import pbox2d.*;
 
 import model.ResourceReader;
@@ -33,6 +34,21 @@ public class Molecule {
 		compoundName = compoundName_;
 		
 		vertices = new ArrayList<PVector>();
+		
+		ResourceReader reader = new ResourceReader("resources/compoundsSvg/Water.svg");
+		shapeString = reader.read();
+		
+		XMLElement svg = new XMLElement();
+		svg.parse(shapeString);
+		System.out.println("the content is: " + svg.getContent());
+		//moleculeShape = new PShapeSVG(svg);
+		
+		// TODO this needs to be converted to read "shapeString", but I don't know how to make it read a string rather than a file.  Exported Jars will break!
+		moleculeShape = (PShapeSVG)parent.loadShape("/resources/compoundsSvg/Water.svg");
+		
+		PShape outline = moleculeShape.findChild("outline");
+		System.out.println(outline);
+		
 		PVector v1 = new PVector(-30, 25);
 		PVector v2 = new PVector(10,15);
 		PVector v3 = new PVector(15,5);
@@ -50,11 +66,14 @@ public class Molecule {
 		
 		body.setUserData(this);
 		
-		ResourceReader reader = new ResourceReader("resources/compoundsSvg/Water.svg");
-		shapeString = reader.read();
 
-		// TODO this needs to be converted to read "shapeString", but I don't know how to make it read a string rather than a file.  Exported Jars will break!
-		moleculeShape = (PShapeSVG)parent.loadShape("/resources/compoundsSvg/Generic.svg");
+		
+		//svg.setContent(shapeString);
+		
+		//PShapeSVG theShape = new PShapeSVG(svg);
+		
+		
+		
 		
 
 	}
@@ -101,9 +120,9 @@ public class Molecule {
 			
 			parent.endShape();
 
-			//float moleculeShapeW = moleculeShape.width;
-			//float moleculeShapeH = moleculeShape.height;
-			//parent.shape(moleculeShape, moleculeShapeW/-2, moleculeShapeH/-2, moleculeShapeW, moleculeShapeH);
+			float moleculeShapeW = moleculeShape.width;
+			float moleculeShapeH = moleculeShape.height;
+			parent.shape(moleculeShape, moleculeShapeW/-2, moleculeShapeH/-2, moleculeShapeW, moleculeShapeH);
 			
 			parent.ellipseMode(parent.CENTER);
 			parent.fill(200);
