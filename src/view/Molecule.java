@@ -54,7 +54,7 @@ public class Molecule {
 		shapeString = reader.read();
 
 		// TODO this needs to be converted to read "shapeString", but I don't know how to make it read a string rather than a file.  Exported Jars will break!
-		moleculeShape = (PShapeSVG)parent.loadShape("/resources/compoundsSvg/Generic.svg");
+		//moleculeShape = (PShapeSVG)parent.loadShape("/resources/compoundsSvg/Generic.svg");
 		
 
 	}

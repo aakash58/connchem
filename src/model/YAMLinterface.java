@@ -90,7 +90,8 @@ public class YAMLinterface {
 	public static HashMap getSim(int unitNumber, int simNumber) {
 		ArrayList sims = getSims(unitNumber);
 		HashMap sim = new HashMap();
-
+		
+		if (sims==null) return null;
 		for (int i = 0; i<sims.size(); i++) {
 			sim = (HashMap)sims.get(i);
 			int n = Integer.parseInt((String)sim.get("sim"));
@@ -113,6 +114,7 @@ public class YAMLinterface {
 
 	public static ArrayList getSets(int unitNumber, int simNumber) {
 		HashMap sim = getSim(unitNumber, simNumber);
+		if (sim==null) return null;
 		ArrayList sets = (ArrayList)sim.get("sets");
 		return sets;
 	}

@@ -1,7 +1,6 @@
 package main;
 
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
@@ -10,6 +9,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JButton;
+import javax.swing.Timer;
+
 import java.awt.Component;
 import javax.swing.Box;
 import net.miginfocom.swing.MigLayout;
@@ -33,15 +34,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static model.YAMLinterface.*;
-import static model.State.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.ScrollPane;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 public class Main {
-
+	// Controllers
+	private P5Canvas p5Canvas = new P5Canvas();
+	
+	// Canvases
+	private MainController mainController = new MainController(p5Canvas);
+	// TODO flag
+	
 	private JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
 	private int selectedUnit=0;
@@ -50,8 +57,10 @@ public class Main {
 	private int[] sliderValues = {3,4,5,6,7};
 	private int minSliderValue = 1;
 	private int maxSliderValue = 9;
-	
-	
+	private JComboBox setSelector = new JComboBox();
+	private Timer timer;
+	private int countTimer, maxCountTimer=30;
+ 	
 	/**
 	 * Launch the application.
 	 */
@@ -73,14 +82,9 @@ public class Main {
 	 */
 	public Main() {
 		initialize();
+		
 	}
 
-	// Controllers
-	P5Canvas p5Canvas = new P5Canvas();
-	
-	// Canvases
-	MainController mainController = new MainController(p5Canvas);
-	// TODO flag
 	
 	/**
 	 * Initialize the contents of the frame.
@@ -89,6 +93,7 @@ public class Main {
 		mainFrame = new JFrame();
 		mainFrame.setBounds(0, 0, 1150, 700);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -176,6 +181,17 @@ public class Main {
 													", Sim "+selectedSim+": "+getSimName(i, j+1));
 											simMenu.getItem(i).setBackground(selectedColor);
 											((JMenuItem) (subMenuArrayList[i].get(j))).setBackground(selectedColor) ;
+										
+										
+											//Update set selector
+											ArrayList sets = getSets(selectedUnit,selectedSim);
+											setSelector.removeAllItems();
+											setSelector.addItem("Select Set");
+											if (sets!=null){
+												for (int s=1; s<=sets.size();s++){
+													setSelector.addItem("Set "+s);
+												}
+											}
 										}	
 									}	
 								}
@@ -191,10 +207,6 @@ public class Main {
 			}
 		}
 		
-
-
-
-
 		Component headHGlue = Box.createHorizontalGlue();
 		menuBar.add(headHGlue);
 
@@ -202,9 +214,7 @@ public class Main {
 		/*
 		 * Menubar Unit/Sim/Set status area
 		 */
-		JLabel headInfo = new JLabel("Unit " + getCurrentUnitNumber() + ": " + getCurrentUnitName () + " • Simulation " + getCurrentSimNumber() + ": " + getCurrentSimName());
-		menuBar.add(headInfo);
-
+	
 		Component headHStrut = Box.createHorizontalStrut(20);
 		menuBar.add(headHStrut);
 
@@ -226,35 +236,93 @@ public class Main {
 		JPanel timerSubpanel = new JPanel();
 		timerSubpanel.setBackground(new Color(211, 211, 211));
 		leftPanel.add(timerSubpanel, "cell 0 0,grow");
-		timerSubpanel.setLayout(new MigLayout("", "[][][][grow][]", "[grow][]"));
+		timerSubpanel.setLayout(new MigLayout("", "[][56.00,fill][][grow][]", "[grow][]"));
 
 		JButton playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			}
+				mainController.addMolecule("Acetate");
+				}
 		});
 		playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
 		timerSubpanel.add(playBtn, "cell 0 0 1 2,growy");
 
-		JComboBox setSelector = new JComboBox();
+		
+		//********* Select a Set
+		setSelector.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				
+				mainController.addMolecule("Water");
+				
+			}
+		});
 		timerSubpanel.add(setSelector, "cell 1 0 2 1,growx");
-
+		ArrayList sets = getSets(selectedUnit,selectedSim);
+		setSelector.addItem("Select Set");
+		if (sets!=null){
+			for (int i=1; i<=sets.size();i++){
+				setSelector.addItem("Set "+i);
+			}
+		}
+		
 		JLabel timerLabel = new JLabel("Timer");
 		timerSubpanel.add(timerLabel, "cell 4 0,alignx center");
-
-		JButton setPrevBtn = new JButton("");
-		setPrevBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-previous.png")));
-		timerSubpanel.add(setPrevBtn, "cell 1 1,alignx center");
-
-		JButton setNextBtn = new JButton("");
-		setNextBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-next.png")));
-		timerSubpanel.add(setNextBtn, "cell 2 1,growx");
-
-		JLabel timerDisplay = new JLabel("30");
+		final JLabel timerDisplay = new JLabel("30");
+		
 		timerDisplay.setForeground(new Color(0, 128, 0));
 		timerDisplay.setFont(new Font("Digital", Font.PLAIN, 30));
 		timerSubpanel.add(timerDisplay, "cell 4 1,alignx center");
 
+		timer = new Timer(1000, new ActionListener() {
+	          public void actionPerformed(ActionEvent e) {
+	        	  countTimer++;
+	        	  if (countTimer == maxCountTimer)
+	        		  countTimer=0;
+	        	  if (countTimer<10)
+	        		  timerDisplay.setText("0"+countTimer);
+	        	  else
+	        		  timerDisplay.setText(""+countTimer);
+	          }
+		});    
+		timer.start();
+		
+		JButton setPrevBtn = new JButton("");
+		setPrevBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		setPrevBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-previous.png")));
+		timerSubpanel.add(setPrevBtn, "cell 1 1,alignx center");
+		setPrevBtn.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				int selectedIndex = setSelector.getSelectedIndex();
+				int numSets = setSelector.getItemCount();
+				if (selectedIndex>0){
+					setSelector.setSelectedIndex(selectedIndex-1);
+				}
+				else{
+					setSelector.setSelectedIndex(numSets -1);
+				}
+			}
+		});
+		
+		JButton setNextBtn = new JButton("");
+		setNextBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-next.png")));
+		timerSubpanel.add(setNextBtn, "cell 2 1,growx");
+		setNextBtn.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				int selectedIndex = setSelector.getSelectedIndex();
+				int numSets = setSelector.getItemCount();
+				if (selectedIndex<numSets-1){
+					setSelector.setSelectedIndex(selectedIndex+1);
+				}
+				else{
+					setSelector.setSelectedIndex(0);
+				}
+			}
+		});
+
+		
 		
 		//***************** Add elements Control panel
 		
