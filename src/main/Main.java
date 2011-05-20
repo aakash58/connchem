@@ -62,9 +62,11 @@ public class Main {
 	private JComboBox setSelector = new JComboBox();
 	private Timer timer;
 	private int countTimer, maxCountTimer=30;
-	private JPanel dynamicPanel;
+	public static JPanel dynamicPanel;
 	private ArrayList dynamicArray =  new ArrayList();
-	
+	public static JFrame moleculeChooserWindow;
+	private PopupMenu vm;
+    
 	/**
 	 * Launch the application.
 	 */
@@ -124,7 +126,7 @@ public class Main {
 
 		simMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("TTT:"+simMenu.getSelectedObjects());
+		
 			}
 		});
 		simMenu.addMouseListener(new MouseAdapter() {
@@ -163,7 +165,6 @@ public class Main {
 						HashMap sim = (HashMap)sims.get(j);
 						int simNo = Integer.parseInt((String)sim.get("sim"));
 						String simName = getSimName(unitNo, simNo);
-						
 						JMenuItem subMenu = new JMenuItem("Sim "+ Integer.toString(simNo) + ": " + simName);
 						
 						//Add new subMenuItem
@@ -222,8 +223,31 @@ public class Main {
 		Component headHStrut = Box.createHorizontalStrut(20);
 		menuBar.add(headHStrut);
 
-		JButton moleculeChooserBtn = new JButton("");
-		moleculeChooserBtn.setEnabled(false);
+		final JButton moleculeChooserBtn = new JButton("");
+		moleculeChooserBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Enable");
+				moleculeChooserWindow = new JFrame("Choose molecules");
+				moleculeChooserWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				moleculeChooserWindow.getContentPane().add(new MoleculeChooserPanel());
+				moleculeChooserWindow.setBounds(MoleculeChooserPanel.x, MoleculeChooserPanel.y, 
+						MoleculeChooserPanel.w, MoleculeChooserPanel.h);
+				//moleculeChooserWindow.show();
+				
+				 Component c = (Component) e.getSource();
+	              
+	                if (vm == null) {
+	                    vm = new PopupMenu(moleculeChooserBtn);
+	                }
+	                else{
+	                	vm.updateMenu();
+	                }
+	                vm.show(c, 0, 33);
+			}
+		});
+		
+		 
+		//moleculeChooserBtn.setEnabled(false);
 		moleculeChooserBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconCompound.png")));
 		menuBar.add(moleculeChooserBtn);
 
@@ -258,9 +282,6 @@ public class Main {
 				if (e.getStateChange()==e.SELECTED){
 					//mainController.addMolecule("Water");
 					int selectedIndex = setSelector.getSelectedIndex();
-					System.out.println("	"+getUnits());
-					System.out.println("	"+getSims(selectedUnit));
-					System.out.println(""+getSet(selectedUnit,selectedSim,selectedIndex));
 					if (dynamicPanel!=null){
 						dynamicPanel.removeAll();
 						System.out.println(""+getSetCompounds(selectedUnit,selectedSim,selectedIndex));
