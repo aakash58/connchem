@@ -121,37 +121,37 @@ units:
         qty: 10
     - set: 2
       compounds:
-      - compound: "water"
+      - compound: "Water"
         qty: 25
       - compound: "Silicon Dioxide"
         qty: 10
     - set: 3
       compounds:
-      - compound: "water"
+      - compound: "Water"
         qty: 25
       - compound: "Glycerol"
         qty: 10
     - set: 4
       compounds:
-      - compound: "water"
+      - compound: "Water"
         qty: 25
       - compound: "Calcium Chloride"
         qty: 10
     - set: 5
       compounds:
-      - compound: "water"
+      - compound: "Water"
         qty: 25
       - compound: "Acetic Acid"
         qty: 10    
     - set: 6
       compounds:
-      - compound: "water"
+      - compound: "Water"
         qty: 25
       - compound: "Pentane"
         qty: 10    
     - set: 7
       compounds:
-      - compound: "water"
+      - compound: "Water"
         qty: 25
       - compound: "Sodium Bicarbonate"
         qty: 10
@@ -473,7 +473,7 @@ units:
 - unit: 4
   name: "Pressure and Gas Laws"
   sims:
-  - sim: 4
+  - sim: 1
     name: "Physical Properties of Air"
     sets:
     - set: 1
@@ -566,7 +566,7 @@ units:
       compounds:
       - compound: "Water"
         qty: 25
-      - compound: "Hydrogen Flouride"
+      - compound: "Hydrogen Fluoride"
         qty: 25
     - set: 3
       compounds:

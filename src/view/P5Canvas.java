@@ -18,11 +18,11 @@ public class P5Canvas extends Area {
 	
 	public void setup() {
 		smooth();
-		setW(600);
-		setH(600);
+		setW(550);
+		setH(550);
 		setDimensions(0, 0, w(), h());  // this is a custom function from the Region interface, implemented in the Area class
-		size(600, 600);
-		
+		size(550, 550);
+	
 		// Initialize box2d physics and create the world
 		box2d = new PBox2D(this);
 		box2d.createWorld();

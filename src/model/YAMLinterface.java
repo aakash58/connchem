@@ -123,6 +123,7 @@ public class YAMLinterface {
 		ArrayList sets = getSets(unitNumber, simNumber);
 		HashMap set = new HashMap();
 
+		if (sets==null) return null;
 		for (int i = 0; i<sets.size(); i++) {
 			set = (HashMap)sets.get(i);
 			int n = Integer.parseInt((String)set.get("set"));
@@ -135,9 +136,29 @@ public class YAMLinterface {
 
 	public static ArrayList getSetCompounds(int unitNumber, int simNumber, int setNumber) {
 		HashMap set = getSet(unitNumber, simNumber, setNumber);
+		if (set==null) return null;
 		ArrayList compounds = (ArrayList)set.get("compounds");
 		return compounds;
 	}
 
+	public static HashMap getCompound(int unitNumber, int simNumber, int setNumber, int comNumber) {
+		ArrayList compounds = getSetCompounds(unitNumber, simNumber, setNumber);
+		HashMap compound = new HashMap();
 
+		if (compounds ==null) return null;
+		compound = (HashMap) compounds.get(comNumber);
+		return compound;
+	}
+
+	public static String getCompoundQty(int unitNumber, int simNumber, int setNumber, int comNumber) {
+		HashMap set = getCompound(unitNumber, simNumber, setNumber,comNumber);
+		if (set==null) return null;
+		return (String)set.get("qty");
+	}
+	
+	public static String getCompoundName(int unitNumber, int simNumber, int setNumber, int comNumber) {
+		HashMap set = getCompound(unitNumber, simNumber, setNumber,comNumber);
+		if (set==null) return null;
+		return (String)set.get("compound");
+	}
 }

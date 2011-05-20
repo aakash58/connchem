@@ -55,12 +55,16 @@ public class Main {
 	private int selectedSim=0;
 	private Color selectedColor = new Color(200,200,150);
 	private int[] sliderValues = {3,4,5,6,7};
+	private int sliderValue = 5;
+	
 	private int minSliderValue = 1;
 	private int maxSliderValue = 9;
 	private JComboBox setSelector = new JComboBox();
 	private Timer timer;
 	private int countTimer, maxCountTimer=30;
- 	
+	private JPanel dynamicPanel;
+	private ArrayList dynamicArray =  new ArrayList();
+	
 	/**
 	 * Launch the application.
 	 */
@@ -251,9 +255,60 @@ public class Main {
 		//********* Select a Set
 		setSelector.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				
-				mainController.addMolecule("Water");
-				
+				if (e.getStateChange()==e.SELECTED){
+					//mainController.addMolecule("Water");
+					int selectedIndex = setSelector.getSelectedIndex();
+					System.out.println("	"+getUnits());
+					System.out.println("	"+getSims(selectedUnit));
+					System.out.println(""+getSet(selectedUnit,selectedSim,selectedIndex));
+					if (dynamicPanel!=null){
+						dynamicPanel.removeAll();
+						System.out.println(""+getSetCompounds(selectedUnit,selectedSim,selectedIndex));
+						ArrayList compounds= getSetCompounds(selectedUnit,selectedSim,selectedIndex);
+						if (compounds!=null){
+							for (int i=0;i<compounds.size();i++){
+								JPanel panel = new JPanel();
+								panel.setBackground(Color.LIGHT_GRAY);
+								panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+								dynamicPanel.add(panel, "cell 0 "+i+",grow");
+								
+								String cName =  getCompoundName(selectedUnit,selectedSim,selectedIndex,i);
+								cName = cName.replace(" ", "-");
+								System.out.println(""+cName);
+								
+								JLabel label = new JLabel(cName);
+								label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));
+								panel.add(label, "cell 0 0 3 1,growx");
+								
+								
+								final JLabel label_1 = new JLabel(""+sliderValue);
+								panel.add(label_1, "cell 0 1");
+							
+								
+								JSlider slider = new JSlider(minSliderValue,maxSliderValue,sliderValue);
+								panel.add(slider, "cell 1 1");
+								slider.addChangeListener(new ChangeListener() {
+									public void stateChanged(ChangeEvent e) {
+									int value = ((JSlider) e.getSource()).getValue(); 
+									label_1.setText(""+value);
+									}
+								});
+								
+								
+								JButton button_1 = new JButton("");
+								button_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
+								panel.add(button_1, "cell 2 1,growy");
+								button_1.addMouseListener(new MouseAdapter() {
+									public void mouseClicked(MouseEvent arg0) {
+										for (int i=0;i<Integer.parseInt(label_1.getText());i++)
+											mainController.addMolecule("Water");
+									}
+								});
+							
+							}
+						}
+					}
+				}
 			}
 		});
 		timerSubpanel.add(setSelector, "cell 1 0 2 1,growx");
@@ -336,12 +391,12 @@ public class Main {
 		JScrollPane legendScrollContainer_1 = new JScrollPane();
 		legendSubpanel.add(legendScrollContainer_1, "name_1303765324750467000");
 
-		JPanel legendPane_1 = new JPanel();
-		legendScrollContainer_1.setViewportView(legendPane_1);
-		legendPane_1.setLayout(new MigLayout("insets 6", "[174.00,grow]", "[53.00,grow][grow][grow][grow][grow]"));
+		dynamicPanel = new JPanel();
+		legendScrollContainer_1.setViewportView(dynamicPanel);
+		dynamicPanel.setLayout(new MigLayout("insets 6", "[174.00,grow]", "[53.00,grow][grow][grow][grow][grow]"));
 		
 		JPanel panel_2 = new JPanel();
-		legendPane_1.add(panel_2, "cell 0 0");
+		dynamicPanel.add(panel_2, "cell 0 0");
 		panel_2.setBackground(new Color(192, 192, 192));
 		panel_2.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
@@ -373,7 +428,7 @@ public class Main {
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.LIGHT_GRAY);
-		legendPane_1.add(panel, "cell 0 1,grow");
+		dynamicPanel.add(panel, "cell 0 1,grow");
 		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		JLabel lblHydrochloricAcid_1 = new JLabel("Hydrochloric Acid");
@@ -404,7 +459,7 @@ public class Main {
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBackground(new Color(192, 192, 192));
-		legendPane_1.add(panel_1, "cell 0 2,grow");
+		dynamicPanel.add(panel_1, "cell 0 2,grow");
 		panel_1.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		final JLabel lblNewLabel_2 = new JLabel(""+sliderValues[2]);
@@ -435,7 +490,7 @@ public class Main {
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBackground(new Color(192, 192, 192));
-		legendPane_1.add(panel_3, "cell 0 3,grow");
+		dynamicPanel.add(panel_3, "cell 0 3,grow");
 		panel_3.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		final JLabel label_1 = new JLabel(""+sliderValues[3]);
@@ -467,7 +522,7 @@ public class Main {
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setBackground(new Color(192, 192, 192));
-		legendPane_1.add(panel_4, "cell 0 4,grow");
+		dynamicPanel.add(panel_4, "cell 0 4,grow");
 		panel_4.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		final JLabel label_3 = new JLabel(""+sliderValues[4]);
