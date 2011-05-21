@@ -31,7 +31,12 @@ import java.awt.Color;
 import java.awt.CardLayout;
 import java.awt.Panel;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static model.YAMLinterface.*;
 import java.awt.event.MouseAdapter;
@@ -40,6 +45,11 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
 
 public class Main {
 	// Controllers
@@ -92,6 +102,50 @@ public class Main {
 	}
 
 	
+	
+	String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
+	      URL dirURL = clazz.getClassLoader().getResource(path);
+	      if (dirURL != null && dirURL.getProtocol().equals("file")) {
+	        /* A file path: easy enough */
+	    	  System.out.println("++++++++");
+	        return new File(dirURL.toURI()).list();
+	      } 
+
+	      if (dirURL == null) {
+	        /* 
+	         * In case of a jar file, we can't actually find a directory.
+	         * Have to assume the same jar as clazz.
+	         */
+	        String me = clazz.getName().replace(".", "/")+".class";
+	        dirURL = clazz.getClassLoader().getResource(me);
+	      }
+	      
+	      if (dirURL.getProtocol().equals("jar")) {
+	        /* A JAR path */
+	        String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+	        JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+	        Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+	        Set<String> result = new HashSet<String>(); //avoid duplicates in case it is a subdirectory
+	        while(entries.hasMoreElements()) {
+	          String name = entries.nextElement().getName();
+	          	
+	          if (name.startsWith(path)) { //filter according to the path
+	            String entry = name.substring(path.length());
+	            int checkSubdir = entry.indexOf("/");
+	            if (checkSubdir >= 0) {
+	              // if it is a subdirectory, we just return the directory name
+	              entry = entry.substring(0, checkSubdir);
+	          	
+	            }
+	            result.add(entry);
+	          }
+	        }
+	        return result.toArray(new String[result.size()]);
+	      } 
+	        
+	      throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
+	  }
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -100,13 +154,9 @@ public class Main {
 		mainFrame.setBounds(0, 0, 1150, 700);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		
-		
 		JMenuBar menuBar = new JMenuBar();
 		mainFrame.setJMenuBar(menuBar);
 		p5Canvas.setBackground(Color.WHITE);
-		
-		// Controller and View Initialization
 		p5Canvas.init();
 		
 		
@@ -223,34 +273,44 @@ public class Main {
 		Component headHStrut = Box.createHorizontalStrut(20);
 		menuBar.add(headHStrut);
 
-		final JButton moleculeChooserBtn = new JButton("");
-		moleculeChooserBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("Enable");
-				moleculeChooserWindow = new JFrame("Choose molecules");
-				moleculeChooserWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-				moleculeChooserWindow.getContentPane().add(new MoleculeChooserPanel());
-				moleculeChooserWindow.setBounds(MoleculeChooserPanel.x, MoleculeChooserPanel.y, 
-						MoleculeChooserPanel.w, MoleculeChooserPanel.h);
-				//moleculeChooserWindow.show();
-				
-				 Component c = (Component) e.getSource();
-	              
-	                if (vm == null) {
-	                    vm = new PopupMenu(moleculeChooserBtn);
-	                }
-	                else{
-	                	vm.updateMenu();
-	                }
-	                vm.show(c, 0, 33);
-			}
-		});
+		// Get All molecules from Folder
+		try {
+			final String[] moleculeNames =getResourceListing(Main.class, "resources/compoundsPng50/");
+		
+			final JButton moleculeChooserBtn = new JButton("");
+			moleculeChooserBtn.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					moleculeChooserWindow = new JFrame("Choose molecules");
+					moleculeChooserWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+					moleculeChooserWindow.getContentPane().add(new MoleculeChooserPanel());
+					moleculeChooserWindow.setBounds(MoleculeChooserPanel.x, MoleculeChooserPanel.y, 
+							MoleculeChooserPanel.w, MoleculeChooserPanel.h);
+					//moleculeChooserWindow.show();
+					
+					 Component c = (Component) e.getSource();
+		              
+		                if (vm == null) {
+		                    vm = new PopupMenu(moleculeChooserBtn, moleculeNames);
+		                }
+		                else{
+		                	vm.updateMenu();
+		                }
+		                vm.show(c, -150, 33);
+				}
+			  });
+			//moleculeChooserBtn.setEnabled(false);
+			moleculeChooserBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconCompound.png")));
+			menuBar.add(moleculeChooserBtn);
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		 
-		//moleculeChooserBtn.setEnabled(false);
-		moleculeChooserBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconCompound.png")));
-		menuBar.add(moleculeChooserBtn);
-
+		
 		JButton periodicTableBtn = new JButton("\n");
 		periodicTableBtn.setEnabled(false);
 		periodicTableBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconPeriodicTable.png")));
