@@ -31,7 +31,10 @@ public class PopupMenu extends JPopupMenu implements MouseListener {
     protected JList list;
    // protected CustomIcon[] images;
     protected  Component[] components;
-    public PopupMenu(JButton button) {
+    protected  String[] moleculeNames;
+    
+    public PopupMenu(JButton button, String[] moleculeFiles) {
+    	moleculeNames = parseNames(moleculeFiles);
         this.button = button;
         JPanel panel = new JPanel();
 		panel.setBackground(Color.LIGHT_GRAY);
@@ -55,26 +58,40 @@ public class PopupMenu extends JPopupMenu implements MouseListener {
 
     }
 
+    protected String[] parseNames(String[] files) {
+    	int numMolecules = 0;
+    	for (int i=0;i<files.length;i++){
+    		if (files[i].endsWith(".png")){
+    			numMolecules++;
+    		}
+    	}
+    	String[] moleculeNames = new String[numMolecules];
+    	int count =0;
+    	for (int i=0;i<files.length;i++){
+    		if (files[i].endsWith(".png")){
+    			moleculeNames[count] = files[i].split(".png")[0];   
+    			count++;
+    		}
+    	}
+    	return moleculeNames;
+    }
+    
     protected void makeMenu() {	
-    	Object selectedSim;
-		ArrayList compounds= getSetCompounds(8,2,1);
-		if (compounds!=null){
-			for (int i=0;i<compounds.size();i++){
-				JPanel panel = new JPanel();
-				panel.setBackground(Color.LIGHT_GRAY);
-				panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-				this.add(panel, "cell 0 "+i+",grow");
-				
-				String cName =  getCompoundName(8,2,1,i);
-				cName = cName.replace(" ", "-");
-				System.out.println(""+cName);
-				
-				JLabel label = new JLabel(cName);
-				label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));
-				panel.add(label, "cell 0 0 3 1,growx");
-				
-			}
-		}	
+    	for (int i=0;i<moleculeNames.length;i++){
+			JPanel panel = new JPanel();
+			panel.setBackground(Color.LIGHT_GRAY);
+			panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+			this.add(panel, "cell 0 "+i+",grow");
+			
+			String cName =  moleculeNames[i];
+			cName = cName.replace(" ", "-");
+			
+			JLabel label = new JLabel(cName);
+			label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));
+			panel.add(label, "cell 0 0 3 1,growx");
+			
+		}
+		
       
     }
     protected void updateMenu() {
