@@ -32,26 +32,42 @@ public class PopupMenu extends JPopupMenu implements MouseListener {
    // protected CustomIcon[] images;
     protected  Component[] components;
     protected  String[] moleculeNames;
+    protected JPanel moleculePanel;
     
     public PopupMenu(JButton button, String[] moleculeFiles) {
     	moleculeNames = parseNames(moleculeFiles);
-        this.button = button;
-        JPanel panel = new JPanel();
-		panel.setBackground(Color.LIGHT_GRAY);
-		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-		this.add(panel, "cell 0 0,grow");
+    	
+    	this.button = button;
+    	
+    	
+    	JPanel p = new JPanel();
+		this.add(p, "cell 0 1,grow");
+		p.setLayout(new CardLayout(0, 0));
+
+		JScrollPane legendScrollContainer_1 = new JScrollPane();
+		p.add(legendScrollContainer_1, "name_1303765324750467000");
 		
-        makeMenu();
+		moleculePanel = new JPanel();
+		legendScrollContainer_1.setViewportView(moleculePanel);
+		moleculePanel.setLayout(new MigLayout("insets 6", "[174.00,grow]", "[53.00,grow][grow][grow][grow][grow]"));
+		
+		for (int i=0;i<moleculeNames.length;i++){
+    		String cName =  moleculeNames[i];
+			cName = cName.replace(" ", "-");
+			
+			JLabel label = new JLabel(cName);
+			label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));
+			moleculePanel.add(label, "cell 0 " + i + "3 1,growx");
+			
+		}
+
         setVisible(true);
         addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuCanceled(PopupMenuEvent e) {
-
             }
-
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 setVisible(true);
             }
-
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             }
         });
@@ -76,25 +92,7 @@ public class PopupMenu extends JPopupMenu implements MouseListener {
     	return moleculeNames;
     }
     
-    protected void makeMenu() {	
-    	for (int i=0;i<moleculeNames.length;i++){
-			JPanel panel = new JPanel();
-			panel.setBackground(Color.LIGHT_GRAY);
-			panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-			this.add(panel, "cell 0 "+i+",grow");
-			
-			String cName =  moleculeNames[i];
-			cName = cName.replace(" ", "-");
-			
-			JLabel label = new JLabel(cName);
-			label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));
-			panel.add(label, "cell 0 0 3 1,growx");
-			
-		}
-		
-      
-    }
-    protected void updateMenu() {
+   protected void updateMenu() {
     	
         this.updateUI();
       }
