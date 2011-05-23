@@ -55,27 +55,29 @@ import java.net.URLDecoder;
 
 public class Main {
 	// Controllers
-	private P5Canvas p5Canvas = new P5Canvas();
+	private static P5Canvas p5Canvas = new P5Canvas();
 	
 	// Canvases
-	private MainController mainController = new MainController(p5Canvas);
+	private static MainController mainController = new MainController(p5Canvas);
 	// TODO flag
 	
 	private JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
-	private int selectedUnit=0;
-	private int selectedSim=0;
+	private static int selectedUnit=0;
+	private static int selectedSim=0;
+	private static int selectedSet=0;
 	public static Color selectedColor = new Color(200,200,150);
+	public static Color defaultColor = Color.LIGHT_GRAY;
 	private int[] sliderValues = {3,4,5,6,7};
-	private int sliderValue = 5;
+	private static int sliderValue = 5;
 	
-	private int minSliderValue = 1;
-	private int maxSliderValue = 9;
+	private static int minSliderValue = 1;
+	private static int maxSliderValue = 9;
 	private JComboBox setSelector = new JComboBox();
 	private Timer timer;
 	private int countTimer, maxCountTimer=30;
 	public static JPanel dynamicPanel;
-	private ArrayList dynamicArray =  new ArrayList();
+	public static ArrayList additionalPanelList =  new ArrayList();
 	public static ArrayList defaultSetMolecules =  new ArrayList();
 	
 	/**
@@ -163,6 +165,125 @@ public class Main {
 	      throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
 	  }
 	
+	
+	public static void removeAdditionalMolecule(int additionalIndex){
+		int pos = defaultSetMolecules.size()+additionalIndex;
+		dynamicPanel.removeAll();
+		additionalPanelList.remove(pos);
+		//System.out.println(" 	POS:"+pos +" additionalPanelList.size():"+additionalPanelList.size());
+		for (int i=0; i<additionalPanelList.size();i++){
+			JPanel p = (JPanel) additionalPanelList.get(i);
+			dynamicPanel.add(p, "cell 0 "+i+",grow");
+			
+		}
+	}
+		
+	public static void addAdditionalMolecule(){
+		//Default unit setting
+		if (selectedUnit==0 && defaultSetMolecules.size()==0){
+			defaultSetMolecules.add("Water");
+			defaultSetMolecules.add("Hydrochloric Acid");
+			defaultSetMolecules.add("Hydronium");
+			defaultSetMolecules.add("Methylammonium");
+			defaultSetMolecules.add("Phenylpthalein");
+		}
+		JPanel panel = new JPanel();
+		panel.setBackground(Main.selectedColor);
+		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+		
+		//new molecule is at the end of additionalList
+		int newMolecule =  CustomPopupMenu.additionalList.size()-1; 
+		int pos = defaultSetMolecules.size() + newMolecule;
+		dynamicPanel.add(panel, "cell 0 "+pos+",grow");
+		additionalPanelList.add(panel);
+		
+		String cName = (String)  CustomPopupMenu.additionalList.get(newMolecule);
+		JLabel label = new JLabel(cName);
+		
+		cName = cName.replace(" ", "-");
+		label.setIcon(new ImageIcon(Main.class .getResource("/resources/compoundsPng50/"+cName+".png")));
+		panel.add(label, "cell 0 0 3 1,growx");
+		
+		
+		final JLabel label_1 = new JLabel(""+sliderValue);
+		panel.add(label_1, "cell 0 1");
+	
+		
+		JSlider slider = new JSlider(minSliderValue,maxSliderValue,sliderValue);
+		panel.add(slider, "cell 1 1");
+		slider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+			int value = ((JSlider) e.getSource()).getValue(); 
+			label_1.setText(""+value);
+			}
+		});
+		
+		
+		JButton button_1 = new JButton("");
+		button_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
+		panel.add(button_1, "cell 2 1,growy");
+		button_1.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				for (int i=0;i<Integer.parseInt(label_1.getText());i++)
+					mainController.addMolecule("Water");
+			}
+		});
+		
+	}
+	
+	public static void addDynamicPanel(){
+		if (dynamicPanel!=null){
+			dynamicPanel.removeAll();
+			defaultSetMolecules =  new ArrayList();
+			//System.out.println(""+getSetCompounds(selectedUnit,selectedSim,selectedIndex));
+			ArrayList compounds= getSetCompounds(selectedUnit,selectedSim,selectedSet);
+			if (compounds!=null){
+				for (int i=0;i<compounds.size();i++){
+					JPanel panel = new JPanel();
+					panel.setBackground(Color.LIGHT_GRAY);
+					panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
+					dynamicPanel.add(panel, "cell 0 "+i+",grow");
+					additionalPanelList.add(panel);
+					
+					String cName =  getCompoundName(selectedUnit,selectedSim,selectedSet,i);
+					defaultSetMolecules.add(cName);
+					JLabel label = new JLabel(cName);
+					
+					//System.out.println("cName: "+cName);
+					cName = cName.replace(" ", "-");
+					label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));
+					panel.add(label, "cell 0 0 3 1,growx");
+					
+					
+					final JLabel label_1 = new JLabel(""+sliderValue);
+					panel.add(label_1, "cell 0 1");
+				
+					
+					JSlider slider = new JSlider(minSliderValue,maxSliderValue,sliderValue);
+					panel.add(slider, "cell 1 1");
+					slider.addChangeListener(new ChangeListener() {
+						public void stateChanged(ChangeEvent e) {
+						int value = ((JSlider) e.getSource()).getValue(); 
+						label_1.setText(""+value);
+						}
+					});
+					
+					
+					JButton button_1 = new JButton("");
+					button_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
+					panel.add(button_1, "cell 2 1,growy");
+					button_1.addMouseListener(new MouseAdapter() {
+						public void mouseClicked(MouseEvent arg0) {
+							for (int i=0;i<Integer.parseInt(label_1.getText());i++)
+								mainController.addMolecule("Water");
+						}
+					});
+				
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -248,13 +369,13 @@ public class Main {
 									for (int j = 0; j<subMenuArrayList[i].size(); j++) {
 										if (e.getSource()==subMenuArrayList[i].get(j)){
 											if (selectedUnit>0){
-												simMenu.getItem(selectedUnit).setBackground(Color.WHITE);
-												((JMenuItem) (subMenuArrayList[selectedUnit].get(selectedSim-1))).setBackground(Color.WHITE) ;
+												simMenu.getItem(selectedUnit-1).setBackground(Color.WHITE);
+												((JMenuItem) (subMenuArrayList[selectedUnit-1].get(selectedSim-1))).setBackground(Color.WHITE) ;
 											}
-											selectedUnit = i;
+											selectedUnit = i+1;
 											selectedSim = j+1;
 											simMenu.setText("Unit "+selectedUnit+": "+getUnitName(selectedUnit)+
-													", Sim "+selectedSim+": "+getSimName(i, j+1));
+													", Sim "+selectedSim+": "+getSimName(selectedUnit, selectedSim));
 											simMenu.getItem(i).setBackground(selectedColor);
 											((JMenuItem) (subMenuArrayList[i].get(j))).setBackground(selectedColor) ;
 										
@@ -311,7 +432,7 @@ public class Main {
 			xx.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+moleculeNames[i]+".png")));
 			xx.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent e) {
-					scrollablePopupMenu.hidemenu();
+					//scrollablePopupMenu.hidemenu();
 				}
 			});
 			scrollablePopupMenu.add(xx, i);
@@ -354,60 +475,15 @@ public class Main {
 		timerSubpanel.add(playBtn, "cell 0 0 1 2,growy");
 
 		
-		//********* Select a Set
+		//********* Select a Set from ComboBox -> Update Dynamic Panel
 		setSelector.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange()==e.SELECTED){
 					//mainController.addMolecule("Water");
-					int selectedIndex = setSelector.getSelectedIndex();
-					if (dynamicPanel!=null){
-						dynamicPanel.removeAll();
-						defaultSetMolecules =  new ArrayList();
-						//System.out.println(""+getSetCompounds(selectedUnit,selectedSim,selectedIndex));
-						ArrayList compounds= getSetCompounds(selectedUnit,selectedSim,selectedIndex);
-						if (compounds!=null){
-							for (int i=0;i<compounds.size();i++){
-								JPanel panel = new JPanel();
-								panel.setBackground(Color.LIGHT_GRAY);
-								panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-								dynamicPanel.add(panel, "cell 0 "+i+",grow");
-								
-								String cName =  getCompoundName(selectedUnit,selectedSim,selectedIndex,i);
-								defaultSetMolecules.add(cName);
-								cName = cName.replace(" ", "-");
-								
-								JLabel label = new JLabel(cName);
-								label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));
-								panel.add(label, "cell 0 0 3 1,growx");
-								
-								
-								final JLabel label_1 = new JLabel(""+sliderValue);
-								panel.add(label_1, "cell 0 1");
-							
-								
-								JSlider slider = new JSlider(minSliderValue,maxSliderValue,sliderValue);
-								panel.add(slider, "cell 1 1");
-								slider.addChangeListener(new ChangeListener() {
-									public void stateChanged(ChangeEvent e) {
-									int value = ((JSlider) e.getSource()).getValue(); 
-									label_1.setText(""+value);
-									}
-								});
-								
-								
-								JButton button_1 = new JButton("");
-								button_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-								panel.add(button_1, "cell 2 1,growy");
-								button_1.addMouseListener(new MouseAdapter() {
-									public void mouseClicked(MouseEvent arg0) {
-										for (int i=0;i<Integer.parseInt(label_1.getText());i++)
-											mainController.addMolecule("Water");
-									}
-								});
-							
-							}
-						}
-					}
+					selectedSet = setSelector.getSelectedIndex();
+					CustomPopupMenu.additionalList = new ArrayList();
+					additionalPanelList = new ArrayList();
+					addDynamicPanel();
 				}
 			}
 		});
@@ -497,6 +573,7 @@ public class Main {
 		
 		JPanel panel_2 = new JPanel();
 		dynamicPanel.add(panel_2, "cell 0 0");
+		additionalPanelList.add(panel_2);
 		panel_2.setBackground(new Color(192, 192, 192));
 		panel_2.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
@@ -529,6 +606,7 @@ public class Main {
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.LIGHT_GRAY);
 		dynamicPanel.add(panel, "cell 0 1,grow");
+		additionalPanelList.add(panel);
 		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		JLabel lblHydrochloricAcid_1 = new JLabel("Hydrochloric Acid");
@@ -560,6 +638,7 @@ public class Main {
 		JPanel panel_1 = new JPanel();
 		panel_1.setBackground(new Color(192, 192, 192));
 		dynamicPanel.add(panel_1, "cell 0 2,grow");
+		additionalPanelList.add(panel_1);
 		panel_1.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		final JLabel lblNewLabel_2 = new JLabel(""+sliderValues[2]);
@@ -591,6 +670,7 @@ public class Main {
 		JPanel panel_3 = new JPanel();
 		panel_3.setBackground(new Color(192, 192, 192));
 		dynamicPanel.add(panel_3, "cell 0 3,grow");
+		additionalPanelList.add(panel_3);
 		panel_3.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		final JLabel label_1 = new JLabel(""+sliderValues[3]);
@@ -623,6 +703,7 @@ public class Main {
 		JPanel panel_4 = new JPanel();
 		panel_4.setBackground(new Color(192, 192, 192));
 		dynamicPanel.add(panel_4, "cell 0 4,grow");
+		additionalPanelList.add(panel_4);
 		panel_4.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		final JLabel label_3 = new JLabel(""+sliderValues[4]);

@@ -20,10 +20,10 @@ import javax.swing.plaf.basic.BasicButtonUI;
 public class CustomButton extends JButton {
 
 	private JPanel	panel;
-	private int status= 0;  // 0 = default; 
-							// 1 = mouseOver
-							// 2 = simulationDefault
-							// 3 = isAdded
+	public static final int DEFAULT = 0;
+	public static final int SIMULATION_DEFAULT = 1;
+	public static final int SELECTED = 2;
+	private int status= DEFAULT;
 	private String name;
 	public static final Color	MENU_HIGHLIGHT_BG_COLOR	= UIManager.getColor("MenuItem.selectionBackground");
 	public static final Color	MENU_HIGHLIGHT_FG_COLOR	= UIManager.getColor("MenuItem.selectionForeground");
@@ -46,12 +46,18 @@ public class CustomButton extends JButton {
 		init();
 	}
 
-	public void addContainerPanel(JPanel p) {
+	public void setContainerPanel(JPanel p) {
 		panel = p;
 	}
-		
+	public JPanel getContainerPanel() {
+		return panel;
+	}
+	
 	public void setStatus(int num) {
 		status =num;
+	}
+	public int getStatus() {
+		return status;
 	}
 	public String getName() {
 		return name;
@@ -79,24 +85,39 @@ public class CustomButton extends JButton {
 
 	private void setMenuItemDefaultColors() {
 		CustomButton.this.setOpaque(false);
+		if (this.getStatus()==CustomButton.SIMULATION_DEFAULT)
+			return;
 		if (panel!=null){
 			panel.setBackground(MENUITEM_BG_COLOR);
+			CustomButton.this.setForeground(MENUITEM_FG_COLOR);
+		}
+	}
+	
+	private void setMenuItemSelectedtColors() {
+		CustomButton.this.setOpaque(false);
+		if (this.getStatus()==CustomButton.SIMULATION_DEFAULT)
+			return;
+		if (panel!=null){
+			panel.setBackground(Main.selectedColor);
 			CustomButton.this.setForeground(MENUITEM_FG_COLOR);
 		}
 	}
 
 	private void setMenuItemHighlightColors() {
 		CustomButton.this.setOpaque(false);
+		if (this.getStatus()==CustomButton.SIMULATION_DEFAULT)
+			return;
 		if (panel!=null){
 			panel.setBackground(MENU_HIGHLIGHT_BG_COLOR);
 			CustomButton.this.setForeground(MENU_HIGHLIGHT_FG_COLOR);
 		}
 	}
 
+	private void addDefaultSet() {
+		
+	}
+
 	
-	/**
-	 * @return
-	 */
 	private MouseAdapter getMouseAdapter() {
 		return new MouseAdapter() {
 			/*
