@@ -134,9 +134,26 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		panel.add(panel_2, "cell 0 "+id);
 		panel_2.setLayout(new MigLayout("insets 0, gap 0", "10[][][300.00]", "[][]"));
 		panel_2.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
+			public void mouseClicked(MouseEvent e) {
+				if (customButton.getStatus()==CustomButton.SIMULATION_DEFAULT)
+					return;
+				if (customButton.getStatus()==CustomButton.DEFAULT){
+					additionalList.add(customButton.getName());
+					customButton.setStatus(CustomButton.SELECTED);
+					customButton.getContainerPanel().setBackground(Main.selectedColor);
+					customButton.setForeground(CustomButton.MENUITEM_FG_COLOR);
+					Main.addAdditionalMolecule();
+				}
+				else if (customButton.getStatus()==CustomButton.SELECTED){
+					//additionalList.add(b.getName());
+					customButton.setStatus(CustomButton.DEFAULT);
+					customButton.getContainerPanel().setBackground(CustomButton.MENUITEM_BG_COLOR);
+					customButton.setForeground(CustomButton.MENUITEM_FG_COLOR);
+					Main.removeAdditionalMolecule(getIndex(customButton.getName()));
+					additionalList.remove(customButton.getName());
+				}
 			}
-
+				
 			public void mouseEntered(MouseEvent e) {
 				if (customButton.getStatus()==CustomButton.SIMULATION_DEFAULT)
 					return;
@@ -181,16 +198,16 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 			additionalList.add(b.getName());
 			b.setStatus(CustomButton.SELECTED);
 			b.getContainerPanel().setBackground(Main.selectedColor);
+			b.setForeground(CustomButton.MENUITEM_FG_COLOR);
 			Main.addAdditionalMolecule();
 		}
 		else if (b.getStatus()==CustomButton.SELECTED){
 			//additionalList.add(b.getName());
 			b.setStatus(CustomButton.DEFAULT);
 			b.getContainerPanel().setBackground(CustomButton.MENUITEM_BG_COLOR);
+			b.setForeground(CustomButton.MENUITEM_FG_COLOR);
 			Main.removeAdditionalMolecule(getIndex(b.getName()));
 			additionalList.remove(b.getName());
-			//Main.addDynamicPanel();
-			//Main.addAdditionalMolecule();
 		}
 		
 	}
