@@ -79,6 +79,8 @@ public class Main {
 	public static JPanel dynamicPanel;
 	public static ArrayList additionalPanelList =  new ArrayList();
 	public static ArrayList defaultSetMolecules =  new ArrayList();
+	public static CustomPopupMenu scrollablePopupMenu;
+	public static String[] moleculeNames = null;
 	
 	/**
 	 * Launch the application.
@@ -284,6 +286,21 @@ public class Main {
 		}
 	}
 	
+	
+	public void createPopupMenu(){
+		scrollablePopupMenu = new CustomPopupMenu();
+		for (int i=0;i<moleculeNames.length;i++){
+			CustomButton xx = new CustomButton(moleculeNames[i].replace("-", " "));
+			xx.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+moleculeNames[i]+".png")));
+			xx.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e) {
+					//scrollablePopupMenu.hidemenu();
+				}
+			});
+			scrollablePopupMenu.add(xx, i);
+		}
+	}
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -416,7 +433,6 @@ public class Main {
 		menuBar.add(headHStrut);
 
 		// Get All molecules from Folder
-		String[] moleculeNames = null;
 		try {
 			moleculeNames =parseNames(getResourceListing(Main.class, "resources/compoundsPng50/"));
 		} catch (URISyntaxException e1) {
@@ -426,18 +442,7 @@ public class Main {
 		}
 		
 		final JButton moleculeChooserBtn = new JButton("");
-		final CustomPopupMenu scrollablePopupMenu = new CustomPopupMenu();
-		for (int i=0;i<moleculeNames.length;i++){
-			CustomButton xx = new CustomButton(moleculeNames[i].replace("-", " "));
-			xx.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+moleculeNames[i]+".png")));
-			xx.addActionListener(new ActionListener(){
-				public void actionPerformed(ActionEvent e) {
-					//scrollablePopupMenu.hidemenu();
-				}
-			});
-			scrollablePopupMenu.add(xx, i);
-		}
-		
+		createPopupMenu();
 		moleculeChooserBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				  scrollablePopupMenu.show(moleculeChooserBtn, -160,37,mainFrame.getHeight()-39);
@@ -484,6 +489,7 @@ public class Main {
 					CustomPopupMenu.additionalList = new ArrayList();
 					additionalPanelList = new ArrayList();
 					addDynamicPanel();
+					createPopupMenu();
 				}
 			}
 		});

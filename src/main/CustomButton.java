@@ -88,22 +88,18 @@ public class CustomButton extends JButton {
 		if (this.getStatus()==CustomButton.SIMULATION_DEFAULT)
 			return;
 		if (panel!=null){
-			panel.setBackground(MENUITEM_BG_COLOR);
-			CustomButton.this.setForeground(MENUITEM_FG_COLOR);
+			if (this.getStatus()==CustomButton.SELECTED){
+				panel.setBackground(Main.selectedColor);
+				this.setForeground(CustomButton.MENUITEM_FG_COLOR);
+			}
+			else{
+				panel.setBackground(CustomButton.MENUITEM_BG_COLOR);
+				this.setForeground(CustomButton.MENUITEM_FG_COLOR);
+			}
 		}
 	}
 	
-	private void setMenuItemSelectedtColors() {
-		CustomButton.this.setOpaque(false);
-		if (this.getStatus()==CustomButton.SIMULATION_DEFAULT)
-			return;
-		if (panel!=null){
-			panel.setBackground(Main.selectedColor);
-			CustomButton.this.setForeground(MENUITEM_FG_COLOR);
-		}
-	}
-
-	private void setMenuItemHighlightColors() {
+		private void setMenuItemHighlightColors() {
 		CustomButton.this.setOpaque(false);
 		if (this.getStatus()==CustomButton.SIMULATION_DEFAULT)
 			return;
@@ -113,10 +109,6 @@ public class CustomButton extends JButton {
 		}
 	}
 
-	private void addDefaultSet() {
-		
-	}
-
 	
 	private MouseAdapter getMouseAdapter() {
 		return new MouseAdapter() {
@@ -124,7 +116,7 @@ public class CustomButton extends JButton {
 			 * For static menuitems, the background color remains the highlighted color, if this is not overridden
 			 */
 			public void mousePressed(MouseEvent e) {
-				setMenuItemDefaultColors();
+				//setMenuItemDefaultColors();
 			}
 
 			public void mouseEntered(MouseEvent e) {
@@ -132,6 +124,7 @@ public class CustomButton extends JButton {
 			}
 
 			public void mouseExited(MouseEvent e) {
+				
 				setMenuItemDefaultColors();
 			}
 
