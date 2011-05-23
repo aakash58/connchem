@@ -65,7 +65,7 @@ public class Main {
 	public static JMenu simMenu = new JMenu("Choose Simulation");
 	private int selectedUnit=0;
 	private int selectedSim=0;
-	private Color selectedColor = new Color(200,200,150);
+	public static Color selectedColor = new Color(200,200,150);
 	private int[] sliderValues = {3,4,5,6,7};
 	private int sliderValue = 5;
 	
@@ -76,6 +76,7 @@ public class Main {
 	private int countTimer, maxCountTimer=30;
 	public static JPanel dynamicPanel;
 	private ArrayList dynamicArray =  new ArrayList();
+	public static ArrayList defaultSetMolecules =  new ArrayList();
 	
 	/**
 	 * Launch the application.
@@ -124,8 +125,6 @@ public class Main {
 	String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
 	      URL dirURL = clazz.getClassLoader().getResource(path);
 	      if (dirURL != null && dirURL.getProtocol().equals("file")) {
-	        /* A file path: easy enough */
-	    	  System.out.println("++++++++");
 	        return new File(dirURL.toURI()).list();
 	      } 
 
@@ -308,7 +307,7 @@ public class Main {
 		final JButton moleculeChooserBtn = new JButton("");
 		final CustomPopupMenu scrollablePopupMenu = new CustomPopupMenu();
 		for (int i=0;i<moleculeNames.length;i++){
-			CustomButton xx = new CustomButton(moleculeNames[i]);
+			CustomButton xx = new CustomButton(moleculeNames[i].replace("-", " "));
 			xx.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+moleculeNames[i]+".png")));
 			xx.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent e) {
@@ -320,7 +319,6 @@ public class Main {
 		
 		moleculeChooserBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("screenDimension:"+mainFrame.getHeight());
 				  scrollablePopupMenu.show(moleculeChooserBtn, -160,37,mainFrame.getHeight()-39);
 			}
 		});
@@ -364,7 +362,8 @@ public class Main {
 					int selectedIndex = setSelector.getSelectedIndex();
 					if (dynamicPanel!=null){
 						dynamicPanel.removeAll();
-						System.out.println(""+getSetCompounds(selectedUnit,selectedSim,selectedIndex));
+						defaultSetMolecules =  new ArrayList();
+						//System.out.println(""+getSetCompounds(selectedUnit,selectedSim,selectedIndex));
 						ArrayList compounds= getSetCompounds(selectedUnit,selectedSim,selectedIndex);
 						if (compounds!=null){
 							for (int i=0;i<compounds.size();i++){
@@ -374,8 +373,8 @@ public class Main {
 								dynamicPanel.add(panel, "cell 0 "+i+",grow");
 								
 								String cName =  getCompoundName(selectedUnit,selectedSim,selectedIndex,i);
+								defaultSetMolecules.add(cName);
 								cName = cName.replace(" ", "-");
-								System.out.println(""+cName);
 								
 								JLabel label = new JLabel(cName);
 								label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));

@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
@@ -27,17 +28,14 @@ import javax.swing.plaf.basic.BasicSeparatorUI;
 
 import net.miginfocom.swing.MigLayout;
 
-/**
- * This class implements a scrollable Popup Menu
- * @author balajihe
- *
- */
 public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 	private static final long	serialVersionUID	= 1;
 	private JPanel				panel			= new JPanel();
 	private JScrollPane			scroll				= null;
 	public static final Icon EMPTY_IMAGE_ICON = new ImageIcon("menu_spacer.gif");
-
+	public static ArrayList panelList =  new ArrayList();
+	public static ArrayList buttonList =  new ArrayList();
+	
 	public CustomPopupMenu() {
 		super();
 		this.setLayout(new BorderLayout());
@@ -80,6 +78,19 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		Point invokerOrigin = invoker.getLocationOnScreen();
 		this.setLocation((int) invokerOrigin.getX() + x, (int) invokerOrigin.getY() + y);
 		this.setVisible(true);
+		
+		//Check if molecule is in the default set
+		for (int i =0; i<buttonList.size();i++){
+			CustomButton b = (CustomButton) buttonList.get(i);
+			System.out.println("MenuName:"+b.getName());
+			JPanel p = (JPanel) panelList.get(i);
+			if (isDefaultSetMolecule(b.getName())){
+				p.setBackground(Main.selectedColor);
+			}
+			else{
+				//p.setBackground(Main.selectedColor);
+			}
+		}
 	}
 
 	public void hidemenu() {
@@ -88,6 +99,19 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		}
 	}
 
+	public boolean isDefaultSetMolecule(String name) {
+		for (int i =0; i<Main.defaultSetMolecules.size();i++){
+			String mName = Main.defaultSetMolecules.get(i).toString();
+			System.out.println("	mName:"+mName);
+			
+			if (mName.equals(name) ){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
 	public void add(final CustomButton menuItem, int id) {
 		//		menuItem.setMargin(new Insets(0, 20, 0 , 0));
 		if (menuItem == null) {
@@ -118,6 +142,9 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		if (menuItem.getIcon() == null) {
 			menuItem.setIcon(EMPTY_IMAGE_ICON);
 		}
+		
+		panelList.add(panel_2);
+		buttonList.add(menuItem);
 	}
 	
 	private MouseAdapter getMouseAdapter() {

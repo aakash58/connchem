@@ -24,6 +24,7 @@ public class CustomButton extends JButton {
 							// 1 = mouseOver
 							// 2 = simulationDefault
 							// 3 = isAdded
+	private String name;
 	public static final Color	MENU_HIGHLIGHT_BG_COLOR	= UIManager.getColor("MenuItem.selectionBackground");
 	public static final Color	MENU_HIGHLIGHT_FG_COLOR	= UIManager.getColor("MenuItem.selectionForeground");
 	public static final Color	MENUITEM_BG_COLOR		= UIManager.getColor("MenuItem.background");
@@ -39,28 +40,21 @@ public class CustomButton extends JButton {
 	}
 
 	
-	public CustomButton(Action a) {
-		super(a);
-		init();
-	}
-
-	public CustomButton(Icon icon) {
-		super(icon);
-		init();
-	}
-
-	public CustomButton(String text, Icon icon) {
-		super(text, icon);
-		init();
-	}
-
 	public CustomButton(String text) {
 		super(text);
+		name =text;
 		init();
 	}
 
 	public void addContainerPanel(JPanel p) {
 		panel = p;
+	}
+		
+	public void setStatus(int num) {
+		status =num;
+	}
+	public String getName() {
+		return name;
 	}
 		
 	
