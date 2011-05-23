@@ -83,8 +83,13 @@ public class YAMLinterface {
 
 	public static ArrayList getSims(int unitNumber) {
 		HashMap unit = getUnit(unitNumber);
-		ArrayList sims = (ArrayList)unit.get("sims");
-		return sims;
+		if (unit!=null){
+			ArrayList sims = (ArrayList)unit.get("sims");
+			return sims;
+		}
+		else{
+			return null;
+		}
 	}
 
 	public static HashMap getSim(int unitNumber, int simNumber) {

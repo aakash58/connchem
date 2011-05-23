@@ -35,6 +35,7 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 	public static final Icon EMPTY_IMAGE_ICON = new ImageIcon("menu_spacer.gif");
 	public static ArrayList panelList =  new ArrayList();
 	public static ArrayList buttonList =  new ArrayList();
+	public static ArrayList additionalList = new ArrayList();; // Contain newly added molecule to the default Set
 	
 	public CustomPopupMenu() {
 		super();
@@ -79,13 +80,14 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		this.setLocation((int) invokerOrigin.getX() + x, (int) invokerOrigin.getY() + y);
 		this.setVisible(true);
 		
+		
 		//Check if molecule is in the default set
 		for (int i =0; i<buttonList.size();i++){
 			CustomButton b = (CustomButton) buttonList.get(i);
-			System.out.println("MenuName:"+b.getName());
 			JPanel p = (JPanel) panelList.get(i);
 			if (isDefaultSetMolecule(b.getName())){
-				p.setBackground(Main.selectedColor);
+				p.setBackground(Main.defaultColor);
+				b.setStatus(CustomButton.SIMULATION_DEFAULT);
 			}
 			else{
 				//p.setBackground(Main.selectedColor);
@@ -102,19 +104,29 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 	public boolean isDefaultSetMolecule(String name) {
 		for (int i =0; i<Main.defaultSetMolecules.size();i++){
 			String mName = Main.defaultSetMolecules.get(i).toString();
-			System.out.println("	mName:"+mName);
-			
 			if (mName.equals(name) ){
 				return true;
 			}
 		}
 		return false;
 	}
+	
+
+	public int getIndex(String name) {
+		for (int i =0; i<additionalList.size();i++){
+			String mName = additionalList.get(i).toString();
+			//System.out.println(" 	getIndexOF: "+ mName +" name:"+name);
+			if (mName.equals(name) ){
+				return i;
+			}
+		}
+		return -100;
+	}
 
 	
-	public void add(final CustomButton menuItem, int id) {
+	public void add(final CustomButton customButton, int id) {
 		//		menuItem.setMargin(new Insets(0, 20, 0 , 0));
-		if (menuItem == null) {
+		if (customButton == null) {
 			return;
 		}
 		
@@ -126,52 +138,65 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 			}
 
 			public void mouseEntered(MouseEvent e) {
+				if (customButton.getStatus()==CustomButton.SIMULATION_DEFAULT)
+					return;
 				panel_2.setBackground(CustomButton.MENU_HIGHLIGHT_BG_COLOR);
-				menuItem.setForeground(CustomButton.MENU_HIGHLIGHT_FG_COLOR);
+				customButton.setForeground(CustomButton.MENU_HIGHLIGHT_FG_COLOR);
 			}	
 			public void mouseExited(MouseEvent e) {
-				panel_2.setBackground(CustomButton.MENUITEM_BG_COLOR);
-				menuItem.setForeground(CustomButton.MENUITEM_FG_COLOR);
+				if (customButton.getStatus()==CustomButton.SIMULATION_DEFAULT)
+					return;
+				if (customButton.getStatus()==CustomButton.SELECTED){
+					panel_2.setBackground(Main.selectedColor);
+					customButton.setForeground(CustomButton.MENUITEM_FG_COLOR);
+				}
+				else{
+					panel_2.setBackground(CustomButton.MENUITEM_BG_COLOR);
+					customButton.setForeground(CustomButton.MENUITEM_FG_COLOR);
+				}
+				
 			}
 
 		});
-		menuItem.addContainerPanel(panel_2);
-		panel_2.add(menuItem, "cell 0 0");
-		menuItem.removeActionListener(this);
-		menuItem.addActionListener(this);
-		if (menuItem.getIcon() == null) {
-			menuItem.setIcon(EMPTY_IMAGE_ICON);
+		customButton.setContainerPanel(panel_2);
+		panel_2.add(customButton, "cell 0 0");
+		customButton.removeActionListener(this);
+		customButton.addActionListener(this);
+		if (customButton.getIcon() == null) {
+			customButton.setIcon(EMPTY_IMAGE_ICON);
 		}
 		
 		panelList.add(panel_2);
-		buttonList.add(menuItem);
+		buttonList.add(customButton);
 	}
 	
-	private MouseAdapter getMouseAdapter() {
-		return new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-			}
-
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			public void mouseExited(MouseEvent e) {
-			}
-
-		};
-	}
-	
-
-	
+		
 
 	public void actionPerformed(ActionEvent e) {
-		this.hidemenu();
+		//this.hidemenu();
+		CustomButton b = (CustomButton) e.getSource();
+		if (b.getStatus()==CustomButton.SIMULATION_DEFAULT)
+			return;
+		if (b.getStatus()==CustomButton.DEFAULT){
+			additionalList.add(b.getName());
+			b.setStatus(CustomButton.SELECTED);
+			b.getContainerPanel().setBackground(Main.selectedColor);
+			Main.addAdditionalMolecule();
+		}
+		else if (b.getStatus()==CustomButton.SELECTED){
+			//additionalList.add(b.getName());
+			b.setStatus(CustomButton.DEFAULT);
+			b.getContainerPanel().setBackground(CustomButton.MENUITEM_BG_COLOR);
+			Main.removeAdditionalMolecule(getIndex(b.getName()));
+			additionalList.remove(b.getName());
+			//Main.addDynamicPanel();
+			//Main.addAdditionalMolecule();
+		}
+		
 	}
 
 	public Component[] getComponents() {
 		return panel.getComponents();
 	}
-
-	
 
 }
