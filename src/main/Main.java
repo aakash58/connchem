@@ -26,10 +26,12 @@ import control.MainController;
 
 import view.P5Canvas;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.CardLayout;
 import java.awt.Panel;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -74,9 +76,7 @@ public class Main {
 	private int countTimer, maxCountTimer=30;
 	public static JPanel dynamicPanel;
 	private ArrayList dynamicArray =  new ArrayList();
-	public static JFrame moleculeChooserWindow;
-	private PopupMenu vm;
-    
+	
 	/**
 	 * Launch the application.
 	 */
@@ -101,7 +101,25 @@ public class Main {
 		
 	}
 
-	
+	protected String[] parseNames(String[] files) {
+    	int numMolecules = 0;
+    	for (int i=0;i<files.length;i++){
+    		if (files[i].endsWith(".png")){
+    			numMolecules++;
+    		}
+    	}
+    	String[] moleculeNames = new String[numMolecules];
+    	int count =0;
+    	for (int i=0;i<files.length;i++){
+    		if (files[i].endsWith(".png")){
+    			moleculeNames[count] = files[i].split(".png")[0];   
+    			count++;
+    		}
+    	}
+    	return moleculeNames;
+    }
+    
+
 	
 	String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
 	      URL dirURL = clazz.getClassLoader().getResource(path);
@@ -150,8 +168,12 @@ public class Main {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		Dimension screenDimension = tk.getScreenSize();
+		    
 		mainFrame = new JFrame();
-		mainFrame.setBounds(0, 0, 1150, 700);
+		mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -274,40 +296,38 @@ public class Main {
 		menuBar.add(headHStrut);
 
 		// Get All molecules from Folder
+		String[] moleculeNames = null;
 		try {
-			final String[] moleculeNames =getResourceListing(Main.class, "resources/compoundsPng50/");
+			moleculeNames =parseNames(getResourceListing(Main.class, "resources/compoundsPng50/"));
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		
-			final JButton moleculeChooserBtn = new JButton("");
-			moleculeChooserBtn.addActionListener(new ActionListener() {
+		final JButton moleculeChooserBtn = new JButton("");
+		final CustomPopupMenu scrollablePopupMenu = new CustomPopupMenu();
+		for (int i=0;i<moleculeNames.length;i++){
+			CustomButton xx = new CustomButton(moleculeNames[i]);
+			xx.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+moleculeNames[i]+".png")));
+			xx.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent e) {
-					moleculeChooserWindow = new JFrame("Choose molecules");
-					moleculeChooserWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-					moleculeChooserWindow.getContentPane().add(new MoleculeChooserPanel());
-					moleculeChooserWindow.setBounds(MoleculeChooserPanel.x, MoleculeChooserPanel.y, 
-							MoleculeChooserPanel.w, MoleculeChooserPanel.h);
-					//moleculeChooserWindow.show();
-					
-					 Component c = (Component) e.getSource();
-		              
-		                if (vm == null) {
-		                    vm = new PopupMenu(moleculeChooserBtn, moleculeNames);
-		                }
-		                else{
-		                	vm.updateMenu();
-		                }
-		                vm.show(c, -150, 33);
+					scrollablePopupMenu.hidemenu();
 				}
-			  });
+			});
+			scrollablePopupMenu.add(xx, i);
+		}
+		
+		moleculeChooserBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("screenDimension:"+mainFrame.getHeight());
+				  scrollablePopupMenu.show(moleculeChooserBtn, -160,37,mainFrame.getHeight()-39);
+			}
+		});
 			//moleculeChooserBtn.setEnabled(false);
 			moleculeChooserBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconCompound.png")));
 			menuBar.add(moleculeChooserBtn);
-		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		
 		
 		 
 		
