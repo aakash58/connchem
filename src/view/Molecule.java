@@ -1,166 +1,141 @@
 package view;
 
 import java.util.ArrayList;
-
 import processing.core.*;
+import processing.xml.XMLElement;
 import pbox2d.*;
-
 import model.ResourceReader;
-
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.*;
-
 import static model.State.*;
 
 public class Molecule {
 	P5Canvas parent;
-	// We need to keep track of a Body and a radius
-	Body body;
 	PBox2D box2d;
-	String compoundName;
-	float angle; // angle of body
+	Body body = new Body();
+	PShape pShape = new PShape();
+	PShape outline = pShape.findChild("outline");
+	float pShapeW = 0f;
+	float pShapeH = 0f;
 	
-	String shapeString;
-	PShapeSVG moleculeShape;
+	ArrayList<Vec2> vertices = new ArrayList<Vec2>();
 	
-	ArrayList<PVector> vertices;
+	String compoundName = new String();
+	Vec2 pos = new Vec2();
+	float angle = 0f;
+	int color = 0;
+	
+	PolygonDef sd = new PolygonDef();
+	BodyDef bd = new BodyDef();
 
 	Molecule(float x_, float y_, String compoundName_, PBox2D box2d_, P5Canvas parent_) {
-		this.parent = parent_;
-		this.box2d = box2d_;
+		molecules.add(this);
+		parent = parent_;
+		box2d = box2d_;
+		
 		compoundName = compoundName_;
 		
-		vertices = new ArrayList<PVector>();
-		PVector v1 = new PVector(-30, 25);
-		PVector v2 = new PVector(10,15);
-		PVector v3 = new PVector(15,5);
-		PVector v4 = new PVector(30,-15);
-		PVector v5 = new PVector(-10,-20);
+		pShape = parent.loadShape("resources/compoundsSvg/Water.svg");
+		pShapeW = pShape.width;
+		pShapeH = pShape.height;
 		
-		vertices.add(v1);
-		vertices.add(v2);
-		vertices.add(v3);
-		vertices.add(v4);
-		vertices.add(v5);
+		pos.x = x_;
+		pos.y = y_;
 		
-		// This function puts the particle in the Box2d world
-		makeBody(new Vec2(x_,y_));
+		PShape outline = pShape.findChild("outline");
 		
-		body.setUserData(this);
+		for (int i = 0; i<outline.getChild(0).getVertexCount(); i++) {
+			Vec2 vertex = new Vec2(outline.getChild(0).getVertexX(i), outline.getChild(0).getVertexY(i));
+			vertices.add(vertex);
+		}
 		
-		ResourceReader reader = new ResourceReader("resources/compoundsSvg/Water.svg");
-		shapeString = reader.read();
+		for (int i = 0; i<vertices.size(); i++) {
+			System.out.println(vertices.get(i).x + " " + vertices.get(i).y);
+		}
 
-		// TODO this needs to be converted to read "shapeString", but I don't know how to make it read a string rather than a file.  Exported Jars will break!
-		moleculeShape = (PShapeSVG)parent.loadShape("resources/compoundsSvg/Generic.svg");
-		
-
+		makeBody(new Vec2(pos.x,pos.y));
 	}
 
-	// This function removes the particle from the box2d world
 	void killBody() {
 		box2d.destroyBody(body);
 		molecules.remove(this);
 	}
 
+	void makeBody(Vec2 center_) {
+		float box2dW = box2d.scalarPixelsToWorld(pShapeW/2);
+	    float box2dH = box2d.scalarPixelsToWorld(pShapeH/2);
+	    sd.setAsBox(box2dW, box2dH);
+	 
+	    sd.density = 1.0f;
+	    sd.friction = 0.0f;
+	    sd.restitution = 0.5f;
+		
+	    bd.position.set(box2d.coordPixelsToWorld(center_));
+	 
+	    body = box2d.createBody(bd);
+	    body.createShape(sd);
+	    body.setMassFromShapes();
+	    
+	    body.setLinearVelocity(new Vec2(parent.random(-5,5), parent.random(2,5)));
+	    body.setAngularVelocity(parent.random(-5,5));
+	    
+	   
+		////////
+	    /* 
+	    float box2dW = box2d.scalarPixelsToWorld(pShapeW/2);
+		float box2dH = box2d.scalarPixelsToWorld(pShapeH/2);
+		//sd.setAsBox(box2dW, box2dH);
+		
+		for (int i = 0; i < vertices.size();i++) {
+			sd.addVertex(box2d.vectorPixelsToWorld(box2d.coordPixelsToWorld(new Vec2(vertices.get(i).x/-2,vertices.get(i).y/-2))));
+    	}
+		
+		sd.density = 1.0f;
+		sd.friction = 0.0f;
+		sd.restitution = 1.0f;
+		
+		bd.position.set(box2d.coordPixelsToWorld(center_));
+		//body = box2d.world.createBody(bd);
 
-	float bodysize = 25f; // radius
+		body = box2d.createBody(bd);
+		body.createShape(sd);
+		body.setMassFromShapes();
+		*/
+		
+	}
 	
 	void display() {
 		parent.pushStyle();
 		parent.pushMatrix();
-			// We look at each body and get its screen position
-			Vec2 pos = box2d.getBodyPixelCoord(body);
-			// Get its angle of rotation
+			pos = box2d.getBodyPixelCoord(body);
 			angle = body.getAngle();
-			parent.translate(pos.x,pos.y);
-			
-			// this is temporary
-			if (compoundName.equals("Water")) {
-				parent.fill(25, 25, 127);
-			} else {
-				parent.fill(0, 127, 0);
-			}
-
-			parent.rotate(angle * -1);
-
-/*			parent.ellipse(0,0,bodysize*2,bodysize*2);
-			// Let's add a line so we can see the rotation
-			parent.line(0,0,bodysize,0);*/
-			
-			// this is for the ellipse
-			//parent.rect(bodysize/-2, bodysize/-2, bodysize, bodysize);
-			
-			parent.beginShape();
-			
-			for (int i = 0; i<vertices.size(); i++) {
-				parent.vertex(vertices.get(i).x, vertices.get(i).y);
-			}
-			
-			parent.endShape();
-
-			//float moleculeShapeW = moleculeShape.width;
-			//float moleculeShapeH = moleculeShape.height;
-			//parent.shape(moleculeShape, moleculeShapeW/-2, moleculeShapeH/-2, moleculeShapeW, moleculeShapeH);
-			
-			parent.ellipseMode(parent.CENTER);
-			parent.fill(200);
-			parent.stroke(200);
-			parent.ellipse(0, 0, 5, 5);
-			parent.line(0,0,10,0);
-
+		 	if (pos!=null){
+		 		parent.translate(pos.x, pos.y);
+		 		parent.rotate(angle * -1); // TODO not sure why rotate requires negative value
+		 		
+		 		// main p5 pic
+		 		parent.shape(pShape, pShapeW/-2, pShapeH/-2, pShapeW, pShapeH); // second two args center for p5
+		 		
+		 		// background shape which ostensibly matches pbox
+		 		parent.noFill();
+		 		parent.stroke(127, 50);
+		 		parent.rect(pShapeW * -1/2, pShapeH * -1/2, pShapeW, pShapeH);
+		 		parent.beginShape();
+	 			for (int i = 0; i<vertices.size(); i++) {
+	 				Vec2 vec2 = vertices.get(i);
+	 				parent.vertex(vec2.x, vec2.y);
+	 			}
+		 		parent.endShape();
+		 	
+		 		// center indicator
+		 		parent.ellipseMode(parent.CENTER);
+		 		parent.fill(200);
+		 		parent.stroke(200);
+		 		parent.ellipse(0, 0, 5, 5);
+		 		parent.line(0,0,10,0);
+		 	}
 		parent.popMatrix();
 		parent.popStyle();
-	}
-
-	// Here's our function that adds the particle to the Box2D world
-	void makeBody(Vec2 center_) {
-		// Define the body and make it from the shape
-		BodyDef bd = new BodyDef();
-		bd.position = box2d.coordPixelsToWorld(center_);
-		body = box2d.world.createBody(bd);
-
-/*		// Make the body's shape a circle
-		CircleDef cd = new CircleDef();
-		cd.radius = box2d.scalarPixelsToWorld(bodysize);
-		cd.density = 1.0f;
-		cd.friction = 0.0f;
-		cd.restitution = 1.0f; // Restitution is bounciness
-		body.createShape(cd); */
-		
-/* 		// I'm gonna try a square.
-		PolygonDef sd = new PolygonDef();
-		float boxW = box2d.scalarPixelsToWorld(bodysize/2);
-		float boxH = box2d.scalarPixelsToWorld(bodysize/2);
-		sd.setAsBox(boxW, boxH);
-		sd.density = 1.0f;
-		sd.friction = 0.0f;
-		sd.restitution = 1.0f;
-		body.createShape(sd); */
-		
-		// Now trying an arbitrary polygon
-	    // Define a polygon (this is what we use for a rectangle)
-	    PolygonDef sd = new PolygonDef();
-	    
-	    for (int i = 0; i < vertices.size();i++) {
-	    	sd.addVertex(box2d.vectorPixelsToWorld(new Vec2(vertices.get(i).x,vertices.get(i).y)));
-	    }
-
-	    // Parameters that affect physics
-	    sd.density = 1.0f;
-	    sd.friction = 0.0f;
-	    sd.restitution = 1.0f;
-
-	    body = box2d.createBody(bd);
-	    body.createShape(sd);
-		
-
-		// Always do this at the end
-		body.setMassFromShapes();
-
-		// Give it a random initial velocity (and angular velocity)
-		//body.setLinearVelocity(new Vec2(parent.random(-10f,10f),parent.random(5f,10f)));
-		//body.setAngularVelocity(random(-10,10));
 	}
 }
