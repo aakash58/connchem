@@ -14,7 +14,7 @@ import p5.Area;
 public class P5Canvas extends Area {
 
 	// A reference to our box2d world
-	PBox2D box2d;
+	PBox2D box2d = new PBox2D(this);
 	
 	public void setup() {
 		smooth();
@@ -24,7 +24,6 @@ public class P5Canvas extends Area {
 		size(550, 550);
 	
 		// Initialize box2d physics and create the world
-		box2d = new PBox2D(this);
 		box2d.createWorld();
 		box2d.setGravity(0f,-10f);
 		// Turn on collision listening!
