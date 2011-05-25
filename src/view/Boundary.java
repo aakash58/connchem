@@ -1,9 +1,7 @@
 package view;
 
-import processing.core.*;
 import p5.Area;
 import pbox2d.*;
-import p5.Region;
 
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.*;

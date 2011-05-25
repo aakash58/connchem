@@ -128,6 +128,8 @@ public class Main {
 	
 	String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
 	      URL dirURL = clazz.getClassLoader().getResource(path);
+	      System.out.println(dirURL);
+			
 	      if (dirURL != null && dirURL.getProtocol().equals("file")) {
 	        return new File(dirURL.toURI()).list();
 	      } 
