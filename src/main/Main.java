@@ -204,8 +204,8 @@ public class Main {
 		String cName = (String)  CustomPopupMenu.additionalList.get(newMolecule);
 		JLabel label = new JLabel(cName);
 		
-		cName = cName.replace(" ", "-");
-		label.setIcon(new ImageIcon(Main.class .getResource("/resources/compoundsPng50/"+cName+".png")));
+		final String fixedName = cName.replace(" ", "-");
+		label.setIcon(new ImageIcon(Main.class .getResource("/resources/compoundsPng50/"+fixedName+".png")));
 		panel.add(label, "cell 0 0 3 1,growx");
 		
 		
@@ -228,9 +228,10 @@ public class Main {
 		panel.add(button_1, "cell 2 1,growy");
 		button_1.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				for (int i=0;i<Integer.parseInt(label_1.getText());i++)
-					mainController.addMolecule("Water");
-			}
+				for (int i=0;i<Integer.parseInt(label_1.getText());i++){
+					mainController.addMolecule(fixedName);
+				}
+			}	
 		});
 		
 	}
@@ -254,8 +255,8 @@ public class Main {
 					JLabel label = new JLabel(cName);
 					
 					//System.out.println("cName: "+cName);
-					cName = cName.replace(" ", "-");
-					label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+cName+".png")));
+					final String fixedName = cName.replace(" ", "-");
+					label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
 					panel.add(label, "cell 0 0 3 1,growx");
 					
 					
@@ -279,7 +280,7 @@ public class Main {
 					button_1.addMouseListener(new MouseAdapter() {
 						public void mouseClicked(MouseEvent arg0) {
 							for (int i=0;i<Integer.parseInt(label_1.getText());i++)
-								mainController.addMolecule("Water");
+								mainController.addMolecule(fixedName);
 						}
 					});
 				
@@ -566,8 +567,10 @@ public class Main {
 		//***************** Add elements Control panel
 		
 		final String controlCompoundName_1 = "Water";
-		final String controlCompoundName_2 = "Hydronium";
-		final String controlCompoundName_3 = "Acetate";
+		final String controlCompoundName_2 = "Hydrochloric Acid";
+		final String controlCompoundName_3 = "Hydronium";
+		final String controlCompoundName_4 = "Methylammonium";
+		final String controlCompoundName_5 = "Phenylpthalein";
 		JPanel legendSubpanel = new JPanel();
 		leftPanel.add(legendSubpanel, "cell 0 1,grow");
 		legendSubpanel.setLayout(new CardLayout(0, 0));
@@ -588,8 +591,8 @@ public class Main {
 		final JLabel label = new JLabel(""+sliderValues[0]);
 		panel_2.add(label, "cell 0 1");
 		
-		JLabel lblWater = new JLabel("Water");
-		lblWater.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydroxide.png")));
+		JLabel lblWater = new JLabel(controlCompoundName_1);
+		lblWater.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+controlCompoundName_1+".png")));
 		panel_2.add(lblWater, "cell 0 0 3 1,growx");
 		
 		JButton button = new JButton("");
@@ -617,8 +620,9 @@ public class Main {
 		additionalPanelList.add(panel);
 		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
-		JLabel lblHydrochloricAcid_1 = new JLabel("Hydrochloric Acid");
-		lblHydrochloricAcid_1.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydrochloric-Acid.png")));
+		JLabel lblHydrochloricAcid_1 = new JLabel(controlCompoundName_2);
+		final String fixedName2 = controlCompoundName_2.replace(" ", "-");
+		lblHydrochloricAcid_1.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName2+".png")));
 		panel.add(lblHydrochloricAcid_1, "cell 0 0 3 1,growx");
 		
 		final JLabel lblNewLabel_1 = new JLabel(""+sliderValues[1]);
@@ -629,8 +633,9 @@ public class Main {
 		panel.add(button_1, "cell 2 1,growy");
 		button_1.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				for (int i=0;i<Integer.parseInt(lblNewLabel_1.getText());i++)
-					mainController.addMolecule(controlCompoundName_2);
+				for (int i=0;i<Integer.parseInt(lblNewLabel_1.getText());i++){
+					mainController.addMolecule(fixedName2);
+				}	
 			}
 		});
 		
@@ -652,8 +657,8 @@ public class Main {
 		final JLabel lblNewLabel_2 = new JLabel(""+sliderValues[2]);
 		panel_1.add(lblNewLabel_2, "cell 0 1");
 		
-		JLabel lblNewLabel_3 = new JLabel("Hydronium");
-		lblNewLabel_3.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Hydronium.png")));
+		JLabel lblNewLabel_3 = new JLabel(controlCompoundName_3);
+		lblNewLabel_3.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+controlCompoundName_3+".png")));
 		panel_1.add(lblNewLabel_3, "cell 0 0 3 1,growx");
 		
 		JButton button_2 = new JButton("");
@@ -684,8 +689,8 @@ public class Main {
 		final JLabel label_1 = new JLabel(""+sliderValues[3]);
 		panel_3.add(label_1, "cell 0 1");
 		
-		JLabel lblMethylammonium = new JLabel("Methylammonium");
-		lblMethylammonium.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Methylammonium.png")));
+		JLabel lblMethylammonium = new JLabel(controlCompoundName_4);
+		lblMethylammonium.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+ controlCompoundName_4+".png")));
 		panel_3.add(lblMethylammonium, "cell 0 0 3 1,growx");
 		
 		JButton button_3 = new JButton("");
@@ -694,7 +699,7 @@ public class Main {
 		button_3.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
 				for (int i=0;i<Integer.parseInt(label_1.getText());i++)
-					mainController.addMolecule(controlCompoundName_3);
+					mainController.addMolecule(controlCompoundName_4);
 			}
 		});
 		
@@ -717,8 +722,8 @@ public class Main {
 		final JLabel label_3 = new JLabel(""+sliderValues[4]);
 		panel_4.add(label_3, "cell 0 1");
 		
-		JLabel lblNewLabel_6 = new JLabel("Phenylpthalein");
-		lblNewLabel_6.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Phenylpthalein.png")));
+		JLabel lblNewLabel_6 = new JLabel(controlCompoundName_5);
+		lblNewLabel_6.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+controlCompoundName_5+".png")));
 		panel_4.add(lblNewLabel_6, "cell 0 0 3 1,growx");
 		
 		JButton button_4 = new JButton("");
@@ -727,7 +732,7 @@ public class Main {
 		button_4.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
 				for (int i=0;i<Integer.parseInt(label_3.getText());i++)
-					mainController.addMolecule(controlCompoundName_3);
+					mainController.addMolecule(controlCompoundName_5);
 			}
 		});
 		
