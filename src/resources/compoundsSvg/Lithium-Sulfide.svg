@@ -2,20 +2,19 @@
 <!-- Generator: Adobe Illustrator 15.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="146px"
-	 height="61px" viewBox="0 0 146 61" style="enable-background:new 0 0 146 61;" xml:space="preserve">
+	 height="61px" viewBox="0 0 146 61" enable-background="new 0 0 146 61" xml:space="preserve">
 <g id="object">
-	<path style="fill:#B1B1B1;" d="M115.5,0c-11.337,0-21.241,6.222-26.498,15.426C84.987,11.167,79.301,8.5,73,8.5
+	<path fill="#B1B1B1" d="M115.5,0c-11.337,0-21.241,6.222-26.498,15.426C84.987,11.167,79.301,8.5,73,8.5
 		s-11.987,2.667-16.002,6.926C51.742,6.222,41.837,0,30.5,0C13.682,0,0,13.683,0,30.5C0,47.318,13.682,61,30.5,61
 		c11.337,0,21.241-6.222,26.498-15.426C61.013,49.833,66.699,52.5,73,52.5s11.987-2.667,16.002-6.926
 		C94.259,54.779,104.163,61,115.5,61c16.817,0,30.5-13.683,30.5-30.5C146,13.683,132.317,0,115.5,0z"/>
-	<circle style="fill:#FFFF00;stroke:#000000;stroke-miterlimit:10;" cx="73" cy="30.5" r="17"/>
-	<circle style="fill:#5500A9;stroke:#000000;stroke-miterlimit:10;" cx="115.5" cy="30.5" r="25.5"/>
-	<circle style="fill:#5500A9;stroke:#000000;stroke-miterlimit:10;" cx="30.5" cy="30.5" r="25.5"/>
+	<circle fill="#FFFF00" stroke="#000000" stroke-miterlimit="10" cx="73" cy="30.5" r="17"/>
+	<circle fill="#5500A9" stroke="#000000" stroke-miterlimit="10" cx="115.5" cy="30.5" r="25.5"/>
+	<circle fill="#5500A9" stroke="#000000" stroke-miterlimit="10" cx="30.5" cy="30.5" r="25.5"/>
 </g>
-<g id="outline">
-	<path style="fill:none;" d="M115.5,0c-11.337,0-21.241,6.222-26.498,15.426C84.987,11.167,79.301,8.5,73,8.5
-		s-11.987,2.667-16.002,6.926C51.742,6.222,41.837,0,30.5,0C13.682,0,0,13.683,0,30.5C0,47.318,13.682,61,30.5,61
-		c11.337,0,21.241-6.222,26.498-15.426C61.013,49.833,66.699,52.5,73,52.5s11.987-2.667,16.002-6.926
-		C94.259,54.779,104.163,61,115.5,61c16.817,0,30.5-13.683,30.5-30.5C146,13.683,132.317,0,115.5,0z"/>
+<g id="circles">
+	<circle fill="none" cx="73" cy="30.5" r="21.944"/>
+	<circle fill="none" cx="30.5" cy="30.5" r="30.5"/>
+	<circle fill="none" cx="115.5" cy="30.5" r="30.5"/>
 </g>
 </svg>
