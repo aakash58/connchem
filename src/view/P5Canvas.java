@@ -15,9 +15,11 @@ public class P5Canvas extends Area {
 
 	// A reference to our box2d world
 	PBox2D box2d = new PBox2D(this);
+	public static long count =0;
 	
 	public void setup() {
 		smooth();
+		frameRate(30);
 		setW(550);
 		setH(550);
 		setDimensions(0, 0, w(), h());  // this is a custom function from the Region interface, implemented in the Area class
@@ -25,7 +27,7 @@ public class P5Canvas extends Area {
 	
 		// Initialize box2d physics and create the world
 		box2d.createWorld();
-		box2d.setGravity(0f,-10f);
+		box2d.setGravity(0f,0f);
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		//box2d.listenForCollisions();
@@ -47,6 +49,12 @@ public class P5Canvas extends Area {
 	}
 
 	public void draw() {
+		
+		long tmp = count;
+		count = System.currentTimeMillis();
+		long dif = (count - tmp);
+		//System.out.println("Dif:"+dif);
+		
 		drawBackground();
 		
 		// We must always step through time!
