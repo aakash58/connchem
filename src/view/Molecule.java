@@ -31,12 +31,13 @@ public class Molecule {
 		r = 20;
 		
 		String url = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		String path = url + "resources/compoundsSvg/Shp3.svg";
+		String path = url + "resources/compoundsSvg/"+compoundName_+".svg";
 		pShape = parent.loadShape(path);
 		
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
 		
+		System.out.println("new path: "+path);
 		circles = DataReader.getSVG(path);
 		
 		// Add the box to the box2d world

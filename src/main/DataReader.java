@@ -29,8 +29,13 @@ public class DataReader {
 			ArrayList xList = new ArrayList();
 			ArrayList yList = new ArrayList();
 			ArrayList rList = new ArrayList();
+			boolean reachCircle = false;
 			while (sText != null) {
-				if (sText.contains("<circle fill")){
+				if (sText.contains("<g id=\"circles\">")){
+					reachCircle = true;
+				}
+				if (sText.contains("<circle fill") && reachCircle){
+					System.out.println(""+sText);
 					String[] values = sText.split("\"");
 					xList.add(values[3]);
 					yList.add(values[5]);
@@ -41,6 +46,8 @@ public class DataReader {
 			}
 			float[][] circles = new float[xList.size()][3];
 			for (int i =0;i<xList.size();i++){
+				System.out.println(rList.get(i) +" "+xList.get(i) +" "+yList.get(i));
+				
 				circles[i][0] = Float.parseFloat(rList.get(i).toString()); 
 				circles[i][1] = Float.parseFloat(xList.get(i).toString()); 
 				circles[i][2] = Float.parseFloat(yList.get(i).toString()); 
