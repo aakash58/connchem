@@ -1,15 +1,13 @@
 package view;
 
-import java.net.URL;
 
 import processing.core.*;
 import pbox2d.*;
+import main.Main;
+
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.*;
-
-import main.DataReader;
-import main.Main;
 
 public class Molecule {
 	// We need to keep track of a Body and a width and height
@@ -30,15 +28,32 @@ public class Molecule {
 		box2d = box2d_;
 		r = 20;
 		
-		String url = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		String path = url + "resources/compoundsSvg/"+compoundName_+".svg";
+	//	String url = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+	//	String path = url + "/resources/compoundsSvg/"+compoundName_+".svg";
+		
+	//	String path = "/resources/compoundsSvg/"+compoundName_+".svg";
+	//	URL url = Main.class.getResource("/resources/compoundsSvg/Water.svg");
+	//	System.out.println("URL********:"+url.getPath());
+	//	String path = url.getPath();//.substring(5,url.getPath().length());
+	/*	File tempDir = new File(System.getProperty("java.io.tmpdir"));
+		File temporaryFile = new File(tempDir, "Water.svg");
+		String absolutePath = temporaryFile.getAbsolutePath();
+		System.out.println(""+absolutePath);
+		*/
+		//System.out.println("1: "+Main.class.getResource("/Users/tuandang/Desktop/GA/Workspace/ConnChemProject8/bin/resources/compoundsSvg/Water.svg").getPath());
+		
+			String path = "resources/compoundsSvg/"+compoundName_+".svg";
+	//	System.out.println("2: "+path);
+		//URL url2 = Main.class.getResource("Main.class");  
+		//System.out.println(url2);
+		//System.out.println(System.getProperty("java.class.path"));  
 		pShape = parent.loadShape(path);
+		
 		
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
 		
-		System.out.println("new path: "+path);
-		circles = DataReader.getSVG(path);
+		circles = SVGReader.getSVG(path);
 		
 		// Add the box to the box2d world
 		makeBody(new Vec2(x, y));
@@ -102,10 +117,9 @@ public class Molecule {
 			body.createShape(cd);
 		}
 		body.setMassFromShapes();
-
+		
 		// Give it some initial random velocity
 		body.setLinearVelocity(new Vec2(parent.random(-10, 10), parent.random(5,10)));
 		body.setAngularVelocity(parent.random(-10, 10));
 	}
-
 }

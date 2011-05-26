@@ -47,8 +47,11 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -68,7 +71,7 @@ public class Main {
 	private static int selectedSet=0;
 	public static Color selectedColor = new Color(200,200,150);
 	public static Color defaultColor = Color.LIGHT_GRAY;
-	private int[] sliderValues = {3,4,5,6,7};
+	private int[] sliderValues = {1,2,3,2,1};
 	private static int sliderValue = 5;
 	
 	private static int minSliderValue = 1;
@@ -104,6 +107,60 @@ public class Main {
 	public Main() {
 		initialize();
 		
+		//File f = new File("/Users/tuandang/Desktop/TTT.jar!/resources/compoundsSvg/Water.svg");
+		//System.out.println("Exist?: "+f.exists());
+	
+	/*	java.util.jar.JarFile jar = null;
+		try {
+			jar = new java.util.jar.JarFile("TTT.jar");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		java.util.Enumeration enum1 = jar.entries();
+		while (enum1.hasMoreElements()) {
+		    java.util.jar.JarEntry file = (java.util.jar.JarEntry) enum1.nextElement();
+		    java.io.File f = new java.io.File("Y/" + java.io.File.separator + file.getName());
+		    if (file.isDirectory()) { // if its a directory, create it
+		        f.mkdir();
+		        continue;
+		    }
+		    java.io.InputStream is = null;
+			try {
+				is = jar.getInputStream(file);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} // get the input stream
+		    java.io.FileOutputStream fos = null;
+			try {
+				fos = new java.io.FileOutputStream(f);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    try {
+				while (is.available() > 0) {  // write contents of 'is' to 'fos'
+				    fos.write(is.read());
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    try {
+				fos.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    try {
+				is.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}*/
+
 	}
 
 	protected String[] parseNames(String[] files) {
@@ -125,10 +182,32 @@ public class Main {
     }
     
 
+	public static String geAbsolutePath(String path) throws URISyntaxException, IOException {
+			URL url = Main.class.getClassLoader().getResource(path);
+			 String path2 =  url.getPath();
+	    	
+	      if (url != null && url.getProtocol().equals("file")) {
+	        return path2;
+	      } 
+
+	      if (url == null) {
+	        String me = Main.class.getName().replace(".", "/")+".class";
+	        url = Main.class.getClassLoader().getResource(me);
+	      }
+	      
+	      if (url.getProtocol().equals("jar")) {
+	        String jarPath = url.getPath().substring(5, url.getPath().indexOf("!")); //strip out only the JAR file
+	        JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+	        Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+	       
+	      } 
+	        
+	      throw new UnsupportedOperationException("Cannot list files for URL "+url);
+	  }
 	
 	String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
 	      URL dirURL = clazz.getClassLoader().getResource(path);
-	      System.out.println(dirURL);
+	      //System.out.println("getResourceListingdir: "+dirURL);
 			
 	      if (dirURL != null && dirURL.getProtocol().equals("file")) {
 	        return new File(dirURL.toURI()).list();
@@ -145,7 +224,9 @@ public class Main {
 	      
 	      if (dirURL.getProtocol().equals("jar")) {
 	        /* A JAR path */
-	        String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+	    	
+	    	String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+	        
 	        JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
 	        Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
 	        Set<String> result = new HashSet<String>(); //avoid duplicates in case it is a subdirectory
