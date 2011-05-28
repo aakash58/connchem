@@ -1,29 +1,37 @@
 package view;
 
-import p5.Area;
 import pbox2d.*;
 
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.*;
 
-public class Boundary extends Area{
+public class Boundary {
 
-	private Area parent;
+	private P5Canvas parent;
 	// But we also have to make a body for box2d to know about it
-	Body b;
+	Body body;
 	PBox2D box2d;
-
-	Boundary(float x_,float y_, float w_, float h_, PBox2D box2d_, Area parent_) {
+	private float x;
+	private float y;
+	private float w;
+	private float h;
+	private float box2dW;
+	private float box2dH;
+	
+	Boundary(float x_,float y_, float w_, float h_, PBox2D box2d_, P5Canvas parent_) {
 		this.parent = parent_;
 		this.box2d = box2d_;
-		setDimensions(x_, y_, w_, h_);
-
+		x=x_;
+		y=y_;
+		w = w_;
+		h = h_;
+	
+		
 		// Figure out the box2d coordinates
-		float box2dW = box2d.scalarPixelsToWorld(w()/2);
-		float box2dH = box2d.scalarPixelsToWorld(h()/2);
-		Vec2 center = new Vec2(x(),y());
-
+		box2dW = box2d.scalarPixelsToWorld(w_/2);
+		box2dH = box2d.scalarPixelsToWorld(h_/2);
+		
 		// Define the polygon
 		PolygonDef sd = new PolygonDef();
 		sd.setAsBox(box2dW, box2dH);
@@ -32,9 +40,24 @@ public class Boundary extends Area{
 
 		// Create the body
 		BodyDef bd = new BodyDef();
-		bd.position.set(box2d.coordPixelsToWorld(center));
-		b = box2d.createBody(bd);
-		b.createShape(sd);
-		b.setUserData(this);
+		bd.position.set(box2d.coordPixelsToWorld(new Vec2(x_,y_)));
+		body = box2d.createBody(bd);
+		body.createShape(sd);
+		body.setUserData(this);
+	}
+	
+	void display() {
+		
+		parent.fill(0);
+		parent.stroke(0);
+		parent.rectMode(parent.CENTER);
+		parent.rect(x, y, w, h);
+ 		//parent.rectMode(parent.CORNER);
+		parent.rectMode(parent.CORNER);
+		
+	}
+
+	public void killBody() {
+		box2d.destroyBody(body);
 	}
 }

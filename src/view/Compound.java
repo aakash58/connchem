@@ -34,7 +34,7 @@ public class Compound {
 	}
 
 	// Change color when hit
-	void change(double tEMPMOD) {
+	void change1(double tEMPMOD) {
 		if(tEMPMOD > 1) {
 			col = parent.color(255,0,0);
 		}
