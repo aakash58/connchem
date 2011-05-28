@@ -3,73 +3,85 @@ package view;
 import java.util.ArrayList;
 
 import pbox2d.*;
+import processing.core.PApplet;
+
+
 import org.jbox2d.collision.shapes.*;
-import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 import static model.State.*;
 
-import p5.Area;
-
-public class P5Canvas extends Area {
-
+public class P5Canvas extends PApplet{
+	private float x;
+	private float y;
+	private float w;
+	private float h;
+	
 	// A reference to our box2d world
-	PBox2D box2d = new PBox2D(this);
-	public static long count =0;
+	private PBox2D box2d = new PBox2D(this);
+	public static boolean isEnable = true;
 	
 	public void setup() {
 		smooth();
 		frameRate(30);
-		setW(550);
-		setH(550);
-		setDimensions(0, 0, w(), h());  // this is a custom function from the Region interface, implemented in the Area class
-		size(550, 550);
-	
+		
 		// Initialize box2d physics and create the world
 		box2d.createWorld();
 		box2d.setGravity(0f,0f);
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		//box2d.listenForCollisions();
-
+		
+		setBoudary(0,0,500,400);
+	}
+	
+	public void setBoudary(int xx, int yy, int ww, int hh) {
+		x=xx;
+		y=yy;
+		w = ww;
+		h = hh;
+		size((int) w, (int) h);
 		
 		// Add a bunch of fixed boundaries
-		float bW = 1; // boundary width
-		
-		Boundary lBound = new Boundary(x(), mh(), bW, h(), box2d, this);
-		Boundary rBound = new Boundary(r(), mh(), bW, h(), box2d, this);
-		Boundary tBound = new Boundary(mw(), y(), w(), bW, box2d, this);
-		Boundary bBound = new Boundary(mw(), b(), w(), bW, box2d, this);
-
+		float bW = 20.f; // boundary width
+		Boundary lBound = new Boundary(x    , y+h/2, bW, h, box2d, this);
+		Boundary rBound = new Boundary(x+w  , y+h/2, bW, h, box2d, this);
+		Boundary tBound = new Boundary(x+w/2, y,     w,  bW, box2d, this);
+		Boundary bBound = new Boundary(x+w/2, y+h,   w,  bW, box2d, this);
+		if (boundaries[0] != null)
+			boundaries[0].killBody();
+		if (boundaries[1] != null)
+			boundaries[1].killBody();
+		if (boundaries[2] != null)
+			boundaries[2].killBody();
+		if (boundaries[3] != null)
+			boundaries[3].killBody();
 		boundaries[0]=lBound;
 		boundaries[1]=rBound;
 		boundaries[2]=tBound;
 		boundaries[3]=bBound;
-		
 	}
-
-	public void draw() {
 		
-		long tmp = count;
-		count = System.currentTimeMillis();
-		long dif = (count - tmp);
-		//System.out.println("Dif:"+dif);
+	public void draw() {
+		if (getSize().width != w || getSize().height!=h){
+			setBoudary(0,0,this.getSize().width,this.getSize().height);
+		}
 		
 		drawBackground();
-		
 		// We must always step through time!
-		box2d.step();
-		
-		//if (w!=width || h!=height){
-		//	setup(width, height);
-		//}
-		
+		if (isEnable)
+			box2d.step();
 		
 		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
 			m.display();
 		}
+		boundaries[0].display();
+		boundaries[1].display();
+		boundaries[2].display();
+		boundaries[3].display();
+		
 		// boundaries are not displayed.  If they should be, use a display method in the Boundary class.
 		// System.out.println("x: " + str(boundaries.get(2).x()) +" y: " + str(boundaries.get(2).y()) + " w: " + str(boundaries.get(2).w()) + "  h: " + str(boundaries.get(2).h()) );
 		
@@ -90,26 +102,47 @@ public class P5Canvas extends Area {
 	 * Function to create compounds from outside the PApplet
 	 */
 	
-	public void addMolecule(String compoundName) {
-		float x_ = 200;
-		float y_ = random(200, y());
-		molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
+	public void addMolecule(String compoundName, int count) {
+		// The if condition help to fix a Box2D Bug: 2147483647  because of Multithreading
+		// at pbox2d.PBox2D.step(PBox2D.java:81)
+		// at pbox2d.PBox2D.step(PBox2D.java:72)
+		// at pbox2d.PBox2D.step(PBox2D.java:67)
+		// at view.P5Canvas.draw(P5Canvas.java:73)
+		if (isEnable){
+			isEnable = false;
+			for (int i=0;i<count;i++){
+				float x_ =(i+1)*(w/(count+1));
+				float y_ = 100;
+				molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
+			}
+			isEnable = true;
+		}
+		else{
+			for (int i=0;i<count;i++){
+				float x_ =(i+1)*(w/(count+1));
+				float y_ = 100;
+				molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
+			}
+		}
 	}
 	
-	public void addMolecule() {
-		addMolecule("Water");
-	}
-	
-	public void addMolecule(float x_, float y_) {
-		addMolecule(x_, y_, "Water");
-	}
 	
 	public void addMolecule(float x_, float y_, String compoundName) {
 		molecules.add(new Molecule(x_,y_,compoundName, box2d, this));
 	}
 	
+	public void removeAllMolecules() {
+		for (int i =0; i< molecules.size(); i++){
+			Molecule m = (Molecule) molecules.get(i);
+			m.killBody();
+			break;
+		}
+		molecules =  new ArrayList();
+	}
+	
+	
 	public void mousePressed() {
-		addMolecule(mouseX, mouseY);
+		addMolecule(mouseX, mouseY,"Water");
 	}
 	// Collision event functions!
 	public void addContact(ContactPoint cp) {

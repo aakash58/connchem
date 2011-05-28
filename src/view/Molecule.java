@@ -1,9 +1,7 @@
 package view;
 
-
 import processing.core.*;
 import pbox2d.*;
-import main.Main;
 
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.*;
@@ -11,14 +9,13 @@ import org.jbox2d.dynamics.*;
 
 public class Molecule {
 	// We need to keep track of a Body and a width and height
-	Body body;
-	float r;
-	PBox2D box2d;
-	P5Canvas parent;
-	PShape pShape = new PShape();
-	float pShapeW = 0f;
-	float pShapeH = 0f;
-
+	private Body body;
+	private float r;
+	private PBox2D box2d;
+	private P5Canvas parent;
+	private PShape pShape = new PShape();
+	private float pShapeW = 0f;
+	private float pShapeH = 0f;
 	private float[][] circles;
 
 	// Constructor
@@ -28,55 +25,48 @@ public class Molecule {
 		box2d = box2d_;
 		r = 20;
 		
-	//	String url = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-	//	String path = url + "/resources/compoundsSvg/"+compoundName_+".svg";
-		
-	//	String path = "/resources/compoundsSvg/"+compoundName_+".svg";
-	//	URL url = Main.class.getResource("/resources/compoundsSvg/Water.svg");
-	//	System.out.println("URL********:"+url.getPath());
-	//	String path = url.getPath();//.substring(5,url.getPath().length());
-	/*	File tempDir = new File(System.getProperty("java.io.tmpdir"));
-		File temporaryFile = new File(tempDir, "Water.svg");
-		String absolutePath = temporaryFile.getAbsolutePath();
-		System.out.println(""+absolutePath);
-		*/
-		//System.out.println("1: "+Main.class.getResource("/Users/tuandang/Desktop/GA/Workspace/ConnChemProject8/bin/resources/compoundsSvg/Water.svg").getPath());
-		
-			String path = "resources/compoundsSvg/"+compoundName_+".svg";
-	//	System.out.println("2: "+path);
-		//URL url2 = Main.class.getResource("Main.class");  
-		//System.out.println(url2);
-		//System.out.println(System.getProperty("java.class.path"));  
+		String path = "resources/compoundsSvg/"+compoundName_+".svg";
 		pShape = parent.loadShape(path);
-		
-		
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
 		
 		circles = SVGReader.getSVG(path);
 		
-		// Add the box to the box2d world
-		makeBody(new Vec2(x, y));
-	}
-
-	// This function removes the particle from the box2d world
-	void killBody() {
-		box2d.destroyBody(body);
-	}
-
-	// Is the particle ready for deletion?
-	boolean done() {
-		// Let's find the screen position of the particle
-		Vec2 pos = box2d.getBodyPixelCoord(body);
-		// Is it off the bottom of the screen?
-		if (pos.y > r) {
-			killBody();
-			return true;
+		// Define the body and make it from the shape
+		BodyDef bd = new BodyDef();
+		bd.position.set(box2d.coordPixelsToWorld(new Vec2(x, y)));
+		
+		// This infinitive loop fix nullPointerException  because box2d.createBody(bd) may create a null body
+		// The error happens when user want to create many compound at the same time
+		body = box2d.createBody(bd);
+		int numTry =1;
+		while (body ==null){ 
+			body = box2d.createBody(bd);
+			//System.out.println("Box2d:"+box2d+" bd:"+bd+" numTry:"+numTry);
+			numTry++;
+		}	
+		
+		for (int i=0; i<circles.length;i++){
+			// Define a circle
+			CircleDef cd = new CircleDef();
+			// Offset its "local position" (relative to 0,0)
+			Vec2 offset = new Vec2(circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2);
+			cd.localPosition = box2d.vectorPixelsToWorld(offset);
+			cd.radius = box2d.scalarPixelsToWorld(circles[i][0]);
+			cd.density = 1.0f;
+			cd.friction = 0.0f;
+			cd.restitution = 1.0f;
+		
+			// Attach shapes!
+			body.createShape(cd);
 		}
-		return false;
+		body.setMassFromShapes();
+		
+		// Give it some initial random velocity
+		body.setLinearVelocity(new Vec2(parent.random(-10, 10), parent.random(5,10)));
+		body.setAngularVelocity(parent.random(-10, 10));
 	}
 
-	// Drawing the box
 	void display() {
 		// We look at each body and get its screen position
 		Vec2 pos = box2d.getBodyPixelCoord(body);
@@ -91,35 +81,29 @@ public class Molecule {
 		parent.shape(pShape, pShapeW/-2, pShapeH/-2, pShapeW, pShapeH); // second two args center for p5
  		parent.fill(175);
 		parent.stroke(0);
-		//parent.line(0,0,r,0);
 	 	parent.popMatrix();
 	}
-
-	// This function adds the rectangle to the box2d world
-	void makeBody(Vec2 center) {
-		// Define the body and make it from the shape
-		BodyDef bd = new BodyDef();
-		bd.position.set(box2d.coordPixelsToWorld(center));
-		body = box2d.createBody(bd);
-
-		for (int i=0; i<circles.length;i++){
-			// Define a circle
-			CircleDef cd = new CircleDef();
-			// Offset its "local position" (relative to 0,0)
-			Vec2 offset = new Vec2(circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2);
-			cd.localPosition = box2d.vectorPixelsToWorld(offset);
-			cd.radius = box2d.scalarPixelsToWorld(circles[i][0]);
-			cd.density = 1.0f;
-			cd.friction = 0.0f;
-			cd.restitution = 1.0f;
-		
-			// Attach both shapes!
-			body.createShape(cd);
-		}
-		body.setMassFromShapes();
-		
-		// Give it some initial random velocity
-		body.setLinearVelocity(new Vec2(parent.random(-10, 10), parent.random(5,10)));
-		body.setAngularVelocity(parent.random(-10, 10));
+	
+	
+	
+	// This function removes the particle from the box2d world
+	public void killBody() {
+		box2d.destroyBody(body);
 	}
+
+	// Is the particle ready for deletion?
+	public boolean done() {
+		// Let's find the screen position of the particle
+		Vec2 pos = box2d.getBodyPixelCoord(body);
+		// Is it off the bottom of the screen?
+		if (pos.y > r) {
+			killBody();
+			return true;
+		}
+		return false;
+	}
+
+	
+
+	
 }

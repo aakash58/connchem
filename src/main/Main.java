@@ -13,6 +13,7 @@ import javax.swing.Timer;
 
 import java.awt.Component;
 import javax.swing.Box;
+
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -21,8 +22,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
-
-import control.MainController;
 
 import view.P5Canvas;
 
@@ -47,11 +46,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -60,8 +56,6 @@ public class Main {
 	// Controllers
 	private static P5Canvas p5Canvas = new P5Canvas();
 	
-	// Canvases
-	private static MainController mainController = new MainController(p5Canvas);
 	// TODO flag
 	
 	private JFrame mainFrame;
@@ -80,6 +74,7 @@ public class Main {
 	private Timer timer;
 	private int countTimer, maxCountTimer=30;
 	public static JPanel dynamicPanel;
+	public static JScrollPane dynamicScrollPane; 
 	public static ArrayList additionalPanelList =  new ArrayList();
 	public static ArrayList defaultSetMolecules =  new ArrayList();
 	public static CustomPopupMenu scrollablePopupMenu;
@@ -106,61 +101,6 @@ public class Main {
 	 */
 	public Main() {
 		initialize();
-		
-		//File f = new File("/Users/tuandang/Desktop/TTT.jar!/resources/compoundsSvg/Water.svg");
-		//System.out.println("Exist?: "+f.exists());
-	
-	/*	java.util.jar.JarFile jar = null;
-		try {
-			jar = new java.util.jar.JarFile("TTT.jar");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		java.util.Enumeration enum1 = jar.entries();
-		while (enum1.hasMoreElements()) {
-		    java.util.jar.JarEntry file = (java.util.jar.JarEntry) enum1.nextElement();
-		    java.io.File f = new java.io.File("Y/" + java.io.File.separator + file.getName());
-		    if (file.isDirectory()) { // if its a directory, create it
-		        f.mkdir();
-		        continue;
-		    }
-		    java.io.InputStream is = null;
-			try {
-				is = jar.getInputStream(file);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} // get the input stream
-		    java.io.FileOutputStream fos = null;
-			try {
-				fos = new java.io.FileOutputStream(f);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		    try {
-				while (is.available() > 0) {  // write contents of 'is' to 'fos'
-				    fos.write(is.read());
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		    try {
-				fos.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		    try {
-				is.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}*/
-
 	}
 
 	protected String[] parseNames(String[] files) {
@@ -182,29 +122,6 @@ public class Main {
     }
     
 
-	public static String geAbsolutePath(String path) throws URISyntaxException, IOException {
-			URL url = Main.class.getClassLoader().getResource(path);
-			 String path2 =  url.getPath();
-	    	
-	      if (url != null && url.getProtocol().equals("file")) {
-	        return path2;
-	      } 
-
-	      if (url == null) {
-	        String me = Main.class.getName().replace(".", "/")+".class";
-	        url = Main.class.getClassLoader().getResource(me);
-	      }
-	      
-	      if (url.getProtocol().equals("jar")) {
-	        String jarPath = url.getPath().substring(5, url.getPath().indexOf("!")); //strip out only the JAR file
-	        JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
-	        Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
-	       
-	      } 
-	        
-	      throw new UnsupportedOperationException("Cannot list files for URL "+url);
-	  }
-	
 	String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
 	      URL dirURL = clazz.getClassLoader().getResource(path);
 	      //System.out.println("getResourceListingdir: "+dirURL);
@@ -309,12 +226,22 @@ public class Main {
 		panel.add(button_1, "cell 2 1,growy");
 		button_1.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				for (int i=0;i<Integer.parseInt(label_1.getText());i++){
-					mainController.addMolecule(fixedName);
-				}
+				int count = Integer.parseInt(label_1.getText());
+				p5Canvas.addMolecule(fixedName,count);
 			}	
 		});
-		
+		System.out.println(dynamicScrollPane.getViewport().isEnabled() +" "+
+				dynamicScrollPane.getViewport().isFocusable() +" "+
+				dynamicScrollPane.getViewport().isEnabled() +" "+
+				dynamicScrollPane.getViewport().isShowing()+" "+
+				dynamicScrollPane.getViewport().isValid()+" "+
+				dynamicScrollPane.getViewport().isValidateRoot()+" "+
+				dynamicScrollPane.getViewport().isVisible()+" "+
+				" "+dynamicScrollPane.getHeight());
+		if (dynamicPanel.getComponentCount()>6){
+			int h = dynamicPanel.getComponentCount()*100;
+			dynamicScrollPane.getViewport().setViewPosition(new java.awt.Point(0,h));
+		}
 	}
 	
 	public static void addDynamicPanel(){
@@ -360,8 +287,8 @@ public class Main {
 					panel.add(button_1, "cell 2 1,growy");
 					button_1.addMouseListener(new MouseAdapter() {
 						public void mouseClicked(MouseEvent arg0) {
-							for (int i=0;i<Integer.parseInt(label_1.getText());i++)
-								mainController.addMolecule(fixedName);
+							int count = Integer.parseInt(label_1.getText());
+							p5Canvas.addMolecule(fixedName,count);
 						}
 					});
 				
@@ -490,6 +417,8 @@ public class Main {
 													setSelector.addItem("Set "+s);
 												}
 											}
+											
+											p5Canvas.removeAllMolecules();
 										}	
 									}	
 								}
@@ -545,6 +474,9 @@ public class Main {
 		menuBar.add(periodicTableBtn);
 		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[263.00][480px,grow][250px]", "[grow]"));
 
+		
+		
+		//*********************************** LEFT PANEL ********************************************
 		JPanel leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
 		leftPanel.setLayout(new MigLayout("insets 6, gap 2", "14[grow]", "[][][grow]"));
@@ -554,17 +486,29 @@ public class Main {
 		leftPanel.add(timerSubpanel, "cell 0 0,grow");
 		timerSubpanel.setLayout(new MigLayout("", "[][56.00,fill][][grow][]", "[grow][]"));
 
-		JButton playBtn = new JButton("");
+		final JButton playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				mainController.addMolecule("Acetate");
-				}
+				if (p5Canvas.isEnable){
+					p5Canvas.isEnable = false;
+					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
+				}	
+				else{ 
+					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
+					p5Canvas.isEnable = true; 
+				}	
+				
+			}
 		});
-		playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
+		if (P5Canvas.isEnable)
+			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
+		else
+			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
+		
 		timerSubpanel.add(playBtn, "cell 0 0 1 2,growy");
 
 		
-		//********* Select a Set from ComboBox -> Update Dynamic Panel
+		//Select a Set from ComboBox -> Update Dynamic Panel
 		setSelector.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange()==e.SELECTED){
@@ -574,6 +518,8 @@ public class Main {
 					additionalPanelList = new ArrayList();
 					addDynamicPanel();
 					createPopupMenu();
+					//Update Model
+					p5Canvas.removeAllMolecules();
 				}
 			}
 		});
@@ -620,9 +566,8 @@ public class Main {
 				int numSets = setSelector.getItemCount();
 				if (selectedIndex>0){
 					setSelector.setSelectedIndex(selectedIndex-1);
-				}
-				else{
-					setSelector.setSelectedIndex(numSets -1);
+					//Update Model
+					p5Canvas.removeAllMolecules();
 				}
 			}
 		});
@@ -636,9 +581,8 @@ public class Main {
 				int numSets = setSelector.getItemCount();
 				if (selectedIndex<numSets-1){
 					setSelector.setSelectedIndex(selectedIndex+1);
-				}
-				else{
-					setSelector.setSelectedIndex(0);
+					//Update Model
+					p5Canvas.removeAllMolecules();
 				}
 			}
 		});
@@ -646,7 +590,6 @@ public class Main {
 		
 		
 		//***************** Add elements Control panel
-		
 		final String controlCompoundName_1 = "Water";
 		final String controlCompoundName_2 = "Hydrochloric Acid";
 		final String controlCompoundName_3 = "Hydronium";
@@ -655,13 +598,15 @@ public class Main {
 		JPanel legendSubpanel = new JPanel();
 		leftPanel.add(legendSubpanel, "cell 0 1,grow");
 		legendSubpanel.setLayout(new CardLayout(0, 0));
-
-		JScrollPane legendScrollContainer_1 = new JScrollPane();
-		legendSubpanel.add(legendScrollContainer_1, "name_1303765324750467000");
+		legendSubpanel.setBackground(new Color(238,238,238));
+		
+		dynamicScrollPane = new JScrollPane();
+		legendSubpanel.add(dynamicScrollPane, "dynamicScrollPane");
 
 		dynamicPanel = new JPanel();
-		legendScrollContainer_1.setViewportView(dynamicPanel);
-		dynamicPanel.setLayout(new MigLayout("insets 6", "[174.00,grow]", "[53.00,grow][grow][grow][grow][grow]"));
+		dynamicPanel.setBackground(new Color(238,238,238));
+		dynamicScrollPane.setViewportView(dynamicPanel);
+		dynamicPanel.setLayout(new MigLayout("insets 6", "[174.00,grow]", "[grow][grow]"));
 		
 		JPanel panel_2 = new JPanel();
 		dynamicPanel.add(panel_2, "cell 0 0");
@@ -681,8 +626,8 @@ public class Main {
 		panel_2.add(button, "cell 2 1 1 1,growy");
 		button.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				for (int i=0;i<Integer.parseInt(label.getText());i++)
-					mainController.addMolecule(controlCompoundName_1);
+				int count = Integer.parseInt(label.getText());
+				p5Canvas.addMolecule(controlCompoundName_1,count);
 			}
 		});
 		
@@ -714,9 +659,8 @@ public class Main {
 		panel.add(button_1, "cell 2 1,growy");
 		button_1.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				for (int i=0;i<Integer.parseInt(lblNewLabel_1.getText());i++){
-					mainController.addMolecule(fixedName2);
-				}	
+				int count = Integer.parseInt(lblNewLabel_1.getText());
+				p5Canvas.addMolecule(fixedName2,count);
 			}
 		});
 		
@@ -747,8 +691,8 @@ public class Main {
 		panel_1.add(button_2, "cell 2 1 1 1,growy");
 		button_2.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				for (int i=0;i<Integer.parseInt(lblNewLabel_2.getText());i++)
-					mainController.addMolecule(controlCompoundName_3);
+				int count = Integer.parseInt(lblNewLabel_2.getText());
+				p5Canvas.addMolecule(controlCompoundName_3,count);
 			}
 		});
 		
@@ -779,8 +723,8 @@ public class Main {
 		panel_3.add(button_3, "cell 2 1 1 1,growy");
 		button_3.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				for (int i=0;i<Integer.parseInt(label_1.getText());i++)
-					mainController.addMolecule(controlCompoundName_4);
+				int count = Integer.parseInt(label_1.getText());
+				p5Canvas.addMolecule(controlCompoundName_4,count);
 			}
 		});
 		
@@ -812,8 +756,8 @@ public class Main {
 		panel_4.add(button_4, "cell 2 1 1 1,growy");
 		button_4.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
-				for (int i=0;i<Integer.parseInt(label_3.getText());i++)
-					mainController.addMolecule(controlCompoundName_5);
+				int count = Integer.parseInt(label_3.getText());
+				p5Canvas.addMolecule(controlCompoundName_5,count);
 			}
 		});
 		
@@ -827,9 +771,7 @@ public class Main {
 		});
 
 
-		/*
-		 * Center Panel
-		 */
+		//****************************************** CENTER PANEL *****************************************************
 		JPanel centerPanel = new JPanel();
 		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
 		centerPanel.setLayout(new MigLayout("insets 2, gap 2", "[]", "[]"));
@@ -839,8 +781,12 @@ public class Main {
 
 		JPanel canvasPanel_mainView = new JPanel();
 		canvasTabs.addTab("Main Simulation", null, canvasPanel_mainView, null);
-		canvasPanel_mainView.setLayout(new MigLayout("insets 2, gap 2", "[center][600px]", "[600px][center]"));
+		canvasPanel_mainView.setLayout(new MigLayout("insets 2, gap 2", "[center][800px]", "[600px][center]"));
 
+		// Add P5Canvas 
+		canvasPanel_mainView.add(p5Canvas, "cell 1 0,grow");
+		//System.out.println(""+ canvasPanel_mainView.getSize());
+		
 		JSlider canvasControl_main_scale = new JSlider();
 		canvasControl_main_scale.setOrientation(SwingConstants.VERTICAL);
 		canvasPanel_mainView.add(canvasControl_main_scale, "flowy,cell 0 0");
@@ -851,9 +797,6 @@ public class Main {
 		JSlider canvasControl_main_speed = new JSlider();
 		canvasControl_main_speed.setOrientation(SwingConstants.VERTICAL);
 		canvasPanel_mainView.add(canvasControl_main_speed, "cell 0 0");
-
-		canvasPanel_mainView.add(p5Canvas, "cell 1 0,grow");
-		// TODO flag
 
 		JLabel canvasControlLabel_main_area = new JLabel("Area");
 		canvasPanel_mainView.add(canvasControlLabel_main_area, "flowx,cell 1 1");
@@ -875,9 +818,8 @@ public class Main {
 		canvasTabs.addTab("Close Up", null, canvasPanel_closeView, null);
 		canvasPanel_closeView.setLayout(new MigLayout("", "[grow,fill]", "[grow,fill]"));
 		
-		/*
-		 * Right Panel
-		 */
+		
+		//***************************************** RIGHT PANEL *******************************************
 		JPanel rightPanel = new JPanel();
 		mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
 		rightPanel.setLayout(new MigLayout("insets 2, gap 2", "[]", "[grow][grow]"));
