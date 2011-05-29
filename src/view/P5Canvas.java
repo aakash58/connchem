@@ -20,6 +20,8 @@ public class P5Canvas extends PApplet{
 	// A reference to our box2d world
 	private PBox2D box2d = new PBox2D(this);
 	public static boolean isEnable = true;
+	public static float speedRate = 1.f;
+	
 	
 	public void setup() {
 		smooth();
@@ -43,7 +45,7 @@ public class P5Canvas extends PApplet{
 		size((int) w, (int) h);
 		
 		// Add a bunch of fixed boundaries
-		float bW = 20.f; // boundary width
+		float bW = 10.f; // boundary width
 		Boundary lBound = new Boundary(x    , y+h/2, bW, h, box2d, this);
 		Boundary rBound = new Boundary(x+w  , y+h/2, bW, h, box2d, this);
 		Boundary tBound = new Boundary(x+w/2, y,     w,  bW, box2d, this);
@@ -69,6 +71,7 @@ public class P5Canvas extends PApplet{
 		
 		drawBackground();
 		// We must always step through time!
+		
 		if (isEnable)
 			box2d.step();
 		
@@ -103,42 +106,54 @@ public class P5Canvas extends PApplet{
 	 */
 	
 	public void addMolecule(String compoundName, int count) {
-		// The if condition help to fix a Box2D Bug: 2147483647  because of Multithreading
+		// The tmp variable helps to fix a Box2D Bug: 2147483647  because of Multithreading
 		// at pbox2d.PBox2D.step(PBox2D.java:81)
 		// at pbox2d.PBox2D.step(PBox2D.java:72)
 		// at pbox2d.PBox2D.step(PBox2D.java:67)
 		// at view.P5Canvas.draw(P5Canvas.java:73)
-		if (isEnable){
-			isEnable = false;
-			for (int i=0;i<count;i++){
-				float x_ =(i+1)*(w/(count+1));
-				float y_ = 100;
-				molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
-			}
-			isEnable = true;
+		boolean tmp = isEnable;
+		isEnable = false;
+		for (int i=0;i<count;i++){
+			float x_ =(i+1)*(w/(count+1));
+			float y_ = 100;
+			molecules.add(new Molecule(x_, y_,compoundName, box2d, this, speedRate));
 		}
-		else{
-			for (int i=0;i<count;i++){
-				float x_ =(i+1)*(w/(count+1));
-				float y_ = 100;
-				molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
-			}
-		}
+		isEnable = tmp;
 	}
 	
 	
 	public void addMolecule(float x_, float y_, String compoundName) {
-		molecules.add(new Molecule(x_,y_,compoundName, box2d, this));
+		molecules.add(new Molecule(x_,y_,compoundName, box2d, this, speedRate));
 	}
 	
 	public void removeAllMolecules() {
+		boolean tmp = isEnable;
+		
+		isEnable = false;
 		for (int i =0; i< molecules.size(); i++){
 			Molecule m = (Molecule) molecules.get(i);
 			m.killBody();
-			break;
 		}
 		molecules =  new ArrayList();
+		
+		isEnable = tmp;
 	}
+	
+	//Set Speed of Molecules; values are from 0 to 100; 20 is default value 
+	public void setSpeed(int value, int defaultSpeed) {
+		boolean tmp = isEnable;
+		isEnable = false;
+		
+		speedRate = (float) value/defaultSpeed;
+		for (int i =0; i< molecules.size(); i++){
+			Molecule m = (Molecule) molecules.get(i);
+			m.setSpeed(speedRate);
+		}
+		System.out.println("speedRate:"+speedRate );
+		
+		isEnable = tmp;
+	}
+	
 	
 	
 	public void mousePressed() {

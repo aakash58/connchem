@@ -417,11 +417,10 @@ public class Main {
 													setSelector.addItem("Set "+s);
 												}
 											}
-											
-											p5Canvas.removeAllMolecules();
 										}	
 									}	
 								}
+								p5Canvas.removeAllMolecules();
 							}
 						});
 						
@@ -765,8 +764,8 @@ public class Main {
 		panel_4.add(slider_3, "cell 1 1");
 		slider_3.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-			int value = ((JSlider) e.getSource()).getValue(); 
-			label_3.setText(""+value);
+				int value = ((JSlider) e.getSource()).getValue(); 
+				label_3.setText(""+value);
 			}
 		});
 
@@ -775,48 +774,43 @@ public class Main {
 		JPanel centerPanel = new JPanel();
 		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
 		centerPanel.setLayout(new MigLayout("insets 2, gap 2", "[]", "[]"));
-
-		JTabbedPane canvasTabs = new JTabbedPane(JTabbedPane.TOP);
-		centerPanel.add(canvasTabs, "cell 0 0,grow");
-
-		JPanel canvasPanel_mainView = new JPanel();
-		canvasTabs.addTab("Main Simulation", null, canvasPanel_mainView, null);
-		canvasPanel_mainView.setLayout(new MigLayout("insets 2, gap 2", "[center][800px]", "[600px][center]"));
+		centerPanel.setLayout(new MigLayout("insets 2, gap 2", "[center][800px]", "[600px][center]"));
 
 		// Add P5Canvas 
-		canvasPanel_mainView.add(p5Canvas, "cell 1 0,grow");
+		centerPanel.add(p5Canvas, "cell 1 0,grow");
 		//System.out.println(""+ canvasPanel_mainView.getSize());
 		
 		JSlider canvasControl_main_scale = new JSlider();
 		canvasControl_main_scale.setOrientation(SwingConstants.VERTICAL);
-		canvasPanel_mainView.add(canvasControl_main_scale, "flowy,cell 0 0");
+		centerPanel.add(canvasControl_main_scale, "flowy,cell 0 0");
 
 		JLabel canvasControlLabel_main_scale = new JLabel("Scale");
-		canvasPanel_mainView.add(canvasControlLabel_main_scale, "cell 0 0");
+		centerPanel.add(canvasControlLabel_main_scale, "cell 0 0");
 
-		JSlider canvasControl_main_speed = new JSlider();
+		final int defaultSpeed = 20;
+		JSlider canvasControl_main_speed = new JSlider(1,100,defaultSpeed);
+		canvasControl_main_speed.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int value = ((JSlider) e.getSource()).getValue(); 
+				p5Canvas.setSpeed(value,defaultSpeed);
+			}
+		});
 		canvasControl_main_speed.setOrientation(SwingConstants.VERTICAL);
-		canvasPanel_mainView.add(canvasControl_main_speed, "cell 0 0");
+		centerPanel.add(canvasControl_main_speed, "cell 0 0");
 
 		JLabel canvasControlLabel_main_area = new JLabel("Area");
-		canvasPanel_mainView.add(canvasControlLabel_main_area, "flowx,cell 1 1");
+		centerPanel.add(canvasControlLabel_main_area, "flowx,cell 1 1");
 
 		JSlider canvasControl_main_area = new JSlider();
-		canvasPanel_mainView.add(canvasControl_main_area, "cell 1 1");
+		centerPanel.add(canvasControl_main_area, "cell 1 1");
 
 		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
-		canvasPanel_mainView.add(canvasControlLabel_main_heat, "cell 1 1");
+		centerPanel.add(canvasControlLabel_main_heat, "cell 1 1");
 
 		JSlider canvasControl_main_heat = new JSlider();
-		canvasPanel_mainView.add(canvasControl_main_heat, "cell 1 1");
-
+		centerPanel.add(canvasControl_main_heat, "cell 1 1");
 		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
-		canvasPanel_mainView.add(canvasControlLabel_main_speed, "cell 0 0");
-
-		// close view
-		Panel canvasPanel_closeView = new Panel();
-		canvasTabs.addTab("Close Up", null, canvasPanel_closeView, null);
-		canvasPanel_closeView.setLayout(new MigLayout("", "[grow,fill]", "[grow,fill]"));
+		centerPanel.add(canvasControlLabel_main_speed, "cell 0 0");
 		
 		
 		//***************************************** RIGHT PANEL *******************************************
