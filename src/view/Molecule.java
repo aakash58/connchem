@@ -10,20 +10,21 @@ import org.jbox2d.dynamics.*;
 public class Molecule {
 	// We need to keep track of a Body and a width and height
 	private Body body;
-	private float r;
 	private PBox2D box2d;
 	private P5Canvas parent;
 	private PShape pShape = new PShape();
 	private float pShapeW = 0f;
 	private float pShapeH = 0f;
 	private float[][] circles;
+	private float currentRate;
 
+	
 	// Constructor
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
-			P5Canvas parent_) {
+			P5Canvas parent_, float speedRate) {
 		parent = parent_;
 		box2d = box2d_;
-		r = 20;
+		currentRate = speedRate; 
 		
 		String path = "resources/compoundsSvg/"+compoundName_+".svg";
 		pShape = parent.loadShape(path);
@@ -63,11 +64,21 @@ public class Molecule {
 		body.setMassFromShapes();
 		
 		// Give it some initial random velocity
-		body.setLinearVelocity(new Vec2(parent.random(-10, 10), parent.random(5,10)));
-		body.setAngularVelocity(parent.random(-10, 10));
+		body.setLinearVelocity(new Vec2(parent.random(-10, 10)*currentRate, parent.random(-10,10)*currentRate));
+		body.setAngularVelocity(parent.random(-10, 10)*currentRate);
 	}
-
-	void display() {
+	
+	public void setSpeed(float newRate) {
+		Vec2 v =  body.getLinearVelocity();
+		body.setLinearVelocity(new Vec2( v.x*newRate/currentRate, v.y*newRate/currentRate));
+		
+		float angularVelocity = body.getAngularVelocity();
+		body.setAngularVelocity(angularVelocity*newRate/currentRate);
+		
+		currentRate = newRate;
+	}
+		
+	public void display() {
 		// We look at each body and get its screen position
 		Vec2 pos = box2d.getBodyPixelCoord(body);
 		// Get its angle of rotation
@@ -91,7 +102,7 @@ public class Molecule {
 		box2d.destroyBody(body);
 	}
 
-	// Is the particle ready for deletion?
+	/*/ Is the particle ready for deletion?
 	public boolean done() {
 		// Let's find the screen position of the particle
 		Vec2 pos = box2d.getBodyPixelCoord(body);
@@ -102,7 +113,7 @@ public class Molecule {
 		}
 		return false;
 	}
-
+	 */
 	
 
 	
