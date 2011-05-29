@@ -7,6 +7,8 @@ import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.*;
 
+import Util.SVGReader;
+
 public class Molecule {
 	// We need to keep track of a Body and a width and height
 	private Body body;
@@ -66,6 +68,7 @@ public class Molecule {
 		// Give it some initial random velocity
 		body.setLinearVelocity(new Vec2(parent.random(-10, 10)*currentRate, parent.random(-10,10)*currentRate));
 		body.setAngularVelocity(parent.random(-10, 10)*currentRate);
+		body.setUserData(this);
 	}
 	
 	public void setSpeed(float newRate) {
@@ -77,7 +80,15 @@ public class Molecule {
 		
 		currentRate = newRate;
 	}
-		
+	
+
+	public void setSpeedByHeat(float newRate) {
+		Vec2 v =  body.getLinearVelocity();
+		body.setLinearVelocity(new Vec2( v.x*newRate, v.y*newRate));
+		float angularVelocity = body.getAngularVelocity();
+		body.setAngularVelocity(angularVelocity*newRate);
+	}
+	
 	public void display() {
 		// We look at each body and get its screen position
 		Vec2 pos = box2d.getBodyPixelCoord(body);
