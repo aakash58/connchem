@@ -47,9 +47,9 @@ public class Boundary {
 	}
 	
 	void display() {
-		
-		parent.fill(0);
-		parent.stroke(0);
+	//	parent.fill(255,0,0);
+		parent.fill(parent.heatRGB);
+		parent.noStroke();
 		parent.rectMode(parent.CENTER);
 		parent.rect(x, y, w, h);
  		//parent.rectMode(parent.CORNER);

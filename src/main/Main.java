@@ -32,6 +32,7 @@ import java.awt.CardLayout;
 import java.awt.Panel;
 import java.awt.Toolkit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -124,7 +125,7 @@ public class Main {
 
 	String[] getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
 	      URL dirURL = clazz.getClassLoader().getResource(path);
-	      //System.out.println("getResourceListingdir: "+dirURL);
+	     // System.out.println(dirURL);
 			
 	      if (dirURL != null && dirURL.getProtocol().equals("file")) {
 	        return new File(dirURL.toURI()).list();
@@ -141,12 +142,10 @@ public class Main {
 	      
 	      if (dirURL.getProtocol().equals("jar")) {
 	        /* A JAR path */
-	    	
-	    	String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
-	        
+	        String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
 	        JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
 	        Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
-	        Set<String> result = new HashSet<String>(); //avoid duplicates in case it is a subdirectory
+	        ArrayList result = new ArrayList(); //avoid duplicates in case it is a subdirectory
 	        while(entries.hasMoreElements()) {
 	          String name = entries.nextElement().getName();
 	          	
@@ -161,7 +160,12 @@ public class Main {
 	            result.add(entry);
 	          }
 	        }
-	        return result.toArray(new String[result.size()]);
+	        Collections.sort(result);
+	        String[] resultArray = new String[result.size()];
+	        for (int i=0;i<result.size();i++){
+	        	resultArray[i] = result.get(i).toString(); 
+	        }
+	        return resultArray;
 	      } 
 	        
 	      throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
@@ -807,7 +811,15 @@ public class Main {
 		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
 		centerPanel.add(canvasControlLabel_main_heat, "cell 1 1");
 
-		JSlider canvasControl_main_heat = new JSlider();
+		final int defaultHeat = 50;
+		p5Canvas.setHeat(defaultHeat);
+		JSlider canvasControl_main_heat = new JSlider(0,100,defaultHeat);
+		canvasControl_main_heat.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int value = ((JSlider) e.getSource()).getValue(); 
+				p5Canvas.setHeat(value);
+			}
+		});
 		centerPanel.add(canvasControl_main_heat, "cell 1 1");
 		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
 		centerPanel.add(canvasControlLabel_main_speed, "cell 0 0");
