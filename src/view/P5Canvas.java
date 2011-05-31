@@ -7,6 +7,8 @@ import pbox2d.*;
 import processing.core.PApplet;
 
 
+import main.Main;
+
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
@@ -25,7 +27,6 @@ public class P5Canvas extends PApplet{
 	public static boolean isEnable = true;
 	public static float speedRate = 1.f;
 	public static float heatRate = 1.f;
-	public static final int heatMaxMultiplier = 2;
 	public static int heatRGB = 0;
 	
 	public void setup() {
@@ -150,6 +151,8 @@ public class P5Canvas extends PApplet{
 		isEnable = false;
 		
 		speedRate = (float) value/defaultSpeed;
+		if (value>defaultSpeed)
+			speedRate *=2;
 		for (int i =0; i< molecules.size(); i++){
 			Molecule m = (Molecule) molecules.get(i);
 			m.setSpeed(speedRate);
@@ -161,13 +164,18 @@ public class P5Canvas extends PApplet{
 	
 	//Set Speed of Molecules; values are from 0 to 100; 20 is default value 
 	public void setHeat(int value) {
-		if (value>=50)
-			heatRate = 1.f+(float) (value-50)*(heatMaxMultiplier-1)/50;
+		if (value>=50){
+			heatRate = 1.f+(float) (value-50)/50;
+			heatRate =1+(heatRate-1)/2;
+			// Max heatRate = 1.5
+		}	
 		else{
 			heatRate = (float) (50-value)/50;
-			float reverseMultiplier = 1.f/heatMaxMultiplier;
-			heatRate = (1-heatRate)*(1-reverseMultiplier) +reverseMultiplier;
+			float minRate = 0.5f;
+			heatRate = (1-heatRate)*(1-minRate) +minRate;
+			// Max heatRate = 0.5
 		}
+		
 		double v = (double) value/100;
 		Color color = ColorScales.getColor(1-v, "redblue", 1f);
 		heatRGB = color.getRGB();
@@ -181,6 +189,7 @@ public class P5Canvas extends PApplet{
 	// Collision event functions!
 	public void addContact(ContactPoint cp) {
 		System.out.println("Contact heatRate: "+heatRate);
+		System.out.println(Main.leftPanel.getSize()+" "+Main.centerPanel+" "+Main.rightPanel.getSize());
 		// Get both shapes
 		Shape s1 = cp.shape1;
 		Shape s2 = cp.shape2;
@@ -206,4 +215,12 @@ public class P5Canvas extends PApplet{
 			p.setSpeedByHeat(heatRate);
 		}
 	}
+	
+	public void persistContact(ContactPoint cp) {
+	}
+	public void removeContact(ContactPoint cp) {
+	}
+	public void resultContact(ContactResult cr) {
+	}
+		
 }
