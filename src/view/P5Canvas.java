@@ -15,6 +15,7 @@ import org.jbox2d.dynamics.contacts.*;
 
 import Util.ColorScales;
 import static model.State.*;
+import model.DBinterface;
 
 public class P5Canvas extends PApplet{
 	private float x;
@@ -29,6 +30,11 @@ public class P5Canvas extends PApplet{
 	public static float heatRate = 1.f;
 	public static int heatRGB = 0;
 	
+	/*
+	 * for testing
+	 */
+	DBinterface db = new DBinterface();
+	
 	public void setup() {
 		smooth();
 		frameRate(30);
@@ -40,10 +46,16 @@ public class P5Canvas extends PApplet{
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
 		
-		setBoudary(0,0,500,400);
+		setBoundary(0,0,500,400);
+		
+		testDbInterface();
 	}
 	
-	public void setBoudary(int xx, int yy, int ww, int hh) {
+	private void testDbInterface() {
+		println("The Density of Water is: " + db.getCompoundDensity("Water"));
+	}
+	
+	public void setBoundary(int xx, int yy, int ww, int hh) {
 		x=xx;
 		y=yy;
 		w = ww;
@@ -72,7 +84,7 @@ public class P5Canvas extends PApplet{
 		
 	public void draw() {
 		if (getSize().width != w || getSize().height!=h){
-			setBoudary(0,0,this.getSize().width,this.getSize().height);
+			setBoundary(0,0,this.getSize().width,this.getSize().height);
 		}
 		
 		drawBackground();
@@ -94,7 +106,11 @@ public class P5Canvas extends PApplet{
 		// boundaries are not displayed.  If they should be, use a display method in the Boundary class.
 		// System.out.println("x: " + str(boundaries.get(2).x()) +" y: " + str(boundaries.get(2).y()) + " w: " + str(boundaries.get(2).w()) + "  h: " + str(boundaries.get(2).h()) );
 		
+		
 	}
+	
+
+	
 	
 	/*
 	 * Background methods
@@ -107,10 +123,10 @@ public class P5Canvas extends PApplet{
 		popStyle();
 	}
 	
+	
 	/*
 	 * Function to create compounds from outside the PApplet
 	 */
-	
 	public void addMolecule(String compoundName, int count) {
 		// The tmp variable helps to fix a Box2D Bug: 2147483647  because of Multithreading
 		// at pbox2d.PBox2D.step(PBox2D.java:81)
