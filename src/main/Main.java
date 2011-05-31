@@ -28,8 +28,6 @@ import view.P5Canvas;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
-import java.awt.CardLayout;
-import java.awt.Panel;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +56,6 @@ public class Main {
 	private static P5Canvas p5Canvas = new P5Canvas();
 	
 	// TODO flag
-	
 	private JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
 	private static int selectedUnit=0;
@@ -80,6 +77,9 @@ public class Main {
 	public static ArrayList defaultSetMolecules =  new ArrayList();
 	public static CustomPopupMenu scrollablePopupMenu;
 	public static String[] moleculeNames = null;
+	public static JPanel rightPanel;
+	public static JPanel leftPanel;
+	public static JPanel centerPanel;
 	
 	/**
 	 * Launch the application.
@@ -234,14 +234,6 @@ public class Main {
 				p5Canvas.addMolecule(fixedName,count);
 			}	
 		});
-		System.out.println(dynamicScrollPane.getViewport().isEnabled() +" "+
-				dynamicScrollPane.getViewport().isFocusable() +" "+
-				dynamicScrollPane.getViewport().isEnabled() +" "+
-				dynamicScrollPane.getViewport().isShowing()+" "+
-				dynamicScrollPane.getViewport().isValid()+" "+
-				dynamicScrollPane.getViewport().isValidateRoot()+" "+
-				dynamicScrollPane.getViewport().isVisible()+" "+
-				" "+dynamicScrollPane.getHeight());
 		if (dynamicPanel.getComponentCount()>6){
 			int h = dynamicPanel.getComponentCount()*100;
 			dynamicScrollPane.getViewport().setViewPosition(new java.awt.Point(0,h));
@@ -480,9 +472,9 @@ public class Main {
 		
 		
 		//*********************************** LEFT PANEL ********************************************
-		JPanel leftPanel = new JPanel();
+		leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
-		leftPanel.setLayout(new MigLayout("insets 6, gap 2", "14[grow]", "[][][grow]"));
+		leftPanel.setLayout(new MigLayout("insets 6, gap 8", "14[grow]", "[][][grow]"));
 
 		JPanel timerSubpanel = new JPanel();
 		timerSubpanel.setBackground(new Color(211, 211, 211));
@@ -598,18 +590,14 @@ public class Main {
 		final String controlCompoundName_3 = "Hydronium";
 		final String controlCompoundName_4 = "Methylammonium";
 		final String controlCompoundName_5 = "Phenylpthalein";
-		JPanel legendSubpanel = new JPanel();
-		leftPanel.add(legendSubpanel, "cell 0 1,grow");
-		legendSubpanel.setLayout(new CardLayout(0, 0));
-		legendSubpanel.setBackground(new Color(238,238,238));
 		
 		dynamicScrollPane = new JScrollPane();
-		legendSubpanel.add(dynamicScrollPane, "dynamicScrollPane");
-
+		leftPanel.add(dynamicScrollPane, "cell 0 1,grow");
+		
 		dynamicPanel = new JPanel();
 		dynamicPanel.setBackground(new Color(238,238,238));
 		dynamicScrollPane.setViewportView(dynamicPanel);
-		dynamicPanel.setLayout(new MigLayout("insets 6", "[174.00,grow]", "[grow][grow]"));
+		dynamicPanel.setLayout(new MigLayout("insets 4", "[174.00,grow]", "[][]"));
 		
 		JPanel panel_2 = new JPanel();
 		dynamicPanel.add(panel_2, "cell 0 0");
@@ -775,10 +763,17 @@ public class Main {
 
 
 		//****************************************** CENTER PANEL *****************************************************
-		JPanel centerPanel = new JPanel();
-		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
-		centerPanel.setLayout(new MigLayout("insets 2, gap 2", "[]", "[]"));
-		centerPanel.setLayout(new MigLayout("insets 2, gap 2", "[center][800px]", "[600px][center]"));
+		
+		JScrollPane centerScrollPane = new JScrollPane();
+		mainFrame.getContentPane().add(centerScrollPane, "cell 1 0,grow");
+		
+		
+		
+		centerPanel = new JPanel();
+		centerScrollPane.setViewportView(centerPanel);
+		// leftPanel Width=282 		rightPanel Width =255  
+		int wCenter = screenDimension.width - 282 - 255 -50; 
+		centerPanel.setLayout(new MigLayout("insets 2, gap 2", "[]["+wCenter+"px]", "[600px][center]"));
 
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
@@ -791,7 +786,7 @@ public class Main {
 		JLabel canvasControlLabel_main_scale = new JLabel("Scale");
 		centerPanel.add(canvasControlLabel_main_scale, "cell 0 0");
 
-		final int defaultSpeed = 20;
+		final int defaultSpeed = 50;
 		JSlider canvasControl_main_speed = new JSlider(1,100,defaultSpeed);
 		canvasControl_main_speed.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -826,9 +821,9 @@ public class Main {
 		
 		
 		//***************************************** RIGHT PANEL *******************************************
-		JPanel rightPanel = new JPanel();
+		rightPanel = new JPanel();
 		mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
-		rightPanel.setLayout(new MigLayout("insets 2, gap 2", "[]", "[grow][grow]"));
+		rightPanel.setLayout(new MigLayout("insets 2, gap 2", "[][][100]", "[grow][grow]"));
 
 		JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP);
 		rightPanel.add(graphTabs, "cell 0 0,grow");
@@ -886,7 +881,7 @@ public class Main {
 
 		JLabel totalSystemPressureOutput = new JLabel("100 kPa");
 		dashboard.add(totalSystemPressureOutput, "cell 1 4");
-		
+		System.out.println(rightPanel.getSize());
 	}
 
 }
