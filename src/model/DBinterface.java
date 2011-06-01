@@ -77,7 +77,7 @@ public class DBinterface {
 		return mass;
 	}
 
-	public static Integer getReaction(ArrayList<String> reactants) {
+	public static Integer getReactionNumber(ArrayList<String> reactants) {
 
 		String reactant;
 		String[] args = new String[2];
@@ -123,7 +123,7 @@ public class DBinterface {
 	public static ArrayList<String> getReactionProducts(ArrayList<String> reactants) {
 		ArrayList<String> products = new ArrayList<String>();
 
-		Integer reaction = getReaction(reactants);
+		Integer reaction = getReactionNumber(reactants);
 		
 		// get products
 		String[] args = new String[2];
@@ -140,5 +140,29 @@ public class DBinterface {
 		}
 	}
 	
+	public static Float getReactionProbability(ArrayList<String> reactants) {
+		Integer reaction = getReactionNumber(reactants);
+		try {
+			return getReactionProbability(reaction);
+		} catch (Exception e) {
+			//System.out.println("Reaction invalid: " + e);
+			return 0.0f;
+		}
+	}
 	
+	public static Float getReactionProbability(int reactionNumber_) {
+		
+		ArrayList results = new ArrayList();
+		String[] args = new String[2];
+		args[0] = "SELECT probability FROM reactions WHERE id = " + reactionNumber_;
+		args[1] = "probability";
+		results = dbConnect(args);
+		
+		try {
+			return Float.parseFloat((String)results.get(0));
+		} catch (Exception e) {
+			//System.out.println("Reaction invalid: " + e);
+			return 0.0f;
+		}
+	}
 }

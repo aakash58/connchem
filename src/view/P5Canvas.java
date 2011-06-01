@@ -55,10 +55,11 @@ public class P5Canvas extends PApplet{
 		
 		ArrayList<String> reactants = new ArrayList<String>();
 		reactants.add("Ammonia");
-		reactants.add("Flurgen");
+		reactants.add("Water");
 		//reactants.add("Ammonium");
 		
 		println(db.getReactionProducts(reactants));
+		println(db.getReactionProbability(10));
 	}
 	
 	public void setBoundary(int xx, int yy, int ww, int hh) {
