@@ -52,7 +52,13 @@ public class P5Canvas extends PApplet{
 	}
 	
 	private void testDbInterface() {
-		println("The Density of Water is: " + db.getCompoundDensity("Water"));
+		
+		ArrayList<String> reactants = new ArrayList<String>();
+		reactants.add("Water");
+		reactants.add("Nitric-Acid");
+		//reactants.add("Massive Attack");
+		
+		println(db.getProducts(reactants));
 	}
 	
 	public void setBoundary(int xx, int yy, int ww, int hh) {
