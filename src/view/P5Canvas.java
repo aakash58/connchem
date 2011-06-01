@@ -54,11 +54,11 @@ public class P5Canvas extends PApplet{
 	private void testDbInterface() {
 		
 		ArrayList<String> reactants = new ArrayList<String>();
-		reactants.add("Water");
-		reactants.add("Nitric-Acid");
-		//reactants.add("Massive Attack");
+		reactants.add("Ammonia");
+		reactants.add("Flurgen");
+		//reactants.add("Ammonium");
 		
-		println(db.getProducts(reactants));
+		println(db.getReactionProducts(reactants));
 	}
 	
 	public void setBoundary(int xx, int yy, int ww, int hh) {
