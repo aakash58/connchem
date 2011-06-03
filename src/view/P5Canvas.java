@@ -29,6 +29,8 @@ public class P5Canvas extends PApplet{
 	public static float speedRate = 1.f;
 	public static float heatRate = 1.f;
 	public static int heatRGB = 0;
+	public static int count = 0;
+	
 	
 	/*
 	 * for testing
@@ -41,7 +43,7 @@ public class P5Canvas extends PApplet{
 		
 		// Initialize box2d physics and create the world
 		box2d.createWorld();
-		box2d.setGravity(0f,0f);
+		box2d.setGravity(0f,-10f);
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
@@ -124,6 +126,9 @@ public class P5Canvas extends PApplet{
 	 */
 	
 	private void drawBackground() { // draw background
+		count++;
+		if (count>10000)
+			count =0;
 		Main.canvas.repaint();
 		pushStyle();
 		fill(127, 127, 127);
