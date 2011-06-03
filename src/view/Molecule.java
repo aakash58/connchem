@@ -1,7 +1,11 @@
 package view;
 
+import java.awt.Color;
+
 import processing.core.*;
 import pbox2d.*;
+
+import main.Canvas;
 
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.*;
@@ -107,9 +111,16 @@ public class Molecule {
 		parent.rotate(-a);
 		
 		parent.shape(pShape, pShapeW/-2, pShapeH/-2, pShapeW, pShapeH); // second two args center for p5
- 		parent.fill(175);
-		parent.stroke(0);
-	 	parent.popMatrix();
+ 		parent.noFill();
+		
+ 		if (name.equals(Canvas.getSelecttedmolecule())){
+ 	 		parent.stroke(0);
+ 	 		Color c = Canvas.getSelecttedColor();
+ 	 	 	parent.stroke(c.getRGB(), c.getAlpha());
+ 			int margin =5;
+ 			parent.rect(pShapeW/-2-margin , pShapeH/-2-margin , pShapeW+2*margin , pShapeH+2*margin);
+		}	
+		parent.popMatrix();
 	}
 	
 	

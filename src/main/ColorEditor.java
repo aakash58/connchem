@@ -18,7 +18,6 @@ import java.awt.event.ActionListener;
 public class ColorEditor extends AbstractCellEditor
                          implements TableCellEditor,
 			            ActionListener,ChangeListener {
-    int currentRow =-1;
 	Color currentColor;
     JColorChooser colorChooser;
     JDialog dialog;
@@ -48,8 +47,9 @@ public class ColorEditor extends AbstractCellEditor
                                                  int column) {
     	// Can not do TableView.UpdateUI 
     	TableView.stopUpdating =true;
-    	currentRow =row;
-        
+    	TableView.selectedRow =row;
+    	System.out.println("ROW: "+TableView.selectedRow);
+        TableView.table.addRowSelectionInterval(row, row);
     	dialog.setLocation(Main.mainFrame.getSize().width-430-300, 80);
     	dialog.setVisible(true);
         currentColor = (Color)value;
@@ -58,7 +58,7 @@ public class ColorEditor extends AbstractCellEditor
 
 	public void stateChanged(ChangeEvent e) {
 		currentColor = colorChooser.getColor();
-		Main.tableView.table.setValueAt(currentColor, currentRow, 1);
+		Main.tableView.table.setValueAt(currentColor, TableView.selectedRow, 1);
 	
 	}
 

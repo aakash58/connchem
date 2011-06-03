@@ -192,6 +192,19 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		}
 		return -1;
 	}
+	public static String getSelecttedmolecule(){
+		int index = TableView.selectedRow;
+		System.out.println("SelectedIndex:"+index);
+		if (index<0 || index>=mNames.size())
+			return "";
+		return mNames.get(index).toString();
+	}
+	public static Color getSelecttedColor(){
+		int index = TableView.selectedRow;
+		if (index<0 || index>=mNames.size())
+			return null;
+		return TableView.colors[index];
+	}
 	
 
 	
