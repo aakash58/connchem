@@ -19,6 +19,7 @@ public class Molecule {
 	private float pShapeH = 0f;
 	private float[][] circles;
 	private float currentRate;
+	private String name;
 
 	
 	// Constructor
@@ -26,6 +27,7 @@ public class Molecule {
 			P5Canvas parent_, float speedRate) {
 		parent = parent_;
 		box2d = box2d_;
+		name = compoundName_;
 		currentRate = speedRate; 
 		
 		String path = "resources/compoundsSvg/"+compoundName_+".svg";
@@ -87,6 +89,10 @@ public class Molecule {
 		body.setLinearVelocity(new Vec2( v.x*newRate, v.y*newRate));
 		float angularVelocity = body.getAngularVelocity();
 		body.setAngularVelocity(angularVelocity*newRate);
+	}
+	
+	public String getName(){
+		return name;
 	}
 	
 	public void display() {

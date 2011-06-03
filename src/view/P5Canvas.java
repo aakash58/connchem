@@ -124,8 +124,9 @@ public class P5Canvas extends PApplet{
 	 */
 	
 	private void drawBackground() { // draw background
+		Main.canvas.repaint();
 		pushStyle();
-		fill(63, 63, 127);
+		fill(127, 127, 127);
 		rect(0, 0, width, height);
 		popStyle();
 	}
@@ -211,8 +212,6 @@ public class P5Canvas extends PApplet{
 	}
 	// Collision event functions!
 	public void addContact(ContactPoint cp) {
-		System.out.println("Contact heatRate: "+heatRate);
-		System.out.println(Main.leftPanel.getSize()+" "+Main.centerPanel+" "+Main.rightPanel.getSize());
 		// Get both shapes
 		Shape s1 = cp.shape1;
 		Shape s2 = cp.shape2;

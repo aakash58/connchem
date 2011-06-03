@@ -56,7 +56,7 @@ public class Main {
 	private static P5Canvas p5Canvas = new P5Canvas();
 	
 	// TODO flag
-	private JFrame mainFrame;
+	public static JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
 	private static int selectedUnit=0;
 	private static int selectedSim=0;
@@ -80,6 +80,8 @@ public class Main {
 	public static JPanel rightPanel;
 	public static JPanel leftPanel;
 	public static JPanel centerPanel;
+	public static Canvas canvas = new Canvas();
+	public static TableView tableView;
 	
 	/**
 	 * Launch the application.
@@ -467,7 +469,7 @@ public class Main {
 		periodicTableBtn.setEnabled(false);
 		periodicTableBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconPeriodicTable.png")));
 		menuBar.add(periodicTableBtn);
-		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[263.00][480px,grow][250px]", "[grow]"));
+		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[263.00][480px,grow][300px]", "[grow]"));
 
 		
 		
@@ -561,7 +563,6 @@ public class Main {
 				int numSets = setSelector.getItemCount();
 				if (selectedIndex>0){
 					setSelector.setSelectedIndex(selectedIndex-1);
-					//Update Model
 					p5Canvas.removeAllMolecules();
 				}
 			}
@@ -576,7 +577,6 @@ public class Main {
 				int numSets = setSelector.getItemCount();
 				if (selectedIndex<numSets-1){
 					setSelector.setSelectedIndex(selectedIndex+1);
-					//Update Model
 					p5Canvas.removeAllMolecules();
 				}
 			}
@@ -595,7 +595,6 @@ public class Main {
 		leftPanel.add(dynamicScrollPane, "cell 0 1,grow");
 		
 		dynamicPanel = new JPanel();
-		dynamicPanel.setBackground(new Color(238,238,238));
 		dynamicScrollPane.setViewportView(dynamicPanel);
 		dynamicPanel.setLayout(new MigLayout("insets 4", "[174.00,grow]", "[][]"));
 		
@@ -772,7 +771,7 @@ public class Main {
 		centerPanel = new JPanel();
 		centerScrollPane.setViewportView(centerPanel);
 		// leftPanel Width=282 		rightPanel Width =255  
-		int wCenter = screenDimension.width - 282 - 255 -50; 
+		int wCenter = screenDimension.width - 282 - 300 -50; 
 		centerPanel.setLayout(new MigLayout("insets 2, gap 2", "[]["+wCenter+"px]", "[600px][center]"));
 
 		// Add P5Canvas 
@@ -823,28 +822,26 @@ public class Main {
 		//***************************************** RIGHT PANEL *******************************************
 		rightPanel = new JPanel();
 		mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
-		rightPanel.setLayout(new MigLayout("insets 2, gap 2", "[][][100]", "[grow][grow]"));
+		rightPanel.setLayout(new MigLayout("insets 0, gap 0", "[297.00]", "[380.00,grow][grow]"));
 
 		JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP);
 		rightPanel.add(graphTabs, "cell 0 0,grow");
 
 		JPanel graphSet_1 = new JPanel();
 		graphTabs.addTab("Compounds", null, graphSet_1, null);
-		graphSet_1.setLayout(new MigLayout("insets 6", "[150:n,grow][]", "[150:n][grow]"));
+		graphSet_1.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]", "[178.00:n][grow]"));
+		canvas.setBackground(Color.CYAN);
 
-		JPanel graph_1 = new JPanel();
-		graph_1.setBackground(Color.WHITE);
-		graphSet_1.add(graph_1, "cell 0 0,grow");
+		graphSet_1.add(canvas, "cell 0 0,grow");
 
 		JButton graphPopoutBtn_1 = new JButton("");
 		graphPopoutBtn_1.setEnabled(false);
 		graphPopoutBtn_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconZoom.png")));
 		graphSet_1.add(graphPopoutBtn_1, "cell 1 0,aligny top");
 
-		JPanel graphKey_1 = new JPanel();
-		graphKey_1.setBackground(Color.WHITE);
-		graphSet_1.add(graphKey_1, "cell 0 1,grow");
-
+		tableView = new TableView();
+		graphSet_1.add(tableView, "cell 0 1,grow");
+		
 		JPanel graphSet_2 = new JPanel();
 		graphTabs.addTab("pH", null, graphSet_2, null);
 
