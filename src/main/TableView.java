@@ -23,6 +23,8 @@ public class TableView extends JPanel {
 	public static ArrayList[] data = new ArrayList[3];
 	private static int sat =222;
 	public static Color[] colors; 
+	public static int selectedRow=-1; 
+	
 	
 	public TableView() {
 		super(new GridLayout(1, 0));
@@ -41,7 +43,7 @@ public class TableView extends JPanel {
 		table.getColumnModel().getColumn(0).setPreferredWidth(10);
 		table.getColumnModel().getColumn(1).setPreferredWidth(50);
 		table.getColumnModel().getColumn(2).setPreferredWidth(130);
-		table.setSelectionBackground(new Color(40,60,220));
+		table.setSelectionBackground(Color.GRAY);//new Color(40,60,220));
 		
 		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
 		dtcr.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -78,21 +80,14 @@ public class TableView extends JPanel {
 		return Color.BLACK;
 	}
 	
-	public static void updateTableSelected(boolean[] isSelected) {
-		table.clearSelection();
-		for (int i = 0; i < isSelected.length; i++) {
-			if (isSelected[i]) {
-				table.addRowSelectionInterval(i, i);
-			}
-		}
-	}
-
+	
 	private class RowListener implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent event) {
 			if (event.getValueIsAdjusting()) {
-				
 				return;
 			}
+			selectedRow = table.getSelectedRow();
+			System.out.println("ROW2: "+selectedRow);
 		}
 	}
 
@@ -138,10 +133,10 @@ public class TableView extends JPanel {
 		}
 
 		public void setValueAt(Object value, int row, int col) {
-			System.out.println("setValueAt:"+row +" "+col+" "+value);
-				data[col].set(row, value);
-				colors[row] = (Color) value;
-				fireTableCellUpdated(row, col);
+			//System.out.println("setValueAt:"+row +" "+col+" "+value);
+			data[col].set(row, value);
+			colors[row] = (Color) value;
+			fireTableCellUpdated(row, col);
 		}
 	}
 

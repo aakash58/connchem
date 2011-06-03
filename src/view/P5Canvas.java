@@ -144,7 +144,7 @@ public class P5Canvas extends PApplet{
 		boolean tmp = isEnable;
 		isEnable = false;
 		for (int i=0;i<count;i++){
-			float x_ =(i+1)*(w/(count+1));
+			float x_ =w/3+(i+1)*(w/(4*(count+1)));
 			float y_ = 100;
 			molecules.add(new Molecule(x_, y_,compoundName, box2d, this, speedRate));
 		}
