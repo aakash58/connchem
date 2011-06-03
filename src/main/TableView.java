@@ -12,8 +12,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 public class TableView extends JPanel {
@@ -80,6 +78,14 @@ public class TableView extends JPanel {
 		return Color.BLACK;
 	}
 	
+	public static void setSelectedRow(int row) {
+		selectedRow = row;
+		table.clearSelection();
+		if (selectedRow>=0){
+			table.addRowSelectionInterval(selectedRow, selectedRow);
+		}
+		table.updateUI();
+	}
 	
 	private class RowListener implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent event) {

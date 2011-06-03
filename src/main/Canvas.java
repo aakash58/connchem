@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import view.Molecule;
+import view.P5Canvas;
 
 import model.State;
 
@@ -126,7 +127,10 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		for (int i=0; i< MAXCOMPOUND;i++){
 			for (int index=0; index< lines[i].size();index++){
 				Line l = (Line) lines[i].get(index);
-				l.paint(g,TableView.colors[i]);
+				if (i==TableView.selectedRow)
+					l.paint(g,blinkingColor(TableView.colors[i]));
+				else
+					l.paint(g,TableView.colors[i]);
 			}
 		}
 		
@@ -194,7 +198,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 	public static String getSelecttedmolecule(){
 		int index = TableView.selectedRow;
-		System.out.println("SelectedIndex:"+index);
+		//System.out.println("SelectedIndex:"+index);
 		if (index<0 || index>=mNames.size())
 			return "";
 		return mNames.get(index).toString();
@@ -202,9 +206,20 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	public static Color getSelecttedColor(){
 		int index = TableView.selectedRow;
 		if (index<0 || index>=mNames.size())
-			return null;
-		return TableView.colors[index];
+			return Color.BLACK;
+		Color c1 = TableView.colors[index];
+		return blinkingColor(c1);
 	}
+	public static Color blinkingColor(Color c1){
+		int num = (P5Canvas.count%36+1)*7;
+		int r,g,b;
+		r = c1.getRed()+num;   if (r>255) r = 255;
+		g = c1.getGreen()+num; if (g>255) g = 255;
+		b = c1.getBlue()+num;  if (b>255) b = 255;
+		Color c2 = new Color(r, g,b);
+		return c2;
+	}
+		
 	
 
 	
@@ -245,7 +260,20 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 
 	public void mouseMoved(MouseEvent e) {
-	
+		int x = e.getX();
+		int y = e.getY();
+		int select = -1;
+		for (int i=0; i<mNames.size();i++){
+			for (int j=0; j<lines[i].size();j++){
+				Line l = (Line) lines[i].get(j);
+				if (l.isIn(x, y)){
+					select =i; //Pick up the last lines
+				}	
+			}
+		}
+		if (select != TableView.selectedRow)
+			TableView.setSelectedRow(select);
 	}
+	
 
 }

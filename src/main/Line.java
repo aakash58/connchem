@@ -54,19 +54,19 @@ public class Line{
 	  	g.drawLine(x1, y1, x2, y2); 
   }
   
-  public int isIn(int x, int y) {
+  public boolean isIn(int x, int y) {
 	  if (y1<=y2){
 		  if (x>=x1 && x<x2 && y>=y1-2 && y<=y2+2){
-			  return 1;
+			  return true;
 		  }
 	  }
 	  else{
 		  if (x>=x1 && x<x2 && y>=y2-2 && y<=y1+2){
-			  return 2;
+			  return true;
 		  }
 	  }
 	 
-	  return -1;
+	  return false;
   }
   
 }
