@@ -18,6 +18,10 @@ public class Boundary {
 	private float h;
 	private float box2dW;
 	private float box2dH;
+	private float xCurrent;
+	private float yCurrent;
+	private float curDragX=0;
+	private float curDragY=0;
 	
 	Boundary(float x_,float y_, float w_, float h_, PBox2D box2d_, P5Canvas parent_) {
 		this.parent = parent_;
@@ -26,7 +30,6 @@ public class Boundary {
 		y=y_;
 		w = w_;
 		h = h_;
-	
 		
 		// Figure out the box2d coordinates
 		box2dW = box2d.scalarPixelsToWorld(w_/2);
@@ -46,14 +49,44 @@ public class Boundary {
 		body.setUserData(this);
 	}
 	
+	public float getCurrentX(){
+		return xCurrent;
+	}
+	public float getCurrentY(){
+		return yCurrent;
+	}
+	
 	void display() {
-	//	parent.fill(255,0,0);
-		parent.fill(parent.heatRGB);
-		parent.noStroke();
 		parent.rectMode(parent.CENTER);
-		parent.rect(x, y, w, h);
- 		//parent.rectMode(parent.CORNER);
-		parent.rectMode(parent.CORNER);
+		if (P5Canvas.isDrag){
+			float difX = P5Canvas.xDrag -curDragX;
+			float difY = P5Canvas.yDrag -curDragY;
+			xCurrent += difX;
+			yCurrent += difY;
+			float x1 = body.getPosition().x + box2d.scalarPixelsToWorld(difX);
+			float y1 = body.getPosition().y - box2d.scalarPixelsToWorld(difY);
+			Vec2 v = new Vec2(x1, y1);
+			body.setXForm(v, body.getAngle());
+			
+			//Move by Scale
+			parent.fill(parent.heatRGB);
+			parent.noStroke();
+			parent.rect(x+xCurrent, y+yCurrent, w, h);
+	 		parent.rectMode(parent.CORNER);	
+	 		curDragX = P5Canvas.xDrag;
+			curDragY = P5Canvas.yDrag;
+		}
+		else{
+			curDragX =0;
+			curDragY =0;
+			
+			parent.fill(parent.heatRGB);
+			parent.noStroke();
+			parent.rect(x+xCurrent, y+yCurrent, w, h);
+	 		parent.rectMode(parent.CORNER);	
+	 		curDragX = P5Canvas.xDrag;
+	 		curDragY = P5Canvas.yDrag;
+		}
 		
 	}
 

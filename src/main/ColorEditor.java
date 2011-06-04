@@ -48,8 +48,7 @@ public class ColorEditor extends AbstractCellEditor
     	// Can not do TableView.UpdateUI 
     	TableView.stopUpdating =true;
     	TableView.selectedRow =row;
-    	System.out.println("ROW: "+TableView.selectedRow);
-        TableView.table.addRowSelectionInterval(row, row);
+    	TableView.table.addRowSelectionInterval(row, row);
     	dialog.setLocation(Main.mainFrame.getSize().width-430-300, 80);
     	dialog.setVisible(true);
         currentColor = (Color)value;
