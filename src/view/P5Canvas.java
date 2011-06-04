@@ -28,8 +28,14 @@ public class P5Canvas extends PApplet{
 	public static boolean isEnable = true;
 	public static float speedRate = 1.f;
 	public static float heatRate = 1.f;
+	public static float scale = 1.f;
 	public static int heatRGB = 0;
 	public static int count = 0;
+	public static int xStart = 0;
+	public static int yStart = 0;
+	public static int xDrag = 0;
+	public static int yDrag = 0;
+	public static boolean isDrag = false;
 	
 	
 	/*
@@ -42,13 +48,12 @@ public class P5Canvas extends PApplet{
 		frameRate(30);
 		
 		// Initialize box2d physics and create the world
-		box2d.createWorld();
-		box2d.setGravity(0f,-10f);
+		box2d.createWorld(-1000,-1000, 2000, 2000);
+		box2d.setGravity(0f,0f);
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
-		
-		setBoundary(0,0,500,400);
+		setBoundary(0,0,700,600);
 		
 		testDbInterface();
 	}
@@ -103,9 +108,11 @@ public class P5Canvas extends PApplet{
 			box2d.step();
 		
 		// Display all molecules
+		this.scale(scale);
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
 			m.display();
+			
 		}
 		boundaries[0].display();
 		boundaries[1].display();
@@ -148,9 +155,11 @@ public class P5Canvas extends PApplet{
 		// at view.P5Canvas.draw(P5Canvas.java:73)
 		boolean tmp = isEnable;
 		isEnable = false;
+		
 		for (int i=0;i<count;i++){
 			float x_ =w/3+(i+1)*(w/(4*(count+1)));
-			float y_ = 100;
+			x_ = boundaries[0].getCurrentX() +x_*scale;
+			float y_ = boundaries[0].getCurrentY()+100*scale;
 			molecules.add(new Molecule(x_, y_,compoundName, box2d, this, speedRate));
 		}
 		isEnable = tmp;
@@ -210,13 +219,38 @@ public class P5Canvas extends PApplet{
 		heatRGB = color.getRGB();
 	}
 	
-	
+	//Set Scale of Molecules; values are from 0 to 100; 50 is default value 
+	public void setScale(int value, int defaultScale) {
+		boolean tmp = isEnable;
+		isEnable = false;
+		scale = (float) value/defaultScale;
+		isEnable = tmp;
+	}
 	
 	public void mousePressed() {
-		addMolecule(mouseX, mouseY,"Water");
+		xStart = mouseX;
+		yStart = mouseY;
+	}
+	public void mouseReleased() {
+		xDrag =0;
+		yDrag =0;
+		isDrag = false;
+	}
+		
+	
+	public void mouseDragged() {
+		isDrag = true;
+		xDrag = (int) ((mouseX-xStart)/scale);
+		yDrag = (int) ((mouseY-yStart)/scale);
+	}
+		
+	public void mouseClicked() {
+		addMolecule(mouseX/scale, mouseY/scale,"Water");
 	}
 	// Collision event functions!
 	public void addContact(ContactPoint cp) {
+		//System.out.println("Contact heatRate: "+heatRate);
+		//System.out.println(Main.leftPanel.getSize()+" "+Main.centerPanel+" "+Main.rightPanel.getSize());
 		// Get both shapes
 		Shape s1 = cp.shape1;
 		Shape s2 = cp.shape2;

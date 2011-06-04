@@ -93,7 +93,6 @@ public class TableView extends JPanel {
 				return;
 			}
 			selectedRow = table.getSelectedRow();
-			System.out.println("ROW2: "+selectedRow);
 		}
 	}
 

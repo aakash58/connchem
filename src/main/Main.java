@@ -63,7 +63,7 @@ public class Main {
 	private static int selectedSet=0;
 	public static Color selectedColor = new Color(200,200,150);
 	public static Color defaultColor = Color.LIGHT_GRAY;
-	private int[] sliderValues = {1,2,3,2,1};
+	private int[] sliderValues = {5,6,7,6,3};
 	private static int sliderValue = 5;
 	
 	private static int minSliderValue = 1;
@@ -778,7 +778,15 @@ public class Main {
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
 		//System.out.println(""+ canvasPanel_mainView.getSize());
 		
-		JSlider canvasControl_main_scale = new JSlider();
+		final int defaultScale = 50;
+		JSlider canvasControl_main_scale = new JSlider(1,100,defaultScale);
+		canvasControl_main_scale.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int value = ((JSlider) e.getSource()).getValue(); 
+				p5Canvas.setScale(value,defaultScale);
+			
+			}
+		});
 		canvasControl_main_scale.setOrientation(SwingConstants.VERTICAL);
 		centerPanel.add(canvasControl_main_scale, "flowy,cell 0 0");
 

@@ -22,17 +22,20 @@ public class Molecule {
 	private float pShapeW = 0f;
 	private float pShapeH = 0f;
 	private float[][] circles;
-	private float currentRate;
+	private float speedRate;
+	//private float scale;
 	private String name;
-
+	private float xTmp;
+	private float yTmp;
+	
 	
 	// Constructor
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
-			P5Canvas parent_, float speedRate) {
+			P5Canvas parent_, float speedRate_) {
 		parent = parent_;
 		box2d = box2d_;
 		name = compoundName_;
-		currentRate = speedRate; 
+		speedRate = speedRate_; 
 		
 		String path = "resources/compoundsSvg/"+compoundName_+".svg";
 		pShape = parent.loadShape(path);
@@ -40,7 +43,10 @@ public class Molecule {
 		pShapeH = pShape.height;
 		
 		circles = SVGReader.getSVG(path);
-		
+		createBody(x,y);
+	}
+	
+	public void createBody(float x, float y){	
 		// Define the body and make it from the shape
 		BodyDef bd = new BodyDef();
 		bd.position.set(box2d.coordPixelsToWorld(new Vec2(x, y)));
@@ -72,19 +78,21 @@ public class Molecule {
 		body.setMassFromShapes();
 		
 		// Give it some initial random velocity
-		body.setLinearVelocity(new Vec2(parent.random(-10, 10)*currentRate, parent.random(-10,10)*currentRate));
-		body.setAngularVelocity(parent.random(-10, 10)*currentRate);
+		body.setLinearVelocity(new Vec2(parent.random(-10, 10)*speedRate, parent.random(-10,10)*speedRate));
+		body.setAngularVelocity(parent.random(-10, 10)*speedRate);
 		body.setUserData(this);
+
 	}
+	
 	
 	public void setSpeed(float newRate) {
 		Vec2 v =  body.getLinearVelocity();
-		body.setLinearVelocity(new Vec2( v.x*newRate/currentRate, v.y*newRate/currentRate));
+		body.setLinearVelocity(new Vec2( v.x*newRate/speedRate, v.y*newRate/speedRate));
 		
 		float angularVelocity = body.getAngularVelocity();
-		body.setAngularVelocity(angularVelocity*newRate/currentRate);
+		body.setAngularVelocity(angularVelocity*newRate/speedRate);
 		
-		currentRate = newRate;
+		speedRate = newRate;
 	}
 	
 
@@ -100,6 +108,7 @@ public class Molecule {
 	}
 	
 	public void display() {
+		
 		// We look at each body and get its screen position
 		Vec2 pos = box2d.getBodyPixelCoord(body);
 		// Get its angle of rotation
@@ -108,11 +117,25 @@ public class Molecule {
 		// parent.rectMode(parent.CENTER);
 		parent.pushMatrix();
 		parent.translate(pos.x, pos.y);
+		
+		if (P5Canvas.isDrag){
+			Vec2 v = new Vec2(xTmp+box2d.scalarPixelsToWorld(P5Canvas.xDrag), 
+					yTmp-box2d.scalarPixelsToWorld(P5Canvas.yDrag));
+			body.setXForm(v, body.getAngle());
+		}
+		else{
+			xTmp = body.getPosition().x;
+			yTmp = body.getPosition().y;
+		}
 		parent.rotate(-a);
 		
+		
+		//pShape.scale(P5Canvas.scale/scale);
+		//scale = P5Canvas.scale;
 		parent.shape(pShape, pShapeW/-2, pShapeH/-2, pShapeW, pShapeH); // second two args center for p5
  		parent.noFill();
 		
+ 		
  		if (name.equals(Canvas.getSelecttedmolecule())){
  	 		parent.stroke(0);
  	 		Color c = Canvas.getSelecttedColor();
