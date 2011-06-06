@@ -10,6 +10,7 @@ import processing.core.PApplet;
 import main.Main;
 
 import org.jbox2d.collision.shapes.*;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
@@ -28,8 +29,11 @@ public class P5Canvas extends PApplet{
 	public static boolean isEnable = true;
 	public static float speedRate = 1.f;
 	public static float heatRate = 1.f;
+	public static float restitution =0.5f;
+	public static float gravity =1.f;
 	public static float scale = 1.f;
 	public static int heatRGB = 0;
+	
 	public static int count = 0;
 	public static int xStart = 0;
 	public static int yStart = 0;
@@ -45,7 +49,7 @@ public class P5Canvas extends PApplet{
 	
 	public void setup() {
 		smooth();
-		frameRate(30);
+		frameRate(24);
 		
 		// Initialize box2d physics and create the world
 		box2d.createWorld(-1000,-1000, 2000, 2000);
@@ -109,19 +113,42 @@ public class P5Canvas extends PApplet{
 		
 		// Display all molecules
 		this.scale(scale);
+		
+		for (int i = 0; i < molecules.size(); i++) {
+			Molecule m = molecules.get(i);
+			m.setRestitution(restitution);
+			setForce(i,m);
+		}
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
 			m.display();
-			
 		}
 		boundaries[0].display();
 		boundaries[1].display();
 		boundaries[2].display();
 		boundaries[3].display();
+			
+	}
+	private void setForce(int index, Molecule mIndex) { // draw background
+		for (int i = 0; i < molecules.size(); i++) {
+			if (i==index)
+				continue;
+			Molecule m = molecules.get(i);
+			Vec2 loc = m.getLocation();
+			Vec2 locIndex = mIndex.getLocation();
+			float x = loc.x-locIndex.x;
+			float y = loc.y-locIndex.y;
+			float dis = x*x +y*y;
+			Vec2 normV = normalizeForce(new Vec2(x,y));
+			float forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*2.5f*gravity;
+			float forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*2.5f*gravity;
+			m.addForce(new Vec2(forceX,forceY));
+		}	
+	}
 		
-		// boundaries are not displayed.  If they should be, use a display method in the Boundary class.
-		// System.out.println("x: " + str(boundaries.get(2).x()) +" y: " + str(boundaries.get(2).y()) + " w: " + str(boundaries.get(2).w()) + "  h: " + str(boundaries.get(2).h()) );
-		
+	private Vec2 normalizeForce(Vec2 v){
+		float dis = (float) Math.sqrt(v.x*v.x + v.y*v.y);
+		return new Vec2(v.x/dis,v.y/dis);
 		
 	}
 	
@@ -195,25 +222,29 @@ public class P5Canvas extends PApplet{
 			Molecule m = (Molecule) molecules.get(i);
 			m.setSpeed(speedRate);
 		}
-		
 		isEnable = tmp;
 	}
 	
 	
-	//Set Speed of Molecules; values are from 0 to 100; 20 is default value 
+	//Set Speed of Molecules; values are from 0 to 100; 50 is default value 
 	public void setHeat(int value) {
-		if (value>=50){
-			heatRate = 1.f+(float) (value-50)/50;
-			heatRate =1+(heatRate-1)/2;
+		restitution = (float) (value)/50;
+		restitution = 0.3f+restitution*0.5f;
+		gravity = (100f-value);
+		
+		
+	/*	if (value>=50){
+			heatRate = (float) (value-50)/50;
+			heatRate =1+heatRate/2;
 			// Max heatRate = 1.5
 		}	
 		else{
 			heatRate = (float) (50-value)/50;
-			float minRate = 0.5f;
-			heatRate = (1-heatRate)*(1-minRate) +minRate;
-			// Max heatRate = 0.5
-		}
-		
+			heatRate = (1-heatRate);
+			heatRate =0.5f+heatRate/2;
+			// MIN heatRate = 0.5
+		}*/
+		System.out.println("HEAT:"+heatRate);
 		double v = (double) value/100;
 		Color color = ColorScales.getColor(1-v, "redblue", 1f);
 		heatRGB = color.getRGB();
@@ -268,12 +299,12 @@ public class P5Canvas extends PApplet{
 		// Note we are ignoring particle on particle collisions
 		if (c1.contains("Boundary")) {
 			Molecule p = (Molecule) o2;
-			p.setSpeedByHeat(heatRate);
+			//p.setSpeedByHeat(heatRate);
 		} 
 		// If object 2 is a Box, then object 1 must be a particle
 		else if (c2.contains("Boundary")) {
 			Molecule p = (Molecule) o1;
-			p.setSpeedByHeat(heatRate);
+			//p.setSpeedByHeat(heatRate);
 		}
 	}
 	

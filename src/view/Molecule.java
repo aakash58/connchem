@@ -28,7 +28,6 @@ public class Molecule {
 	private float xTmp;
 	private float yTmp;
 	
-	
 	// Constructor
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
 			P5Canvas parent_, float speedRate_) {
@@ -70,13 +69,12 @@ public class Molecule {
 			cd.radius = box2d.scalarPixelsToWorld(circles[i][0]);
 			cd.density = 1.0f;
 			cd.friction = 0.0f;
-			cd.restitution = 1.0f;
+			cd.restitution = P5Canvas.restitution;
 		
 			// Attach shapes!
 			body.createShape(cd);
 		}
 		body.setMassFromShapes();
-		
 		// Give it some initial random velocity
 		body.setLinearVelocity(new Vec2(parent.random(-10, 10)*speedRate, parent.random(-10,10)*speedRate));
 		body.setAngularVelocity(parent.random(-10, 10)*speedRate);
@@ -106,8 +104,32 @@ public class Molecule {
 	public String getName(){
 		return name;
 	}
+	public float getMass(){
+		return body.getMass();
+	}
 	
+	public Vec2 getLocation(){
+		return body.getPosition();
+	}
+	
+	public void setRestitution(float r){
+		Shape s = body.getShapeList();
+		for (int i=0; i<circles.length;i++){
+			//System.out.println("))))))))"+i+" "+s.getRestitution());
+			s.setRestitution(r);
+			s = s.getNext();
+		}
+		
+	}
+		
+	public void addForce(Vec2 f){
+	//	System.out.println(force); 
+		
+		body.applyForce(f, body.getPosition());
+	}
 	public void display() {
+		body.applyForce(new Vec2(0,-250*body.getMass()), body.getPosition());
+		
 		
 		// We look at each body and get its screen position
 		Vec2 pos = box2d.getBodyPixelCoord(body);
