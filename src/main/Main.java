@@ -815,7 +815,7 @@ public class Main {
 
 		final int defaultHeat = 50;
 		p5Canvas.setHeat(defaultHeat);
-		JSlider canvasControl_main_heat = new JSlider(0,100,defaultHeat);
+		JSlider canvasControl_main_heat = new JSlider(1,100,defaultHeat);
 		canvasControl_main_heat.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
