@@ -40,7 +40,8 @@ public class P5Canvas extends PApplet{
 	public static int xDrag = 0;
 	public static int yDrag = 0;
 	public static boolean isDrag = false;
-	
+	ArrayList<String> products = new ArrayList<String>();
+	ArrayList killingList = new ArrayList();
 	
 	/*
 	 * for testing
@@ -59,19 +60,22 @@ public class P5Canvas extends PApplet{
 		box2d.listenForCollisions();
 		setBoundary(0,0,700,600);
 		
-		testDbInterface();
+		//testDbInterface();
 	}
 	
 	private void testDbInterface() {
 		
 		ArrayList<String> reactants = new ArrayList<String>();
-		reactants.add("Ammonia");
-		reactants.add("Water");
+		reactants.add("Hydrogen Peroxide");
+		reactants.add("Hydrogen Peroxide");
+		//reactants.add("Water");
 		//reactants.add("Ammonium");
 		
 		println(db.getReactionProducts(reactants));
 		println(db.getReactionProbability(10));
 	}
+	
+	
 	
 	public void setBoundary(int xx, int yy, int ww, int hh) {
 		x=xx;
@@ -108,6 +112,22 @@ public class P5Canvas extends PApplet{
 		drawBackground();
 		// We must always step through time!
 		
+		if (products!=null && products.size()>0){
+			Molecule m1 = (Molecule) killingList.get(0);
+			Molecule m2 = (Molecule) killingList.get(1);
+			for (int i=0;i<products.size();i++){
+				Vec2 loc =m1.getLocation();
+				addMolecule(box2d.scalarWorldToPixels(loc.x),box2d.scalarWorldToPixels(loc.y),products.get(i));
+			}
+			m1.killBody();
+			m2.killBody();
+			molecules.remove(m1);
+			molecules.remove(m2);
+			
+			products = new ArrayList<String>();
+			killingList = new ArrayList();
+		}
+		
 		if (isEnable)
 			box2d.step();
 		
@@ -140,8 +160,8 @@ public class P5Canvas extends PApplet{
 			float y = loc.y-locIndex.y;
 			float dis = x*x +y*y;
 			Vec2 normV = normalizeForce(new Vec2(x,y));
-			float forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*2.5f*gravity;
-			float forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*2.5f*gravity;
+			float forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravity;
+			float forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravity;
 			m.addForce(new Vec2(forceX,forceY));
 		}	
 	}
@@ -194,13 +214,17 @@ public class P5Canvas extends PApplet{
 	
 	
 	public void addMolecule(float x_, float y_, String compoundName) {
-		molecules.add(new Molecule(x_,y_,compoundName, box2d, this, speedRate));
+		System.out.println("addMolecule"+compoundName+"?");
+		Molecule m = new Molecule(x_,y_,compoundName, box2d, this, speedRate);
+		System.out.println("addMolecule 2:"+compoundName+"?");
+		molecules.add(m);
+		System.out.println("addMolecule 3");
 	}
 	
 	public void removeAllMolecules() {
 		boolean tmp = isEnable;
-		
 		isEnable = false;
+		
 		for (int i =0; i< molecules.size(); i++){
 			Molecule m = (Molecule) molecules.get(i);
 			m.killBody();
@@ -231,7 +255,7 @@ public class P5Canvas extends PApplet{
 		restitution = (float) (value)/50;
 		restitution = 0.3f+restitution*0.5f;
 		gravity = (100f-value);
-		
+		gravity = (float) Math.pow(gravity, 1.3);
 		
 	/*	if (value>=50){
 			heatRate = (float) (value-50)/50;
@@ -244,7 +268,7 @@ public class P5Canvas extends PApplet{
 			heatRate =0.5f+heatRate/2;
 			// MIN heatRate = 0.5
 		}*/
-		System.out.println("HEAT:"+heatRate);
+		//System.out.println("HEAT:"+heatRate);
 		double v = (double) value/100;
 		Color color = ColorScales.getColor(1-v, "redblue", 1f);
 		heatRGB = color.getRGB();
@@ -278,6 +302,24 @@ public class P5Canvas extends PApplet{
 	public void mouseClicked() {
 		addMolecule(mouseX/scale, mouseY/scale,"Water");
 	}
+	
+	
+	
+	
+	// A FAKE function for testing
+	private ArrayList<String> getReactionProducts(ArrayList<String> reactants) {	
+		if (reactants.get(0).equals("Hydrogen-Peroxide") &&
+			reactants.get(1).equals("Hydrogen-Peroxide")){
+			ArrayList<String> products = new ArrayList<String>();
+			products.add("Water");
+			products.add("Water");
+			products.add("Oxygen");
+			return products;
+		}
+		else{
+			return null;
+		}
+	}
 	// Collision event functions!
 	public void addContact(ContactPoint cp) {
 		//System.out.println("Contact heatRate: "+heatRate);
@@ -305,6 +347,21 @@ public class P5Canvas extends PApplet{
 		else if (c2.contains("Boundary")) {
 			Molecule p = (Molecule) o1;
 			//p.setSpeedByHeat(heatRate);
+		}
+		else if (c1.contains("Molecule") && c2.contains("Molecule")){
+			Molecule m1 = (Molecule) o1;
+			Molecule m2 = (Molecule) o2;
+			ArrayList<String> reactants = new ArrayList<String>();
+			reactants.add(m1.getName());
+			reactants.add(m2.getName());
+			products = getReactionProducts(reactants);
+			if (products!=null && products.size()>0){
+				System.out.println("KILLING: "+m1.getName() + " "+m2.getName());
+				killingList.add(m1);
+				killingList.add(m2);
+			}
+			
+			
 		}
 	}
 	

@@ -112,6 +112,7 @@ public class Molecule {
 		return body.getPosition();
 	}
 	
+	
 	public void setRestitution(float r){
 		Shape s = body.getShapeList();
 		for (int i=0; i<circles.length;i++){
