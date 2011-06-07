@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.util.ArrayList;
 
 import pbox2d.*;
@@ -32,6 +33,7 @@ public class P5Canvas extends PApplet{
 	public static float restitution =0.5f;
 	public static float gravity =1.f;
 	public static float scale = 1.f;
+	public static float volume = 1.f;
 	public static int heatRGB = 0;
 	
 	public static int count = 0;
@@ -42,6 +44,7 @@ public class P5Canvas extends PApplet{
 	public static boolean isDrag = false;
 	ArrayList<String> products = new ArrayList<String>();
 	ArrayList killingList = new ArrayList();
+	public static int draggingBoundary =-1;
 	
 	/*
 	 * for testing
@@ -58,7 +61,7 @@ public class P5Canvas extends PApplet{
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
-		setBoundary(0,0,700,600);
+		setBoundary(0,0,648,600);
 		
 		//testDbInterface();
 	}
@@ -77,7 +80,7 @@ public class P5Canvas extends PApplet{
 	
 	
 	
-	public void setBoundary(int xx, int yy, int ww, int hh) {
+	public void setBoundary(float xx, float yy, float ww, float hh) {
 		x=xx;
 		y=yy;
 		w = ww;
@@ -86,10 +89,10 @@ public class P5Canvas extends PApplet{
 		
 		// Add a bunch of fixed boundaries
 		float bW = 10.f; // boundary width
-		Boundary lBound = new Boundary(x    , y+h/2, bW, h, box2d, this);
-		Boundary rBound = new Boundary(x+w  , y+h/2, bW, h, box2d, this);
-		Boundary tBound = new Boundary(x+w/2, y,     w,  bW, box2d, this);
-		Boundary bBound = new Boundary(x+w/2, y+h,   w,  bW, box2d, this);
+		Boundary lBound = new Boundary(0,x 	, y+h/2, bW, h , box2d, this);
+		Boundary rBound = new Boundary(1,x+w  , y+h/2, bW , h, box2d, this);
+		Boundary tBound = new Boundary(2,x+w/2, y,     w +bW ,  bW, box2d, this);
+		Boundary bBound = new Boundary(3,x+w/2, y+h,   w +bW ,  bW, box2d, this);
 		if (boundaries[0] != null)
 			boundaries[0].killBody();
 		if (boundaries[1] != null)
@@ -106,12 +109,11 @@ public class P5Canvas extends PApplet{
 		
 	public void draw() {
 		if (getSize().width != w || getSize().height!=h){
-			setBoundary(0,0,this.getSize().width,this.getSize().height);
+			//setBoundary(0,0,this.getSize().width,this.getSize().height);
 		}
 		
 		drawBackground();
 		// We must always step through time!
-		
 		if (products!=null && products.size()>0){
 			Molecule m1 = (Molecule) killingList.get(0);
 			Molecule m2 = (Molecule) killingList.get(1);
@@ -149,6 +151,7 @@ public class P5Canvas extends PApplet{
 		boundaries[3].display();
 			
 	}
+	
 	private void setForce(int index, Molecule mIndex) { // draw background
 		for (int i = 0; i < molecules.size(); i++) {
 			if (i==index)
@@ -156,13 +159,21 @@ public class P5Canvas extends PApplet{
 			Molecule m = molecules.get(i);
 			Vec2 loc = m.getLocation();
 			Vec2 locIndex = mIndex.getLocation();
-			float x = loc.x-locIndex.x;
-			float y = loc.y-locIndex.y;
+			float x = locIndex.x-loc.x;
+			float y = locIndex.y-loc.y;
 			float dis = x*x +y*y;
 			Vec2 normV = normalizeForce(new Vec2(x,y));
-			float forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravity;
-			float forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravity;
-			m.addForce(new Vec2(forceX,forceY));
+			float forceX;
+			float forceY;
+			if (mIndex.getName().equals(m.getName())){
+				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravity;
+				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravity;
+			}
+			else{
+				forceX =  (normV.x/dis)*m.getMass()*mIndex.getMass()*gravity;
+				forceY =  (normV.y/dis)*m.getMass()*mIndex.getMass()*gravity;
+			}
+			mIndex.addForce(new Vec2(forceX,forceY));
 		}	
 	}
 		
@@ -214,11 +225,8 @@ public class P5Canvas extends PApplet{
 	
 	
 	public void addMolecule(float x_, float y_, String compoundName) {
-		System.out.println("addMolecule"+compoundName+"?");
 		Molecule m = new Molecule(x_,y_,compoundName, box2d, this, speedRate);
-		System.out.println("addMolecule 2:"+compoundName+"?");
 		molecules.add(m);
-		System.out.println("addMolecule 3");
 	}
 	
 	public void removeAllMolecules() {
@@ -282,19 +290,63 @@ public class P5Canvas extends PApplet{
 		isEnable = tmp;
 	}
 	
+	//Set Volume; values are from 0 to 100; 50 is default value 
+	public void setVolume(int value, int defaultScale) {
+		boolean tmp = isEnable;
+		isEnable = false;
+		volume = (float) value/defaultScale;
+		System.out.println("Volume: "+volume);
+		//float ww = (w*volume);
+		//float hh = (h*volume);
+		//setBoundary(x,y,  ww, h);
+		isEnable = tmp;
+	}
+	
+	
+	
+	public void mouseMoved() {
+		int b = -1;
+		for (int i =0;i<4;i++){
+			b = boundaries[i].isIn(mouseX, mouseY);
+			if (b>=0)
+				break;
+		}
+		if (b==0 || b==1)
+			this.cursor(Cursor.W_RESIZE_CURSOR);
+		else if (b==2 ||b==3)
+			this.cursor(Cursor.N_RESIZE_CURSOR);
+		else
+			this.cursor(Cursor.DEFAULT_CURSOR);
+	}
+		
 	public void mousePressed() {
 		xStart = mouseX;
 		yStart = mouseY;
+	
+		System.out.println("");
+		for (int i =0;i<4;i++){
+			draggingBoundary = boundaries[i].isIn(mouseX, mouseY);
+			if (boundaries[i].isIn(mouseX, mouseY)>=0)
+				return;
+		}
 	}
 	public void mouseReleased() {
 		xDrag =0;
 		yDrag =0;
 		isDrag = false;
+		draggingBoundary =-1;
+	
+		
 	}
 		
 	
 	public void mouseDragged() {
-		isDrag = true;
+		if (draggingBoundary>=0){
+			
+		}
+		else{
+			isDrag = true;
+		}
 		xDrag = (int) ((mouseX-xStart)/scale);
 		yDrag = (int) ((mouseY-yStart)/scale);
 	}
@@ -314,6 +366,7 @@ public class P5Canvas extends PApplet{
 			products.add("Water");
 			products.add("Water");
 			products.add("Oxygen");
+			
 			return products;
 		}
 		else{
@@ -356,7 +409,6 @@ public class P5Canvas extends PApplet{
 			reactants.add(m2.getName());
 			products = getReactionProducts(reactants);
 			if (products!=null && products.size()>0){
-				System.out.println("KILLING: "+m1.getName() + " "+m2.getName());
 				killingList.add(m1);
 				killingList.add(m2);
 			}
