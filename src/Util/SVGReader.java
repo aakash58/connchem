@@ -24,12 +24,12 @@ public class SVGReader {
 				if (sText.contains("<g id=\"circles\">")) {
 					reachCircle = true;
 				}
-				if (sText.contains("<circle fill") && reachCircle) {
+				if (sText.contains("<circle id") && reachCircle) {
 					//System.out.println("" + sText);
 					String[] values = sText.split("\"");
-					xList.add(values[3]);
-					yList.add(values[5]);
-					rList.add(values[7]);
+					xList.add(values[5]);
+					yList.add(values[7]);
+					rList.add(values[9]);
 				}
 				lineCount++;
 				sText = br.readLine();
