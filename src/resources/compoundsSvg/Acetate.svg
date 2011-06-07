@@ -35,7 +35,6 @@
 	<circle id="Hydrogen_1_" fill="none" cx="15.995" cy="56.71" r="11.402"/>
 	<circle id="Hydrogen" fill="none" cx="12.097" cy="38.419" r="11.402"/>
 	<circle id="Carbon_1_" fill="none" cx="26.499" cy="38.42" r="14.5"/>
-	<path id="Carbon-Ion" fill="none" d="M35.947,38.419c0,8.02,6.501,14.521,14.521,14.521c8.017,0,14.52-6.5,14.52-14.521
-		s-6.503-14.521-14.52-14.521C42.448,23.898,35.947,30.399,35.947,38.419z"/>
+	<circle id="Carbon-Ion" fill="none" cx="50.468" cy="38.419" r="14.521"/>
 </g>
 </svg>
