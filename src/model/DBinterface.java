@@ -12,7 +12,7 @@ public class DBinterface {
 		ArrayList output = new ArrayList();
 		try {
 			Class.forName("org.sqlite.JDBC");
-			Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+			Connection conn = DriverManager.getConnection("jdbc:sqlite:model/chemdb");
 			Statement stat = conn.createStatement();
 
 			ResultSet rs = stat.executeQuery(args[0]);
@@ -28,7 +28,7 @@ public class DBinterface {
 		return output;
 	}
 
-	public static ArrayList getCompoundNames(String order_) {
+	public static ArrayList getAllCompoundNames(String order_) {
 		ArrayList output = new ArrayList();
 
 		String[] args = new String[2];
@@ -39,7 +39,7 @@ public class DBinterface {
 		return output;
 	}
 
-	public static ArrayList getCompoundFormulas(String order_) {
+	public static ArrayList getAllCompoundFormulas(String order_) {
 		ArrayList output = new ArrayList();
 
 		String[] args = new String[2];
@@ -50,7 +50,7 @@ public class DBinterface {
 		return output;
 	}
 
-	public static ArrayList getElementNames(String order_) {
+	public static ArrayList getAllElementNames(String order_) {
 		ArrayList output = new ArrayList();
 
 		String[] args = new String[2];
@@ -60,13 +60,50 @@ public class DBinterface {
 
 		return output;
 	}
+	
+	public static Float getElementMass(String elementName_) {
+		
+		//ArrayList results = new ArrayList();
+		String[] args = new String[2];
+		args[0] = "SELECT mass FROM elements WHERE name = \"" + elementName_ + "\"";
+		args[1] = "mass";
+		ArrayList results = dbConnect(args);
+		
+		try {
+			return Float.valueOf((String)results.get(0)).floatValue();
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
+	
+	public static Float getElementDensity(String elementName_) {
+		
+		//ArrayList results = new ArrayList();
+		String[] args = new String[2];
+		args[0] = "SELECT density FROM elements WHERE name = \"" + elementName_ + "\"";
+		args[1] = "density";
+		ArrayList results = dbConnect(args);
+		
+		try {
+			return Float.valueOf((String)results.get(0)).floatValue();
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
+	
+	public static String fixName(String compoundName_) {
+		String compoundName = compoundName_.replaceAll(" ", "-");
+		return compoundName;
+	}
 
 	public static float getCompoundMass(String compoundName_) {
 		ArrayList elementMasses = new ArrayList();
 		float mass = 0;
 
 		String[] args = new String[2];
-		args[0] = "SELECT E.mass, E.name FROM compounds as C, compounds_elements as CE, elements as E WHERE C.name = \"Water\" and C.id = CE.compound_id and E.id = CE.element_id";
+		args[0] = "SELECT E.mass, E.name FROM compounds as C, compounds_elements as CE, elements as E WHERE C.name = \"" + compoundName_ + "\" and C.id = CE.compound_id and E.id = CE.element_id";
 		args[1] = "mass";
 		elementMasses = dbConnect(args);
 
@@ -75,6 +112,55 @@ public class DBinterface {
 			mass += Float.valueOf(elementMass);
 		}
 		return mass;
+	}
+	
+	public static String getCompoundFormula(String compoundName_) {
+		String formula = "blork";
+		
+		String[] args = new String[2];
+		args[0] = "SELECT formula FROM compounds WHERE name = \"" + compoundName_ + "\"";
+		args[1] = "formula";
+		ArrayList results = dbConnect(args);
+
+		try {
+			return (String)results.get(0);
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
+	
+	public static Integer getCompoundCharge(String compoundName_) {
+		int output = 0;
+		/*
+		String formula = getCompoundFormula(fixName(compoundName_));
+		
+		String[] subset = formula.split("<sup>");
+		String charge = subset[1].split("</sup>")[0];
+		
+		output = Integer.parseInt(charge);
+		*/
+		return output;
+	}
+	
+	public static Boolean getCompoundPolarity(String compoundName_) {
+
+		String[] args = new String[2];
+		args[0] = "SELECT polarity FROM compounds WHERE name = \"" + compoundName_ + "\"";
+		args[1] = "polarity";
+		ArrayList results = dbConnect(args);
+		
+		try {
+			Integer truthy = Integer.valueOf((String)results.get(0)).intValue();
+			if (truthy == 1) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
 	}
 
 	public static Integer getReactionNumber(ArrayList<String> reactants) {

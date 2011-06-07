@@ -63,22 +63,12 @@ public class P5Canvas extends PApplet{
 		box2d.listenForCollisions();
 		setBoundary(0,0,648,600);
 		
-		//testDbInterface();
+		testDbInterface();
 	}
 	
 	private void testDbInterface() {
-		
-		ArrayList<String> reactants = new ArrayList<String>();
-		reactants.add("Hydrogen Peroxide");
-		reactants.add("Hydrogen Peroxide");
-		//reactants.add("Water");
-		//reactants.add("Ammonium");
-		
-		println(db.getReactionProducts(reactants));
-		println(db.getReactionProbability(10));
+		System.out.println(db.getCompoundCharge("Copper-III"));
 	}
-	
-	
 	
 	public void setBoundary(float xx, float yy, float ww, float hh) {
 		x=xx;
@@ -149,7 +139,7 @@ public class P5Canvas extends PApplet{
 		boundaries[1].display();
 		boundaries[2].display();
 		boundaries[3].display();
-			
+		
 	}
 	
 	private void setForce(int index, Molecule mIndex) { // draw background
