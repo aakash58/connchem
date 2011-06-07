@@ -75,7 +75,7 @@ public class P5Canvas extends PApplet{
 		//reactants.add("Ammonium");
 		
 		println(db.getReactionProducts(reactants));
-		println(db.getReactionProbability(10));
+		println(db.getReactionProbability(reactants));
 	}
 	
 	
