@@ -11,7 +11,7 @@
 	<circle fill="#5F5F5F" stroke="#000000" stroke-miterlimit="10" cx="21.5" cy="28" r="16.5"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="21.5" cy="28" r="21.485"/>
-	<circle fill="none" cx="61.5" cy="28" r="28"/>
+	<circle id="Sodium-Ion" fill="none" cx="21.5" cy="28" r="21.485"/>
+	<circle id="Chlorine-Ion" fill="none" cx="61.5" cy="28" r="28"/>
 </g>
 </svg>

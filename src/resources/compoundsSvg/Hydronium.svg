@@ -23,9 +23,9 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="16.426" cy="28.001" r="16.489"/>
-	<circle fill="none" cx="49.657" cy="31.005" r="16.489"/>
-	<circle fill="none" cx="47.657" cy="18.505" r="16.489"/>
-	<circle fill="none" cx="35.172" cy="18.528" r="18.512"/>
+	<circle id="Hydrogen-Ion_2_" fill="none" cx="16.426" cy="28.001" r="16.489"/>
+	<circle id="Hydrogen-Ion_1_" fill="none" cx="49.657" cy="31.005" r="16.489"/>
+	<circle id="Hydrogen-Ion" fill="none" cx="47.657" cy="18.505" r="16.489"/>
+	<circle id="Oxygen-Ion" fill="none" cx="35.172" cy="18.528" r="18.512"/>
 </g>
 </svg>

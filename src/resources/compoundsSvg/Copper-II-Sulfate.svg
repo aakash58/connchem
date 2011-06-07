@@ -32,11 +32,11 @@
 	<circle fill="#A95500" stroke="#000000" stroke-miterlimit="10" cx="19.5" cy="39.714" r="14.5"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="19.5" cy="39.714" r="19.5"/>
-	<circle fill="none" cx="38.733" cy="18.377" r="18.377"/>
-	<circle fill="none" cx="65.937" cy="32.872" r="18.377"/>
-	<circle fill="none" cx="74.987" cy="45.251" r="18.377"/>
-	<circle fill="none" cx="38.733" cy="61.086" r="18.377"/>
-	<circle fill="none" cx="50.996" cy="39.72" r="22.031"/>
+	<circle id="Oxygen-Ion_3_" fill="none" cx="38.733" cy="18.377" r="18.377"/>
+	<circle id="Oxygen-Ion_2_" fill="none" cx="65.937" cy="32.872" r="18.377"/>
+	<circle id="Oxygen-Ion_1_" fill="none" cx="74.987" cy="45.251" r="18.377"/>
+	<circle id="Oxygen-Ion" fill="none" cx="38.733" cy="61.086" r="18.377"/>
+	<circle id="Sulfur-Ion" fill="none" cx="50.996" cy="39.72" r="22.031"/>
+	<circle id="Copper-Ion" fill="none" cx="19.5" cy="39.714" r="19.5"/>
 </g>
 </svg>

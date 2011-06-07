@@ -31,13 +31,13 @@
 		C27.684,59.371,27.905,55.932,26.874,52.902z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="15.996" cy="20.285" r="11.499"/>
-	<circle fill="none" cx="12" cy="38.422" r="11.499"/>
-	<circle fill="none" cx="16.08" cy="56.711" r="11.499"/>
-	<circle fill="none" cx="26.51" cy="38.42" r="14.51"/>
-	<circle fill="none" cx="50.479" cy="38.42" r="14.51"/>
-	<circle fill="none" cx="84.489" cy="38.406" r="21.486"/>
-	<circle fill="none" cx="61.909" cy="58.384" r="18.434"/>
-	<circle fill="none" cx="61.909" cy="18.455" r="18.434"/>
+	<circle id="Hydrogen_2_" fill="none" cx="15.996" cy="20.285" r="11.499"/>
+	<circle id="Hydrogen_1_" fill="none" cx="12" cy="38.422" r="11.499"/>
+	<circle id="Hydrogen" fill="none" cx="16.08" cy="56.711" r="11.499"/>
+	<circle id="Carbon_1_" fill="none" cx="26.51" cy="38.42" r="14.51"/>
+	<circle id="Carbon-Ion" fill="none" cx="50.479" cy="38.42" r="14.51"/>
+	<circle id="Sodium-Ion" fill="none" cx="84.489" cy="38.406" r="21.486"/>
+	<circle id="Oxygen-Ion_1_" fill="none" cx="61.909" cy="58.384" r="18.434"/>
+	<circle id="Oxygen-Ion" fill="none" cx="61.909" cy="18.455" r="18.434"/>
 </g>
 </svg>

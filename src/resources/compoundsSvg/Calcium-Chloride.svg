@@ -17,8 +17,8 @@
 	<circle fill="#FFFFA9" stroke="#000000" stroke-miterlimit="10" cx="62.002" cy="29.004" r="24"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="21.511" cy="29.004" r="21.503"/>
-	<circle fill="none" cx="102.509" cy="29.004" r="21.503"/>
-	<circle fill="none" cx="62.002" cy="29.004" r="29.004"/>
+	<circle id="Chloride-Ion_1_" fill="none" cx="21.511" cy="29.004" r="21.503"/>
+	<circle id="Chloride-Ion" fill="none" cx="102.509" cy="29.004" r="21.503"/>
+	<circle id="Calcium-Ion" fill="none" cx="62.002" cy="29.004" r="29.004"/>
 </g>
 </svg>

@@ -15,8 +15,8 @@
 	<circle fill="#A9A9FF" stroke="#000000" stroke-miterlimit="10" cx="22.5" cy="22.5" r="17.5"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="22.5" cy="22.5" r="22.5"/>
-	<circle fill="none" cx="53.5" cy="22.5" r="18.5"/>
-	<circle fill="none" cx="73.5" cy="22.5" r="16.492"/>
+	<circle id="Silver-Ion" fill="none" cx="22.5" cy="22.5" r="22.5"/>
+	<circle id="Oxygen-Ion" fill="none" cx="53.5" cy="22.5" r="18.5"/>
+	<circle id="Hydrogen-Ion" fill="none" cx="73.5" cy="22.5" r="16.492"/>
 </g>
 </svg>

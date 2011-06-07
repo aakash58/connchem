@@ -26,12 +26,12 @@
 		C43.067,9.241,42.847,12.68,43.878,15.71z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="12.002" cy="13.302" r="11.501"/>
-	<circle fill="none" cx="54.756" cy="11.998" r="11.498"/>
-	<circle fill="none" cx="58.753" cy="30.189" r="11.498"/>
-	<circle fill="none" cx="44.278" cy="30.214" r="14.475"/>
-	<circle fill="none" cx="21.823" cy="30.214" r="13.07"/>
-	<circle fill="none" cx="12.002" cy="47.169" r="11.501"/>
-	<circle fill="none" cx="54.756" cy="48.516" r="11.498"/>
+	<circle id="Hydrogen_4_" fill="none" cx="12.002" cy="13.302" r="11.501"/>
+	<circle id="Hydrogen_3_" fill="none" cx="54.756" cy="11.998" r="11.498"/>
+	<circle id="Hydrogen_2_" fill="none" cx="58.753" cy="30.189" r="11.498"/>
+	<circle id="Carbon" fill="none" cx="44.278" cy="30.214" r="14.475"/>
+	<circle id="Nitrogen" fill="none" cx="21.823" cy="30.214" r="13.07"/>
+	<circle id="Hydrogen_1_" fill="none" cx="12.002" cy="47.169" r="11.501"/>
+	<circle id="Hydrogen" fill="none" cx="54.756" cy="48.516" r="11.498"/>
 </g>
 </svg>

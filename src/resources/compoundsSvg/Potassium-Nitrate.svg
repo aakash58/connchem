@@ -26,10 +26,10 @@
 	<circle fill="#FFA9FF" stroke="#000000" stroke-miterlimit="10" cx="24.5" cy="37.128" r="19.5"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="83.907" cy="37.133" r="18.654"/>
-	<circle fill="none" cx="51.756" cy="18.479" r="18.654"/>
-	<circle fill="none" cx="51.756" cy="55.787" r="18.654"/>
-	<circle fill="none" cx="62.654" cy="37.128" r="17.89"/>
-	<circle fill="none" cx="24.5" cy="37.128" r="24.418"/>
+	<circle id="Oxygen-Ion_2_" fill="none" cx="83.907" cy="37.133" r="18.654"/>
+	<circle id="Oxygen-Ion_1_" fill="none" cx="51.756" cy="18.479" r="18.654"/>
+	<circle id="Oxygen-Ion" fill="none" cx="51.756" cy="55.787" r="18.654"/>
+	<circle id="Nitrogen-Ion" fill="none" cx="62.654" cy="37.128" r="17.89"/>
+	<circle id="Potassium-Ion" fill="none" cx="24.5" cy="37.128" r="24.418"/>
 </g>
 </svg>

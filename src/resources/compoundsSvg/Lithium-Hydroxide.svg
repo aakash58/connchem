@@ -17,8 +17,8 @@
 		c-7.456,0-13.5,6.043-13.5,13.5c0,7.456,6.044,13.5,13.5,13.5c4.699,0,8.834-2.404,11.252-6.047V12.049z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="19.502" cy="19.502" r="19.502"/>
-	<circle fill="none" cx="47.511" cy="19.484" r="18.481"/>
-	<circle fill="none" cx="67.51" cy="19.502" r="16.5"/>
+	<circle id="Lithium-Ion" fill="none" cx="19.502" cy="19.502" r="19.502"/>
+	<circle id="Oxygen-Ion" fill="none" cx="47.511" cy="19.484" r="18.481"/>
+	<circle id="Hydrogen-Ion" fill="none" cx="67.51" cy="19.502" r="16.5"/>
 </g>
 </svg>

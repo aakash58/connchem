@@ -29,10 +29,10 @@
 		C59.803,53.431,59.803,46.152,55.312,41.66z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="16.413" cy="45.744" r="16.486"/>
-	<circle fill="none" cx="33.417" cy="16.487" r="16.486"/>
-	<circle fill="none" cx="46.227" cy="39.051" r="16.486"/>
-	<circle fill="none" cx="47.182" cy="49.794" r="16.486"/>
-	<circle fill="none" cx="33.417" cy="36.004" r="18.012"/>
+	<circle id="Hydrogen-Ion_3_" fill="none" cx="16.413" cy="45.744" r="16.486"/>
+	<circle id="Hydrogen-Ion_2_" fill="none" cx="33.417" cy="16.487" r="16.486"/>
+	<circle id="Hydrogen-Ion_1_" fill="none" cx="46.227" cy="39.051" r="16.486"/>
+	<circle id="Hydrogen-Ion" fill="none" cx="47.182" cy="49.794" r="16.486"/>
+	<circle id="Nitrogen-Ion" fill="none" cx="33.417" cy="36.004" r="18.012"/>
 </g>
 </svg>

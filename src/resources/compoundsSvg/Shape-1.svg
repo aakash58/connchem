@@ -7,6 +7,6 @@
 	<polygon fill="#FFFFFF" stroke="#231F20" stroke-miterlimit="10" points="0.628,0.671 40.878,10.671 7.128,36.921 	"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="20.753" cy="20.796" r="20.125"/>
+	<circle id="Hydrogen" fill="none" cx="20.753" cy="20.796" r="20.125"/>
 </g>
 </svg>

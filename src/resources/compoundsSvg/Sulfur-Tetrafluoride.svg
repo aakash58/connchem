@@ -19,14 +19,10 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="17.419" cy="15.008" r="13.998"/>
-	<circle fill="none" cx="14.496" cy="29.007" r="13.996"/>
-	<circle fill="none" cx="54.345" cy="29.007" r="13.996"/>
-	<circle fill="none" cx="51.42" cy="14.5" r="14"/>
-	<circle fill="none" cx="34.42" cy="17.5" r="17"/>
-	<circle fill="none" cx="14.496" cy="29.006" r="13.997"/>
-	<circle fill="none" cx="17.419" cy="15.007" r="13.997"/>
-	<circle fill="none" cx="51.419" cy="14.5" r="13.997"/>
-	<circle fill="none" cx="54.345" cy="29.004" r="13.997"/>
+	<circle id="Sulfur" fill="none" cx="34.42" cy="17.5" r="17"/>
+	<circle id="Fluorine_3_" fill="none" cx="14.496" cy="29.006" r="13.997"/>
+	<circle id="Fluorine_2_" fill="none" cx="17.419" cy="15.007" r="13.997"/>
+	<circle id="Fluorine_1_" fill="none" cx="51.419" cy="14.5" r="13.997"/>
+	<circle id="Fluorine" fill="none" cx="54.345" cy="29.004" r="13.997"/>
 </g>
 </svg>

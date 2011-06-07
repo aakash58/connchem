@@ -26,11 +26,11 @@
 		C62.312,5.294,54.056,3.083,47.599,6.811z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="26.499" cy="39.714" r="26.494"/>
-	<circle fill="none" cx="54.344" cy="18.456" r="18.455"/>
-	<circle fill="none" cx="54.344" cy="61.085" r="18.455"/>
-	<circle fill="none" cx="66.606" cy="39.72" r="16.996"/>
-	<circle fill="none" cx="90.497" cy="45.251" r="13.474"/>
-	<circle fill="none" cx="81.546" cy="32.872" r="13.474"/>
+	<circle id="Magnesium-Ion" fill="none" cx="26.499" cy="39.714" r="26.494"/>
+	<circle id="Oxygen-Ion_3_" fill="none" cx="54.344" cy="18.456" r="18.455"/>
+	<circle id="Oxygen-Ion_2_" fill="none" cx="54.344" cy="61.085" r="18.455"/>
+	<circle id="Sulfur-Ion" fill="none" cx="66.606" cy="39.72" r="16.996"/>
+	<circle id="Oxygen-Ion_1_" fill="none" cx="90.497" cy="45.251" r="13.474"/>
+	<circle id="Oxygen-Ion" fill="none" cx="81.546" cy="32.872" r="13.474"/>
 </g>
 </svg>

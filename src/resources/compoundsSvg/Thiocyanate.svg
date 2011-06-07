@@ -18,8 +18,8 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="22" cy="22" r="21.984"/>
-	<circle fill="none" cx="71" cy="22" r="18"/>
-	<circle fill="none" cx="48.345" cy="22" r="19.5"/>
+	<circle id="Sulfur-Ion" fill="none" cx="22" cy="22" r="21.984"/>
+	<circle id="Nitrogen-Ion" fill="none" cx="71" cy="22" r="18"/>
+	<circle id="Carbon-Ion" fill="none" cx="48.345" cy="22" r="19.5"/>
 </g>
 </svg>

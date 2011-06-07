@@ -18,10 +18,10 @@
 		C40.823,5.648,35.674,0.5,29.322,0.5z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="29.323" cy="12" r="11.5"/>
-	<circle fill="none" cx="29.322" cy="32" r="14.5"/>
-	<circle fill="none" cx="12" cy="42.001" r="11.5"/>
-	<circle fill="none" cx="44.091" cy="45.5" r="11.5"/>
-	<circle fill="none" cx="43.323" cy="34" r="11.5"/>
+	<circle id="Hydrogen_3_" fill="none" cx="29.323" cy="12" r="11.5"/>
+	<circle id="Carbon" fill="none" cx="29.322" cy="32" r="14.5"/>
+	<circle id="Hydrogen_2_" fill="none" cx="12" cy="42.001" r="11.5"/>
+	<circle id="Hydrogen_1_" fill="none" cx="44.091" cy="45.5" r="11.5"/>
+	<circle id="Hydrogen" fill="none" cx="43.323" cy="34" r="11.5"/>
 </g>
 </svg>

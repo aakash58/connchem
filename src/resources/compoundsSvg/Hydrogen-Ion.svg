@@ -8,6 +8,6 @@
 	<circle fill="#FFFFFF" stroke="#1D1D1B" stroke-miterlimit="10" cx="15" cy="15" r="10"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="15" cy="15" r="15"/>
+	<circle id="Hydrogen-Ion" fill="none" cx="15" cy="15" r="15"/>
 </g>
 </svg>

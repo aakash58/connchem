@@ -19,9 +19,9 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="16.999" cy="30.254" r="16.499"/>
-	<circle fill="none" cx="60.273" cy="36" r="16.499"/>
-	<circle fill="none" cx="57.318" cy="19.501" r="16.499"/>
-	<circle fill="none" cx="40.837" cy="16.5" r="16"/>
+	<circle id="Chlorine_2_" fill="none" cx="16.999" cy="30.254" r="16.499"/>
+	<circle id="Chlorine_1_" fill="none" cx="60.273" cy="36" r="16.499"/>
+	<circle id="Chlorine" fill="none" cx="57.318" cy="19.501" r="16.499"/>
+	<circle id="Boron" fill="none" cx="40.837" cy="16.5" r="16"/>
 </g>
 </svg>
