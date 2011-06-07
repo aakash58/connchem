@@ -18,10 +18,6 @@ public class Boundary {
 	private float h;
 	private float box2dW;
 	private float box2dH;
-	private float xCurrent;
-	private float yCurrent;
-	private float curDragX=0;
-	private float curDragY=0;
 	private int id =-1;
 	
 	
@@ -42,7 +38,7 @@ public class Boundary {
 		PolygonDef sd = new PolygonDef();
 		sd.setAsBox(box2dW, box2dH);
 		sd.density = 0;    // No density means it won't move!
-		sd.friction = 0.0f;
+		sd.friction = 1.0f;
 
 		// Create the body
 		BodyDef bd = new BodyDef();
@@ -52,72 +48,38 @@ public class Boundary {
 		body.setUserData(this);
 	}
 	
-	public float getCurrentX(){
-		return xCurrent;
-	}
-	public float getCurrentY(){
-		return yCurrent;
-	}
 	
 	void display() {
 		parent.rectMode(parent.CENTER);
-		if (P5Canvas.isDrag || P5Canvas.draggingBoundary==id){
-			float difX = P5Canvas.xDrag -curDragX;
-			float difY = P5Canvas.yDrag -curDragY;
-			xCurrent += difX;
-			yCurrent += difY;
-			float x1 = body.getPosition().x + box2d.scalarPixelsToWorld(difX);
-			float y1 = body.getPosition().y - box2d.scalarPixelsToWorld(difY);
-			Vec2 v = new Vec2(x1, y1);
-			body.setXForm(v, body.getAngle());
-			
-			//Move by Scale
-			parent.fill(parent.heatRGB);
-			parent.noStroke();
-			parent.rect(x+xCurrent, y+yCurrent, w, h);
-	 		parent.rectMode(parent.CORNER);	
-	 		curDragX = P5Canvas.xDrag;
-			curDragY = P5Canvas.yDrag;
-		}
-		else{
-			curDragX =0;
-			curDragY =0;
-			
-			parent.fill(parent.heatRGB);
-			parent.noStroke();
-			parent.rect(x+xCurrent, y+yCurrent, w, h);
-	 		parent.rectMode(parent.CORNER);	
-	 		curDragX = P5Canvas.xDrag;
-	 		curDragY = P5Canvas.yDrag;
-		}
-
 		
 		
+		
+		parent.fill(parent.heatRGB);
+			parent.noStroke();
+			parent.rect(x, y, w, h);
+	 		parent.rectMode(parent.CORNER);	
 	}
 
 	public int isIn(float x_, float y_) {
 		float xx=0, yy=0;
 		if(id==0){
-			xx=x; 	
+			xx=x-w/2; 	
 			yy=y-h/2;
 		}
 		else if(id==1){
-			xx=x-w; 	
+			xx=x-w/2; 	
 			yy=y-h/2;
 		}
 		else if(id==2){
 			xx=x-w/2; 	
-			yy=y;
+			yy=y-h/2;
 		}
 		else if(id==3){
 			xx=x-w/2; 	
-			yy=y-h;
+			yy=y-h/2;
 		}
-		xx += xCurrent;
-		yy += yCurrent;
 		xx = xx*P5Canvas.scale;
 		yy = yy*P5Canvas.scale;
-		System.out.println("xCurrent:"+xCurrent+" "+x_);
 		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+h){
 			return id;
 		}
