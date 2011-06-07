@@ -10,7 +10,7 @@ units:
       - compound: "Water"
         qty: 5
   - sim: 2
-    name: "Submicroscopic Representation"
+    name: "Classifying Matter"
     sets:
     - set: 1
       compounds:
@@ -34,7 +34,7 @@ units:
         qty: 10
     - set: 6
       compounds:
-      - compound: "Sodium Chloride"
+      - compound: "Phosphorus"
         qty: 10
   - sim: 3
     name: "Physical Changes"
