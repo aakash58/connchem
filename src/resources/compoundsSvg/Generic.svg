@@ -33,6 +33,6 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="25.5" cy="25.5" r="25"/>
+	<circle id="Generic" fill="none" cx="25.5" cy="25.5" r="25"/>
 </g>
 </svg>

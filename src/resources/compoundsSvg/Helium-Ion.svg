@@ -8,6 +8,6 @@
 	<circle fill="#FFA955" stroke="#000000" stroke-miterlimit="10" cx="23" cy="23" r="18"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="23" cy="23" r="23"/>
+	<circle id="Helium-Ion" fill="none" cx="23" cy="23" r="23"/>
 </g>
 </svg>

@@ -7,6 +7,6 @@
 	<circle fill="#1B75BB" stroke="#000000" stroke-miterlimit="10" cx="20.5" cy="20.5" r="20"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="20.5" cy="20.5" r="20"/>
+	<circle id="Blue-Ion" fill="none" cx="20.5" cy="20.5" r="20"/>
 </g>
 </svg>

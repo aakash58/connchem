@@ -28,10 +28,10 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="18.495" cy="18.495" r="18.495"/>
-	<circle fill="none" cx="18.495" cy="58.386" r="18.495"/>
-	<circle fill="none" cx="30.034" cy="38.441" r="19.526"/>
-	<circle fill="none" cx="53.009" cy="38.441" r="13.48"/>
-	<circle fill="none" cx="63.011" cy="21.001" r="11.403"/>
+	<circle id="Oxygen-Ion_2_" fill="none" cx="18.495" cy="18.495" r="18.495"/>
+	<circle id="Oxygen-Ion_1_" fill="none" cx="18.495" cy="58.386" r="18.495"/>
+	<circle id="Oxygen-Ion" fill="none" cx="53.009" cy="38.441" r="13.48"/>
+	<circle id="Carbon-Ion" fill="none" cx="30.034" cy="38.441" r="19.526"/>
+	<circle id="Hydrogen" fill="none" cx="63.011" cy="21.001" r="11.403"/>
 </g>
 </svg>

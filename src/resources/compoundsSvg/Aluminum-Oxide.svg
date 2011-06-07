@@ -24,10 +24,10 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="13.994" cy="13.994" r="13.494"/>
-	<circle fill="none" cx="62.002" cy="13.994" r="13.494"/>
-	<circle fill="none" cx="110.01" cy="13.994" r="13.494"/>
-	<circle fill="none" cx="86.495" cy="28.257" r="20"/>
-	<circle fill="none" cx="37.494" cy="28.257" r="20"/>
+	<circle id="Oxygen_2_" fill="none" cx="13.994" cy="13.994" r="13.494"/>
+	<circle id="Oxygen_1_" fill="none" cx="62.002" cy="13.994" r="13.494"/>
+	<circle id="Oxygen" fill="none" cx="110.01" cy="13.994" r="13.494"/>
+	<circle id="Aluminum_1_" fill="none" cx="86.495" cy="28.257" r="20"/>
+	<circle id="Aluminum" fill="none" cx="37.494" cy="28.257" r="20"/>
 </g>
 </svg>

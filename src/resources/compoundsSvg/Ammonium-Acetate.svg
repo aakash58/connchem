@@ -43,17 +43,17 @@
 		C105.138,84.617,97.859,84.617,93.367,80.127z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="16.079" cy="20.19" r="11.404"/>
-	<circle fill="none" cx="16.079" cy="56.711" r="11.404"/>
-	<circle fill="none" cx="11.999" cy="38.419" r="11.404"/>
-	<circle fill="none" cx="101.501" cy="44.773" r="16.498"/>
-	<circle fill="none" cx="101.501" cy="71.996" r="16.498"/>
-	<circle fill="none" cx="90.758" cy="71.041" r="16.502"/>
-	<circle fill="none" cx="90.758" cy="45.729" r="16.502"/>
-	<circle fill="none" cx="88.501" cy="59.539" r="18.759"/>
-	<circle fill="none" cx="61.993" cy="58.385" r="18.455"/>
-	<circle fill="none" cx="50.589" cy="38.419" r="19.382"/>
-	<circle fill="none" cx="61.993" cy="18.455" r="18.456"/>
-	<circle fill="none" cx="26.516" cy="38.419" r="14.517"/>
+	<circle id="Oxygen-Ion_1_" fill="none" cx="61.993" cy="58.385" r="18.455"/>
+	<circle id="Oxygen-Ion" fill="none" cx="61.993" cy="18.455" r="18.456"/>
+	<circle id="Carbon-Ion" fill="none" cx="50.589" cy="38.419" r="19.382"/>
+	<circle id="Hydrogen_6_" fill="none" cx="16.079" cy="20.19" r="11.404"/>
+	<circle id="Hydrogen_5_" fill="none" cx="16.079" cy="56.711" r="11.404"/>
+	<circle id="Hydrogen_4_" fill="none" cx="11.999" cy="38.419" r="11.404"/>
+	<circle id="Carbon" fill="none" cx="26.516" cy="38.419" r="14.517"/>
+	<circle id="Hydrogen-Ion_3_" fill="none" cx="101.501" cy="44.773" r="16.498"/>
+	<circle id="Hydrogen-Ion_2_" fill="none" cx="101.501" cy="71.996" r="16.498"/>
+	<circle id="Hydrogen-Ion_1_" fill="none" cx="90.758" cy="71.041" r="16.502"/>
+	<circle id="Hydrogen-Ion" fill="none" cx="90.758" cy="45.729" r="16.502"/>
+	<circle id="Nitrogen-Ion" fill="none" cx="88.501" cy="59.539" r="18.759"/>
 </g>
 </svg>

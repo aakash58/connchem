@@ -7,7 +7,6 @@
 	<circle fill="#000055" stroke="#000000" stroke-miterlimit="10" cx="20" cy="20" r="19.5"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="20" cy="20" r="19.5"/>
-	<circle fill="none" cx="20" cy="20" r="19.5"/>
+	<circle id="Tin" fill="none" cx="20" cy="20" r="19.5"/>
 </g>
 </svg>

@@ -13,8 +13,8 @@
 	<circle fill="#A9A955" stroke="#000000" stroke-miterlimit="10" cx="56" cy="23" r="18"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="56.092" cy="23" r="23"/>
-	<circle fill="none" cx="21.459" cy="23.04" r="21.459"/>
-	<circle fill="none" cx="90.685" cy="23.04" r="21.459"/>
+	<circle id="Manganese-Ion" fill="none" cx="56.092" cy="23" r="23"/>
+	<circle id="Chlorine-Ion_1_" fill="none" cx="21.459" cy="23.04" r="21.459"/>
+	<circle id="Chlorine-Ion" fill="none" cx="90.685" cy="23.04" r="21.459"/>
 </g>
 </svg>

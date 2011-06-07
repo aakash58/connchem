@@ -7,6 +7,6 @@
 	<circle fill="#FFFFFF" stroke="#231F20" stroke-miterlimit="10" cx="33" cy="33" r="32.5"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="33" cy="33" r="32.5"/>
+	<circle id="Hydrogen" fill="none" cx="33" cy="33" r="32.5"/>
 </g>
 </svg>

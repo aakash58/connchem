@@ -44,19 +44,19 @@
 		C120.95,38.523,115.802,33.374,109.45,33.374z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="11.933" cy="33.441" r="11.433"/>
-	<circle fill="none" cx="29.376" cy="66.383" r="11.5"/>
-	<circle fill="none" cx="16" cy="52.009" r="11.5"/>
-	<circle fill="none" cx="61.174" cy="64.471" r="11.499"/>
-	<circle fill="none" cx="80.973" cy="64.495" r="11.499"/>
-	<circle fill="none" cx="109.512" cy="44.875" r="11.499"/>
-	<circle fill="none" cx="104.509" cy="25.538" r="11.499"/>
-	<circle fill="none" cx="91.859" cy="11.999" r="11.499"/>
-	<circle fill="none" cx="60.074" cy="15.333" r="11.499"/>
-	<circle fill="none" cx="50.281" cy="33.504" r="14.497"/>
-	<circle fill="none" cx="71.08" cy="45.508" r="14.497"/>
-	<circle fill="none" cx="91.88" cy="33.509" r="14.497"/>
-	<circle fill="none" cx="29.482" cy="45.514" r="14.497"/>
-	<circle fill="none" cx="39.866" cy="15.31" r="11.499"/>
+	<circle id="Hydrogen_9_" fill="none" cx="11.933" cy="33.441" r="11.433"/>
+	<circle id="Hydrogen_8_" fill="none" cx="29.376" cy="66.383" r="11.5"/>
+	<circle id="Hydrogen_7_" fill="none" cx="16" cy="52.009" r="11.5"/>
+	<circle id="Hydrogen_6_" fill="none" cx="61.174" cy="64.471" r="11.499"/>
+	<circle id="Hydrogen_5_" fill="none" cx="80.973" cy="64.495" r="11.499"/>
+	<circle id="Hydrogen_4_" fill="none" cx="109.512" cy="44.875" r="11.499"/>
+	<circle id="Hydrogen_3_" fill="none" cx="104.509" cy="25.538" r="11.499"/>
+	<circle id="Hydrogen_2_" fill="none" cx="91.859" cy="11.999" r="11.499"/>
+	<circle id="Hydrogen_1_" fill="none" cx="60.074" cy="15.333" r="11.499"/>
+	<circle id="Hydrogen" fill="none" cx="39.866" cy="15.31" r="11.499"/>
+	<circle id="Carbon_3_" fill="none" cx="50.281" cy="33.504" r="14.497"/>
+	<circle id="Carbon_2_" fill="none" cx="71.08" cy="45.508" r="14.497"/>
+	<circle id="Carbon_1_" fill="none" cx="91.88" cy="33.509" r="14.497"/>
+	<circle id="Carbon" fill="none" cx="29.482" cy="45.514" r="14.497"/>
 </g>
 </svg>

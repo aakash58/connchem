@@ -12,7 +12,7 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="14.5" cy="14.5" r="14"/>
-	<circle fill="none" cx="36.5" cy="14.5" r="14"/>
+	<circle id="Chlorine_1_" fill="none" cx="14.5" cy="14.5" r="14"/>
+	<circle id="Chlorine" fill="none" cx="36.5" cy="14.5" r="14"/>
 </g>
 </svg>

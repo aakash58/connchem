@@ -22,11 +22,11 @@
 		c2.65,3.455,6.809,5.692,11.5,5.692c0.905,0,1.787-0.094,2.646-0.252L63.391,28.789z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="12" cy="11.998" r="11.498"/>
-	<circle fill="none" cx="63.287" cy="11.998" r="11.498"/>
-	<circle fill="none" cx="12" cy="40.286" r="11.498"/>
-	<circle fill="none" cx="26.022" cy="26.068" r="14.379"/>
-	<circle fill="none" cx="49.265" cy="26.068" r="14.379"/>
-	<circle fill="none" cx="63.287" cy="40.286" r="11.498"/>
+	<circle id="Hydrogen_4_" fill="none" cx="12" cy="11.998" r="11.498"/>
+	<circle id="Hydrogen_3_" fill="none" cx="63.287" cy="11.998" r="11.498"/>
+	<circle id="Hydrogen_2_" fill="none" cx="12" cy="40.286" r="11.498"/>
+	<circle id="Hydrogen" fill="none" cx="63.287" cy="40.286" r="11.498"/>
+	<circle id="Carbon" fill="none" cx="26.022" cy="26.068" r="14.379"/>
+	<circle id="Carbon_1_" fill="none" cx="49.265" cy="26.068" r="14.379"/>
 </g>
 </svg>

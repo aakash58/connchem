@@ -13,8 +13,8 @@
 		L42.793,13.174z"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="29.356" cy="13.997" r="13.497"/>
-	<circle fill="none" cx="46.63" cy="23.988" r="11.515"/>
-	<circle fill="none" cx="11.904" cy="23.988" r="11.515"/>
+	<circle id="Hydrogen_1_" fill="none" cx="12.015" cy="23.988" r="11.515"/>
+	<circle id="Hydrogen" fill="none" cx="46.63" cy="23.988" r="11.515"/>
+	<circle id="Oxygen" fill="none" cx="29.356" cy="13.997" r="13.497"/>
 </g>
 </svg>

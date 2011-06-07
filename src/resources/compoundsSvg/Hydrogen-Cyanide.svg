@@ -14,8 +14,8 @@
 	</g>
 </g>
 <g id="circles">
-	<circle fill="none" cx="12" cy="15" r="11.5"/>
-	<circle fill="none" cx="33.02" cy="15" r="14.5"/>
-	<circle fill="none" cx="56" cy="15" r="13"/>
+	<circle id="Hydrogen" fill="none" cx="12" cy="15" r="11.5"/>
+	<circle id="Carbon" fill="none" cx="33.02" cy="15" r="14.5"/>
+	<circle id="Nitrogen" fill="none" cx="56" cy="15" r="13"/>
 </g>
 </svg>

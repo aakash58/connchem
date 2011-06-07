@@ -25,11 +25,11 @@
 		"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="78.999" cy="38.429" r="21.492"/>
-	<circle fill="none" cx="56.513" cy="18.508" r="18.508"/>
-	<circle fill="none" cx="56.513" cy="58.384" r="18.508"/>
-	<circle fill="none" cx="44.839" cy="38.429" r="19.357"/>
-	<circle fill="none" cx="21.981" cy="38.389" r="13.479"/>
-	<circle fill="none" cx="12" cy="55.73" r="11.5"/>
+	<circle id="Sodium-Ion" fill="none" cx="78.999" cy="38.429" r="21.492"/>
+	<circle id="Oxygen-Ion_1_" fill="none" cx="56.513" cy="18.508" r="18.508"/>
+	<circle id="Oxygen-Ion" fill="none" cx="56.513" cy="58.384" r="18.508"/>
+	<circle id="Carbon-Ion" fill="none" cx="44.839" cy="38.429" r="19.357"/>
+	<circle id="Oxygen" fill="none" cx="21.981" cy="38.389" r="13.479"/>
+	<circle id="Hydrogen" fill="none" cx="12" cy="55.73" r="11.5"/>
 </g>
 </svg>
