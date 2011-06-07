@@ -75,7 +75,7 @@ public class P5Canvas extends PApplet{
 		//reactants.add("Ammonium");
 		
 		println(db.getReactionProducts(reactants));
-		println(db.getReactionProbability(reactants));
+		println(db.getReactionProbability(10));
 	}
 	
 	
@@ -215,9 +215,9 @@ public class P5Canvas extends PApplet{
 		isEnable = false;
 		
 		for (int i=0;i<count;i++){
-			float x_ =w/3+(i+1)*(w/(4*(count+1)));
-			x_ = boundaries[0].getCurrentX() +x_*scale;
-			float y_ = boundaries[0].getCurrentY()+100*scale;
+			float x_ =w/3+i*(w/(3*(count+1)));
+			x_ = x+x_*scale;
+			float y_ =y+100*scale;
 			molecules.add(new Molecule(x_, y_,compoundName, box2d, this, speedRate));
 		}
 		isEnable = tmp;
@@ -305,15 +305,9 @@ public class P5Canvas extends PApplet{
 	
 	
 	public void mouseMoved() {
-		int b = -1;
-		for (int i =0;i<4;i++){
-			b = boundaries[i].isIn(mouseX, mouseY);
-			if (b>=0)
-				break;
-		}
-		if (b==0 || b==1)
-			this.cursor(Cursor.W_RESIZE_CURSOR);
-		else if (b==2 ||b==3)
+		//Check the top boundary
+		int id = boundaries[2].isIn(mouseX, mouseY);
+		if (id==2)
 			this.cursor(Cursor.N_RESIZE_CURSOR);
 		else
 			this.cursor(Cursor.DEFAULT_CURSOR);
@@ -323,12 +317,8 @@ public class P5Canvas extends PApplet{
 		xStart = mouseX;
 		yStart = mouseY;
 	
-		System.out.println("");
-		for (int i =0;i<4;i++){
-			draggingBoundary = boundaries[i].isIn(mouseX, mouseY);
-			if (boundaries[i].isIn(mouseX, mouseY)>=0)
-				return;
-		}
+		draggingBoundary = boundaries[2].isIn(mouseX, mouseY);
+		
 	}
 	public void mouseReleased() {
 		xDrag =0;
@@ -341,14 +331,18 @@ public class P5Canvas extends PApplet{
 		
 	
 	public void mouseDragged() {
-		if (draggingBoundary>=0){
+		
+		isDrag = true;
 			
-		}
-		else{
-			isDrag = true;
-		}
+		int xTmp = xDrag;
+		int yTmp = yDrag;
 		xDrag = (int) ((mouseX-xStart)/scale);
 		yDrag = (int) ((mouseY-yStart)/scale);
+		if (draggingBoundary==2){
+			//h = h-(yDrag - yTmp);
+		}	
+		setBoundary(x+xDrag -xTmp,y+yDrag - yTmp,w,h-(yDrag - yTmp));
+		
 	}
 		
 	public void mouseClicked() {
