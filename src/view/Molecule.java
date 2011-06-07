@@ -71,6 +71,7 @@ public class Molecule {
 			cd.friction = 0.0f;
 			cd.restitution = P5Canvas.restitution;
 		
+			
 			// Attach shapes!
 			body.createShape(cd);
 		}

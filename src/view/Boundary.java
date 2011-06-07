@@ -22,8 +22,11 @@ public class Boundary {
 	private float yCurrent;
 	private float curDragX=0;
 	private float curDragY=0;
+	private int id =-1;
 	
-	Boundary(float x_,float y_, float w_, float h_, PBox2D box2d_, P5Canvas parent_) {
+	
+	Boundary(int id_,float x_,float y_, float w_, float h_, PBox2D box2d_, P5Canvas parent_) {
+		id = id_;
 		this.parent = parent_;
 		this.box2d = box2d_;
 		x=x_;
@@ -58,7 +61,7 @@ public class Boundary {
 	
 	void display() {
 		parent.rectMode(parent.CENTER);
-		if (P5Canvas.isDrag){
+		if (P5Canvas.isDrag || P5Canvas.draggingBoundary==id){
 			float difX = P5Canvas.xDrag -curDragX;
 			float difY = P5Canvas.yDrag -curDragY;
 			xCurrent += difX;
@@ -87,9 +90,41 @@ public class Boundary {
 	 		curDragX = P5Canvas.xDrag;
 	 		curDragY = P5Canvas.yDrag;
 		}
+
+		
 		
 	}
 
+	public int isIn(float x_, float y_) {
+		float xx=0, yy=0;
+		if(id==0){
+			xx=x; 	
+			yy=y-h/2;
+		}
+		else if(id==1){
+			xx=x-w; 	
+			yy=y-h/2;
+		}
+		else if(id==2){
+			xx=x-w/2; 	
+			yy=y;
+		}
+		else if(id==3){
+			xx=x-w/2; 	
+			yy=y-h;
+		}
+		xx += xCurrent;
+		yy += yCurrent;
+		xx = xx*P5Canvas.scale;
+		yy = yy*P5Canvas.scale;
+		System.out.println("xCurrent:"+xCurrent+" "+x_);
+		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+h){
+			return id;
+		}
+		else 
+			return -1;
+	}
+		
 	public void killBody() {
 		box2d.destroyBody(body);
 	}
