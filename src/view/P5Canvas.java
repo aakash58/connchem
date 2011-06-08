@@ -63,7 +63,7 @@ public class P5Canvas extends PApplet{
 		box2d.listenForCollisions();
 		setBoundary(0,0,648,600);
 		
-		testDbInterface();
+		//testDbInterface();
 	}
 	
 	private void testDbInterface() {
