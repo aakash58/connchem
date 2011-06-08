@@ -92,11 +92,6 @@ public class DBinterface {
 			return null;
 		}
 	}
-	
-	public static String fixName(String compoundName_) {
-		String compoundName = compoundName_.replaceAll(" ", "-");
-		return compoundName;
-	}
 
 	public static float getCompoundMass(String compoundName_) {
 		ArrayList elementMasses = new ArrayList();
@@ -131,16 +126,16 @@ public class DBinterface {
 	}
 	
 	public static Integer getCompoundCharge(String compoundName_) {
-		int output = 0;
-		/*
-		String formula = getCompoundFormula(fixName(compoundName_));
+		Integer charge = 0;
 		
-		String[] subset = formula.split("<sup>");
-		String charge = subset[1].split("</sup>")[0];
+		ArrayList results = new ArrayList();
+		String[] args = new String[2];
+		args[0] = "SELECT charge FROM compounds WHERE name = \"" + compoundName_ + "\"";
+		args[1] = "charge";
+		results = dbConnect(args);
 		
-		output = Integer.parseInt(charge);
-		*/
-		return output;
+		charge = Integer.valueOf((String)results.get(0)).intValue();
+		return charge;
 	}
 	
 	public static Boolean getCompoundPolarity(String compoundName_) {
