@@ -103,7 +103,7 @@ public class P5Canvas extends PApplet{
 		println(db.getReactionProducts(reactants));
 		println(db.getReactionProbability(10));*/
 		//System.out.println(db.getCompoundCharge("Copper-III"));
-		System.out.println(db.getCompoundMass("Hydrogen"));
+		System.out.println(db.getElementDensity("Hydrogen-Ion"));
 		
 	}
 	

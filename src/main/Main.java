@@ -486,7 +486,7 @@ public class Main {
 		JPanel timerSubpanel = new JPanel();
 		timerSubpanel.setBackground(new Color(211, 211, 211));
 		leftPanel.add(timerSubpanel, "cell 0 0,grow");
-		timerSubpanel.setLayout(new MigLayout("", "[][56.00,fill][][grow][]", "[grow][]"));
+		timerSubpanel.setLayout(new MigLayout("", "[][56.00,fill][][][grow]", "[grow][]"));
 
 		final JButton playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
@@ -534,6 +534,10 @@ public class Main {
 			}
 		}
 		
+		/*
+		 * Following is timer code, currently not active
+		 */
+		/*
 		JLabel timerLabel = new JLabel("Timer");
 		timerSubpanel.add(timerLabel, "cell 4 0,alignx center");
 		final JLabel timerDisplay = new JLabel("30");
@@ -554,12 +558,17 @@ public class Main {
 	          }
 		});    
 		timer.start();
+		 */
 		
 		JButton setPrevBtn = new JButton("");
 		setPrevBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
+		
+		JButton resetBtn = new JButton("");
+		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
+		timerSubpanel.add(resetBtn, "cell 3 0 1 2,grow");
 		setPrevBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-previous.png")));
 		timerSubpanel.add(setPrevBtn, "cell 1 1,alignx center");
 		setPrevBtn.addMouseListener(new MouseAdapter() {
