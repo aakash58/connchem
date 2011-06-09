@@ -1,5 +1,7 @@
 package view;
 
+import java.awt.Color;
+
 import pbox2d.*;
 
 import org.jbox2d.common.*;
@@ -19,9 +21,12 @@ public class Boundary {
 	private float box2dW;
 	private float box2dH;
 	private int id =-1;
+	private int volumeSliderValue;
+	private int volumeSliderDefaultValue;
+	private float yOriginal=0; //Original y of body when created
+	public static float difVolume; //Increase or Decrease in Volume
 	
-	
-	Boundary(int id_,float x_,float y_, float w_, float h_, PBox2D box2d_, P5Canvas parent_) {
+	Boundary(int id_,float x_,float y_, float w_, float h_, int sliderValue_, PBox2D box2d_, P5Canvas parent_) {
 		id = id_;
 		this.parent = parent_;
 		this.box2d = box2d_;
@@ -29,7 +34,8 @@ public class Boundary {
 		y=y_;
 		w = w_;
 		h = h_;
-		
+		volumeSliderValue =sliderValue_;
+		volumeSliderDefaultValue =P5Canvas.defaultVolume;
 		// Figure out the box2d coordinates
 		box2dW = box2d.scalarPixelsToWorld(w_/2);
 		box2dH = box2d.scalarPixelsToWorld(h_/2);
@@ -39,25 +45,43 @@ public class Boundary {
 		sd.setAsBox(box2dW, box2dH);
 		sd.density = 0;    // No density means it won't move!
 		sd.friction = 1.0f;
+		sd.restitution =1.f;
 
 		// Create the body
 		BodyDef bd = new BodyDef();
 		bd.position.set(box2d.coordPixelsToWorld(new Vec2(x_,y_)));
 		body = box2d.createBody(bd);
+		while (body ==null){ 
+			body = box2d.createBody(bd);
+		}	
 		body.createShape(sd);
 		body.setUserData(this);
+		yOriginal = body.getPosition().y ;
 	}
 	
+	public void set(int v){
+			volumeSliderValue = v;
+			difVolume = (volumeSliderValue-volumeSliderDefaultValue)*P5Canvas.multiplierVolume;
+	}
 	
 	void display() {
 		parent.rectMode(parent.CENTER);
-		
-		
-		
-		parent.fill(parent.heatRGB);
-			parent.noStroke();
+		if (id==2){
+			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
+					box2d.scalarPixelsToWorld(difVolume));
+			body.setXForm(v, body.getAngle());
+		}	
+		if (id==3)
+			parent.fill(parent.heatRGB);
+		else{
+			parent.fill(Color.WHITE.getRGB());
+		}	
+		parent.noStroke();
+		if (id==2)
+			parent.rect(x, y-difVolume, w, h);
+		else
 			parent.rect(x, y, w, h);
-	 		parent.rectMode(parent.CORNER);	
+	 	parent.rectMode(parent.CORNER);	
 	}
 
 	public int isIn(float x_, float y_) {
@@ -89,5 +113,6 @@ public class Boundary {
 		
 	public void killBody() {
 		box2d.destroyBody(body);
+		body.m_world =null;
 	}
 }
