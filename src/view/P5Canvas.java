@@ -2,6 +2,7 @@ package view;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.util.ArrayList;
 
 import pbox2d.*;
@@ -20,20 +21,32 @@ import static model.State.*;
 import model.DBinterface;
 
 public class P5Canvas extends PApplet{
-	private float x;
-	private float y;
-	private float w;
-	private float h;
+	public static float x;
+	public static float y;
+	public static float w;//width of the boundary
+	public static float h;//width of the boundary
+	public static float width;//width of this Panel
+	public static float height;//width of this  Panel
 	
 	// A reference to our box2d world
 	private PBox2D box2d = new PBox2D(this);
 	public static boolean isEnable = true;
-	public static float speedRate = 1.f;
-	public static float heatRate = 1.f;
 	public static float restitution =0.5f;
 	public static float gravity =1.f;
+	
+	//Default value of speed
+	public static float speedRate = 1.f;
+	//Default value of heat
+	public static float heatRate = 1.f;
+	//Default value of scale slider
 	public static float scale = 1.f;
-	public static float volume = 1.f;
+	//Default value of volume slider
+	public static int defaultVolume =50;
+	public static int currenttVolume =defaultVolume;
+	public static int multiplierVolume =10; // Multiplier from pixels to ml
+	public static float minH=0;//minimum height of container
+	public static float maxH=1100;//minimum height of container
+	
 	public static int heatRGB = 0;
 	
 	public static int count = 0;
@@ -43,46 +56,76 @@ public class P5Canvas extends PApplet{
 	public static int yDrag = 0;
 	public static boolean isDrag = false;
 	ArrayList<String> products = new ArrayList<String>();
-	ArrayList killingList = new ArrayList();
+	ArrayList<Molecule> killingList = new ArrayList<Molecule>();
 	public static int draggingBoundary =-1;
+	private boolean isFirstTime =true;
 	
 	/*
 	 * for testing
 	 */
-	DBinterface db = new DBinterface();
+	public static DBinterface db = new DBinterface();
 	
+	public void updateSize(Dimension d, int volume) {
+		boolean tmp = isEnable;
+		isEnable = false;
+		
+		setBoundary(0,0,d.width,d.height);
+		width = d.width;
+		height = d.height;
+		minH = (volume - defaultVolume)*multiplierVolume;
+		maxH = (volume + defaultVolume)*multiplierVolume;
+		
+		isEnable = tmp;
+	}
+		
 	public void setup() {
 		smooth();
 		frameRate(24);
 		
 		// Initialize box2d physics and create the world
-		box2d.createWorld(-1000,-1000, 2000, 2000);
+		box2d.createWorld(-300,-300, 600, 600);
 		box2d.setGravity(0f,0f);
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
-		setBoundary(0,0,648,600);
-		
+		setBoundary(0,0,648,600);	
 		testDbInterface();
 	}
 	
 	private void testDbInterface() {
-		System.out.println(db.getElementRadiusAtomic("Nitrogen"));
+		/*
+		ArrayList<String> reactants = new ArrayList<String>();
+		reactants.add("Hydrogen Peroxide");
+		reactants.add("Hydrogen Peroxide");
+		//reactants.add("Water");
+		//reactants.add("Ammonium");
+		
+		println(db.getReactionProducts(reactants));
+		println(db.getReactionProbability(10));*/
+		//System.out.println(db.getCompoundCharge("Copper-III"));
+		System.out.println(db.getCompoundMass("Hydrogen"));
+		
 	}
 	
+	
 	public void setBoundary(float xx, float yy, float ww, float hh) {
+		if (hh<minH || hh>maxH) return;
 		x=xx;
 		y=yy;
 		w = ww;
 		h = hh;
-		size((int) w, (int) h);
+		if (isFirstTime){
+			size((int) w, (int) h);
+			isFirstTime =false;
+		}
 		
 		// Add a bunch of fixed boundaries
 		float bW = 10.f; // boundary width
-		Boundary lBound = new Boundary(0,x 	, y+h/2, bW, h , box2d, this);
-		Boundary rBound = new Boundary(1,x+w  , y+h/2, bW , h, box2d, this);
-		Boundary tBound = new Boundary(2,x+w/2, y,     w +bW ,  bW, box2d, this);
-		Boundary bBound = new Boundary(3,x+w/2, y+h,   w +bW ,  bW, box2d, this);
+		int sliderValue = Main.volumeSlider.getValue();
+		Boundary lBound = new Boundary(0,x 	,  y+minH/2 , bW, 2*h -minH , sliderValue, box2d, this);
+		Boundary rBound = new Boundary(1,x+w , y+minH/2 , bW, 2*h -minH, sliderValue, box2d, this);
+		Boundary tBound = new Boundary(2,x+w/2, y,     w +bW , bW, sliderValue, box2d, this);
+		Boundary bBound = new Boundary(3,x+w/2, y+h,   w +bW , bW, sliderValue, box2d, this);
 		if (boundaries[0] != null)
 			boundaries[0].killBody();
 		if (boundaries[1] != null)
@@ -96,6 +139,7 @@ public class P5Canvas extends PApplet{
 		boundaries[2]=tBound;
 		boundaries[3]=bBound;
 	}
+	
 		
 	public void draw() {
 		if (getSize().width != w || getSize().height!=h){
@@ -123,14 +167,15 @@ public class P5Canvas extends PApplet{
 		if (isEnable)
 			box2d.step();
 		
-		// Display all molecules
 		this.scale(scale);
 		
+		// Apply gravity to molecules
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
 			m.setRestitution(restitution);
 			setForce(i,m);
 		}
+		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
 			m.display();
@@ -139,7 +184,7 @@ public class P5Canvas extends PApplet{
 		boundaries[1].display();
 		boundaries[2].display();
 		boundaries[3].display();
-		
+			
 	}
 	
 	private void setForce(int index, Molecule mIndex) { // draw background
@@ -173,13 +218,9 @@ public class P5Canvas extends PApplet{
 		
 	}
 	
-
-	
-	
 	/*
 	 * Background methods
 	 */
-	
 	private void drawBackground() { // draw background
 		count++;
 		if (count>10000)
@@ -281,20 +322,19 @@ public class P5Canvas extends PApplet{
 	}
 	
 	//Set Volume; values are from 0 to 100; 50 is default value 
-	public void setVolume(int value, int defaultScale) {
+	public void setVolume(int value) {
 		boolean tmp = isEnable;
 		isEnable = false;
-		volume = (float) value/defaultScale;
-		System.out.println("Volume: "+volume);
-		//float ww = (w*volume);
-		//float hh = (h*volume);
-		//setBoundary(x,y,  ww, h);
+		//int dif = value-currenttVolume;
+		boundaries[2].set(value);
+		
+		currenttVolume = value;
 		isEnable = tmp;
 	}
 	
 	
-	
-	public void mouseMoved() {
+	//********************************* MOUSE EVENT ******************************
+	public void mouseMoved() {		
 		//Check the top boundary
 		int id = boundaries[2].isIn(mouseX, mouseY);
 		if (id==2)
@@ -306,33 +346,47 @@ public class P5Canvas extends PApplet{
 	public void mousePressed() {
 		xStart = mouseX;
 		yStart = mouseY;
-	
 		draggingBoundary = boundaries[2].isIn(mouseX, mouseY);
-		
 	}
+	
 	public void mouseReleased() {
 		xDrag =0;
 		yDrag =0;
 		isDrag = false;
 		draggingBoundary =-1;
-	
 		
+		//Check the top boundary
+		int id = boundaries[2].isIn(mouseX, mouseY);
+		if (id==2)
+			this.cursor(Cursor.N_RESIZE_CURSOR);
+		else
+			this.cursor(Cursor.DEFAULT_CURSOR);
 	}
-		
 	
 	public void mouseDragged() {
-		
 		isDrag = true;
 			
 		int xTmp = xDrag;
 		int yTmp = yDrag;
 		xDrag = (int) ((mouseX-xStart)/scale);
 		yDrag = (int) ((mouseY-yStart)/scale);
-		if (draggingBoundary==2){
-			//h = h-(yDrag - yTmp);
-		}	
-		setBoundary(x+xDrag -xTmp,y+yDrag - yTmp,w,h-(yDrag - yTmp));
 		
+		//Dragging the top boundary
+		if (draggingBoundary==2){
+		/*	setBoundary(x,y+yDrag-yTmp,w,h-(yDrag-yTmp));
+			//Update volume label
+			int volume = (int) h/10;
+			Main.volumeLabel.setText(volume +" ml");
+			//Update volume slider
+			int value = (int) (h-minH)/10;
+			Main.isVolumeblocked =true;
+			Main.volumeSlider.setValue(value);
+			Main.isVolumeblocked =false;
+			*/
+		}	
+		else{
+			setBoundary(x+xDrag -xTmp,y+yDrag - yTmp,w,h);
+		}
 	}
 		
 	public void mouseClicked() {
