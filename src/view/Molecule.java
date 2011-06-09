@@ -27,6 +27,7 @@ public class Molecule {
 	private String name;
 	private float xTmp;
 	private float yTmp;
+	private float minSize;
 	
 	// Constructor
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
@@ -40,6 +41,7 @@ public class Molecule {
 		pShape = parent.loadShape(path);
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
+		minSize = Math.min(pShapeW , pShapeH);
 		
 		circles = SVGReader.getSVG(path);
 		createBody(x,y);
@@ -130,7 +132,45 @@ public class Molecule {
 		body.applyForce(f, body.getPosition());
 	}
 	public void display() {
-		body.applyForce(new Vec2(0,-250*body.getMass()), body.getPosition());
+		//body.applyForce(new Vec2(0,-250*body.getMass()), body.getPosition());
+		
+		if (P5Canvas.isDrag && P5Canvas.draggingBoundary<0){
+			float xx = xTmp+box2d.scalarPixelsToWorld(P5Canvas.xDrag);
+			float yy = yTmp-box2d.scalarPixelsToWorld(P5Canvas.yDrag);
+			Vec2 v = new Vec2(xx,yy);
+			body.setXForm(v, body.getAngle());
+		}
+		else{
+			xTmp = body.getPosition().x;
+			yTmp = body.getPosition().y;
+		}
+		
+		
+		float t = P5Canvas.height- P5Canvas.y;
+		float b = P5Canvas.height -P5Canvas.h-P5Canvas.y;
+		float l = P5Canvas.x;
+		float r = P5Canvas.x + P5Canvas.w;
+		float xx = box2d.scalarWorldToPixels(body.getPosition().x);
+		float yy = box2d.scalarWorldToPixels(body.getPosition().y);
+		
+		if (yy>t-minSize/2+Boundary.difVolume){
+			Vec2 v = new Vec2(body.getPosition().x, box2d.scalarPixelsToWorld(t-minSize+Boundary.difVolume));
+			//System.out.println(box2d.scalarWorldToPixels(body.getPosition().x)+" "+box2d.scalarWorldToPixels(body.getPosition().y));
+			//System.out.println("   P5Canvas: "+P5Canvas.x+" "+P5Canvas.y+" "+P5Canvas.w+" "+P5Canvas.h);
+			body.setXForm(v, body.getAngle());
+		}
+		if (yy<b+minSize/2){
+				Vec2 v = new Vec2(body.getPosition().x, box2d.scalarPixelsToWorld(b+minSize));
+			body.setXForm(v, body.getAngle());
+		}	
+		if (xx<l-minSize/2){
+			Vec2 v = new Vec2(box2d.scalarPixelsToWorld(l+minSize),body.getPosition().y);
+			body.setXForm(v, body.getAngle());
+		}
+		if (xx>r+minSize/2){
+			Vec2 v = new Vec2(box2d.scalarPixelsToWorld(r-minSize),body.getPosition().y);
+			body.setXForm(v, body.getAngle());
+		}
 		
 		
 		// We look at each body and get its screen position
@@ -142,15 +182,6 @@ public class Molecule {
 		parent.pushMatrix();
 		parent.translate(pos.x, pos.y);
 		
-		if (P5Canvas.isDrag){
-			Vec2 v = new Vec2(xTmp+box2d.scalarPixelsToWorld(P5Canvas.xDrag), 
-					yTmp-box2d.scalarPixelsToWorld(P5Canvas.yDrag));
-			body.setXForm(v, body.getAngle());
-		}
-		else{
-			xTmp = body.getPosition().x;
-			yTmp = body.getPosition().y;
-		}
 		parent.rotate(-a);
 		
 		
