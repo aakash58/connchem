@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class SVGReader {
+	private ArrayList<String> a = new ArrayList<String>();
 	public static float[][] getSVG(String s) {
 		InputStream is = null;
 		BufferedReader br = null;

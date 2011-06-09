@@ -69,14 +69,19 @@ public class Molecule {
 			Vec2 offset = new Vec2(circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2);
 			cd.localPosition = box2d.vectorPixelsToWorld(offset);
 			cd.radius = box2d.scalarPixelsToWorld(circles[i][0]);
-			cd.density = 1.0f;
+			if (i==1)
+				cd.density = i*3;
+			else 
+				cd.density = 0;
+					
 			cd.friction = 0.0f;
 			cd.restitution = P5Canvas.restitution;
-		
+			
 			
 			// Attach shapes!
 			body.createShape(cd);
 		}
+		//body.computeMass();
 		body.setMassFromShapes();
 		// Give it some initial random velocity
 		body.setLinearVelocity(new Vec2(parent.random(-10, 10)*speedRate, parent.random(-10,10)*speedRate));
