@@ -77,9 +77,45 @@ public class DBinterface {
 		}
 	}
 	
-	public static Float getElementDensity(String elementName_) {
+	public static Float getElementRadiusAtomic(String elementName_) {
+		String[] args = new String[2];
+		args[0] = "SELECT radiusAtomic FROM elements WHERE name = \"" + elementName_ + "\"";
+		args[1] = "radiusAtomic";
+		ArrayList results = dbConnect(args);
 		
-		//ArrayList results = new ArrayList();
+		try {
+			return Float.valueOf((String)results.get(0)).floatValue();
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
+	
+	public static Float getElementRadiusIonic(String elementName_) {
+		String[] args = new String[2];
+		args[0] = "SELECT radiusIonic FROM elements WHERE name = \"" + elementName_ + "\"";
+		args[1] = "radiusIonic";
+		ArrayList results = dbConnect(args);
+		
+		try {
+			return Float.valueOf((String)results.get(0)).floatValue();
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
+	
+	public static Float getElementArea(String elementName_) {
+		Float radius = getElementRadiusAtomic(elementName_);
+		return (float) (Math.PI * (radius * radius));
+	}
+	
+	public static Float getElementAreaIonic(String elementName_) {
+		Float radius = getElementRadiusIonic(elementName_);
+		return (float) (Math.PI * (radius * radius));
+	}
+	
+	public static Float getElementDensity(String elementName_) {
 		String[] args = new String[2];
 		args[0] = "SELECT density FROM elements WHERE name = \"" + elementName_ + "\"";
 		args[1] = "density";
@@ -91,6 +127,17 @@ public class DBinterface {
 			System.out.println(e);
 			return null;
 		}
+	}
+	
+	public static ArrayList<String> getCompoundConstituentElements(String compoundName_) {
+		ArrayList<String> output = new ArrayList();
+		
+		String[] args = new String[2];
+		args[0] = "SELECT E.name FROM compounds as C, compounds_elements as CE, elements as E WHERE CE.compound_id = C.id and CE.element_id = E.id and C.name = \"" + compoundName_ + "\"";
+		args[1] = "name";
+		output = dbConnect(args);
+		
+		return output;
 	}
 
 	public static float getCompoundMass(String compoundName_) {
@@ -108,6 +155,7 @@ public class DBinterface {
 		}
 		return mass;
 	}
+
 	
 	public static String getCompoundFormula(String compoundName_) {
 		String formula = "blork";

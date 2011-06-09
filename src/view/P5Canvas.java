@@ -63,11 +63,11 @@ public class P5Canvas extends PApplet{
 		box2d.listenForCollisions();
 		setBoundary(0,0,648,600);
 		
-		//testDbInterface();
+		testDbInterface();
 	}
 	
 	private void testDbInterface() {
-		System.out.println(db.getCompoundCharge("Copper-III"));
+		System.out.println(db.getElementRadiusAtomic("Nitrogen"));
 	}
 	
 	public void setBoundary(float xx, float yy, float ww, float hh) {
