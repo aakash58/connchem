@@ -50,6 +50,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class Main {
 	// Controllers
@@ -82,6 +84,9 @@ public class Main {
 	public static JPanel centerPanel;
 	public static Canvas canvas = new Canvas();
 	public static TableView tableView;
+	public static final JLabel  volumeLabel = new JLabel(P5Canvas.currenttVolume+"ml");
+	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
+	public static boolean isVolumeblocked = false;
 	
 	/**
 	 * Launch the application.
@@ -763,10 +768,18 @@ public class Main {
 
 		//****************************************** CENTER PANEL *****************************************************
 		centerPanel = new JPanel();
+		centerPanel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				int volume = (int) p5Canvas.getSize().height/P5Canvas.multiplierVolume;
+				p5Canvas.updateSize(p5Canvas.getSize(), volume);
+				volumeLabel.setText(volume+" ml");
+			}
+		});
 		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
 		int wCenter = screenDimension.width - 282 - 300 -50; 
-		centerPanel.setLayout(new MigLayout("insets 2, gap 2", "[]["+wCenter+"px]", "[600px][center]"));
+		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[]["+wCenter+"px]", "[600px][center]"));
 
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
@@ -774,6 +787,51 @@ public class Main {
 
 		
 		
+		JPanel clPanel = new JPanel();
+		clPanel.setLayout(new MigLayout("insets 0, gap 0", "[]", "[][210.00][][40.00][][210.00][]"));
+		
+		volumeSlider.setOrientation(SwingConstants.VERTICAL);
+		volumeSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (!isVolumeblocked){
+					int value = ((JSlider) e.getSource()).getValue(); 
+					p5Canvas.setVolume(value);
+					int volume = (int) p5Canvas.getSize().height/P5Canvas.multiplierVolume;
+					volumeLabel.setText((volume+P5Canvas.currenttVolume-P5Canvas.defaultVolume)+" ml");
+				}
+			}
+		});
+	   clPanel.add(volumeLabel, "flowy,cell 0 0,alignx right");
+		clPanel.add(volumeSlider, "cell 0 1,alignx right,growy");
+		JLabel canvasControlLabel_main_volume = new JLabel("Volume");
+		clPanel.add(canvasControlLabel_main_volume, "cell 0 2,alignx center");
+
+		
+		JLabel l2 = new JLabel(" ");
+		clPanel.add(l2, "cell 0 3,alignx center");
+		
+		JLabel scaleLabel = new JLabel("   1x");
+		clPanel.add(scaleLabel, "cell 0 4,alignx center");
+		final int defaultScale = 50;
+		JSlider canvasControl_main_scale = new JSlider(1,100,defaultScale);
+		canvasControl_main_scale.setOrientation(SwingConstants.VERTICAL);
+		canvasControl_main_scale.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int value = ((JSlider) e.getSource()).getValue(); 
+				p5Canvas.setScale(value,defaultScale);
+			
+			}
+		});
+		clPanel.add(canvasControl_main_scale, "cell 0 5,alignx right,growy");
+		JLabel canvasControlLabel_main_scale = new JLabel("Scale");
+		clPanel.add(canvasControlLabel_main_scale, "cell 0 6,alignx right");
+		
+		centerPanel.add(clPanel,"cell 0 0");
+		
+	
+		
+		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
+		centerPanel.add(canvasControlLabel_main_speed, "flowx,cell 1 1");
 		final int defaultSpeed = 50;
 		JSlider canvasControl_main_speed =  new JSlider(1,100,defaultSpeed);
 		canvasControl_main_speed.addChangeListener(new ChangeListener() {
@@ -782,13 +840,12 @@ public class Main {
 				p5Canvas.setSpeed(value,defaultSpeed);
 			}
 		});
-		canvasControl_main_speed.setOrientation(SwingConstants.VERTICAL);
-		centerPanel.add(canvasControl_main_speed, "flowy,cell 0 0");
-		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
-		centerPanel.add(canvasControlLabel_main_speed, "cell 0 0");
+		centerPanel.add(canvasControl_main_speed, "cell 1 1");
 		
 		
 		
+		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
+		centerPanel.add(canvasControlLabel_main_heat, "cell 1 1");
 		final int defaultHeat = 50;
 		p5Canvas.setHeat(defaultHeat);
 		JSlider canvasControl_main_heat = new JSlider(1,100,defaultHeat);
@@ -798,42 +855,7 @@ public class Main {
 				p5Canvas.setHeat(value);
 			}
 		});
-		canvasControl_main_heat.setOrientation(SwingConstants.VERTICAL);
-		centerPanel.add(canvasControl_main_heat, "cell 0 0");
-		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
-		centerPanel.add(canvasControlLabel_main_heat, "cell 0 0");
-
-		
-		JLabel canvasControlLabel_main_scale = new JLabel("Scale");
-		centerPanel.add(canvasControlLabel_main_scale, "flowx,cell 1 1");
-		final int defaultScale = 50;
-		JSlider canvasControl_main_scale = new JSlider(1,100,defaultScale);
-		canvasControl_main_scale.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				int value = ((JSlider) e.getSource()).getValue(); 
-				p5Canvas.setScale(value,defaultScale);
-			
-			}
-		});
-		centerPanel.add(canvasControl_main_scale, "cell 1 1");
-
-		
-	
-	
-		JLabel canvasControlLabel_main_volume = new JLabel("Volume");
-		centerPanel.add(canvasControlLabel_main_volume, "cell 1 1");
-
-		final int defaultVolume = 50;
-		JSlider canvasControl_main_volume = new JSlider(1,100,defaultVolume);
-		canvasControl_main_volume.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				int value = ((JSlider) e.getSource()).getValue(); 
-				p5Canvas.setVolume(value,defaultVolume);
-			
-			}
-		});
-		centerPanel.add(canvasControl_main_volume, "cell 1 1");
-
+		centerPanel.add(canvasControl_main_heat, "cell 1 1");
 		
 		
 		
