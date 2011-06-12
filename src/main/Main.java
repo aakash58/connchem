@@ -314,6 +314,12 @@ public class Main {
 		}
 	}
 	
+	public void reset(){
+		p5Canvas.removeAllMolecules();
+		canvas.reset();
+	}
+		
+		
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -521,8 +527,7 @@ public class Main {
 					addDynamicPanel();
 					createPopupMenu();
 					//Update Model
-					p5Canvas.removeAllMolecules();
-					canvas.reset();
+					reset();
 				}
 			}
 		});
@@ -547,6 +552,11 @@ public class Main {
 		
 		JButton resetBtn = new JButton("");
 		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
+		resetBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				reset();
+			}
+		});
 		timerSubpanel.add(resetBtn, "cell 3 0 1 2,grow");
 		
 		
@@ -563,8 +573,7 @@ public class Main {
 				int numSets = setSelector.getItemCount();
 				if (selectedIndex>0){
 					setSelector.setSelectedIndex(selectedIndex-1);
-					p5Canvas.removeAllMolecules();
-					canvas.reset();
+					reset();
 				}
 			}
 		});
@@ -578,8 +587,7 @@ public class Main {
 				int numSets = setSelector.getItemCount();
 				if (selectedIndex<numSets-1){
 					setSelector.setSelectedIndex(selectedIndex+1);
-					p5Canvas.removeAllMolecules();
-					canvas.reset();
+					reset();
 				}
 			}
 		});
