@@ -43,6 +43,33 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		addMouseListener(this);
 	}
 	
+	public void reset(){
+		for (int i=0; i<MAXCOMPOUND;i++){
+			lines[i] = new ArrayList();
+		}
+		beginTime = System.currentTimeMillis();
+		countTime = 0;
+	}
+	
+	public String formatTime(long count){
+		long s = count %60; 
+		long m = count /60;
+		String sStr =""+s;
+		String mStr =""+m;
+		if (s<10)
+			sStr = "0"+sStr;
+		if (m<1)
+			return sStr;
+		else{
+			if (m<10)
+				mStr = "0"+mStr;
+			return mStr+":"+sStr;
+		}
+			
+		
+	}
+		
+	
 	public void paint(Graphics gx) {
 		Graphics2D g = (Graphics2D) gx;
 		int w = 236;
@@ -122,6 +149,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				Line l = new Line(margin, 178-margin, (int) countTime, (int) last,  num1, num2, h2, w2);
 				lines[i].add(l);
 			}
+			Main.elapsedTime.setText(formatTime(countTime));
 			countTime =last;
 		}
 		for (int i=0; i< MAXCOMPOUND;i++){

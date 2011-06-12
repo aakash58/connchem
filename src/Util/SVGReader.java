@@ -6,8 +6,23 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class SVGReader {
-	private ArrayList<String> a = new ArrayList<String>();
+	private static ArrayList<String> names;
+	
+	public static ArrayList<String> getNames(){
+		return names;
+	}
+	public static String processNames(String name){
+		if (name.contains("_"))
+			name = name.split("_")[0];
+		if (name.contains("-"))
+			return name.split("-")[0];
+		else
+			return name;
+		
+	}
+		
 	public static float[][] getSVG(String s) {
+		names = new ArrayList<String>();
 		InputStream is = null;
 		BufferedReader br = null;
 		String sText;
@@ -31,6 +46,7 @@ public class SVGReader {
 					xList.add(values[5]);
 					yList.add(values[7]);
 					rList.add(values[9]);
+					names.add(processNames(values[1]));
 				}
 				lineCount++;
 				sText = br.readLine();
