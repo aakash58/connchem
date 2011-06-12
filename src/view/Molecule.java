@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 import processing.core.*;
 import pbox2d.*;
@@ -22,20 +23,19 @@ public class Molecule {
 	private float pShapeW = 0f;
 	private float pShapeH = 0f;
 	private float[][] circles;
-	private float speedRate;
-	//private float scale;
+	private ArrayList<String> elementNames;
 	private String name;
 	private float xTmp;
 	private float yTmp;
 	private float minSize;
+	public boolean polarity;
 	
 	// Constructor
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
-			P5Canvas parent_, float speedRate_) {
+			P5Canvas parent_) {
 		parent = parent_;
 		box2d = box2d_;
 		name = compoundName_;
-		speedRate = speedRate_; 
 		
 		String path = "resources/compoundsSvg/"+compoundName_+".svg";
 		pShape = parent.loadShape(path);
@@ -43,7 +43,10 @@ public class Molecule {
 		pShapeH = pShape.height;
 		minSize = Math.min(pShapeW , pShapeH);
 		
+		polarity = parent.db.getCompoundPolarity(compoundName_);
+		
 		circles = SVGReader.getSVG(path);
+		elementNames = SVGReader.getNames();
 		createBody(x,y);
 	}
 	
@@ -62,6 +65,11 @@ public class Molecule {
 			numTry++;
 		}	
 		
+		float area = 0f;
+		for (int i=0; i<circles.length;i++){
+			area += circles[i][0]*circles[i][0];
+		}
+			
 		for (int i=0; i<circles.length;i++){
 			// Define a circle
 			CircleDef cd = new CircleDef();
@@ -69,11 +77,13 @@ public class Molecule {
 			Vec2 offset = new Vec2(circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2);
 			cd.localPosition = box2d.vectorPixelsToWorld(offset);
 			cd.radius = box2d.scalarPixelsToWorld(circles[i][0]);
-			if (i==1)
-				cd.density = i*3;
-			else 
-				cd.density = 0;
-					
+			
+			float r = P5Canvas.db.getElementRadiusAtomic(elementNames.get(i));
+			float d = P5Canvas.db.getElementDensity(elementNames.get(i));
+			float m = P5Canvas.db.getElementMass(elementNames.get(i));
+			
+			d = m/(circles[i][0]*circles[i][0]*area);
+			cd.density = d*d*1000; 		
 			cd.friction = 0.0f;
 			cd.restitution = P5Canvas.restitution;
 			
@@ -81,17 +91,20 @@ public class Molecule {
 			// Attach shapes!
 			body.createShape(cd);
 		}
+		
 		//body.computeMass();
 		body.setMassFromShapes();
+		
+		//System.out.println(name+" getMass():"+body.getMass() );
 		// Give it some initial random velocity
-		body.setLinearVelocity(new Vec2(parent.random(-10, 10)*speedRate, parent.random(-10,10)*speedRate));
-		body.setAngularVelocity(parent.random(-10, 10)*speedRate);
+		body.setLinearVelocity(new Vec2(parent.random(-10, 10), parent.random(-10,10)));
+		body.setAngularVelocity(parent.random(-10, 10));
 		body.setUserData(this);
 
 	}
 	
 	
-	public void setSpeed(float newRate) {
+	/*public void setSpeed(float newRate) {
 		Vec2 v =  body.getLinearVelocity();
 		body.setLinearVelocity(new Vec2( v.x*newRate/speedRate, v.y*newRate/speedRate));
 		
@@ -100,7 +113,7 @@ public class Molecule {
 		
 		speedRate = newRate;
 	}
-	
+	*/
 
 	public void setSpeedByHeat(float newRate) {
 		Vec2 v =  body.getLinearVelocity();
@@ -124,7 +137,6 @@ public class Molecule {
 	public void setRestitution(float r){
 		Shape s = body.getShapeList();
 		for (int i=0; i<circles.length;i++){
-			//System.out.println("))))))))"+i+" "+s.getRestitution());
 			s.setRestitution(r);
 			s = s.getNext();
 		}
@@ -137,7 +149,7 @@ public class Molecule {
 		body.applyForce(f, body.getPosition());
 	}
 	public void display() {
-		//body.applyForce(new Vec2(0,-250*body.getMass()), body.getPosition());
+		body.applyForce(new Vec2(0,-10*body.getMass()), body.getPosition());
 		
 		if (P5Canvas.isDrag && P5Canvas.draggingBoundary<0){
 			float xx = xTmp+box2d.scalarPixelsToWorld(P5Canvas.xDrag);

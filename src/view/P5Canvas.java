@@ -35,7 +35,7 @@ public class P5Canvas extends PApplet{
 	public static float gravity =1.f;
 	
 	//Default value of speed
-	public static float speedRate = 1.f;
+	private float speedRate = 1.f;
 	//Default value of heat
 	public static float heatRate = 1.f;
 	//Default value of scale slider
@@ -69,7 +69,7 @@ public class P5Canvas extends PApplet{
 		boolean tmp = isEnable;
 		isEnable = false;
 		
-		setBoundary(0,0,d.width,d.height);
+		//setBoundary(0,0,d.width,d.height);
 		width = d.width;
 		height = d.height;
 		minH = (volume - defaultVolume)*multiplierVolume;
@@ -83,7 +83,7 @@ public class P5Canvas extends PApplet{
 		frameRate(24);
 		
 		// Initialize box2d physics and create the world
-		box2d.createWorld(-300,-300, 600, 600);
+		box2d.createWorld(-400,-400, 600, 600);
 		box2d.setGravity(0f,0f);
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
@@ -103,7 +103,11 @@ public class P5Canvas extends PApplet{
 		println(db.getReactionProducts(reactants));
 		println(db.getReactionProbability(10));*/
 		//System.out.println(db.getCompoundCharge("Copper-III"));
-		System.out.println(db.getElementDensity("Hydrogen-Ion"));
+		System.out.println("Water:   "+db.getCompoundMass("Water")+" "+db.getCompoundPolarity("Water"));
+		System.out.println("Bromine: "+db.getCompoundMass("Bromine") + " "+db.getCompoundPolarity("Bromine"));
+		System.out.println("Pantane: "+db.getCompoundMass("Pentane")+" "+db.getCompoundPolarity("Pentane"));
+		System.out.println("Mercury: "+db.getCompoundMass("Mercury")+ " "+db.getCompoundPolarity("Mercury"));
+	
 		
 	}
 	
@@ -164,8 +168,16 @@ public class P5Canvas extends PApplet{
 			killingList = new ArrayList();
 		}
 		
-		if (isEnable)
-			box2d.step();
+		try{
+			if (isEnable){
+				float timeStep = speedRate / 60.0f;
+				box2d.step(timeStep,10);
+			}	
+			}
+		catch (ArrayIndexOutOfBoundsException e){
+			System.err.println("P5Canvas: ArrayIndexOutOfBoundsException in box2d.step()");
+			return;
+		}
 		
 		this.scale(scale);
 		
@@ -200,16 +212,19 @@ public class P5Canvas extends PApplet{
 			Vec2 normV = normalizeForce(new Vec2(x,y));
 			float forceX;
 			float forceY;
-			if (mIndex.getName().equals(m.getName())){
+			
+			if (mIndex.polarity==m.polarity){
 				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravity;
 				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravity;
-			}
+			}	
 			else{
 				forceX =  (normV.x/dis)*m.getMass()*mIndex.getMass()*gravity;
 				forceY =  (normV.y/dis)*m.getMass()*mIndex.getMass()*gravity;
 			}
 			mIndex.addForce(new Vec2(forceX,forceY));
-		}	
+			
+		}
+					
 	}
 		
 	private Vec2 normalizeForce(Vec2 v){
@@ -249,14 +264,14 @@ public class P5Canvas extends PApplet{
 			float x_ =w/3+i*(w/(3*(count+1)));
 			x_ = x+x_*scale;
 			float y_ =y+100*scale;
-			molecules.add(new Molecule(x_, y_,compoundName, box2d, this, speedRate));
+			molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
 		}
 		isEnable = tmp;
 	}
 	
 	
 	public void addMolecule(float x_, float y_, String compoundName) {
-		Molecule m = new Molecule(x_,y_,compoundName, box2d, this, speedRate);
+		Molecule m = new Molecule(x_,y_,compoundName, box2d, this);
 		molecules.add(m);
 	}
 	
@@ -274,18 +289,8 @@ public class P5Canvas extends PApplet{
 	}
 	
 	//Set Speed of Molecules; values are from 0 to 100; 20 is default value 
-	public void setSpeed(int value, int defaultSpeed) {
-		boolean tmp = isEnable;
-		isEnable = false;
-		
-		speedRate = (float) value/defaultSpeed;
-		if (value>defaultSpeed)
-			speedRate *=2;
-		for (int i =0; i< molecules.size(); i++){
-			Molecule m = (Molecule) molecules.get(i);
-			m.setSpeed(speedRate);
-		}
-		isEnable = tmp;
+	public void setSpeed(float speed) {
+		speedRate = speed;
 	}
 	
 	
@@ -296,17 +301,6 @@ public class P5Canvas extends PApplet{
 		gravity = (100f-value);
 		gravity = (float) Math.pow(gravity, 1.3);
 		
-	/*	if (value>=50){
-			heatRate = (float) (value-50)/50;
-			heatRate =1+heatRate/2;
-			// Max heatRate = 1.5
-		}	
-		else{
-			heatRate = (float) (50-value)/50;
-			heatRate = (1-heatRate);
-			heatRate =0.5f+heatRate/2;
-			// MIN heatRate = 0.5
-		}*/
 		//System.out.println("HEAT:"+heatRate);
 		double v = (double) value/100;
 		Color color = ColorScales.getColor(1-v, "redblue", 1f);

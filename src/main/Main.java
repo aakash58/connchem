@@ -9,8 +9,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-import javax.swing.Timer;
-
 import java.awt.Component;
 import javax.swing.Box;
 
@@ -29,6 +27,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -71,7 +70,6 @@ public class Main {
 	private static int minSliderValue = 1;
 	private static int maxSliderValue = 9;
 	private JComboBox setSelector = new JComboBox();
-	private Timer timer;
 	private int countTimer, maxCountTimer=30;
 	public static JPanel dynamicPanel;
 	public static JScrollPane dynamicScrollPane; 
@@ -87,7 +85,8 @@ public class Main {
 	public static final JLabel  volumeLabel = new JLabel(P5Canvas.currenttVolume+"ml");
 	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
 	public static boolean isVolumeblocked = false;
-	
+	public static JLabel totalSystemEnergy;
+	public static JLabel elapsedTime;
 	/**
 	 * Launch the application.
 	 */
@@ -481,13 +480,14 @@ public class Main {
 		//*********************************** LEFT PANEL ********************************************
 		leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
-		leftPanel.setLayout(new MigLayout("insets 6, gap 8", "14[grow]", "[][][grow]"));
+		leftPanel.setLayout(new MigLayout("insets 6, gap 18", "14[grow]", "[][][grow]"));
 
 		JPanel timerSubpanel = new JPanel();
-		timerSubpanel.setBackground(new Color(211, 211, 211));
+		//timerSubpanel.setBackground(new Color(211, 211, 211));
 		leftPanel.add(timerSubpanel, "cell 0 0,grow");
-		timerSubpanel.setLayout(new MigLayout("", "[][56.00,fill][][][grow]", "[grow][]"));
-
+		//timerSubpanel.setLayout(new MigLayout("", "[][56.00,fill][][grow][]", "[grow][]"));
+		timerSubpanel.setLayout(new MigLayout("insets 3, gap 4", "[][56.00,fill][][][grow]", "[grow][]"));
+		
 		final JButton playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -522,6 +522,7 @@ public class Main {
 					createPopupMenu();
 					//Update Model
 					p5Canvas.removeAllMolecules();
+					canvas.reset();
 				}
 			}
 		});
@@ -535,9 +536,6 @@ public class Main {
 		}
 		
 		/*
-		 * Following is timer code, currently not active
-		 */
-		/*
 		JLabel timerLabel = new JLabel("Timer");
 		timerSubpanel.add(timerLabel, "cell 4 0,alignx center");
 		final JLabel timerDisplay = new JLabel("30");
@@ -545,30 +543,18 @@ public class Main {
 		timerDisplay.setForeground(new Color(0, 128, 0));
 		timerDisplay.setFont(new Font("Digital", Font.PLAIN, 30));
 		timerSubpanel.add(timerDisplay, "cell 4 1,alignx center");
-
-		timer = new Timer(1000, new ActionListener() {
-	          public void actionPerformed(ActionEvent e) {
-	        	  countTimer++;
-	        	  if (countTimer == maxCountTimer)
-	        		  countTimer=0;
-	        	  if (countTimer<10)
-	        		  timerDisplay.setText("0"+countTimer);
-	        	  else
-	        		  timerDisplay.setText(""+countTimer);
-	          }
-		});    
-		timer.start();
-		 */
+		*/
+		
+		JButton resetBtn = new JButton("");
+		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
+		timerSubpanel.add(resetBtn, "cell 3 0 1 2,grow");
+		
 		
 		JButton setPrevBtn = new JButton("");
 		setPrevBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		
-		JButton resetBtn = new JButton("");
-		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
-		timerSubpanel.add(resetBtn, "cell 3 0 1 2,grow");
 		setPrevBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-previous.png")));
 		timerSubpanel.add(setPrevBtn, "cell 1 1,alignx center");
 		setPrevBtn.addMouseListener(new MouseAdapter() {
@@ -578,6 +564,7 @@ public class Main {
 				if (selectedIndex>0){
 					setSelector.setSelectedIndex(selectedIndex-1);
 					p5Canvas.removeAllMolecules();
+					canvas.reset();
 				}
 			}
 		});
@@ -592,6 +579,7 @@ public class Main {
 				if (selectedIndex<numSets-1){
 					setSelector.setSelectedIndex(selectedIndex+1);
 					p5Canvas.removeAllMolecules();
+					canvas.reset();
 				}
 			}
 		});
@@ -819,14 +807,15 @@ public class Main {
 		JLabel l2 = new JLabel(" ");
 		clPanel.add(l2, "cell 0 3,alignx center");
 		
-		JLabel scaleLabel = new JLabel("   1x");
-		clPanel.add(scaleLabel, "cell 0 4,alignx center");
 		final int defaultScale = 50;
-		JSlider canvasControl_main_scale = new JSlider(1,100,defaultScale);
+		final JLabel scaleLabel = new JLabel(defaultScale*2+"%");
+		clPanel.add(scaleLabel, "cell 0 4,alignx right");
+		JSlider canvasControl_main_scale = new JSlider(10,100,defaultScale);
 		canvasControl_main_scale.setOrientation(SwingConstants.VERTICAL);
 		canvasControl_main_scale.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
+				scaleLabel.setText(value*2+"%");
 				p5Canvas.setScale(value,defaultScale);
 			
 			}
@@ -839,32 +828,53 @@ public class Main {
 		
 	
 		
-		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
-		centerPanel.add(canvasControlLabel_main_speed, "flowx,cell 1 1");
+		//Center bottom
+		
+		JPanel cbPanel = new JPanel();
+		cbPanel.setLayout(new MigLayout("insets 0, gap 0", "[][210.00][40.00][30.00][][290.00][43.00]", "[]"));
+		
 		final int defaultSpeed = 50;
+		
+		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
+		final JLabel speedLabel = new JLabel("1x");
+		cbPanel.add(canvasControlLabel_main_speed, "cell 0 0");
 		JSlider canvasControl_main_speed =  new JSlider(1,100,defaultSpeed);
 		canvasControl_main_speed.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
-				p5Canvas.setSpeed(value,defaultSpeed);
+				float speedRate = (float) value/defaultSpeed;
+				if (value>defaultSpeed)
+					speedRate =1+3*(speedRate-1);
+				p5Canvas.setSpeed(speedRate);
+				
+				DecimalFormat df = new DecimalFormat("#.#");
+
+				speedLabel.setText(df.format(speedRate)+"x");
 			}
 		});
-		centerPanel.add(canvasControl_main_speed, "cell 1 1");
+		cbPanel.add(canvasControl_main_speed, "cell 1 0,growx");
+		cbPanel.add(speedLabel, "cell 2 0,alignx left");
+		cbPanel.add(new JLabel("    "), "cell 3 0,alignx center");
 		
 		
 		
-		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
-		centerPanel.add(canvasControlLabel_main_heat, "cell 1 1");
 		final int defaultHeat = 50;
+		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
+		final JLabel heatLabel = new JLabel(defaultHeat+"\u2103");
+		cbPanel.add(canvasControlLabel_main_heat, "cell 4 0");
 		p5Canvas.setHeat(defaultHeat);
 		JSlider canvasControl_main_heat = new JSlider(1,100,defaultHeat);
 		canvasControl_main_heat.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
+				heatLabel.setText(value+"\u2103");
 				p5Canvas.setHeat(value);
 			}
 		});
-		centerPanel.add(canvasControl_main_heat, "cell 1 1");
+		cbPanel.add(canvasControl_main_heat, "cell 5 0,growx");
+		cbPanel.add(heatLabel, "cell 6 0,alignx left");
+		
+		centerPanel.add(cbPanel,"cell 1 1");
 		
 		
 		
@@ -879,8 +889,6 @@ public class Main {
 		JPanel graphSet_1 = new JPanel();
 		graphTabs.addTab("Compounds", null, graphSet_1, null);
 		graphSet_1.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]", "[178.00:n][grow]"));
-		canvas.setBackground(Color.CYAN);
-
 		graphSet_1.add(canvas, "cell 0 0,grow");
 
 		JButton graphPopoutBtn_1 = new JButton("");
@@ -901,8 +909,10 @@ public class Main {
 		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
 		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
 
-		JLabel elapsedTimeOutput = new JLabel("01:10:00");
-		dashboard.add(elapsedTimeOutput, "cell 1 0");
+		elapsedTime = new JLabel("00:00");
+		elapsedTime.setForeground(new Color(0, 128, 0));
+		elapsedTime.setFont(new Font("Digital", Font.PLAIN, 30));
+		dashboard.add(elapsedTime, "cell 1 0");
 
 		JLabel moleculeQuantityLabel = new JLabel("Total Molecule Quantity:");
 		dashboard.add(moleculeQuantityLabel, "cell 0 1,alignx right");
@@ -919,8 +929,8 @@ public class Main {
 		JLabel totalSystemEnergyLabel = new JLabel("Total System Energy:");
 		dashboard.add(totalSystemEnergyLabel, "cell 0 3,alignx right");
 
-		JLabel totalSystemEnergyOutput = new JLabel("100 kJ");
-		dashboard.add(totalSystemEnergyOutput, "cell 1 3");
+		totalSystemEnergy= new JLabel("0 kJ");
+		dashboard.add(totalSystemEnergy, "cell 1 3");
 
 		JLabel totalSystemPressureLabel = new JLabel("Total System Pressure:");
 		dashboard.add(totalSystemPressureLabel, "cell 0 4,alignx right");
