@@ -92,7 +92,7 @@ public class P5Canvas extends PApplet{
 		box2d.listenForCollisions();
 		setBoundary(0,0,648,600);	
 		
-		//testYAMLInterface();
+		testDbInterface();
 	}
 	
 	private void testDbInterface() {
@@ -105,7 +105,7 @@ public class P5Canvas extends PApplet{
 		
 		println(db.getReactionProducts(reactants));
 		println(db.getReactionProbability(10));*/
-		//System.out.println(db.getCompoundDensity("Hydrogen-Peroxide"));
+		System.out.println(db.getCompoundBoilingPointCelsius("Potassium"));
 	}
 	
 	private void testYAMLInterface() {
