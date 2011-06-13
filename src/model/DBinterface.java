@@ -12,12 +12,13 @@ public class DBinterface {
                 ArrayList output = new ArrayList();
                 try {
                         Class.forName("org.sqlite.JDBC");
-                        Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+                        Connection conn = DriverManager.getConnection("jdbc:sqlite:model/chemdb");
                         Statement stat = conn.createStatement();
 
                         ResultSet rs = stat.executeQuery(args[0]);
+                        
                         while (rs.next()) {
-                                output.add(rs.getString(args[1]));
+                            output.add(rs.getString(args[1]));
                         }
                         rs.close();
                         conn.close();
@@ -182,8 +183,59 @@ public class DBinterface {
                 args[1] = "charge";
                 results = dbConnect(args);
                 
+                System.out.println(results);
+                
                 charge = Integer.valueOf((String)results.get(0)).intValue();
                 return charge;
+        }
+        
+        public static Float getCompoundBoilingPointCelsius(String compoundName_) {
+            Float boilPoint = 0.f;
+            
+            ArrayList results = new ArrayList();
+            String[] args = new String[2];
+            args[0] = "SELECT boilingPointCelsius FROM compounds WHERE name = \"" + compoundName_ + "\"";
+            args[1] = "boilingPointCelsius";
+            results = dbConnect(args);
+            
+            boilPoint = Float.valueOf((String) results.get(0)).floatValue();
+            return boilPoint;
+        }
+        
+        public static Float getCompoundBoilingPointKelvin(String compoundName_) {
+        	Float c = getCompoundBoilingPointCelsius(compoundName_);
+        	return c - 273.15f;
+        }
+        
+        public static Float getCompoundFreezingPointCelsius(String compoundName_) {
+            Float freezePoint = 0.f;
+            
+            ArrayList results = new ArrayList();
+            String[] args = new String[2];
+            args[0] = "SELECT freezingPointCelsius FROM compounds WHERE name = \"" + compoundName_ + "\"";
+            args[1] = "freezingPointCelsius";
+            results = dbConnect(args);
+            
+            freezePoint = Float.valueOf((String) results.get(0)).floatValue();
+            return freezePoint;
+        }
+        
+        public static Float getCompoundFreezingPointKelvin(String compoundName_) {
+        	Float c = getCompoundFreezingPointCelsius(compoundName_);
+        	return c - 273.15f;
+        }
+        
+        public static Float getCompoundDensity(String compoundName_) {
+            Float density = 0.f;
+            
+            ArrayList results = new ArrayList();
+            String[] args = new String[2];
+            args[0] = "SELECT density FROM compounds WHERE name = \"" + compoundName_ + "\"";
+            args[1] = "density";
+            results = dbConnect(args);
+            
+            density = Float.valueOf((String) results.get(0)).floatValue();
+            return density;
         }
         
         public static Boolean getCompoundPolarity(String compoundName_) {

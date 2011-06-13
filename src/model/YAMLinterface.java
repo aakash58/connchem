@@ -112,7 +112,31 @@ public class YAMLinterface {
 		String simName = (String)sim.get("name");
 		return simName;
 	}
+	
+	/***
+	 * Control Functions
+	 */
+	public static ArrayList getControls(int unitNumber, int simNumber) {
+		HashMap sim = getSim(unitNumber, simNumber);
+		if (sim==null) return null;
+		ArrayList sets = (ArrayList)sim.get("controls");
+		return sets;
+	}
 
+	public static boolean getControlState(int unitNumber, int simNumber, String controlName_) {
+		boolean output = true;
+		ArrayList<HashMap> sim = getControls(unitNumber, simNumber);
+		
+		HashMap entry = sim.get(0);
+		String controlName = (String) entry.get(String.valueOf("control"));
+		Boolean controlState = (Boolean) entry.get(Boolean.valueOf("state"));
+		
+		System.out.println(controlState);
+		
+		
+		return output;
+	}
+	
 	/***
 	 * Set Functions
 	 */
