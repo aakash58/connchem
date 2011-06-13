@@ -93,6 +93,7 @@ public class P5Canvas extends PApplet{
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
 		setBoundary(0,0,648,600);	
+		
 		testDbInterface();
 	}
 	
@@ -105,16 +106,22 @@ public class P5Canvas extends PApplet{
 		//reactants.add("Ammonium");
 		
 		println(db.getReactionProducts(reactants));
-		println(db.getReactionProbability(10));*/
-		//System.out.println(db.getCompoundCharge("Copper-III"));
+		println(db.getReactionProbability(10));
+		System.out.println(db.getCompoundBoilingPointCelsius("Potassium"));
+		System.out.println(db.getCompoundCharge("Copper-III"));
 		System.out.println("Water:   "+db.getCompoundMass("Water")+" "+db.getCompoundPolarity("Water"));
 		System.out.println("Bromine: "+db.getCompoundMass("Bromine") + " "+db.getCompoundPolarity("Bromine"));
 		System.out.println("Pantane: "+db.getCompoundMass("Pentane")+" "+db.getCompoundPolarity("Pentane"));
 		System.out.println("Mercury: "+db.getCompoundMass("Mercury")+ " "+db.getCompoundPolarity("Mercury"));
-		System.out.println(db.getCompoundDensity("Hydrogen-Peroxide"));
+		System.out.println(db.getCompoundDensity("Hydrogen-Peroxide"));*/
 		
 	}
 	
+	private void testYAMLInterface() {
+		//System.out.println(yaml.getMinTemperature(1, 2));
+		//System.out.println(yaml.getTemperature(1, 2));
+		//System.out.println(yaml.getMaxTemperature(1, 2));
+	}
 	
 	public void setBoundary(float xx, float yy, float ww, float hh) {
 		if (hh<minH || hh>maxH) return;
