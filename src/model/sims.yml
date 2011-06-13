@@ -36,6 +36,9 @@ units:
       - compound: "Bromine"
         qty: 10
     - set: 6
+      temperature: 24
+      minTemperature: -50
+      maxTemperature: 750
       compounds:
       - compound: "Phosphorus"
         qty: 10
