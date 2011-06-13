@@ -42,7 +42,7 @@ public class YAMLinterface {
 	}
 
 
-	/***
+	/*
 	 * Unit Functions
 	 */
 	public static ArrayList getUnits() {
@@ -77,7 +77,7 @@ public class YAMLinterface {
 
 
 
-	/***
+	/*
 	 * Sim Functions
 	 */
 
@@ -113,7 +113,7 @@ public class YAMLinterface {
 		return simName;
 	}
 	
-	/***
+	/*
 	 * Control Functions
 	 */
 	public static ArrayList getControls(int unitNumber, int simNumber) {
@@ -133,11 +133,10 @@ public class YAMLinterface {
 		
 		System.out.println(controlState);
 		
-		
 		return output;
 	}
 	
-	/***
+	/*
 	 * Set Functions
 	 */
 
@@ -169,6 +168,114 @@ public class YAMLinterface {
 		ArrayList compounds = (ArrayList)set.get("compounds");
 		return compounds;
 	}
+	
+	/*
+	 * Temperature Functions
+	 */
+	
+	public static Float getTemperature(int unitNumber) {
+		Float temp = State.defaultTemperature;
+		
+		try {
+			HashMap unit = getUnit(unitNumber);
+			temp = Float.valueOf((String)unit.get("temperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	public static Float getTemperature(int unitNumber, int simNumber) {
+		Float temp = getTemperature(unitNumber);
+		
+		try {
+			HashMap sim = getSim(unitNumber, simNumber);
+			temp = Float.valueOf((String)sim.get("temperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	public static Float getTemperature(int unitNumber, int simNumber, int setNumber) {
+		Float temp = getTemperature(unitNumber, simNumber);
+		
+		try {
+			HashMap set = getSet(unitNumber, simNumber, setNumber);
+			temp = Float.valueOf((String)set.get("temperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	public static Float getMinTemperature(int unitNumber) {
+		Float temp = State.defaultMinTemperature;
+		
+		try {
+			HashMap unit = getUnit(unitNumber);
+			temp = Float.valueOf((String)unit.get("minTemperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	public static Float getMinTemperature(int unitNumber, int simNumber) {
+		Float temp = getMinTemperature(unitNumber);
+		
+		try {
+			HashMap sim = getSim(unitNumber, simNumber);
+			temp = Float.valueOf((String)sim.get("minTemperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	public static Float getMinTemperature(int unitNumber, int simNumber, int setNumber) {
+		Float temp = getMinTemperature(unitNumber, simNumber);
+		
+		try {
+			HashMap set = getSet(unitNumber, simNumber, setNumber);
+			temp = Float.valueOf((String)set.get("minTemperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	public static Float getMaxTemperature(int unitNumber) {
+		Float temp = State.defaultMaxTemperature;
+		
+		try {
+			HashMap unit = getUnit(unitNumber);
+			temp = Float.valueOf((String)unit.get("maxTemperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	public static Float getMaxTemperature(int unitNumber, int simNumber) {
+		Float temp = getMaxTemperature(unitNumber);
+		
+		try {
+			HashMap sim = getSim(unitNumber, simNumber);
+			temp = Float.valueOf((String)sim.get("maxTemperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	public static Float getMaxTemperature(int unitNumber, int simNumber, int setNumber) {
+		Float temp = getMaxTemperature(unitNumber, simNumber);
+		
+		try {
+			HashMap set = getSet(unitNumber, simNumber, setNumber);
+			temp = Float.valueOf((String)set.get("maxTemperature")).floatValue();
+		}
+		catch (Exception e) {}
+		return temp;
+	}
+	
+	
+	/*
+	 * Compound Functions
+	 */
 
 	public static HashMap getCompound(int unitNumber, int simNumber, int setNumber, int comNumber) {
 		ArrayList compounds = getSetCompounds(unitNumber, simNumber, setNumber);
