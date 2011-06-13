@@ -91,7 +91,8 @@ public class P5Canvas extends PApplet{
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
 		setBoundary(0,0,648,600);	
-		testDbInterface();
+		
+		//testYAMLInterface();
 	}
 	
 	private void testDbInterface() {
@@ -104,7 +105,13 @@ public class P5Canvas extends PApplet{
 		
 		println(db.getReactionProducts(reactants));
 		println(db.getReactionProbability(10));*/
-		System.out.println(db.getCompoundDensity("Hydrogen-Peroxide"));
+		//System.out.println(db.getCompoundDensity("Hydrogen-Peroxide"));
+	}
+	
+	private void testYAMLInterface() {
+		//System.out.println(yaml.getMinTemperature(1, 2));
+		//System.out.println(yaml.getTemperature(1, 2));
+		//System.out.println(yaml.getMaxTemperature(1, 2));
 	}
 	
 	
