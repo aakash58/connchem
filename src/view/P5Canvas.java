@@ -19,6 +19,7 @@ import org.jbox2d.dynamics.contacts.*;
 import Util.ColorScales;
 import static model.State.*;
 import model.DBinterface;
+import model.YAMLinterface;
 
 public class P5Canvas extends PApplet{
 	public static float x;
@@ -64,6 +65,7 @@ public class P5Canvas extends PApplet{
 	 * for testing
 	 */
 	public static DBinterface db = new DBinterface();
+	public static YAMLinterface yaml = new YAMLinterface();
 	
 	public void updateSize(Dimension d, int volume) {
 		boolean tmp = isEnable;
@@ -102,13 +104,7 @@ public class P5Canvas extends PApplet{
 		
 		println(db.getReactionProducts(reactants));
 		println(db.getReactionProbability(10));*/
-		//System.out.println(db.getCompoundCharge("Copper-III"));
-		System.out.println("Water:   "+db.getCompoundMass("Water")+" "+db.getCompoundPolarity("Water"));
-		System.out.println("Bromine: "+db.getCompoundMass("Bromine") + " "+db.getCompoundPolarity("Bromine"));
-		System.out.println("Pantane: "+db.getCompoundMass("Pentane")+" "+db.getCompoundPolarity("Pentane"));
-		System.out.println("Mercury: "+db.getCompoundMass("Mercury")+ " "+db.getCompoundPolarity("Mercury"));
-	
-		
+		System.out.println(db.getCompoundDensity("Hydrogen-Peroxide"));
 	}
 	
 	

@@ -11,6 +11,9 @@ units:
         qty: 5
   - sim: 2
     name: "Classifying Matter"
+    controls:
+    - control: "All"
+      state: 0
     sets:
     - set: 1
       compounds:
@@ -51,6 +54,13 @@ units:
       - compound: "Hydrogen Peroxide"
         qty: 10
   - sim: 5
+    controls:
+    - control: "Heat Slider"
+      state: 0
+    - control: "Area Slider"
+      state: 0
+    - control: "Volume Slider"
+      state: 0
     name: "Mixtures"
     sets:
     - set: 1
