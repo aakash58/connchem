@@ -60,7 +60,19 @@ public class State {
 	/*
 	 * Default settings
 	 */
-	public static final float defaultTemperature = 25.0f; // default temp for all sims/sets is 0° Celsius
-	public static final float defaultMinTemperature = -10.f;
-	public static final float defaultMaxTemperature = 500.f;
+	public static final Float defaultTemperature = 25.0f; // default temp for all sims/sets is 0° Celsius
+	public static final Float defaultMinTemperature = -10.f;
+	public static final Float defaultMaxTemperature = 500.f;
+	
+	/*
+	 * Default compound settings
+	 */
+	public static final String defaultCompoundName = "Generic";
+	public static final String defaultCompoundFormula = "G";
+	public static final int defaultCompoundId = 0;
+	public static final int polarity = 0;
+	public static final int charge = 0;
+	public static final Float density = 1.f;
+	public static final Float boilingPointCelsius = 100.f;
+	public static final Float freezingPointCelsius = 0.f;
 }
