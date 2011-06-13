@@ -3,6 +3,7 @@ package view;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import pbox2d.*;
@@ -32,11 +33,12 @@ public class P5Canvas extends PApplet{
 	// A reference to our box2d world
 	private PBox2D box2d = new PBox2D(this);
 	public static boolean isEnable = true;
+	public static int creationCount = 0;
 	public static float restitution =0.5f;
 	public static float gravity =1.f;
 	
 	//Default value of speed
-	private float speedRate = 1.f;
+	public static float speedRate = 1.f;
 	//Default value of heat
 	public static float heatRate = 1.f;
 	//Default value of scale slider
@@ -60,7 +62,7 @@ public class P5Canvas extends PApplet{
 	ArrayList<Molecule> killingList = new ArrayList<Molecule>();
 	public static int draggingBoundary =-1;
 	private boolean isFirstTime =true;
-	
+
 	/*
 	 * for testing
 	 */
@@ -104,7 +106,13 @@ public class P5Canvas extends PApplet{
 		
 		println(db.getReactionProducts(reactants));
 		println(db.getReactionProbability(10));*/
+		//System.out.println(db.getCompoundCharge("Copper-III"));
+		System.out.println("Water:   "+db.getCompoundMass("Water")+" "+db.getCompoundPolarity("Water"));
+		System.out.println("Bromine: "+db.getCompoundMass("Bromine") + " "+db.getCompoundPolarity("Bromine"));
+		System.out.println("Pantane: "+db.getCompoundMass("Pentane")+" "+db.getCompoundPolarity("Pentane"));
+		System.out.println("Mercury: "+db.getCompoundMass("Mercury")+ " "+db.getCompoundPolarity("Mercury"));
 		System.out.println(db.getCompoundDensity("Hydrogen-Peroxide"));
+		
 	}
 	
 	
@@ -180,8 +188,10 @@ public class P5Canvas extends PApplet{
 		// Apply gravity to molecules
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			m.setRestitution(restitution);
-			setForce(i,m);
+			if (m!=null){
+				m.setRestitution(restitution);
+				setForce(i,m);
+			}	
 		}
 		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
@@ -193,6 +203,26 @@ public class P5Canvas extends PApplet{
 		boundaries[2].display();
 		boundaries[3].display();
 			
+		computeEnergy();
+	}
+	private void computeEnergy(){
+		float sum = 0f;
+		for (int i = 0; i < molecules.size(); i++) {
+			Molecule m = molecules.get(i);
+			Vec2 vec = m.getSpeed();
+			float v = vec.x*vec.x + vec.y*vec.y;
+			sum += v*m.getMass();
+		}
+		
+		float average =0f;
+		if (molecules.size()>0)
+			average = sum/molecules.size();
+		
+		if (Main.totalSystemEnergy!=null){
+			DecimalFormat df = new DecimalFormat("#.##");
+			Main.totalSystemEnergy.setText(df.format(sum)+" kJ");
+			Main.averageSystemEnergy.setText(df.format(average )+" kJ");
+		}	
 	}
 	
 	private void setForce(int index, Molecule mIndex) { // draw background
@@ -256,10 +286,16 @@ public class P5Canvas extends PApplet{
 		boolean tmp = isEnable;
 		isEnable = false;
 		
+		if (tmp) //if Applet is enable
+			creationCount =0;
+		else
+			creationCount++;
+		int div = creationCount/3;  // 2 variables are used to distribute molecules
+		int mod = creationCount%3;  // When the system is paused; Otherwise, molecules are create at the same position
 		for (int i=0;i<count;i++){
-			float x_ =w/3+i*(w/(3*(count+1)));
-			x_ = x+x_*scale;
-			float y_ =y+100*scale;
+			float x_ =w/2 +40+ (i-count/2.f)*(w/12) + div;
+			x_ = x+x_;
+			float y_ =y+80-Boundary.difVolume +(mod-1.5f)*20;
 			molecules.add(new Molecule(x_, y_,compoundName, box2d, this));
 		}
 		isEnable = tmp;

@@ -58,7 +58,13 @@ public class Boundary {
 		body.setUserData(this);
 		yOriginal = body.getPosition().y ;
 	}
-	
+	public float getX(){
+		return x;
+	}
+	public float getY(){
+		return y;
+	}
+		
 	public void set(int v){
 			volumeSliderValue = v;
 			difVolume = (volumeSliderValue-volumeSliderDefaultValue)*P5Canvas.multiplierVolume;

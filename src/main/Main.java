@@ -55,6 +55,7 @@ import java.awt.event.ComponentEvent;
 public class Main {
 	// Controllers
 	private static P5Canvas p5Canvas = new P5Canvas();
+	private static boolean isEnable =true;
 	
 	// TODO flag
 	public static JFrame mainFrame;
@@ -86,6 +87,7 @@ public class Main {
 	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
 	public static boolean isVolumeblocked = false;
 	public static JLabel totalSystemEnergy;
+	public static JLabel averageSystemEnergy;
 	public static JLabel elapsedTime;
 	/**
 	 * Launch the application.
@@ -316,8 +318,9 @@ public class Main {
 	
 	public void reset(){
 		p5Canvas.removeAllMolecules();
+		leftPanel.updateUI();
 		canvas.reset();
-	}
+	} 
 		
 		
 	/**
@@ -497,15 +500,15 @@ public class Main {
 		final JButton playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (p5Canvas.isEnable){
-					p5Canvas.isEnable = false;
+				if (P5Canvas.isEnable){
+					P5Canvas.isEnable = false;
 					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
+					
 				}	
 				else{ 
 					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
-					p5Canvas.isEnable = true; 
+					P5Canvas.isEnable = true; 
 				}	
-				
 			}
 		});
 		if (P5Canvas.isEnable)
@@ -527,7 +530,8 @@ public class Main {
 					addDynamicPanel();
 					createPopupMenu();
 					//Update Model
-					reset();
+					p5Canvas.removeAllMolecules();
+					canvas.reset();
 				}
 			}
 		});
@@ -912,40 +916,34 @@ public class Main {
 
 		JPanel dashboard = new JPanel();
 		rightPanel.add(dashboard, "cell 0 1,alignx center,growy");
-		dashboard.setLayout(new MigLayout("", "[][]", "[][][][][][]"));
+		dashboard.setLayout(new MigLayout("", "[][100]", "[][][][]"));
 
 		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
 		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
 
-		elapsedTime = new JLabel("00:00");
+		elapsedTime = new JLabel("00");
 		elapsedTime.setForeground(new Color(0, 128, 0));
 		elapsedTime.setFont(new Font("Digital", Font.PLAIN, 30));
 		dashboard.add(elapsedTime, "cell 1 0");
 
-		JLabel moleculeQuantityLabel = new JLabel("Total Molecule Quantity:");
-		dashboard.add(moleculeQuantityLabel, "cell 0 1,alignx right");
-
-		JLabel moleculeQuantityOutput = new JLabel("50");
-		dashboard.add(moleculeQuantityOutput, "cell 1 1");
-
-		JLabel totalSystemVolumeLabel = new JLabel("Total System Volume:");
-		dashboard.add(totalSystemVolumeLabel, "cell 0 2,alignx right");
-
-		JLabel totalSystemVolumeOutput = new JLabel("200 ml");
-		dashboard.add(totalSystemVolumeOutput, "cell 1 2");
-
+		
 		JLabel totalSystemEnergyLabel = new JLabel("Total System Energy:");
-		dashboard.add(totalSystemEnergyLabel, "cell 0 3,alignx right");
-
+		dashboard.add(totalSystemEnergyLabel, "cell 0 1,alignx right");
 		totalSystemEnergy= new JLabel("0 kJ");
-		dashboard.add(totalSystemEnergy, "cell 1 3");
+		dashboard.add(totalSystemEnergy, "cell 1 1");
 
-		JLabel totalSystemPressureLabel = new JLabel("Total System Pressure:");
-		dashboard.add(totalSystemPressureLabel, "cell 0 4,alignx right");
+		JLabel averageSystemEnergyLabel = new JLabel("Average Molecule Energy:");
+		dashboard.add(averageSystemEnergyLabel, "cell 0 2,alignx right");
+		averageSystemEnergy= new JLabel("a kJ");
+		dashboard.add(averageSystemEnergy, "cell 1 2");
+
+/*		JLabel totalSystemPressureLabel = new JLabel("Total System Pressure:");
+		dashboard.add(totalSystemPressureLabel, "cell 0 3,alignx right");
 
 		JLabel totalSystemPressureOutput = new JLabel("100 kPa");
-		dashboard.add(totalSystemPressureOutput, "cell 1 4");
+		dashboard.add(totalSystemPressureOutput, "cell 1 3");
 		System.out.println(rightPanel.getSize());
+*/
 	}
 
 }

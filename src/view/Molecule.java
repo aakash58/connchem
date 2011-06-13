@@ -103,18 +103,6 @@ public class Molecule {
 
 	}
 	
-	
-	/*public void setSpeed(float newRate) {
-		Vec2 v =  body.getLinearVelocity();
-		body.setLinearVelocity(new Vec2( v.x*newRate/speedRate, v.y*newRate/speedRate));
-		
-		float angularVelocity = body.getAngularVelocity();
-		body.setAngularVelocity(angularVelocity*newRate/speedRate);
-		
-		speedRate = newRate;
-	}
-	*/
-
 	public void setSpeedByHeat(float newRate) {
 		Vec2 v =  body.getLinearVelocity();
 		body.setLinearVelocity(new Vec2( v.x*newRate, v.y*newRate));
@@ -133,6 +121,9 @@ public class Molecule {
 		return body.getPosition();
 	}
 	
+	public Vec2 getSpeed(){
+		return body.getLinearVelocity();
+	}
 	
 	public void setRestitution(float r){
 		Shape s = body.getShapeList();

@@ -27,9 +27,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	public static final int MAXCOMPOUND = 50;
 	public static ArrayList[] lines = new ArrayList[MAXCOMPOUND];
 	private long beginTime = 0;
-	private long now = 0;
+	public static long before = 0;
 	private long countTime = 0;
-	private long gap =1;
 	public static int maxCount =8;
 	public static int maxTime =60;
 	
@@ -38,6 +37,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			lines[i] = new ArrayList();
 		}
 		beginTime = System.currentTimeMillis();
+		before = beginTime;
 		addMouseMotionListener(this);
 		setFocusable(true);
 		addMouseListener(this);
@@ -48,7 +48,12 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			lines[i] = new ArrayList();
 		}
 		beginTime = System.currentTimeMillis();
+		before = beginTime;
 		countTime = 0;
+		maxCount =8;
+		maxTime =60;
+		if (Main.elapsedTime !=null)
+			Main.elapsedTime.setText(formatTime(countTime));
 	}
 	
 	public String formatTime(long count){
@@ -116,11 +121,13 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		g.setColor(Color.DARK_GRAY);
 		g.drawString(""+maxCount, 2, margin-5);
 		
+		if (!P5Canvas.isEnable)
+			before = System.currentTimeMillis();
 		
-		now = System.currentTimeMillis();
-		long last = (now - beginTime)/1000;
+		long now = System.currentTimeMillis();
+		long ccc = (long) ((now - before)*P5Canvas.speedRate/(1000));
+		long last =countTime+ccc;
 		if (last>countTime){
-			//System.out.println("TIME:" + last);
 			resetMoleculeCount();
 			updateTableView();
 			
@@ -151,6 +158,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			}
 			Main.elapsedTime.setText(formatTime(countTime));
 			countTime =last;
+			before =now;
 		}
 		for (int i=0; i< MAXCOMPOUND;i++){
 			for (int index=0; index< lines[i].size();index++){
