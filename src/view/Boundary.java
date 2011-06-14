@@ -44,7 +44,7 @@ public class Boundary {
 		PolygonDef sd = new PolygonDef();
 		sd.setAsBox(box2dW, box2dH);
 		sd.density = 0;    // No density means it won't move!
-		sd.friction = 1.0f;
+		sd.friction = 10000.0f;
 		sd.restitution =1.f;
 
 		// Create the body
@@ -58,6 +58,10 @@ public class Boundary {
 		body.setUserData(this);
 		yOriginal = body.getPosition().y ;
 	}
+	public float getId(){
+		return id;
+	}
+	
 	public float getX(){
 		return x;
 	}
@@ -70,12 +74,16 @@ public class Boundary {
 			difVolume = (volumeSliderValue-volumeSliderDefaultValue)*P5Canvas.multiplierVolume;
 	}
 	
+	
 	void display() {
+		if (body==null)
+			return;
 		parent.rectMode(parent.CENTER);
 		if (id==2){
 			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
 					box2d.scalarPixelsToWorld(difVolume));
-			body.setXForm(v, body.getAngle());
+			if (body!=null)
+				body.setXForm(v, body.getAngle());
 		}	
 		if (id==3)
 			parent.fill(parent.heatRGB);

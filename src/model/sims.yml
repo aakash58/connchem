@@ -11,9 +11,8 @@ units:
         qty: 5
   - sim: 2
     name: "Classifying Matter"
-    controls:
+    disableControls:
     - control: "All"
-      state: 0
     sets:
     - set: 1
       compounds:
@@ -57,9 +56,9 @@ units:
       - compound: "Hydrogen Peroxide"
         qty: 10
   - sim: 5
-    controls:
+    disableControls:
     - control: "Heat Slider"
-      state: 0
+      state: 0,
     - control: "Area Slider"
       state: 0
     - control: "Volume Slider"

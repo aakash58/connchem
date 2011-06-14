@@ -244,10 +244,10 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		if (index<0 || index>=mNames.size())
 			return Color.BLACK;
 		Color c1 = TableView.colors[index];
-		return blinkingColor(c1);
+		return c1;
 	}
 	public static Color blinkingColor(Color c1){
-		int num = (P5Canvas.count%36+1)*7;
+		int num = (P5Canvas.count%26+1)*10;
 		int r,g,b;
 		r = c1.getRed()+num;   if (r>255) r = 255;
 		g = c1.getGreen()+num; if (g>255) g = 255;

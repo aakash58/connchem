@@ -89,6 +89,7 @@ public class Main {
 	public static JLabel totalSystemEnergy;
 	public static JLabel averageSystemEnergy;
 	public static JLabel elapsedTime;
+	public static JButton playBtn;
 	/**
 	 * Launch the application.
 	 */
@@ -320,6 +321,22 @@ public class Main {
 		p5Canvas.removeAllMolecules();
 		leftPanel.updateUI();
 		canvas.reset();
+		System.out.println();
+		System.out.println(getSetCompounds(selectedUnit,selectedSim,selectedSet));
+		//System.out.println(getSetCompounds(selectedUnit,selectedSim,selectedSet).size());
+		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
+		if (a==null) return;
+		for (int i=0; i<a.size();i++){
+			System.out.println(getCompoundName(selectedUnit,selectedSim,selectedSet,i)
+						+ getCompoundQty(selectedUnit,selectedSim,selectedSet,i));
+			String s = (String) getCompoundName(selectedUnit,selectedSim,selectedSet,i);
+			int num = Integer.parseInt(getCompoundQty(selectedUnit,selectedSim,selectedSet,i).toString());
+			p5Canvas.addMoleculeRandomly(s.replace(" ","-"),num);
+		}
+		//System.out.println("AAAAAAAAA:"+getControls(selectedUnit,selectedSim));
+		
+		if (P5Canvas.isEnable)
+			playBtn.doClick();
 	} 
 		
 		
@@ -421,6 +438,7 @@ public class Main {
 										
 											//Update set selector
 											ArrayList sets = getSets(selectedUnit,selectedSim);
+											
 											setSelector.removeAllItems();
 											setSelector.addItem("Select Set");
 											if (sets!=null){
@@ -446,7 +464,8 @@ public class Main {
 		
 		Component headHGlue = Box.createHorizontalGlue();
 		menuBar.add(headHGlue);
-
+		
+		
 		
 		/*
 		 * Menubar Unit/Sim/Set status area
@@ -497,7 +516,7 @@ public class Main {
 		//timerSubpanel.setLayout(new MigLayout("", "[][56.00,fill][][grow][]", "[grow][]"));
 		timerSubpanel.setLayout(new MigLayout("insets 3, gap 4", "[][56.00,fill][][][grow]", "[grow][]"));
 		
-		final JButton playBtn = new JButton("");
+		playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (P5Canvas.isEnable){

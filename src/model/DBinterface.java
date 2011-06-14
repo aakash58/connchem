@@ -12,7 +12,7 @@ public class DBinterface {
 		ArrayList output = new ArrayList();
 		try {
 			Class.forName("org.sqlite.JDBC");
-			Connection conn = DriverManager.getConnection("jdbc:sqlite:model/chemdb");
+			Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
 			Statement stat = conn.createStatement();
 
 			ResultSet rs = stat.executeQuery(args[0]);

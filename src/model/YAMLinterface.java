@@ -119,7 +119,7 @@ public class YAMLinterface {
 	public static ArrayList getControls(int unitNumber, int simNumber) {
 		HashMap sim = getSim(unitNumber, simNumber);
 		if (sim==null) return null;
-		ArrayList sets = (ArrayList)sim.get("controls");
+		ArrayList sets = (ArrayList)sim.get("disableControls");
 		return sets;
 	}
 
