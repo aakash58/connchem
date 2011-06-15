@@ -185,12 +185,12 @@ public class YAMLinterface {
 		return true;
 	}
 	
-	private static boolean getTimerState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "timer"); }
-	private static boolean getTimerState() 								{ return getTimerState(getControls()); }
-	private static boolean getTimerState(int unitNumber) 				{ return getTimerState(getControls(unitNumber)); }
-	public static boolean getTimerState(int unitNumber, int simNumber) 	{ return getTimerState(getControls(unitNumber, simNumber)); }
+	private static boolean getControlTimerState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "timer"); }
+	private static boolean getControlTimerState() 								{ return getControlTimerState(getControls()); }
+	private static boolean getControlTimerState(int unitNumber) 				{ return getControlTimerState(getControls(unitNumber)); }
+	public static boolean getControlTimerState(int unitNumber, int simNumber) 	{ return getControlTimerState(getControls(unitNumber, simNumber)); }
 	
-	private static Float getTimerTime(ArrayList<HashMap> controls, String setting) {
+	private static Float getControlTimerTime(ArrayList<HashMap> controls, String setting) {
 		HashMap timer = new HashMap();
 		for (int i = 0; i < controls.size(); i++) {
 			HashMap control = controls.get(i);
@@ -200,40 +200,40 @@ public class YAMLinterface {
 		}
 		return 0.f;
 	}
-	private static Float getTimerTimeMin(ArrayList<HashMap> controls) 			{ return getTimerTime(controls, "min"); }
-	private static Float getTimerTimeInit(ArrayList<HashMap> controls) 			{ return getTimerTime(controls, "init"); }
-	private static Float getTimerTimeMax(ArrayList<HashMap> controls) 			{ return getTimerTime(controls, "max"); }
-	private static Float getTimerTimeMin() 										{ return getTimerTimeMin(getControls()); }
-	private static Float getTimerTimeMin(int unitNumber) 						{ return getTimerTimeMin(getControls(unitNumber)); }
-	public static Float getTimerTimeMin(int unitNumber, int simNumber) 			{ return getTimerTimeMin(getControls(unitNumber, simNumber)); }
-	private static Float getTimerTimeInit() 									{ return getTimerTimeInit(getControls()); }
-	private static Float getTimerTimeInit(int unitNumber) 						{ return getTimerTimeInit(getControls(unitNumber)); }
-	public static Float getTimerTimeInit(int unitNumber, int simNumber) 		{ return getTimerTimeInit(getControls(unitNumber, simNumber)); }
-	private static Float getTimerTimeMax() 										{ return getTimerTimeMax(getControls()); }
-	private static Float getTimerTimeMax(int unitNumber) 						{ return getTimerTimeMax(getControls(unitNumber)); }
-	public static Float getTimerTimeMax(int unitNumber, int simNumber) 			{ return getTimerTimeMax(getControls(unitNumber, simNumber)); }
+	private static Float getControlTimerTimeMin(ArrayList<HashMap> controls) 			{ return getControlTimerTime(controls, "min"); }
+	private static Float getControlTimerTimeInit(ArrayList<HashMap> controls) 			{ return getControlTimerTime(controls, "init"); }
+	private static Float getControlTimerTimeMax(ArrayList<HashMap> controls) 			{ return getControlTimerTime(controls, "max"); }
+	private static Float getControlTimerTimeMin() 										{ return getControlTimerTimeMin(getControls()); }
+	private static Float getControlTimerTimeMin(int unitNumber) 						{ return getControlTimerTimeMin(getControls(unitNumber)); }
+	public static Float getControlTimerTimeMin(int unitNumber, int simNumber) 			{ return getControlTimerTimeMin(getControls(unitNumber, simNumber)); }
+	private static Float getControlTimerTimeInit() 									{ return getControlTimerTimeInit(getControls()); }
+	private static Float getControlTimerTimeInit(int unitNumber) 						{ return getControlTimerTimeInit(getControls(unitNumber)); }
+	public static Float getControlTimerTimeInit(int unitNumber, int simNumber) 		{ return getControlTimerTimeInit(getControls(unitNumber, simNumber)); }
+	private static Float getControlTimerTimeMax() 										{ return getControlTimerTimeMax(getControls()); }
+	private static Float getControlTimerTimeMax(int unitNumber) 						{ return getControlTimerTimeMax(getControls(unitNumber)); }
+	public static Float getControlTimerTimeMax(int unitNumber, int simNumber) 			{ return getControlTimerTimeMax(getControls(unitNumber, simNumber)); }
 	
-	private static boolean getVolumeSliderState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "volume slider"); }
-	private static boolean getVolumeSliderState() 								{ return getVolumeSliderState(getControls()); }
-	private static boolean getVolumeSliderState(int unitNumber) 				{ return getVolumeSliderState(getControls(unitNumber)); }
-	public static boolean getVolumeSliderState(int unitNumber, int simNumber) 	{ return getVolumeSliderState(getControls(unitNumber, simNumber)); }
+	private static boolean getControlVolumeSliderState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "volume slider"); }
+	private static boolean getControlVolumeSliderState() 								{ return getControlVolumeSliderState(getControls()); }
+	private static boolean getControlVolumeSliderState(int unitNumber) 				{ return getControlVolumeSliderState(getControls(unitNumber)); }
+	public static boolean getControlVolumeSliderState(int unitNumber, int simNumber) 	{ return getControlVolumeSliderState(getControls(unitNumber, simNumber)); }
 	
-	private static boolean getScaleSliderState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "scale slider"); }
-	private static boolean getScaleSliderState() 								{ return getScaleSliderState(getControls()); }
-	private static boolean getScaleSliderState(int unitNumber) 					{ return getScaleSliderState(getControls(unitNumber)); }
-	public static boolean getScaleSliderState(int unitNumber, int simNumber) 	{ return getScaleSliderState(getControls(unitNumber, simNumber)); }
+	private static boolean getControlScaleSliderState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "scale slider"); }
+	private static boolean getControlScaleSliderState() 								{ return getControlScaleSliderState(getControls()); }
+	private static boolean getControlScaleSliderState(int unitNumber) 					{ return getControlScaleSliderState(getControls(unitNumber)); }
+	public static boolean getControlScaleSliderState(int unitNumber, int simNumber) 	{ return getControlScaleSliderState(getControls(unitNumber, simNumber)); }
 	
-	private static boolean getSpeedSliderState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "speed slider"); }
-	private static boolean getSpeedSliderState() 								{ return getSpeedSliderState(getControls()); }
-	private static boolean getSpeedSliderState(int unitNumber) 					{ return getSpeedSliderState(getControls(unitNumber)); }
-	public static boolean getSpeedSliderState(int unitNumber, int simNumber) 	{ return getSpeedSliderState(getControls(unitNumber, simNumber)); }
+	private static boolean getControlSpeedSliderState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "speed slider"); }
+	private static boolean getControlSpeedSliderState() 								{ return getControlSpeedSliderState(getControls()); }
+	private static boolean getControlSpeedSliderState(int unitNumber) 					{ return getControlSpeedSliderState(getControls(unitNumber)); }
+	public static boolean getControlSpeedSliderState(int unitNumber, int simNumber) 	{ return getControlSpeedSliderState(getControls(unitNumber, simNumber)); }
 	
-	private static boolean getHeatSliderState(ArrayList<HashMap> controls) 		{ return getControlState(controls, "heat slider"); }
-	private static boolean getHeatSliderState() 								{ return getHeatSliderState(getControls()); }
-	private static boolean getHeatSliderState(int unitNumber) 					{ return getHeatSliderState(getControls(unitNumber)); }
-	public static boolean getHeatSliderState(int unitNumber, int simNumber) 	{ return getHeatSliderState(getControls(unitNumber, simNumber)); }
+	private static boolean getControlHeatSliderState(ArrayList<HashMap> controls) 		{ return getControlState(controls, "heat slider"); }
+	private static boolean getControlHeatSliderState() 								{ return getControlHeatSliderState(getControls()); }
+	private static boolean getControlHeatSliderState(int unitNumber) 					{ return getControlHeatSliderState(getControls(unitNumber)); }
+	public static boolean getControlHeatSliderState(int unitNumber, int simNumber) 	{ return getControlHeatSliderState(getControls(unitNumber, simNumber)); }
 	
-	private static Float getHeatSliderHeat(ArrayList<HashMap> controls, String setting) {
+	private static Float getControlHeatSliderHeat(ArrayList<HashMap> controls, String setting) {
 		HashMap timer = new HashMap();
 		for (int i = 0; i < controls.size(); i++) {
 			HashMap control = controls.get(i);
@@ -243,28 +243,28 @@ public class YAMLinterface {
 		}
 		return 0.f;
 	}
-	private static Float getHeatSliderMin(ArrayList<HashMap> controls) 			{ return getHeatSliderHeat(controls, "min"); }
-	private static Float getHeatSliderInit(ArrayList<HashMap> controls) 		{ return getHeatSliderHeat(controls, "init"); }
-	private static Float getHeatSliderMax(ArrayList<HashMap> controls) 			{ return getHeatSliderHeat(controls, "max"); }
-	private static Float getHeatSliderMin() 									{ return getHeatSliderMin(getControls()); }
-	private static Float getHeatSliderMin(int unitNumber) 						{ return getHeatSliderMin(getControls(unitNumber)); }
-	public static Float getHeatSliderMin(int unitNumber, int simNumber) 		{ return getHeatSliderMin(getControls(unitNumber, simNumber)); }
-	private static Float getHeatSliderInit() 									{ return getHeatSliderInit(getControls()); }
-	private static Float getHeatSliderInit(int unitNumber) 						{ return getHeatSliderInit(getControls(unitNumber)); }
-	public static Float getHeatSliderInit(int unitNumber, int simNumber) 		{ return getHeatSliderInit(getControls(unitNumber, simNumber)); }
-	private static Float getHeatSliderMax() 									{ return getHeatSliderMax(getControls()); }
-	private static Float getHeatSliderMax(int unitNumber) 						{ return getHeatSliderMax(getControls(unitNumber)); }
-	public static Float getHeatSliderMax(int unitNumber, int simNumber) 		{ return getHeatSliderMax(getControls(unitNumber, simNumber)); }
+	private static Float getControlHeatSliderMin(ArrayList<HashMap> controls) 			{ return getControlHeatSliderHeat(controls, "min"); }
+	private static Float getControlHeatSliderInit(ArrayList<HashMap> controls) 		{ return getControlHeatSliderHeat(controls, "init"); }
+	private static Float getControlHeatSliderMax(ArrayList<HashMap> controls) 			{ return getControlHeatSliderHeat(controls, "max"); }
+	private static Float getControlHeatSliderMin() 									{ return getControlHeatSliderMin(getControls()); }
+	private static Float getControlHeatSliderMin(int unitNumber) 						{ return getControlHeatSliderMin(getControls(unitNumber)); }
+	public static Float getControlHeatSliderMin(int unitNumber, int simNumber) 		{ return getControlHeatSliderMin(getControls(unitNumber, simNumber)); }
+	private static Float getControlHeatSliderInit() 									{ return getControlHeatSliderInit(getControls()); }
+	private static Float getControlHeatSliderInit(int unitNumber) 						{ return getControlHeatSliderInit(getControls(unitNumber)); }
+	public static Float getControlHeatSliderInit(int unitNumber, int simNumber) 		{ return getControlHeatSliderInit(getControls(unitNumber, simNumber)); }
+	private static Float getControlHeatSliderMax() 									{ return getControlHeatSliderMax(getControls()); }
+	private static Float getControlHeatSliderMax(int unitNumber) 						{ return getControlHeatSliderMax(getControls(unitNumber)); }
+	public static Float getControlHeatSliderMax(int unitNumber, int simNumber) 		{ return getControlHeatSliderMax(getControls(unitNumber, simNumber)); }
 	
-	private static boolean getMoleculeSidebarState(ArrayList<HashMap> controls) { return getControlState(controls, "molecule sidebar"); }
-	private static boolean getMoleculeSidebarState() 							{ return getMoleculeSidebarState(getControls()); }
-	private static boolean getMoleculeSidebarState(int unitNumber) 				{ return getMoleculeSidebarState(getControls(unitNumber)); }
-	public static boolean getMoleculeSidebarState(int unitNumber, int simNumber) 	{ return getMoleculeSidebarState(getControls(unitNumber, simNumber)); }
+	private static boolean getControlMoleculeSidebarState(ArrayList<HashMap> controls) { return getControlState(controls, "molecule sidebar"); }
+	private static boolean getControlMoleculeSidebarState() 							{ return getControlMoleculeSidebarState(getControls()); }
+	private static boolean getControlMoleculeSidebarState(int unitNumber) 				{ return getControlMoleculeSidebarState(getControls(unitNumber)); }
+	public static boolean getControlMoleculeSidebarState(int unitNumber, int simNumber) 	{ return getControlMoleculeSidebarState(getControls(unitNumber, simNumber)); }
 	
-	private static boolean getPeriodicTableState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "periodic table"); }
-	private static boolean getPeriodicTableState() 								{ return getPeriodicTableState(getControls()); }
-	private static boolean getPeriodicTableState(int unitNumber) 				{ return getPeriodicTableState(getControls(unitNumber)); }
-	public static boolean getPeriodicTableState(int unitNumber, int simNumber) 	{ return getPeriodicTableState(getControls(unitNumber, simNumber)); }
+	private static boolean getControlPeriodicTableState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "periodic table"); }
+	private static boolean getControlPeriodicTableState() 								{ return getControlPeriodicTableState(getControls()); }
+	private static boolean getControlPeriodicTableState(int unitNumber) 				{ return getControlPeriodicTableState(getControls(unitNumber)); }
+	public static boolean getControlPeriodicTableState(int unitNumber, int simNumber) 	{ return getControlPeriodicTableState(getControls(unitNumber, simNumber)); }
 	
 	/*
 	 * Set Functions
