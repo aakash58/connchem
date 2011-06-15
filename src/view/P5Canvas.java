@@ -93,7 +93,8 @@ public class P5Canvas extends PApplet{
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
 		setBoundary(0,0,648,600);	
-		testDbInterface();
+		
+		testYAMLInterface();
 	}
 	
 	private void testDbInterface() {
@@ -115,6 +116,9 @@ public class P5Canvas extends PApplet{
 		
 	}
 	
+	private void testYAMLInterface() {
+		System.out.println(yaml.getHeatSliderState(1, 1));
+	}
 	
 	public void setBoundary(float xx, float yy, float ww, float hh) {
 		if (hh<minH || hh>maxH) return;
