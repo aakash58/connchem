@@ -1,3 +1,28 @@
+controls:
+- control: "timer"
+  state: "on"
+  unit: "seconds"
+  min: 20
+  init: 0
+  max: 30
+- control: "volume slider"
+  state: "on"
+  unit: "mL"
+- control: "scale slider"
+  state: "on"
+- control: "speed slider"
+  state: "on"
+  unit: "mps"
+- control: "heat slider"
+  state: "on"
+  unit: "celsius"
+  min: -10
+  init: 25
+  max: 500
+- control: "molecule sidebar"
+  state: "on"
+- control: "periodic table"
+  state: "off"
 units:
 - unit: 1
   name: "Modeling Matter"
@@ -11,8 +36,6 @@ units:
         qty: 5
   - sim: 2
     name: "Classifying Matter"
-    disableControls:
-    - control: "All"
     sets:
     - set: 1
       compounds:
@@ -35,9 +58,9 @@ units:
       - compound: "Bromine"
         qty: 10
     - set: 6
-      temperature: 24
-      minTemperature: -50
-      maxTemperature: 750
+      #temperature: 1500
+      #minTemperature: 1000
+      #maxTemperature: 2000
       compounds:
       - compound: "Phosphorus"
         qty: 10
@@ -56,55 +79,48 @@ units:
       - compound: "Hydrogen Peroxide"
         qty: 10
   - sim: 5
-    disableControls:
-    - control: "Heat Slider"
-      state: 0,
-    - control: "Area Slider"
-      state: 0
-    - control: "Volume Slider"
-      state: 0
     name: "Mixtures"
     sets:
     - set: 1
       compounds:
       - compound: "Water"
-        qty: 10
+        qty: 20
       - compound: "Bromine"
-        qty: 10
+        qty: 20
     - set: 2
       compounds:
       - compound: "Water"
-        qty: 10
+        qty: 20
       - compound: "Mercury"
-        qty: 10
+        qty: 20
     - set: 3
       compounds:
       - compound: "Water"
-        qty: 10
+        qty: 20
       - compound: "Hydrogen Peroxide"
-        qty: 10
+        qty: 20
     - set: 4
       compounds:
       - compound: "Water"
-        qty: 10
+        qty: 20
       - compound: "Pentane"
-        qty: 10
+        qty: 8
     - set: 5
       compounds:
       - compound: "Water"
-        qty: 10
+        qty: 20
       - compound: "Bromine"
-        qty: 10
+        qty: 20
       - compound: "Hydrogen Peroxide"
-        qty: 10
+        qty: 20
     - set: 6
       compounds:
       - compound: "Water"
-        qty: 10
+        qty: 20
       - compound: "Bromine"
-        qty: 10
+        qty: 20
       - compound: "Pentane"
-        qty: 10
+        qty: 8
 - unit: 2
   name: "Solutions"
   sims:
