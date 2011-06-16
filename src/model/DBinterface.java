@@ -6,13 +6,21 @@ import java.util.Collections;
 
 import java.sql.*;
 
+import main.Main;
+import main.SQLiteJDBCLoader;
+
+import sun.misc.Resource;
+
 public class DBinterface {
 
 	public static ArrayList dbConnect(String[] args) {
 		ArrayList output = new ArrayList();
 		try {
 			Class.forName("org.sqlite.JDBC");
+
+			
 			Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+			
 			Statement stat = conn.createStatement();
 
 			ResultSet rs = stat.executeQuery(args[0]);
@@ -27,6 +35,8 @@ public class DBinterface {
 			System.out.println(e);
 		}
 		return output;
+
+
 	}
 
 	public static ArrayList getAllCompoundNames(String order_) {
@@ -204,7 +214,7 @@ public class DBinterface {
 		args[0] = "SELECT boilingPointCelsius FROM compounds WHERE name = \"" + compoundName_ + "\"";
 		args[1] = "boilingPointCelsius";
 		results = dbConnect(args);
-		
+
 		try {
 			boilPoint = Float.valueOf((String) results.get(0)).floatValue();
 			return boilPoint;
@@ -227,7 +237,7 @@ public class DBinterface {
 		args[0] = "SELECT freezingPointCelsius FROM compounds WHERE name = \"" + compoundName_ + "\"";
 		args[1] = "freezingPointCelsius";
 		results = dbConnect(args);
-		
+
 		try {
 			freezePoint = Float.valueOf((String) results.get(0)).floatValue();
 			return freezePoint;
@@ -258,7 +268,7 @@ public class DBinterface {
 			System.out.println(e);
 			return null;
 		}
-		
+
 
 	}
 
@@ -348,7 +358,7 @@ public class DBinterface {
 	public static Float getReactionProbability(ArrayList<String> reactants) {
 		Integer reaction = getReactionNumber(reactants);
 		Float defaultReactProb = 0.f;
-		
+
 		try {
 			return getReactionProbability(reaction);
 		} catch (Exception e) {
@@ -359,7 +369,7 @@ public class DBinterface {
 
 	public static Float getReactionProbability(int reactionNumber_) {
 		Float defaultReactProb = 0.f;
-		
+
 		ArrayList results = new ArrayList();
 		String[] args = new String[2];
 		args[0] = "SELECT probability FROM reactions WHERE id = " + reactionNumber_;
