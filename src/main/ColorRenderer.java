@@ -25,7 +25,6 @@ public class ColorRenderer extends JLabel
                             int row, int column) {
         Color newColor = (Color)color;
         setBackground(newColor);
-       // System.out.println("WWW:"+newColor);
         
         if (isBordered) {
             if (isSelected) {

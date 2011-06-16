@@ -4,8 +4,8 @@ import java.awt.Color;
 
 import pbox2d.*;
 
+import org.jbox2d.collision.PolygonDef;
 import org.jbox2d.common.*;
-import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.*;
 
 public class Boundary {
@@ -44,7 +44,7 @@ public class Boundary {
 		PolygonDef sd = new PolygonDef();
 		sd.setAsBox(box2dW, box2dH);
 		sd.density = 0;    // No density means it won't move!
-		sd.friction = 10000.0f;
+		sd.friction = 1.0f;
 		sd.restitution =1.f;
 
 		// Create the body
@@ -55,7 +55,7 @@ public class Boundary {
 			body = box2d.createBody(bd);
 		}	
 		body.createShape(sd);
-		body.setUserData(this);
+		//body.setUserData(this);
 		yOriginal = body.getPosition().y ;
 	}
 	public float getId(){
@@ -76,15 +76,13 @@ public class Boundary {
 	
 	
 	void display() {
-		if (body==null)
-			return;
 		parent.rectMode(parent.CENTER);
-		if (id==2){
+	/*	if (id==2){
 			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
 					box2d.scalarPixelsToWorld(difVolume));
-			if (body!=null)
+			if (body!=null && v!=null)
 				body.setXForm(v, body.getAngle());
-		}	
+		}	*/
 		if (id==3)
 			parent.fill(parent.heatRGB);
 		else{
