@@ -36,6 +36,21 @@ units:
         qty: 5
   - sim: 2
     name: "Classifying Matter"
+    controls:
+    - control: "timer"
+      state: "off"
+    - control: "volume slider"
+      state: "off"
+    - control: "scale slider"
+      state: "off"
+    - control: "speed slider"
+      state: "off"
+    - control: "heat slider"
+      state: "off"
+    - control: "molecule sidebar"
+      state: "off"
+    - control: "periodic table"
+      state: "off"
     sets:
     - set: 1
       compounds:
@@ -80,6 +95,9 @@ units:
         qty: 10
   - sim: 5
     name: "Mixtures"
+    controls:
+    - control: "heat slider"
+      state: "off"
     sets:
     - set: 1
       compounds:

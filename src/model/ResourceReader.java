@@ -2,10 +2,12 @@ package model;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
+import sun.misc.Resource;
 
 public class ResourceReader extends PApplet{
 	private String url;
@@ -27,5 +29,5 @@ public class ResourceReader extends PApplet{
 			output += lines[i] + "\n"; 
 		}
 		return output;
-	};
+	}
 }
