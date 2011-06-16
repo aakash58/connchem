@@ -117,7 +117,7 @@ public class P5Canvas extends PApplet{
 	}
 	
 	private void testYAMLInterface() {
-		System.out.println(yaml.getControlTimerTimeInit(1,1));
+		System.out.println(yaml.getControlHeatSliderState(1, 1));
 	}
 	
 	public void setBoundary(float xx, float yy, float ww, float hh) {
