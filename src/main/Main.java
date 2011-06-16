@@ -110,6 +110,7 @@ public class Main {
 	 * Create the application.
 	 */
 	public Main() {
+		SQLiteJDBCLoader.initialize();
 		initialize();
 	}
 
