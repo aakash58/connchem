@@ -138,7 +138,6 @@ public class TableView extends JPanel {
 		}
 
 		public void setValueAt(Object value, int row, int col) {
-			//System.out.println("setValueAt:"+row +" "+col+" "+value);
 			data[col].set(row, value);
 			colors[row] = (Color) value;
 			fireTableCellUpdated(row, col);

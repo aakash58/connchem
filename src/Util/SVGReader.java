@@ -41,7 +41,6 @@ public class SVGReader {
 					reachCircle = true;
 				}
 				if (sText.contains("<circle id") && reachCircle) {
-					//System.out.println("" + sText);
 					String[] values = sText.split("\"");
 					xList.add(values[5]);
 					yList.add(values[7]);

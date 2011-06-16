@@ -115,7 +115,6 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 	public int getIndex(String name) {
 		for (int i =0; i<additionalList.size();i++){
 			String mName = additionalList.get(i).toString();
-			//System.out.println(" 	getIndexOF: "+ mName +" name:"+name);
 			if (mName.equals(name) ){
 				return i;
 			}

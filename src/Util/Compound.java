@@ -3,8 +3,8 @@ package Util;
 import processing.core.*;
 import pbox2d.*;
 
+import org.jbox2d.collision.CircleDef;
 import org.jbox2d.common.*;
-import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.*;
 
 public class Compound {

@@ -234,7 +234,6 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 	public static String getSelecttedmolecule(){
 		int index = TableView.selectedRow;
-		//System.out.println("SelectedIndex:"+index);
 		if (index<0 || index>=mNames.size())
 			return "";
 		return mNames.get(index).toString();

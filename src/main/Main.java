@@ -6,7 +6,7 @@ package main;
 //Project Leader: Mike Stieff, PhD, University of Illinois at Chicago
 //Modeled in Processing by: Tuan Dang and Allan Berry
 
-//This software is Copyright Â© 2010, 2011 University of Illinois at Chicago,
+//This software is Copyright © 2010, 2011 University of Illinois at Chicago,
 //and is released under the GNU General Public License.
 //Please see "resources/copying.txt" for more details.
 
@@ -85,8 +85,6 @@ import java.awt.event.ComponentEvent;
 public class Main {
 	// Controllers
 	private static P5Canvas p5Canvas = new P5Canvas();
-	private static boolean isEnable =true;
-	
 	// TODO flag
 	public static JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
@@ -101,7 +99,6 @@ public class Main {
 	private static int minSliderValue = 1;
 	private static int maxSliderValue = 9;
 	private JComboBox setSelector = new JComboBox();
-	private int countTimer, maxCountTimer=30;
 	public static JPanel dynamicPanel;
 	public static JScrollPane dynamicScrollPane; 
 	public static ArrayList additionalPanelList =  new ArrayList();
@@ -113,13 +110,26 @@ public class Main {
 	public static JPanel centerPanel;
 	public static Canvas canvas = new Canvas();
 	public static TableView tableView;
-	public static final JLabel  volumeLabel = new JLabel(P5Canvas.currenttVolume+"ml");
+	public static final JLabel  volumeLabel = new JLabel(P5Canvas.currenttVolume+"mL");
 	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
+	public static int defaultZoom =50;
+	public static JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
+	public static int defaultSpeed =50;
+	public static JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
+	public static int heatInit =25;
+	public static int heatMin =-10;
+	public static int heatMax =500;
+	
+	public static JSlider heatSlider = new JSlider(heatMin, heatMax, heatInit);
 	public static boolean isVolumeblocked = false;
 	public static JLabel totalSystemEnergy;
 	public static JLabel averageSystemEnergy;
 	public static JLabel elapsedTime;
 	public static JButton playBtn;
+	public static JButton setPrevBtn; 
+	public static JButton setNextBtn; 
+	public static boolean isFirst =true; 
+	
 	/**
 	 * Launch the application.
 	 */
@@ -140,7 +150,6 @@ public class Main {
 	 * Create the application.
 	 */
 	public Main() {
-		SQLiteJDBCLoader.initialize();
 		initialize();
 	}
 
@@ -216,7 +225,6 @@ public class Main {
 		int pos = defaultSetMolecules.size()+additionalIndex;
 		dynamicPanel.removeAll();
 		additionalPanelList.remove(pos);
-		//System.out.println(" 	POS:"+pos +" additionalPanelList.size():"+additionalPanelList.size());
 		for (int i=0; i<additionalPanelList.size();i++){
 			JPanel p = (JPanel) additionalPanelList.get(i);
 			dynamicPanel.add(p, "cell 0 "+i+",grow");
@@ -350,24 +358,54 @@ public class Main {
 	
 	public void reset(){
 		p5Canvas.removeAllMolecules();
-		leftPanel.updateUI();
 		canvas.reset();
-		System.out.println();
-		System.out.println(getSetCompounds(selectedUnit,selectedSim,selectedSet));
-		//System.out.println(getSetCompounds(selectedUnit,selectedSim,selectedSet).size());
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
-		if (a==null) return;
-		for (int i=0; i<a.size();i++){
-			System.out.println(getCompoundName(selectedUnit,selectedSim,selectedSet,i)
-						+ getCompoundQty(selectedUnit,selectedSim,selectedSet,i));
-			String s = (String) getCompoundName(selectedUnit,selectedSim,selectedSet,i);
-			int num = Integer.parseInt(getCompoundQty(selectedUnit,selectedSim,selectedSet,i).toString());
-			p5Canvas.addMoleculeRandomly(s.replace(" ","-"),num);
+		if (a!=null) {
+			for (int i=0; i<a.size();i++){
+				String s = (String) getCompoundName(selectedUnit,selectedSim,selectedSet,i);
+				int num = Integer.parseInt(getCompoundQty(selectedUnit,selectedSim,selectedSet,i).toString());
+				p5Canvas.addMoleculeRandomly(s.replace(" ","-"),num);
+			}
 		}
-		//System.out.println("AAAAAAAAA:"+getControls(selectedUnit,selectedSim));
 		
 		if (P5Canvas.isEnable)
 			playBtn.doClick();
+		if (setPrevBtn!=null && setNextBtn !=null){
+			int numSet = setSelector.getItemCount();
+			if (setSelector.getSelectedIndex()==0)
+				setPrevBtn.disable(); 
+			else
+				setPrevBtn.enable(); 
+			if (setSelector.getSelectedIndex()>=numSet-1)
+				setNextBtn.disable();
+			else
+				setNextBtn.enable();
+			
+				volumeSlider.requestFocus();
+				volumeSlider.lostFocus(null, null);
+				volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
+				
+				
+				zoomSlider.requestFocus();
+				zoomSlider.lostFocus(null, null);
+				zoomSlider.enable(P5Canvas.yaml.getControlScaleSliderState(selectedUnit, selectedSim));
+				speedSlider.requestFocus();
+				speedSlider.lostFocus(null, null);
+				speedSlider.enable(P5Canvas.yaml.getControlSpeedSliderState(selectedUnit, selectedSim));
+				heatSlider.requestFocus();
+				heatSlider.lostFocus(null,null);
+				heatSlider.enable(P5Canvas.yaml.getControlHeatSliderState(selectedUnit, selectedSim));
+				
+				float heatMin =P5Canvas.yaml.getControlHeatSliderMin(selectedUnit, selectedSim);
+				float heatMax = P5Canvas.yaml.getControlHeatSliderMax(selectedUnit, selectedSim);
+				float heatInit =P5Canvas.yaml.getControlHeatSliderInit(selectedUnit, selectedSim);
+				heatSlider.setMaximum((int) heatMax);
+				heatSlider.setMinimum((int) heatMin);
+				heatSlider.setValue((int) heatInit);
+				leftPanel.updateUI();
+				centerPanel.updateUI();		
+		}	
+		
 	} 
 		
 		
@@ -380,7 +418,8 @@ public class Main {
 		Dimension screenDimension = tk.getScreenSize();
 		    
 		mainFrame = new JFrame();
-		mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
+		mainFrame.setBounds(0, 0, 1280, 700);
+		//mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -480,7 +519,7 @@ public class Main {
 										}	
 									}	
 								}
-								p5Canvas.removeAllMolecules();
+								reset();
 							}
 						});
 						
@@ -580,8 +619,7 @@ public class Main {
 					addDynamicPanel();
 					createPopupMenu();
 					//Update Model
-					p5Canvas.removeAllMolecules();
-					canvas.reset();
+						reset();
 				}
 			}
 		});
@@ -614,7 +652,7 @@ public class Main {
 		timerSubpanel.add(resetBtn, "cell 3 0 1 2,grow");
 		
 		
-		JButton setPrevBtn = new JButton("");
+		setPrevBtn = new JButton("");
 		setPrevBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
@@ -627,12 +665,12 @@ public class Main {
 				int numSets = setSelector.getItemCount();
 				if (selectedIndex>0){
 					setSelector.setSelectedIndex(selectedIndex-1);
-					reset();
+					//reset();
 				}
 			}
 		});
 		
-		JButton setNextBtn = new JButton("");
+		setNextBtn = new JButton("");
 		setNextBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-next.png")));
 		timerSubpanel.add(setNextBtn, "cell 2 1,growx");
 		setNextBtn.addMouseListener(new MouseAdapter() {
@@ -641,7 +679,7 @@ public class Main {
 				int numSets = setSelector.getItemCount();
 				if (selectedIndex<numSets-1){
 					setSelector.setSelectedIndex(selectedIndex+1);
-					reset();
+					//reset();
 				}
 			}
 		});
@@ -842,8 +880,7 @@ public class Main {
 
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
-		//System.out.println(""+ canvasPanel_mainView.getSize());
-
+		
 		
 		
 		JPanel clPanel = new JPanel();
@@ -869,21 +906,20 @@ public class Main {
 		JLabel l2 = new JLabel(" ");
 		clPanel.add(l2, "cell 0 3,alignx center");
 		
-		final int defaultScale = 50;
-		final JLabel scaleLabel = new JLabel(defaultScale*2+"%");
+		final JLabel scaleLabel = new JLabel(defaultZoom*2+"%");
 		clPanel.add(scaleLabel, "cell 0 4,alignx right");
-		JSlider canvasControl_main_scale = new JSlider(10,100,defaultScale);
-		canvasControl_main_scale.setOrientation(SwingConstants.VERTICAL);
-		canvasControl_main_scale.addChangeListener(new ChangeListener() {
+		zoomSlider = new JSlider(10,100,defaultZoom);
+		zoomSlider.setOrientation(SwingConstants.VERTICAL);
+		zoomSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
 				scaleLabel.setText(value*2+"%");
-				p5Canvas.setScale(value,defaultScale);
+				p5Canvas.setScale(value,defaultZoom);
 			
 			}
 		});
-		clPanel.add(canvasControl_main_scale, "cell 0 5,alignx right,growy");
-		JLabel canvasControlLabel_main_scale = new JLabel("Scale");
+		clPanel.add(zoomSlider, "cell 0 5,alignx right,growy");
+		JLabel canvasControlLabel_main_scale = new JLabel("Zoom");
 		clPanel.add(canvasControlLabel_main_scale, "cell 0 6,alignx right");
 		
 		centerPanel.add(clPanel,"cell 0 0");
@@ -895,13 +931,12 @@ public class Main {
 		JPanel cbPanel = new JPanel();
 		cbPanel.setLayout(new MigLayout("insets 0, gap 0", "[][210.00][40.00][30.00][][290.00][43.00]", "[]"));
 		
-		final int defaultSpeed = 50;
 		
 		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
 		final JLabel speedLabel = new JLabel("1x");
 		cbPanel.add(canvasControlLabel_main_speed, "cell 0 0");
-		JSlider canvasControl_main_speed =  new JSlider(1,100,defaultSpeed);
-		canvasControl_main_speed.addChangeListener(new ChangeListener() {
+		speedSlider =  new JSlider(1,100,defaultSpeed);
+		speedSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
 				float speedRate = (float) value/defaultSpeed;
@@ -914,26 +949,24 @@ public class Main {
 				speedLabel.setText(df.format(speedRate)+"x");
 			}
 		});
-		cbPanel.add(canvasControl_main_speed, "cell 1 0,growx");
+		cbPanel.add(speedSlider, "cell 1 0,growx");
 		cbPanel.add(speedLabel, "cell 2 0,alignx left");
 		cbPanel.add(new JLabel("    "), "cell 3 0,alignx center");
 		
 		
 		
-		final int defaultHeat = 50;
 		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
-		final JLabel heatLabel = new JLabel(defaultHeat+"\u2103");
+		final JLabel heatLabel = new JLabel(heatInit+"\u2103");
 		cbPanel.add(canvasControlLabel_main_heat, "cell 4 0");
-		p5Canvas.setHeat(defaultHeat);
-		JSlider canvasControl_main_heat = new JSlider(1,100,defaultHeat);
-		canvasControl_main_heat.addChangeListener(new ChangeListener() {
+		p5Canvas.setHeat(heatInit);
+		heatSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
 				heatLabel.setText(value+"\u2103");
 				p5Canvas.setHeat(value);
 			}
 		});
-		cbPanel.add(canvasControl_main_heat, "cell 5 0,growx");
+		cbPanel.add(heatSlider, "cell 5 0,growx");
 		cbPanel.add(heatLabel, "cell 6 0,alignx left");
 		
 		centerPanel.add(cbPanel,"cell 1 1");
@@ -992,7 +1025,6 @@ public class Main {
 
 		JLabel totalSystemPressureOutput = new JLabel("100 kPa");
 		dashboard.add(totalSystemPressureOutput, "cell 1 3");
-		System.out.println(rightPanel.getSize());
 */
 	}
 

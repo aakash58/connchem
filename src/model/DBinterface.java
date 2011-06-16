@@ -6,10 +6,7 @@ import java.util.Collections;
 
 import java.sql.*;
 
-import main.Main;
-import main.SQLiteJDBCLoader;
 
-import sun.misc.Resource;
 
 public class DBinterface {
 

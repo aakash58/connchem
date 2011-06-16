@@ -9,8 +9,8 @@ import pbox2d.*;
 import main.Canvas;
 
 import org.jbox2d.common.*;
-import org.jbox2d.collision.MassData;
-import org.jbox2d.collision.shapes.*;
+import org.jbox2d.collision.CircleDef;
+import org.jbox2d.collision.Shape;
 import org.jbox2d.dynamics.*;
 
 import Util.SVGReader;
@@ -58,7 +58,6 @@ public class Molecule {
 		bd.position.set(box2d.coordPixelsToWorld(new Vec2(x, y)));
 		
 		// This infinitive loop fix nullPointerException  because box2d.createBody(bd) may create a null body
-		// The error happens when user want to create many compound at the same time
 		body = box2d.createBody(bd);
 		while (body ==null){ 
 			body = box2d.createBody(bd);
@@ -113,13 +112,11 @@ public class Molecule {
 			body.createShape(cd);
 		}
 		body.setMassFromShapes();
-		//System.out.println("BD mass:"+P5Canvas.db.getCompoundMass(name)
-		//		+" Name:"+name+" getMass():"+body.getMass());
-
+	
 		// Give it some initial random velocity
 		body.setLinearVelocity(new Vec2(parent.random(-10, 10), parent.random(-10,10)));
 		body.setAngularVelocity(parent.random(-10, 10));
-		body.setUserData(this);
+		//body.setUserData(this);
 
 	}
 	
@@ -136,19 +133,14 @@ public class Molecule {
 	}
 	
 	public Vec2 getPosition(){
-		if (body==null) return null;
 		return body.getPosition();
 	}
 	
 	public Vec2 getSpeed(){
-		if (body==null)
-			return null;
 		return body.getLinearVelocity();
 	}
 	
 	public void setRestitution(float r){
-		if (body==null)
-			return;
 		Shape s = body.getShapeList();
 		for (int i=0; i<circles.length;i++){
 			s.setRestitution(r);
@@ -157,14 +149,11 @@ public class Molecule {
 	}
 		
 	public void addForce(Vec2 f){
-	//	System.out.println(force); 
-		
 		body.applyForce(f, body.getPosition());
 	}
 	public void display() {
-		if (body==null || box2d==null)
-			return;
-		if (body!=null){
+		if (body==null)
+			System.out.println("BODY:"+body);
 			body.applyForce(new Vec2(0,-100*body.getMass()), body.getPosition());
 		
 			if (P5Canvas.isDrag && P5Canvas.draggingBoundary<0){
@@ -174,10 +163,11 @@ public class Molecule {
 				body.setXForm(v, body.getAngle());
 			}
 			else{
-				xTmp = body.getPosition().x;
-				yTmp = body.getPosition().y;
+					xTmp = body.getPosition().x;
+					yTmp = body.getPosition().y;
 			}
-		}
+		
+		/*
 		
 		float t = P5Canvas.height- P5Canvas.y;
 		float b = P5Canvas.height -P5Canvas.h-P5Canvas.y;
@@ -188,11 +178,9 @@ public class Molecule {
 		
 		if (yy>t-minSize/3+Boundary.difVolume){
 			Vec2 v = new Vec2(body.getPosition().x, box2d.scalarPixelsToWorld(t-minSize+Boundary.difVolume));
-			//System.out.println(box2d.scalarWorldToPixels(body.getPosition().x)+" "+box2d.scalarWorldToPixels(body.getPosition().y));
-			//System.out.println("   P5Canvas: "+P5Canvas.x+" "+P5Canvas.y+" "+P5Canvas.w+" "+P5Canvas.h);
-			body.setXForm(v, body.getAngle());
+			if (body!=null && v!=null)
+				body.setXForm(v, body.getAngle());
 		}
-		/*
 		if (yy<b+minSize/3){
 				Vec2 v = new Vec2(body.getPosition().x, box2d.scalarPixelsToWorld(b+minSize));
 			body.setXForm(v, body.getAngle());
@@ -210,14 +198,16 @@ public class Molecule {
 		// We look at each body and get its screen position
 		Vec2 pos = box2d.getBodyPixelCoord(body);
 		// Get its angle of rotation
-		float a = body.getAngle();
-
-		// parent.rectMode(parent.CENTER);
-		parent.pushMatrix();
-		parent.translate(pos.x, pos.y);
 		
-		parent.rotate(-a);
+			float a = body.getAngle();
+			// parent.rectMode(parent.CENTER);
+			parent.pushMatrix();
+			parent.translate(pos.x, pos.y);
+			
+			parent.rotate(-a);
 		
+		
+	
 		
 		//pShape.scale(P5Canvas.scale/scale);
 		//scale = P5Canvas.scale;
@@ -239,9 +229,8 @@ public class Molecule {
 	
 	// This function removes the particle from the box2d world
 	public void killBody() {
-		if (body==null) return;
 		box2d.destroyBody(body);
-		body=null;
+		System.out.println("Killed body:"+body);
 	}
 
 	/*/ Is the particle ready for deletion?
