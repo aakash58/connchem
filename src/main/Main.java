@@ -84,6 +84,7 @@ import java.awt.event.ComponentEvent;
 
 public class Main {
 	// Controllers
+	// this is a different change. 
 	private static P5Canvas p5Canvas = new P5Canvas();
 	// TODO flag
 	public static JFrame mainFrame;
