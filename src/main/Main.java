@@ -871,7 +871,7 @@ public class Main {
 			public void componentResized(ComponentEvent e) {
 				int volume = (int) p5Canvas.getSize().height/P5Canvas.multiplierVolume;
 				p5Canvas.updateSize(p5Canvas.getSize(), volume);
-				volumeLabel.setText(volume+" ml");
+				volumeLabel.setText(volume+" mL");
 			}
 		});
 		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
@@ -894,7 +894,7 @@ public class Main {
 					int value = ((JSlider) e.getSource()).getValue(); 
 					p5Canvas.setVolume(value);
 					int volume = (int) p5Canvas.getSize().height/P5Canvas.multiplierVolume;
-					volumeLabel.setText((volume+P5Canvas.currenttVolume-P5Canvas.defaultVolume)+" ml");
+					volumeLabel.setText((volume+P5Canvas.currenttVolume-P5Canvas.defaultVolume)+" mL");
 				}
 			}
 		});
@@ -942,7 +942,7 @@ public class Main {
 				int value = ((JSlider) e.getSource()).getValue(); 
 				float speedRate = (float) value/defaultSpeed;
 				if (value>defaultSpeed)
-					speedRate =1+3*(speedRate-1);
+					speedRate =1+2*(speedRate-1);
 				p5Canvas.setSpeed(speedRate);
 				
 				DecimalFormat df = new DecimalFormat("#.#");
