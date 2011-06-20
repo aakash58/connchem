@@ -61,6 +61,8 @@ public class P5Canvas extends PApplet{
 	ArrayList<Molecule> killingList = new ArrayList<Molecule>();
 	public static int draggingBoundary =-1;
 	private boolean isFirstTime =true;
+	private float frameRate =24;
+	
 	
 	/*
 	 * for testing
@@ -83,7 +85,7 @@ public class P5Canvas extends PApplet{
 		
 	public void setup() {
 		smooth();
-		frameRate(24);
+		frameRate(frameRate);
 		
 		// Initialize box2d physics and create the world
 		box2d.createWorld(-400,-400, 600, 600);
@@ -168,7 +170,18 @@ public class P5Canvas extends PApplet{
 			Molecule m2 = (Molecule) killingList.get(1);
 			for (int i=0;i<products.size();i++){
 				Vec2 loc =m1.getPosition();
-				addMolecule(box2d.scalarWorldToPixels(loc.x),h-box2d.scalarWorldToPixels(loc.y),products.get(i));
+				float x1 = box2d.scalarWorldToPixels(loc.x);
+				float y1 = h-box2d.scalarWorldToPixels(loc.y);
+				Vec2 newVec =removeDuplicatePosition(new Vec2(x1,y1));
+				Molecule m = new Molecule(newVec.x, newVec.y,products.get(i), box2d, this);
+				molecules.add(m);
+				if (i==0)
+					m.setLinearVelocity(m1.getLinearVelocity());
+				
+				else{
+					m.setLinearVelocity(m2.getLinearVelocity());
+				}
+					
 			}
 			m1.killBody();
 			m2.killBody();
@@ -181,9 +194,23 @@ public class P5Canvas extends PApplet{
 		
 		this.scale(scale);
 		if (isEnable){
-			float timeStep = speedRate / 60.0f;
-			box2d.step(timeStep,15);
+			float newFrameRate=24;
+ 			if (speedRate>=1){
+ 				newFrameRate = newFrameRate*speedRate;
+			}
+			if (frameRate !=newFrameRate){
+				frameRate = newFrameRate;
+				frameRate(frameRate);
+				System.out.println("frameRate:"+frameRate);
+			}
+				
+			float timeStep = 1 / 60.0f;
+			if (speedRate<1){
+				timeStep *= speedRate;
+			}
+ 			box2d.step(timeStep,15);
 			
+			//System.out.println("speedRate: "+speedRate);
 			// Apply gravity to molecules
 			for (int i = 0; i < molecules.size(); i++) {
 				Molecule m = molecules.get(i);
@@ -205,9 +232,9 @@ public class P5Canvas extends PApplet{
 		boundaries[2].display();
 		boundaries[3].display();
 			
-		computeEnergy();
+		
 	}
-	private void computeEnergy(){
+	public static void computeEnergy(){
 		float sum = 0f;
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
@@ -221,7 +248,6 @@ public class P5Canvas extends PApplet{
 		float average =0f;
 		if (molecules.size()>0)
 			average = sum/molecules.size();
-		
 		
 		if (Main.totalSystemEnergy!=null){
 			DecimalFormat df = new DecimalFormat("#.##");
@@ -260,8 +286,6 @@ public class P5Canvas extends PApplet{
 					gravityY = (bTemp-temp)/(bTemp-fTemp);
 					gravityX = gravityY*0.5f;
 				}	
-			//	gravity = (float) Math.pow(gravity, 2);
-			//	System.out.println(temp+ "	gravity:"+gravity);
 				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*15000;
 				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*15000;
 			}	
@@ -394,9 +418,8 @@ public class P5Canvas extends PApplet{
 				res =0.80f+res*0.23f;
 				res = (float) Math.pow(res, 0.4);
 			}
-			else if (res>=1){
+			else if (res>=1)
 				res =1.1f+res/10;
-			}
 			else
 				res=0.5f;
 			m.setRestitution(res);
@@ -412,7 +435,7 @@ public class P5Canvas extends PApplet{
 				scale = 1+(40-temp)/200f;
 			}	
 			m.setRadius(scale);
-			System.out.println( "Res:"+res+" fric:"+fric+" scale"+scale);
+			//System.out.println( "Res:"+res+" fric:"+fric+" scale"+scale);
 		}
 		
 		
@@ -435,7 +458,6 @@ public class P5Canvas extends PApplet{
 	public void setVolume(int value) {
 		boolean tmp = isEnable;
 		isEnable = false;
-		//int dif = value-currenttVolume;
 		boundaries[2].set(value);
 		
 		currenttVolume = value;

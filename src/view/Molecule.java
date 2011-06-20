@@ -115,7 +115,7 @@ public class Molecule {
 		else if (name.equals("Bromine"))
 			mul =mul*0.6f;
 		else if (name.equals("Mercury"))
-			mul =mul*1.0f;
+			mul =mul*0.75f;
 		
 		for (int i=0; i<circles.length;i++){
 			// Define a circle
@@ -135,8 +135,8 @@ public class Molecule {
 		}
 		body.setMassFromShapes();
 	
-		System.out.println(name+ " get Mass "+body.getMass() +" DBmass:"+
-				+DBinterface.getCompoundMass(name));
+		//System.out.println(name+ " get Mass "+body.getMass() +" DBmass:"+
+		//		+DBinterface.getCompoundMass(name));
 		// Give it some initial random velocity
 		body.setLinearVelocity(new Vec2(parent.random(-1, 1), parent.random(-1,1)));
 		body.setAngularVelocity(0);
@@ -144,9 +144,11 @@ public class Molecule {
 
 	}
 	
-	public void setSpeedByHeat(float newRate) {
-		Vec2 v =  body.getLinearVelocity();
-		body.setLinearVelocity(new Vec2( v.x*newRate, v.y*newRate));
+	public Vec2 getLinearVelocity() {
+		return  body.getLinearVelocity();
+	}
+	public void setLinearVelocity(Vec2 v) {
+		body.setLinearVelocity(v);
 	}
 	
 	public int getNumElement(){
