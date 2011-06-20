@@ -775,6 +775,12 @@ public class BroadPhase {
             // Find the s overlaps.
             while (s != 0) {
                 assert (i >= 0) : ("i = " + i + "; s = " + s);
+                
+                if (i<0){
+                	System.out.println("TUAN: "+i);
+                	break;
+                	//System.out.println("TUAN: "+i+" bounds[i]:"+bounds[i]);
+                }	
                 if (bounds[i].isLower()) {
                     Proxy proxy = m_proxyPool[bounds[i].proxyId];
                     if (lowerQuery <= proxy.upperBounds[axis]) {

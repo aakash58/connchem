@@ -204,7 +204,7 @@ public class DBinterface {
 	}
 
 	public static Float getCompoundBoilingPointCelsius(String compoundName_) {
-		Float boilPoint = 0.f;
+		Float boilPoint = 100.f;
 
 		ArrayList results = new ArrayList();
 		String[] args = new String[2];
@@ -212,13 +212,9 @@ public class DBinterface {
 		args[1] = "boilingPointCelsius";
 		results = dbConnect(args);
 
-		try {
-			boilPoint = Float.valueOf((String) results.get(0)).floatValue();
-			return boilPoint;
-		} catch (Exception e) {
-			System.out.println(e);
-			return null;
-		}
+		if (results.get(0)==null) return 100f;
+		boilPoint = Float.valueOf((String) results.get(0)).floatValue();
+		return boilPoint;
 	}
 
 	public static Float getCompoundBoilingPointKelvin(String compoundName_) {
@@ -235,13 +231,10 @@ public class DBinterface {
 		args[1] = "freezingPointCelsius";
 		results = dbConnect(args);
 
-		try {
-			freezePoint = Float.valueOf((String) results.get(0)).floatValue();
-			return freezePoint;
-		} catch (Exception e) {
-			System.out.println(e);
-			return null;
-		}
+		if (results.get(0)==null) return 0f;
+		freezePoint = Float.valueOf((String) results.get(0)).floatValue();
+		return freezePoint;
+		
 	}
 
 	public static Float getCompoundFreezingPointKelvin(String compoundName_) {

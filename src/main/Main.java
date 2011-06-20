@@ -963,8 +963,8 @@ public class Main {
 		heatSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
-				heatLabel.setText(value+"\u2103");
 				p5Canvas.setHeat(value);
+				heatLabel.setText(value+"\u2103");
 			}
 		});
 		cbPanel.add(heatSlider, "cell 5 0,growx");

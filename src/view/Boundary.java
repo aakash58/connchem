@@ -25,6 +25,8 @@ public class Boundary {
 	private int volumeSliderDefaultValue;
 	private float yOriginal=0; //Original y of body when created
 	public static float difVolume; //Increase or Decrease in Volume
+	public static boolean isTransformed =false; //Increase or Decrease in Volume
+	
 	
 	Boundary(int id_,float x_,float y_, float w_, float h_, int sliderValue_, PBox2D box2d_, P5Canvas parent_) {
 		id = id_;
@@ -44,8 +46,8 @@ public class Boundary {
 		PolygonDef sd = new PolygonDef();
 		sd.setAsBox(box2dW, box2dH);
 		sd.density = 0;    // No density means it won't move!
-		sd.friction = 1.0f;
-		sd.restitution =1.f;
+		sd.friction = 1f;
+		sd.restitution =0.5f;
 
 		// Create the body
 		BodyDef bd = new BodyDef();
@@ -55,7 +57,7 @@ public class Boundary {
 			body = box2d.createBody(bd);
 		}	
 		body.createShape(sd);
-		//body.setUserData(this);
+		body.setUserData(this);
 		yOriginal = body.getPosition().y ;
 	}
 	public float getId(){
@@ -72,17 +74,18 @@ public class Boundary {
 	public void set(int v){
 			volumeSliderValue = v;
 			difVolume = (volumeSliderValue-volumeSliderDefaultValue)*P5Canvas.multiplierVolume;
+			isTransformed =true;
 	}
 	
 	
 	void display() {
 		parent.rectMode(parent.CENTER);
-	/*	if (id==2){
+		if (id==2 && isTransformed){
 			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
 					box2d.scalarPixelsToWorld(difVolume));
-			if (body!=null && v!=null)
-				body.setXForm(v, body.getAngle());
-		}	*/
+			body.setXForm(v, body.getAngle());
+			isTransformed =false;
+		}	
 		if (id==3)
 			parent.fill(parent.heatRGB);
 		else{
