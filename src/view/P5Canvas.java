@@ -34,8 +34,7 @@ public class P5Canvas extends PApplet{
 	private PBox2D box2d = new PBox2D(this);
 	public static boolean isEnable = true;
 	public static int creationCount = 0;
-	public static float restitution =0.5f;
-	public static float gravity =1.f;
+	public static float temp =25.f;
 	
 	//Default value of speed
 	public static float speedRate = 1.f;
@@ -62,7 +61,7 @@ public class P5Canvas extends PApplet{
 	ArrayList<Molecule> killingList = new ArrayList<Molecule>();
 	public static int draggingBoundary =-1;
 	private boolean isFirstTime =true;
-
+	
 	/*
 	 * for testing
 	 */
@@ -108,6 +107,18 @@ public class P5Canvas extends PApplet{
 		
 		println(db.getReactionProducts(reactants));
 		println(db.getReactionProbability(10));*/
+		System.out.print("Phosphorus: ");
+		System.out.print(db.getCompoundFreezingPointCelsius("Phosphorus")+"  ");
+		System.out.println(db.getCompoundBoilingPointCelsius("Phosphorus"));
+		System.out.print("Mercury: ");
+		System.out.print(db.getCompoundFreezingPointCelsius("Mercury")+"  ");
+		System.out.println(db.getCompoundBoilingPointCelsius("Mercury"));
+		System.out.print("Bromine: ");
+		System.out.print(db.getCompoundFreezingPointCelsius("Bromine")+"  ");
+		System.out.println(db.getCompoundBoilingPointCelsius("Bromine"));
+		System.out.print("Hydrogen-Peroxide: ");
+		System.out.print(db.getCompoundFreezingPointCelsius("Hydrogen-Peroxide")+"  ");
+		System.out.println(db.getCompoundBoilingPointCelsius("Hydrogen-Peroxide"));
 		
 	}
 	
@@ -152,12 +163,12 @@ public class P5Canvas extends PApplet{
 		
 		drawBackground();
 		// We must always step through time!
-	/*	if (products!=null && products.size()>0){
+		if (products!=null && products.size()>0){
 			Molecule m1 = (Molecule) killingList.get(0);
 			Molecule m2 = (Molecule) killingList.get(1);
 			for (int i=0;i<products.size();i++){
 				Vec2 loc =m1.getPosition();
-				addMolecule(box2d.scalarWorldToPixels(loc.x),box2d.scalarWorldToPixels(loc.y),products.get(i));
+				addMolecule(box2d.scalarWorldToPixels(loc.x),h-box2d.scalarWorldToPixels(loc.y),products.get(i));
 			}
 			m1.killBody();
 			m2.killBody();
@@ -166,22 +177,23 @@ public class P5Canvas extends PApplet{
 			
 			products = new ArrayList<String>();
 			killingList = new ArrayList();
-		}*/
+		}
 		
 		this.scale(scale);
 		if (isEnable){
-			float timeStep = 1.0f/60.0f;//speedRate / 60.0f;
-			box2d.step();//.step(timeStep,10);
+			float timeStep = speedRate / 60.0f;
+			box2d.step(timeStep,15);
+			
+			// Apply gravity to molecules
+			for (int i = 0; i < molecules.size(); i++) {
+				Molecule m = molecules.get(i);
+				if (m!=null){
+					setForce(i,m);
+				}	
+			}
 		}	
 		
-		// Apply gravity to molecules
-	/*	for (int i = 0; i < molecules.size(); i++) {
-			Molecule m = molecules.get(i);
-			if (m!=null){
-				m.setRestitution(restitution);
-				setForce(i,m);
-			}	
-		}*/
+		
 		
 		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
@@ -193,7 +205,7 @@ public class P5Canvas extends PApplet{
 		boundaries[2].display();
 		boundaries[3].display();
 			
-		//computeEnergy();
+		computeEnergy();
 	}
 	private void computeEnergy(){
 		float sum = 0f;
@@ -210,6 +222,7 @@ public class P5Canvas extends PApplet{
 		if (molecules.size()>0)
 			average = sum/molecules.size();
 		
+		
 		if (Main.totalSystemEnergy!=null){
 			DecimalFormat df = new DecimalFormat("#.##");
 			Main.totalSystemEnergy.setText(df.format(sum)+" kJ");
@@ -222,8 +235,6 @@ public class P5Canvas extends PApplet{
 			if (i==index)
 				continue;
 			Molecule m = molecules.get(i);
-			if (m==null)
-				continue;
 			Vec2 loc = m.getPosition();
 			Vec2 locIndex = mIndex.getPosition();
 			if(loc==null || locIndex==null) continue;
@@ -233,14 +244,31 @@ public class P5Canvas extends PApplet{
 			Vec2 normV = normalizeForce(new Vec2(x,y));
 			float forceX;
 			float forceY;
-			
 			if (mIndex.polarity==m.polarity){
-				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravity;
-				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravity;
+				float fTemp = mIndex.freezingTem;
+				float bTemp = mIndex.boilingTem;
+				float gravityX,gravityY;
+				if (temp>=bTemp){
+					gravityX = 0;
+					gravityY = 0;
+				}
+				else if (temp<=fTemp){
+					gravityY = (bTemp-temp)/(bTemp-fTemp);
+					gravityX = gravityY*1.8f;
+				}	
+				else{
+					gravityY = (bTemp-temp)/(bTemp-fTemp);
+					gravityX = gravityY*0.5f;
+				}	
+			//	gravity = (float) Math.pow(gravity, 2);
+			//	System.out.println(temp+ "	gravity:"+gravity);
+				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*15000;
+				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*15000;
 			}	
 			else{
-				forceX =  (normV.x/dis)*m.getMass()*mIndex.getMass()*gravity;
-				forceY =  (normV.y/dis)*m.getMass()*mIndex.getMass()*gravity;
+				int num = m.getNumElement();
+				forceX =  (normV.x/dis)*m.getMass()*mIndex.getMass()*300*num;
+				forceY =  (normV.y/dis)*m.getMass()*mIndex.getMass()*300*num;
 			}
 			mIndex.addForce(new Vec2(forceX,forceY));
 			
@@ -330,7 +358,7 @@ public class P5Canvas extends PApplet{
 	
 	public void addMolecule(float x_, float y_, String compoundName) {
 		Vec2 newVec =removeDuplicatePosition(new Vec2(x_,y_));
-		Molecule m = new Molecule(newVec .x, newVec.y,compoundName, box2d, this);
+		Molecule m = new Molecule(newVec.x, newVec.y,compoundName, box2d, this);
 		molecules.add(m);
  	}
 	
@@ -355,11 +383,39 @@ public class P5Canvas extends PApplet{
 	
 	//Set Speed of Molecules; values are from 0 to 100; 50 is default value 
 	public void setHeat(int value) {
-		restitution = (float) (value)/50;
-		restitution = 0.5f+restitution*0.5f;
-		gravity = (100f-value)/10f;
-		//gravity = (float) Math.pow(gravity, 1.1);
+		temp = value;
+		for (int i = 0; i < molecules.size(); i++) {
+			Molecule m = molecules.get(i);
+			float fTemp = m.freezingTem;
+			float bTemp = m.boilingTem;
+			float res = (temp-fTemp)/(bTemp-fTemp);
+			
+			if (res>0 && res<1){
+				res =0.80f+res*0.23f;
+				res = (float) Math.pow(res, 0.4);
+			}
+			else if (res>=1){
+				res =1.1f+res/10;
+			}
+			else
+				res=0.5f;
+			m.setRestitution(res);
+			
+			
+			float fric;
+			if (temp<fTemp) fric =1;
+			else  			fric =0; 
+			m.setFriction(fric);
 	
+			float scale=1;
+			if (m.getName().equals("Water") && temp<40){
+				scale = 1+(40-temp)/200f;
+			}	
+			m.setRadius(scale);
+			System.out.println( "Res:"+res+" fric:"+fric+" scale"+scale);
+		}
+		
+		
 		double v = (double) (value-Main.heatMin)/200;
 		v=v+0.3;
 		if (v>1) v=1;
@@ -502,13 +558,16 @@ public class P5Canvas extends PApplet{
 			ArrayList<String> reactants = new ArrayList<String>();
 			reactants.add(m1.getName());
 			reactants.add(m2.getName());
-			//products = getReactionProducts(reactants);
-			if (products!=null && products.size()>0){
-				killingList.add(m1);
-				killingList.add(m2);
+			if (temp>=110){
+				float random = this.random(110, 210);
+				if (random<temp){
+					products = getReactionProducts(reactants);
+					if (products!=null && products.size()>0){
+						killingList.add(m1);
+						killingList.add(m2);
+					}
+				}
 			}
-			
-			
 		}
 	}
 	

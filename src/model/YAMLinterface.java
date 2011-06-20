@@ -128,6 +128,7 @@ public class YAMLinterface {
 
 	private static ArrayList getControls(int unitNumber) {
 		HashMap unit = getUnit(unitNumber);
+		if (unit==null) return null;
 
 		ArrayList<HashMap> al1 = new ArrayList();
 		al1 = getControls();
@@ -140,7 +141,8 @@ public class YAMLinterface {
 
 	private static ArrayList<HashMap> getControls(int unitNumber, int simNumber) {
 		HashMap sim = getSim(unitNumber, simNumber);
-
+		if (sim==null) return null;
+		
 		ArrayList<HashMap> al1 = new ArrayList();
 		al1 = getControls(unitNumber);
 
