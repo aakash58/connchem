@@ -47,7 +47,7 @@ public class Boundary {
 		sd.setAsBox(box2dW, box2dH);
 		sd.density = 0;    // No density means it won't move!
 		sd.friction = 1f;
-		sd.restitution =0.5f;
+		sd.restitution =0.8f;
 
 		// Create the body
 		BodyDef bd = new BodyDef();
@@ -59,6 +59,7 @@ public class Boundary {
 		body.createShape(sd);
 		body.setUserData(this);
 		yOriginal = body.getPosition().y ;
+		isTransformed =true;
 	}
 	public float getId(){
 		return id;

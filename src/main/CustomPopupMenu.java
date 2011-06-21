@@ -208,7 +208,7 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 			Main.removeAdditionalMolecule(getIndex(b.getName()));
 			additionalList.remove(b.getName());
 		}
-		
+		Main.leftPanel.updateUI();
 	}
 
 	public Component[] getComponents() {

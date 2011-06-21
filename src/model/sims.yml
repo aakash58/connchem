@@ -18,7 +18,7 @@ controls:
   unit: "celsius"
   min: -10
   init: 25
-  max: 500
+  max: 200
 - control: "molecule sidebar"
   state: "on"
 - control: "periodic table"
@@ -33,7 +33,7 @@ units:
     - set: 1
       compounds:
       - compound: "Water"
-        qty: 5
+        qty: 20
   - sim: 2
     name: "Classifying Matter"
     controls:
@@ -55,11 +55,11 @@ units:
     - set: 1
       compounds:
       - compound: "Water"
-        qty: 10
+        qty: 20
     - set: 2
       compounds:
       - compound: "Hydrogen Peroxide"
-        qty: 10
+        qty: 20
     - set: 3
       compounds:
       - compound: "Pentane"
@@ -67,11 +67,11 @@ units:
     - set: 4
       compounds:
       - compound: "Mercury"
-        qty: 10
+        qty: 20
     - set: 5
       compounds:
       - compound: "Bromine"
-        qty: 10
+        qty: 15
     - set: 6
       #temperature: 1500
       #minTemperature: 1000
@@ -85,7 +85,7 @@ units:
     - set: 1
       compounds:
       - compound: "Water"
-        qty: 50
+        qty: 40
   - sim: 4
     name: "Chemical Changes"
     sets:
@@ -102,13 +102,13 @@ units:
     - set: 1
       compounds:
       - compound: "Water"
-        qty: 20
+        qty: 30
       - compound: "Bromine"
-        qty: 20
+        qty: 15
     - set: 2
       compounds:
       - compound: "Water"
-        qty: 20
+        qty: 30
       - compound: "Mercury"
         qty: 20
     - set: 3
@@ -120,7 +120,7 @@ units:
     - set: 4
       compounds:
       - compound: "Water"
-        qty: 20
+        qty: 30
       - compound: "Pentane"
         qty: 8
     - set: 5
@@ -136,9 +136,9 @@ units:
       - compound: "Water"
         qty: 20
       - compound: "Bromine"
-        qty: 20
+        qty: 7
       - compound: "Pentane"
-        qty: 8
+        qty: 7
 - unit: 2
   name: "Solutions"
   sims:

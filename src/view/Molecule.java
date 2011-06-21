@@ -7,6 +7,7 @@ import processing.core.*;
 import pbox2d.*;
 
 import main.Canvas;
+import main.Main;
 import model.DBinterface;
 
 import org.jbox2d.common.*;
@@ -66,14 +67,14 @@ public class Molecule {
 		if ((name.equals("Water") || name.equals("Phosphorus")|| name.equals("Hydrogen-Peroxide")) && temp<40){
 			res = (temp-freezingTem)/(boilingTem-freezingTem);
 			if (res>0 && res<1){
-				res =0.80f+res*0.23f;
-				res = (float) Math.pow(res, 0.4);
+				res =0.9f+res*0.13f;
+				//res = (float) Math.pow(res, 0.4);
 			}
 			else if (res>=1){
 				res =1.1f+res/10;
 			}
 			else
-				res=0.5f;
+				res=0.2f;
 
 			if (temp<=freezingTem)
 				fric = 1;
@@ -85,13 +86,21 @@ public class Molecule {
 		else{
 			res =0.95f;
 			if (name.equals("Mercury")){
-				res=0.7f;
+				res=0.76f;
+			}
+			else if (name.equals("Pentane")){
+				res=0.95f;
 			}
 			
 			fric=0;
 			scale = 1.05f;
 		}
-		//System.out.println( name + " res:"+res+" fric:"+fric+" scale:"+scale);
+		if (Main.selectedUnit==1 && Main.selectedSim==5 && Main.selectedSet==2 && name.equals("Water"))
+			res =0.87f;
+			
+		System.out.println("Main.selectedUnit:"+Main.selectedUnit+" " +Main.selectedSim+
+				" "+Main.selectedSet);
+		//System.out.println( name + " res:"+res+" fric:"+fric+" scale:"+scale+" "+circles.length);
 		
 		createBody(x,y);
 	}
@@ -111,11 +120,11 @@ public class Molecule {
 		
 		float mul =1;
 		if (name.equals("Pentane")) 
-			mul =mul*0.05f;
+			mul =mul*0.06f;
 		else if (name.equals("Bromine"))
-			mul =mul*0.6f;
+			mul =mul*0.50f;
 		else if (name.equals("Mercury"))
-			mul =mul*0.75f;
+			mul =mul*2.0f;
 		
 		for (int i=0; i<circles.length;i++){
 			// Define a circle
@@ -124,7 +133,9 @@ public class Molecule {
 			Vec2 offset = new Vec2(circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2);
 			cd.localPosition = box2d.vectorPixelsToWorld(offset);
 			cd.radius = box2d.scalarPixelsToWorld(circles[i][0])*scale;
-			float m = DBinterface.getElementMass(elementNames.get(i));
+			float m =1;
+			if (elementNames!=null && i<elementNames.size())
+				m = DBinterface.getElementMass(elementNames.get(i));
 			
 			float d = m/(circles[i][0]*circles[i][0]*circles[i][0]);
 			cd.density = d*mul; 		
@@ -196,13 +207,16 @@ public class Molecule {
 		body.applyForce(f, body.getPosition());
 	}
 	public void display() {
-			body.applyForce(new Vec2(0,-50*body.getMass()), body.getPosition());
-		
+			if (P5Canvas.isEnable && !P5Canvas.isDrag){
+				body.applyForce(new Vec2(0,-50*body.getMass()), body.getPosition());
+				
+			}	
 			if (P5Canvas.isDrag && P5Canvas.draggingBoundary<0){
 				float xx = xTmp+box2d.scalarPixelsToWorld(P5Canvas.xDrag);
 				float yy = yTmp-box2d.scalarPixelsToWorld(P5Canvas.yDrag);
 				Vec2 v = new Vec2(xx,yy);
 				body.setXForm(v, body.getAngle());
+				body.setAngularVelocity(0);
 			}
 			else{
 					xTmp = body.getPosition().x;

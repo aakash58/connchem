@@ -89,9 +89,9 @@ public class Main {
 	// TODO flag
 	public static JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
-	private static int selectedUnit=0;
-	private static int selectedSim=0;
-	private static int selectedSet=0;
+	public static int selectedUnit=0;
+	public static int selectedSim=0;
+	public static int selectedSet=0;
 	public static Color selectedColor = new Color(200,200,150);
 	public static Color defaultColor = Color.LIGHT_GRAY;
 	private int[] sliderValues = {5,6,7,6,3};
@@ -119,7 +119,7 @@ public class Main {
 	public static JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
 	public static int heatInit =25;
 	public static int heatMin =-10;
-	public static int heatMax =500;
+	public static int heatMax =200;
 	
 	public static JSlider heatSlider = new JSlider(heatMin, heatMax, heatInit);
 	public static boolean isVolumeblocked = false;
@@ -403,6 +403,8 @@ public class Main {
 				heatSlider.setMaximum((int) heatMax);
 				heatSlider.setMinimum((int) heatMin);
 				heatSlider.setValue((int) heatInit);
+				speedSlider.setValue(defaultSpeed);
+				
 				leftPanel.updateUI();
 				centerPanel.updateUI();		
 		}	
@@ -701,7 +703,7 @@ public class Main {
 		dynamicScrollPane.setViewportView(dynamicPanel);
 		dynamicPanel.setLayout(new MigLayout("insets 4", "[174.00,grow]", "[][]"));
 		
-		JPanel panel_2 = new JPanel();
+		/*		JPanel panel_2 = new JPanel();
 		dynamicPanel.add(panel_2, "cell 0 0");
 		additionalPanelList.add(panel_2);
 		panel_2.setBackground(new Color(192, 192, 192));
@@ -863,7 +865,7 @@ public class Main {
 			}
 		});
 
-
+*/
 		//****************************************** CENTER PANEL *****************************************************
 		centerPanel = new JPanel();
 		centerPanel.addComponentListener(new ComponentAdapter() {
