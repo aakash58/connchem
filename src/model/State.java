@@ -62,7 +62,7 @@ public class State {
 	 */
 	public static final Float defaultTemperature = 25.0f; // default temp for all sims/sets is 0° Celsius
 	public static final Float defaultMinTemperature = -10.f;
-	public static final Float defaultMaxTemperature = 500.f;
+	public static final Float defaultMaxTemperature = 200.f;
 	
 	/*
 	 * Default compound settings
