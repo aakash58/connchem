@@ -18,6 +18,7 @@ import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 import Util.ColorScales;
+import Util.MP3;
 import static model.State.*;
 import model.DBinterface;
 import model.YAMLinterface;
@@ -32,7 +33,7 @@ public class P5Canvas extends PApplet{
 	
 	// A reference to our box2d world
 	private PBox2D box2d = new PBox2D(this);
-	public static boolean isEnable = true;
+	public static boolean isEnable = false;
 	public static int creationCount = 0;
 	public static float temp =25.f;
 	
@@ -41,12 +42,11 @@ public class P5Canvas extends PApplet{
 	//Default value of heat
 	public static float heatRate = 1.f;
 	//Default value of scale slider
-	public static float scale = 1.f;
+	public static float scale = 0.8f;
 	//Default value of volume slider
 	public static int defaultVolume =50;
 	public static int currenttVolume =defaultVolume;
 	public static int multiplierVolume =10; // Multiplier from pixels to ml
-	public static float minH=0;//minimum height of container
 	public static float maxH=1100;//minimum height of container
 	
 	public static int heatRGB = 0;
@@ -62,6 +62,7 @@ public class P5Canvas extends PApplet{
 	public static int draggingBoundary =-1;
 	private boolean isFirstTime =true;
 	private float frameRate =24;
+	private boolean isBoom = false;
 	
 	
 	/*
@@ -77,7 +78,6 @@ public class P5Canvas extends PApplet{
 		//setBoundary(0,0,d.width,d.height);
 		width = d.width;
 		height = d.height;
-		minH = (volume - defaultVolume)*multiplierVolume;
 		maxH = (volume + defaultVolume)*multiplierVolume;
 		
 		isEnable = tmp;
@@ -96,37 +96,38 @@ public class P5Canvas extends PApplet{
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
 		setBoundary(0,0,648,600);	
-		testDbInterface();
-	}
-	
-	private void testDbInterface() {
-		/*
-		ArrayList<String> reactants = new ArrayList<String>();
-		reactants.add("Hydrogen Peroxide");
-		reactants.add("Hydrogen Peroxide");
-		//reactants.add("Water");
-		//reactants.add("Ammonium");
-		
-		println(db.getReactionProducts(reactants));
-		println(db.getReactionProbability(10));*/
-		System.out.print("Phosphorus: ");
-		System.out.print(db.getCompoundFreezingPointCelsius("Phosphorus")+"  ");
-		System.out.println(db.getCompoundBoilingPointCelsius("Phosphorus"));
-		System.out.print("Mercury: ");
-		System.out.print(db.getCompoundFreezingPointCelsius("Mercury")+"  ");
-		System.out.println(db.getCompoundBoilingPointCelsius("Mercury"));
-		System.out.print("Bromine: ");
-		System.out.print(db.getCompoundFreezingPointCelsius("Bromine")+"  ");
-		System.out.println(db.getCompoundBoilingPointCelsius("Bromine"));
-		System.out.print("Hydrogen-Peroxide: ");
-		System.out.print(db.getCompoundFreezingPointCelsius("Hydrogen-Peroxide")+"  ");
-		System.out.println(db.getCompoundBoilingPointCelsius("Hydrogen-Peroxide"));
-		
+		//testDbInterface();
 	}
 	
 	
+	
+	public void boom() {
+		MP3.play(2);
+		for (int i = 0; i < 4; i++) {
+			boundaries[i].killBody();
+		}
+		
+		System.out.println(xStart + " "+ yStart);
+
+		int xx =250;
+		int yy =150;
+		
+		for (int i=0; i<60;i++){
+			Boundary2 b  = new Boundary2(i, xx, yy+i*10 , 10, 10 , box2d, this);
+			b2.add(b);
+			Boundary2 bb  = new Boundary2(i, xx+648, yy+ i*10 , 10, 10 , box2d, this);
+			b2.add(bb);
+		}
+		for (int i=0; i<65;i++){
+			Boundary2 b  = new Boundary2(i, xx+i*10, yy, 10, 10 , box2d, this);
+			b2.add(b);
+			Boundary2 bb  = new Boundary2(i+1000, xx+ i*10, yy+600, 10, 10 , box2d, this);
+			b2.add(bb);
+		}
+	}
+		
 	public void setBoundary(float xx, float yy, float ww, float hh) {
-		if (hh<minH || hh>maxH) return;
+		if (hh>maxH) return;
 		x=xx;
 		y=yy;
 		w = ww;
@@ -139,10 +140,11 @@ public class P5Canvas extends PApplet{
 		// Add a bunch of fixed boundaries
 		float bW = 10.f; // boundary width
 		int sliderValue = Main.volumeSlider.getValue();
-		Boundary lBound = new Boundary(0,x 	,  y+minH/2 , bW, 2*h -minH , sliderValue, box2d, this);
-		Boundary rBound = new Boundary(1,x+w , y+minH/2 , bW, 2*h -minH, sliderValue, box2d, this);
+		Boundary lBound = new Boundary(0,x 	,  y , bW, 2*h , sliderValue, box2d, this);
+		Boundary rBound = new Boundary(1,x+w , y , bW, 2*h, sliderValue, box2d, this);
 		Boundary tBound = new Boundary(2,x+w/2, y,     w +bW , bW, sliderValue, box2d, this);
 		Boundary bBound = new Boundary(3,x+w/2, y+h,   w +bW , bW, sliderValue, box2d, this);
+		
 		if (boundaries[0] != null)
 			boundaries[0].killBody();
 		if (boundaries[1] != null)
@@ -194,7 +196,7 @@ public class P5Canvas extends PApplet{
 		
 		this.scale(scale);
 		if (isEnable){
-			float newFrameRate=24;
+			float newFrameRate=2;
  			if (speedRate>=1){
  				newFrameRate = newFrameRate*speedRate;
 			}
@@ -220,17 +222,28 @@ public class P5Canvas extends PApplet{
 		}	
 		
 		
+		for (int i = 0; i < molecules.size(); i++) {
+			Molecule m = molecules.get(i);
+			System.out.println(m.getName());
+			if (m.getName().equals("Hydrogen") || m.getName().equals("Sodium-Hydroxide"))
+			m.display2();
+		}
 		
+		if (!isBoom){
+			for (int i = 0; i < 4; i++) {
+				boundaries[i].display();
+			}
+		}
+		for (int i = 0; i < b2.size(); i++) {
+			Boundary2 b= (Boundary2) b2.get(i);
+			b.display();
+		}
+			
 		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
 			m.display();
 		}
-		boundaries[0].display();
-		boundaries[1].display();
-		boundaries[2].display();
-		boundaries[3].display();
-			
 		
 	}
 	public static void computeEnergy(){
@@ -265,7 +278,7 @@ public class P5Canvas extends PApplet{
 			if(loc==null || locIndex==null) continue;
 			float x = locIndex.x-loc.x;
 			float y = locIndex.y-loc.y;
-			float dis = x*x +y*y;
+		   float dis = x*x +y*y;
 			Vec2 normV = normalizeForce(new Vec2(x,y));
 			float forceX;
 			float forceY;
@@ -319,7 +332,7 @@ public class P5Canvas extends PApplet{
 			count =0;
 		Main.canvas.repaint();
 		pushStyle();
-		fill(127, 127, 127);
+		fill(255, 255, 255);
 		rect(0, 0, width, height);
 		popStyle();
 	}
@@ -469,8 +482,9 @@ public class P5Canvas extends PApplet{
 	}
 	
 	
-	//********************************* MOUSE EVENT ******************************
-	public void mouseMoved() {		
+	//********************************************************* MOUSE EVENT ******************************
+	public void mouseMoved() {	
+	
 		//Check the top boundary
 		int id = boundaries[2].isIn(mouseX, mouseY);
 		if (id==2)
@@ -480,6 +494,7 @@ public class P5Canvas extends PApplet{
 	}
 		
 	public void mousePressed() {
+		
 		xStart = mouseX;
 		yStart = mouseY;
 		draggingBoundary = boundaries[2].isIn(mouseX, mouseY);
@@ -514,7 +529,14 @@ public class P5Canvas extends PApplet{
 	}
 		
 	public void mouseClicked() {
-		//addMolecule(mouseX/scale, mouseY/scale,"Water");
+		if (temp>80){
+			isBoom = true;
+			boom();
+		}
+		else{
+			addMolecule(mouseX/scale, mouseY/scale,"Water");
+				
+		}
 	}
 	
 	
@@ -552,10 +574,10 @@ public class P5Canvas extends PApplet{
 		String c2 = o2.getClass().getName();
 		// If object 1 is a Box, then object 2 must be a particle
 		// Note we are ignoring particle on particle collisions
-		if (c1.contains("Boundary")) {
+		/*if (c1.contains("Boundary")) {
 			Boundary b = (Boundary) o1;
 			if (b.getId()==3){
-				Molecule p = (Molecule) o2;
+				//Molecule p = (Molecule) o2;
 				//p.setSpeedByHeat(1.5f);
 			}
 			
@@ -563,10 +585,11 @@ public class P5Canvas extends PApplet{
 		} 
 		// If object 2 is a Box, then object 1 must be a particle
 		else if (c2.contains("Boundary")) {
-			Molecule p = (Molecule) o1;
+			//Molecule p = (Molecule) o1;
 			//p.setSpeedByHeat(heatRate);
 		}
-		else if (c1.contains("Molecule") && c2.contains("Molecule")){
+		else */
+		if (c1.contains("Molecule") && c2.contains("Molecule")){
 			Molecule m1 = (Molecule) o1;
 			Molecule m2 = (Molecule) o2;
 			ArrayList<String> reactants = new ArrayList<String>();

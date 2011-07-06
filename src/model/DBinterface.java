@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import java.net.URL;
 import java.sql.*;
 
 
@@ -13,9 +14,14 @@ public class DBinterface {
 	public static ArrayList dbConnect(String[] args) {
 		ArrayList output = new ArrayList();
 		try {
+			
+
+			
+			
 			Class.forName("org.sqlite.JDBC");
 
 			
+			//Connection conn = DriverManager.getConnection("jdbc:sqlite:Users/tuandang/Desktop/GA/Workspace/ConnChem3/src/model/chemdb");
 			Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
 			
 			Statement stat = conn.createStatement();

@@ -257,6 +257,8 @@ public class TestbedMain extends PApplet {
      * Allows the world to be dragged with a right-click.
      */
     public void handleCanvasDrag() {
+    	
+    	
     	//Handle mouse dragging stuff
         //Left mouse attaches mouse joint to object.
         //Right mouse drags canvas.
@@ -264,6 +266,7 @@ public class TestbedMain extends PApplet {
 		
         //Vec2 mouseWorld = d.screenToWorld(mouseX, mouseY);
         if (mouseButton == RIGHT) {
+        	//System.out.println("RIGHT: mouse1X:"+mouseX);
             if (mousePressed) {
                 d.transX += mouseX - pmouseX;
                 d.transY -= mouseY - pmouseY;
