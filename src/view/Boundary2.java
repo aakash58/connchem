@@ -8,7 +8,7 @@ import org.jbox2d.collision.PolygonDef;
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 
-public class Boundary {
+public class Boundary2 {
 
 	private P5Canvas parent;
 	// But we also have to make a body for box2d to know about it
@@ -21,14 +21,12 @@ public class Boundary {
 	private float box2dW;
 	private float box2dH;
 	private int id =-1;
-	private int volumeSliderValue;
-	private int volumeSliderDefaultValue;
 	private float yOriginal=0; //Original y of body when created
 	public static float difVolume; //Increase or Decrease in Volume
 	public static boolean isTransformed =false; //Increase or Decrease in Volume
 	
 	
-	Boundary(int id_,float x_,float y_, float w_, float h_, int sliderValue_, PBox2D box2d_, P5Canvas parent_) {
+	Boundary2(int id_,float x_,float y_, float w_, float h_,  PBox2D box2d_, P5Canvas parent_) {
 		id = id_;
 		this.parent = parent_;
 		this.box2d = box2d_;
@@ -36,8 +34,6 @@ public class Boundary {
 		y=y_;
 		w = w_;
 		h = h_;
-		volumeSliderValue =sliderValue_;
-		volumeSliderDefaultValue =P5Canvas.defaultVolume;
 		// Figure out the box2d coordinates
 		box2dW = box2d.scalarPixelsToWorld(w_/2);
 		box2dH = box2d.scalarPixelsToWorld(h_/2);
@@ -53,11 +49,12 @@ public class Boundary {
 		// Define the polygon
 		PolygonDef sd = new PolygonDef();
 		sd.setAsBox(box2dW, box2dH);
-		sd.density = 0f;    // No density means it won't move!
+		sd.density = 0.02f;    // No density means it won't move!
 		sd.friction = 1f;
 		sd.restitution =0.8f;
 		body.createShape(sd);
 		body.setMassFromShapes();
+		
 		body.setUserData(this);
 		yOriginal = body.getPosition().y ;
 		isTransformed =true;
@@ -73,73 +70,38 @@ public class Boundary {
 		return y;
 	}
 		
-	public void set(int v){
-			volumeSliderValue = v;
-			difVolume = (volumeSliderValue-volumeSliderDefaultValue)*P5Canvas.multiplierVolume;
-			isTransformed =true;
-	}
+
 	
 	
 	void display() {
 		float a = body.getAngle();
-		// parent.rectMode(parent.CENTER);
 		Vec2 pos = box2d.getBodyPixelCoord(body);
 		parent.pushMatrix();
 		parent.translate(pos.x, pos.y);
 		parent.rotate(-a);
 		float pShapeW =w;
 		float pShapeH =h;
-	
-		if (id==2 && isTransformed){
-			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
-					box2d.scalarPixelsToWorld(difVolume));
-			body.setXForm(v, body.getAngle());
-			isTransformed =false;
-		}	
-		if (id==3)
-			parent.fill(parent.heatRGB);
-		else{
-			parent.fill(Color.GRAY.getRGB());
-		}	
+		parent.fill(Color.GRAY.getRGB());
+		if (id>=1000)
+			parent.fill(Color.ORANGE.getRGB());
+		
+			
+	/*	if (id==1002){
+			for (int i=250;i>1;i=i-10){
+	 			Color col = new Color(255,0,0,(250-i)/10);
+	 			parent.fill(col.getRGB());//.noFill();
+				parent.ellipse(0, 324, i*4, i*4);
+		 				
+			}
+		}*/
+		
 		parent.noStroke();
 		parent.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);
-		
 		parent.popMatrix();
 		
-		
-		//if (id==2)
-		//	parent.rect(x, y-difVolume, w, h);
-		
-	 	
 	}
 
-	public int isIn(float x_, float y_) {
-		float xx=0, yy=0;
-		if(id==0){
-			xx=x-w/2; 	
-			yy=y-h/2;
-		}
-		else if(id==1){
-			xx=x-w/2; 	
-			yy=y-h/2;
-		}
-		else if(id==2){
-			xx=x-w/2; 	
-			yy=y-h/2;
-		}
-		else if(id==3){
-			xx=x-w/2; 	
-			yy=y-h/2;
-		}
-		xx = xx*P5Canvas.scale;
-		yy = yy*P5Canvas.scale;
-		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+h){
-			return id;
-		}
-		else 
-			return -1;
-	}
-		
+	
 	public void killBody() {
 		box2d.destroyBody(body);
 		body.m_world =null;

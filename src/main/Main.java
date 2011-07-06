@@ -151,6 +151,11 @@ public class Main {
 	 */
 	public Main() {
 		initialize();
+		String image = "images/sun.gif";
+		URL url = Main.class.getResource(image); 
+	        System.out.println("URL:"+url);
+
+		
 	}
 
 	protected String[] parseNames(String[] files) {
@@ -368,8 +373,9 @@ public class Main {
 			}
 		}
 		
-		if (P5Canvas.isEnable)
-			playBtn.doClick();
+		/*
+		//if (P5Canvas.isEnable)
+		//	playBtn.doClick();
 		if (setPrevBtn!=null && setNextBtn !=null){
 			int numSet = setSelector.getItemCount();
 			if (setSelector.getSelectedIndex()==0)
@@ -407,7 +413,7 @@ public class Main {
 				leftPanel.updateUI();
 				centerPanel.updateUI();		
 		}	
-		
+		*/
 	} 
 		
 		
@@ -427,7 +433,7 @@ public class Main {
 		Dimension screenDimension = tk.getScreenSize();
 		    
 		mainFrame = new JFrame();
-		mainFrame.setBounds(0, 0, 1280, 700);
+		mainFrame.setBounds(0, 0, 1680, 780);
 		//mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -609,6 +615,7 @@ public class Main {
 				}	
 			}
 		});
+		
 		if (P5Canvas.isEnable)
 			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
 		else
@@ -884,8 +891,8 @@ public class Main {
 		});
 		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
-		int wCenter = screenDimension.width - 282 - 300 -50; 
-		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[]["+wCenter+"px]", "[600px][center]"));
+		int wCenter = screenDimension.width - 282  -50; 
+		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[]["+wCenter+"px]", "[700px][center]"));
 
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");

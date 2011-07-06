@@ -86,7 +86,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		int w2 = w-3*margin/2;
 		int h2 = h-3*margin/2;
 		
-		g.setColor(Color.GRAY);
+		g.setColor(new Color(244,244,244));//Color.GRAY);
 		g.fillRect(margin, margin/2, w2, h2);
 		g.setColor(Color.BLACK);
 		g.drawRect(margin, margin/2, w2, h2);
