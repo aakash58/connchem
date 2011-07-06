@@ -53,12 +53,16 @@ public class ProcessingDebugDraw extends DebugDraw {
     public float yFlip = -1.0f; //flip y coordinate
     
     public void setCamera(float x, float y, float scale) {
+    	System.out.println("setCamera:"+x);
+        
     	transX = PApplet.map(x,0.0f,-1.0f,g.width*.5f,g.width*.5f+scale);
     	transY = PApplet.map(y,0.0f,yFlip*1.0f,g.height*.5f,g.height*.5f+scale);
     	scaleFactor = scale;
     }
 	
 	public ProcessingDebugDraw(PApplet pApplet) {
+		System.out.println("ProcessingDebugDraw");
+        
 		screen = this;
 		g = pApplet;
 		m_font = g.createFont("LucidaGrande-Bold",12);//-Bold-14.vlw");
@@ -66,6 +70,8 @@ public class ProcessingDebugDraw extends DebugDraw {
 	}
 	
 	public Vec2 worldToScreen(Vec2 world) {
+		System.out.println("worldToScreen: transX :"+transX );
+	    
 		float x = PApplet.map(world.x, 0f, 1f, transX, transX+scaleFactor);
 		float y = PApplet.map(world.y, 0f, 1f, transY, transY+scaleFactor);
 		if (yFlip == -1.0f) y = PApplet.map(y,0f,g.height, g.height,0f);

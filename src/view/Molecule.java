@@ -39,6 +39,7 @@ public class Molecule {
 	private float yTmp;
 	private float minSize;
 	public boolean polarity;
+	public Vec2 off;
 	
 	
 	// Constructor
@@ -64,11 +65,10 @@ public class Molecule {
 		float temp = P5Canvas.temp;
 		
 		
-		if ((name.equals("Water") || name.equals("Phosphorus")|| name.equals("Hydrogen-Peroxide")) && temp<40){
+		if ((name.equals("Water") || name.equals("Phosphorus")|| name.equals("Hydrogen-Peroxide"))|| name.equals("Sodium") && temp<40){
 			res = (temp-freezingTem)/(boilingTem-freezingTem);
 			if (res>0 && res<1){
 				res =0.9f+res*0.13f;
-				//res = (float) Math.pow(res, 0.4);
 			}
 			else if (res>=1){
 				res =1.1f+res/10;
@@ -82,6 +82,9 @@ public class Molecule {
 				fric = 0;
 
 			scale = 1+(40-temp)/200f;
+			if (name.equals("Sodium")){
+				res=0;
+			}
 		}	
 		else{
 			res =0.95f;
@@ -98,8 +101,6 @@ public class Molecule {
 		if (Main.selectedUnit==1 && Main.selectedSim==5 && Main.selectedSet==2 && name.equals("Water"))
 			res =0.87f;
 			
-		System.out.println("Main.selectedUnit:"+Main.selectedUnit+" " +Main.selectedSim+
-				" "+Main.selectedSet);
 		//System.out.println( name + " res:"+res+" fric:"+fric+" scale:"+scale+" "+circles.length);
 		
 		createBody(x,y);
@@ -125,6 +126,8 @@ public class Molecule {
 			mul =mul*0.50f;
 		else if (name.equals("Mercury"))
 			mul =mul*2.0f;
+		else if (name.equals("Sodium"))
+			mul =mul*10.0f;
 		
 		for (int i=0; i<circles.length;i++){
 			// Define a circle
@@ -204,9 +207,18 @@ public class Molecule {
 	}
 		
 	public void addForce(Vec2 f){
-		body.applyForce(f, body.getPosition());
+		Vec2 pos = body.getPosition();
+		//Vec2 offset = new Vec2(circles[2][1]-pShapeW/2, circles[2][2]-pShapeH/2);
+		//pos = pos.add(box2d.vectorPixelsToWorld(offset));
+		body.applyForce(f, pos);
 	}
 	public void display() {
+		if (P5Canvas.temp>100){
+			Vec2 v = body.getLinearVelocity();
+			v = new Vec2(v.x*10000000,v.y*10000000);
+			body.setLinearVelocity(v);
+		}
+		
 			if (P5Canvas.isEnable && !P5Canvas.isDrag){
 				body.applyForce(new Vec2(0,-50*body.getMass()), body.getPosition());
 				
@@ -261,9 +273,8 @@ public class Molecule {
 		parent.pushMatrix();
 		parent.translate(pos.x, pos.y);
 		parent.rotate(-a);
-		parent.shape(pShape, pShapeW/-2, pShapeH/-2, pShapeW, pShapeH); // second two args center for p5
- 		parent.noFill();
 		
+		parent.shape(pShape, pShapeW/-2, pShapeH/-2, pShapeW, pShapeH); // second two args center for p5
  		if (name.equals(Canvas.getSelecttedmolecule())){
  	 		parent.stroke(0);
  	 		Color c = Canvas.getSelecttedColor();
@@ -275,10 +286,35 @@ public class Molecule {
 	}
 	
 	
+	public void display2() {
+		
+		
+		// We look at each body and get its screen position
+		Vec2 pos = box2d.getBodyPixelCoord(body);
+		// Get its angle of rotation
+		
+		float a = body.getAngle();
+		// parent.rectMode(parent.CENTER);
+		parent.pushMatrix();
+		parent.translate(pos.x, pos.y);
+		parent.rotate(-a);
+		
+		for (int i=140;i>1;i=i-5){
+ 			Color col = new Color(255,0,0,(140-i)/10);
+ 			parent.fill(col.getRGB());//.noFill();
+			parent.ellipse(0, 0, i*2, i*2);
+	 				
+		}
+		parent.popMatrix();
+		
+		
+	}
+	
 	
 	// This function removes the particle from the box2d world
 	public void killBody() {
 		box2d.destroyBody(body);
+		body.m_world =null;
 	}
 
 	/*/ Is the particle ready for deletion?
