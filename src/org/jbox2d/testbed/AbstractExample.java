@@ -562,6 +562,7 @@ public abstract class AbstractExample {
      * @param p The new mouse location (screen coordinates)
      */
     public void mouseMove(Vec2 p) {
+    	//System.out.println("p:"+p);
     	mouseScreen.set(p);
         if (m_mouseJoint != null) {
             m_mouseJoint.setTarget(m_debugDraw.screenToWorld(p));
