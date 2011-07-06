@@ -1,12 +1,12 @@
 ----------------------------------------------------------------
-2011-07-06 20:21:42.892 GMT:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.6.2.1 - (999685): instance a816c00e-0131-011c-fe67-0000044c2170 
-on database directory /Users/niteshade/Documents/Aptana Studio 3 Workspace/connchem/db  with class loader sun.misc.Launcher$AppClassLoader@546b97fd 
+2011-07-06 20:24:00.492 GMT:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.6.2.1 - (999685): instance a816c00e-0131-011f-1871-0000044c2170 
+on database directory /Users/niteshade/Documents/Aptana Studio 3 Workspace/connchem/db  with class loader sun.misc.Launcher$AppClassLoader@63c78e57 
 Loaded from file:/Users/niteshade/Documents/Aptana%20Studio%203%20Workspace/connchem/rsc/derby.jar
 java.vendor=Apple Inc.
 java.runtime.version=1.6.0_26-b03-384-10M3425
 Database Class Loader started - derby.database.classpath=''
 
-2011-07-06 20:21:43.792 GMT:
-Shutting down instance a816c00e-0131-011c-fe67-0000044c2170 with class loader sun.misc.Launcher$AppClassLoader@546b97fd 
+2011-07-06 20:24:00.971 GMT:
+Shutting down instance a816c00e-0131-011f-1871-0000044c2170 with class loader sun.misc.Launcher$AppClassLoader@63c78e57 
 ----------------------------------------------------------------
