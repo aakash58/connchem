@@ -6,7 +6,7 @@ package main;
 //Project Leader: Mike Stieff, PhD, University of Illinois at Chicago
 //Modeled in Processing by: Tuan Dang and Allan Berry
 
-//This software is Copyright © 2010, 2011 University of Illinois at Chicago,
+//This software is Copyright 2010, 2011 University of Illinois at Chicago,
 //and is released under the GNU General Public License.
 //Please see "resources/copying.txt" for more details.
 
@@ -62,8 +62,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -81,6 +79,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import model.DerbyInterface;
 
 public class Main {
 	// Controllers
@@ -416,6 +415,13 @@ public class Main {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		/*
+		 * This next stuff for Allan testing.
+		 */
+		DerbyInterface dbi = new DerbyInterface();
+		ArrayList<String> names = dbi.getAllCompoundNames();
+		System.out.println(names);
+		
 		
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension screenDimension = tk.getScreenSize();

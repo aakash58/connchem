@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="rsc/pbox2d.jar"/>
 	<classpathentry kind="lib" path="rsc/sqlitejdbc-v056.jar"/>
 	<classpathentry kind="lib" path="rsc/yamlbeans-1.06.jar"/>
+	<classpathentry kind="lib" path="rsc/derby.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
