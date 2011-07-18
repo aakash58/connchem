@@ -33,7 +33,7 @@ public class P5Canvas extends PApplet{
 	
 	// A reference to our box2d world
 	private PBox2D box2d = new PBox2D(this);
-	public static boolean isEnable = false;
+	public static boolean isEnable = false; 
 	public static int creationCount = 0;
 	public static float temp =25.f;
 	
@@ -42,7 +42,7 @@ public class P5Canvas extends PApplet{
 	//Default value of heat
 	public static float heatRate = 1.f;
 	//Default value of scale slider
-	public static float scale = 0.8f;
+	public static float scale = 1.f;
 	//Default value of volume slider
 	public static int defaultVolume =50;
 	public static int currenttVolume =defaultVolume;
@@ -89,7 +89,7 @@ public class P5Canvas extends PApplet{
 		
 		// Initialize box2d physics and create the world
 		box2d.createWorld(-400,-400, 600, 600);
-		box2d.setGravity(0f,0f);
+		box2d.setGravity(0f,-10f);
 	
 		
 		// Turn on collision listening!
@@ -107,8 +107,7 @@ public class P5Canvas extends PApplet{
 			boundaries[i].killBody();
 		}
 		
-		System.out.println(xStart + " "+ yStart);
-
+	
 		int xx =250;
 		int yy =150;
 		
@@ -196,7 +195,7 @@ public class P5Canvas extends PApplet{
 		
 		this.scale(scale);
 		if (isEnable){
-			float newFrameRate=2;
+			float newFrameRate=24;
  			if (speedRate>=1){
  				newFrameRate = newFrameRate*speedRate;
 			}
@@ -224,7 +223,6 @@ public class P5Canvas extends PApplet{
 		
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			System.out.println(m.getName());
 			if (m.getName().equals("Hydrogen") || m.getName().equals("Sodium-Hydroxide"))
 			m.display2();
 		}
@@ -298,11 +296,11 @@ public class P5Canvas extends PApplet{
 					gravityY = (bTemp-temp)/(bTemp-fTemp);
 					gravityX = gravityY*0.5f;
 				}	
-				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*20000;
-				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*20000;
+				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*10000;
+				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*10000;
 				if (mIndex.getName().equals("Mercury")){
-					forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*5000;
-					forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*10000;
+					forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*2000;
+					forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*5000;
 					
 				}
 			}	
@@ -332,7 +330,7 @@ public class P5Canvas extends PApplet{
 			count =0;
 		Main.canvas.repaint();
 		pushStyle();
-		fill(255, 255, 255);
+		fill(127, 127, 127);
 		rect(0, 0, width, height);
 		popStyle();
 	}
@@ -432,7 +430,7 @@ public class P5Canvas extends PApplet{
 			float res = (temp-fTemp)/(bTemp-fTemp);
 			
 			if (res>0 && res<1){
-				res =0.9f+res*0.13f;
+				res =0.90f+res*0.13f;
 				//res = (float) Math.pow(res, 0.5);
 			}
 			else if (res>=1)
