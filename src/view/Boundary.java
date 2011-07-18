@@ -99,7 +99,7 @@ public class Boundary {
 		if (id==3)
 			parent.fill(parent.heatRGB);
 		else{
-			parent.fill(Color.GRAY.getRGB());
+			parent.fill(Color.WHITE.getRGB());
 		}	
 		parent.noStroke();
 		parent.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);

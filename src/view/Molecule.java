@@ -65,10 +65,10 @@ public class Molecule {
 		float temp = P5Canvas.temp;
 		
 		
-		if ((name.equals("Water") || name.equals("Phosphorus")|| name.equals("Hydrogen-Peroxide"))|| name.equals("Sodium") && temp<40){
+		if (name.equals("Water") || name.equals("Phosphorus")|| name.equals("Hydrogen-Peroxide")|| name.equals("Sodium")){
 			res = (temp-freezingTem)/(boilingTem-freezingTem);
 			if (res>0 && res<1){
-				res =0.9f+res*0.13f;
+				res =0.93f+res*0.13f;
 			}
 			else if (res>=1){
 				res =1.1f+res/10;
@@ -81,7 +81,10 @@ public class Molecule {
 			else 
 				fric = 0;
 
-			scale = 1+(40-temp)/200f;
+			if (name.equals("Water") && temp<40)
+				scale = 1+(40-temp)/200f;
+			else
+				scale = 1.05f;
 			if (name.equals("Sodium")){
 				res=0;
 			}
@@ -213,14 +216,14 @@ public class Molecule {
 		body.applyForce(f, pos);
 	}
 	public void display() {
-		if (P5Canvas.temp>100){
+		/*if (P5Canvas.temp>100){
 			Vec2 v = body.getLinearVelocity();
 			v = new Vec2(v.x*10000000,v.y*10000000);
 			body.setLinearVelocity(v);
-		}
+		}*/
 		
 			if (P5Canvas.isEnable && !P5Canvas.isDrag){
-				body.applyForce(new Vec2(0,-50*body.getMass()), body.getPosition());
+				//body.applyForce(new Vec2(0,-50*body.getMass()), body.getPosition());
 				
 			}	
 			if (P5Canvas.isDrag && P5Canvas.draggingBoundary<0){
@@ -273,9 +276,10 @@ public class Molecule {
 		parent.pushMatrix();
 		parent.translate(pos.x, pos.y);
 		parent.rotate(-a);
-		
 		parent.shape(pShape, pShapeW/-2, pShapeH/-2, pShapeW, pShapeH); // second two args center for p5
- 		if (name.equals(Canvas.getSelecttedmolecule())){
+		parent.noFill();
+		
+		if (name.equals(Canvas.getSelecttedmolecule())){
  	 		parent.stroke(0);
  	 		Color c = Canvas.getSelecttedColor();
  	 	 	parent.stroke(c.getRGB(), c.getAlpha());
@@ -299,8 +303,8 @@ public class Molecule {
 		parent.translate(pos.x, pos.y);
 		parent.rotate(-a);
 		
-		for (int i=140;i>1;i=i-5){
- 			Color col = new Color(255,0,0,(140-i)/10);
+		for (int i=150;i>1;i=i-5){
+ 			Color col = new Color(255,0,0,(150-i)/8);
  			parent.fill(col.getRGB());//.noFill();
 			parent.ellipse(0, 0, i*2, i*2);
 	 				

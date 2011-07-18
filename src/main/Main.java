@@ -6,7 +6,7 @@ package main;
 //Project Leader: Mike Stieff, PhD, University of Illinois at Chicago
 //Modeled in Processing by: Tuan Dang and Allan Berry
 
-//This software is Copyright 2010, 2011 University of Illinois at Chicago,
+//This software is Copyright © 2010, 2011 University of Illinois at Chicago,
 //and is released under the GNU General Public License.
 //Please see "resources/copying.txt" for more details.
 
@@ -79,7 +79,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import model.DerbyInterface;
 
 public class Main {
 	// Controllers
@@ -91,6 +90,7 @@ public class Main {
 	public static int selectedUnit=0;
 	public static int selectedSim=0;
 	public static int selectedSet=0;
+	public static boolean isWelcomed=true;
 	public static Color selectedColor = new Color(200,200,150);
 	public static Color defaultColor = Color.LIGHT_GRAY;
 	private int[] sliderValues = {5,6,7,6,3};
@@ -108,8 +108,10 @@ public class Main {
 	public static JPanel rightPanel;
 	public static JPanel leftPanel;
 	public static JPanel centerPanel;
+	public static JPanel welcomePanel;
 	public static Canvas canvas = new Canvas();
 	public static TableView tableView;
+	public static TableSet tableSet;
 	public static final JLabel  volumeLabel = new JLabel(P5Canvas.currenttVolume+"mL");
 	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
 	public static int defaultZoom =50;
@@ -362,6 +364,16 @@ public class Main {
 	}
 	
 	public void reset(){
+		if (isWelcomed && welcomePanel !=null){
+			mainFrame.remove(welcomePanel);
+			mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
+			mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
+			mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
+			
+			isWelcomed = false;
+		}
+		
+		
 		p5Canvas.removeAllMolecules();
 		canvas.reset();
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
@@ -421,19 +433,12 @@ public class Main {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		/*
-		 * This next stuff for Allan testing.
-		 */
-		DerbyInterface dbi = new DerbyInterface();
-		ArrayList<String> names = dbi.getAllCompoundNames();
-		System.out.println(names);
-		
 		
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension screenDimension = tk.getScreenSize();
 		    
 		mainFrame = new JFrame();
-		mainFrame.setBounds(0, 0, 1680, 780);
+		mainFrame.setBounds(0, 0, 1280, 690);
 		//mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -648,15 +653,8 @@ public class Main {
 			}
 		}
 		
-		/*
-		JLabel timerLabel = new JLabel("Timer");
-		timerSubpanel.add(timerLabel, "cell 4 0,alignx center");
-		final JLabel timerDisplay = new JLabel("30");
-		
-		timerDisplay.setForeground(new Color(0, 128, 0));
-		timerDisplay.setFont(new Font("Digital", Font.PLAIN, 30));
-		timerSubpanel.add(timerDisplay, "cell 4 1,alignx center");
-		*/
+		//tableSet = new TableSet();
+		//timerSubpanel.add(tableSet, "cell 0 2 4 1,growx");
 		
 		JButton resetBtn = new JButton("");
 		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
@@ -891,7 +889,7 @@ public class Main {
 		});
 		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
-		int wCenter = screenDimension.width - 282  -50; 
+		int wCenter = screenDimension.width - 282 -300 -50; 
 		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[]["+wCenter+"px]", "[700px][center]"));
 
 		// Add P5Canvas 
@@ -1042,6 +1040,31 @@ public class Main {
 		JLabel totalSystemPressureOutput = new JLabel("100 kPa");
 		dashboard.add(totalSystemPressureOutput, "cell 1 3");
 */
+		if (isWelcomed){
+			welcomePanel = new JPanel();
+			welcomePanel.setLayout(new MigLayout("insets 10, gap 10", "[][]", "[100px][]"));
+	
+			JLabel label1 = new JLabel(" Welcome to The Connected Chemistry Curriculum");
+			label1.setFont(new Font("Serif", Font.BOLD, 55));
+			label1.setForeground(Color.blue);
+			welcomePanel.add(label1, "cell 1 1,alignx center");
+	    
+			JLabel label2 = new JLabel("Please select a simuation on the top left coner");
+			label2.setFont(new Font("Serif", Font.PLAIN, 33));
+			//label2.setForeground(Color.RED);
+			welcomePanel.add(label2, "cell 1 2,alignx center");
+		    
+			JLabel label3= new JLabel("");
+			label3.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/cccLogo.png")));
+			welcomePanel.add(label3, "cell 1 3,alignx center");
+		    
+			
+			
+			mainFrame.remove(leftPanel);
+			mainFrame.remove(centerPanel);
+			mainFrame.remove(rightPanel);
+			mainFrame.getContentPane().add(welcomePanel, "cell 1 0,grow");
+		}
 	}
 
 }
