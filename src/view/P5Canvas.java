@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import pbox2d.*;
 import processing.core.PApplet;
-import java.lang.InterruptedException;
 
 import main.Main;
 
@@ -62,7 +61,6 @@ public class P5Canvas extends PApplet{
 	public static int draggingBoundary =-1;
 	private boolean isFirstTime =true;
 	private float frameRate =24;
-	private boolean isBoom = false;
 	
 	
 	/*
@@ -101,29 +99,7 @@ public class P5Canvas extends PApplet{
 	
 	
 	
-	public void boom() {
-		MP3.play(2);
-		for (int i = 0; i < 4; i++) {
-			boundaries[i].killBody();
-		}
-		
 	
-		int xx =250;
-		int yy =150;
-		
-		for (int i=0; i<60;i++){
-			Boundary2 b  = new Boundary2(i, xx, yy+i*10 , 10, 10 , box2d, this);
-			b2.add(b);
-			Boundary2 bb  = new Boundary2(i, xx+648, yy+ i*10 , 10, 10 , box2d, this);
-			b2.add(bb);
-		}
-		for (int i=0; i<65;i++){
-			Boundary2 b  = new Boundary2(i, xx+i*10, yy, 10, 10 , box2d, this);
-			b2.add(b);
-			Boundary2 bb  = new Boundary2(i+1000, xx+ i*10, yy+600, 10, 10 , box2d, this);
-			b2.add(bb);
-		}
-	}
 		
 	public void setBoundary(float xx, float yy, float ww, float hh) {
 		if (hh>maxH) return;
@@ -156,6 +132,7 @@ public class P5Canvas extends PApplet{
 		boundaries[1]=rBound;
 		boundaries[2]=tBound;
 		boundaries[3]=bBound;
+		
 	}
 	
 		
@@ -163,7 +140,6 @@ public class P5Canvas extends PApplet{
 		if (getSize().width != w || getSize().height!=h){
 			//setBoundary(0,0,this.getSize().width,this.getSize().height);
 		}
-		
 		drawBackground();
 		// We must always step through time!
 		if (products!=null && products.size()>0){
@@ -227,15 +203,10 @@ public class P5Canvas extends PApplet{
 			m.display2();
 		}
 		
-		if (!isBoom){
-			for (int i = 0; i < 4; i++) {
-				boundaries[i].display();
-			}
+		for (int i = 0; i < 4; i++) {
+			boundaries[i].display();
 		}
-		for (int i = 0; i < b2.size(); i++) {
-			Boundary2 b= (Boundary2) b2.get(i);
-			b.display();
-		}
+		
 			
 		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
@@ -296,13 +267,8 @@ public class P5Canvas extends PApplet{
 					gravityY = (bTemp-temp)/(bTemp-fTemp);
 					gravityX = gravityY*0.5f;
 				}	
-				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*10000;
-				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*10000;
-				if (mIndex.getName().equals("Mercury")){
-					forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*2000;
-					forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*5000;
-					
-				}
+				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*5000;
+				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*5000;
 			}	
 			else{
 				float num = m.getNumElement();
@@ -310,9 +276,7 @@ public class P5Canvas extends PApplet{
 				forceY =  (normV.y/dis)*m.getMass()*mIndex.getMass()*300*num;
 			}
 			mIndex.addForce(new Vec2(forceX,forceY));
-			
 		}
-					
 	}
 		
 	private Vec2 normalizeForce(Vec2 v){
@@ -527,14 +491,7 @@ public class P5Canvas extends PApplet{
 	}
 		
 	public void mouseClicked() {
-		if (temp>80){
-			isBoom = true;
-			boom();
-		}
-		else{
-			addMolecule(mouseX/scale, mouseY/scale,"Water");
-				
-		}
+		addMolecule(mouseX/scale, mouseY/scale,"Water");
 	}
 	
 	

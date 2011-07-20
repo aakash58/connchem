@@ -42,6 +42,7 @@ import javax.swing.JButton;
 import java.awt.Component;
 import javax.swing.Box;
 
+import model.YAMLinterface;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -87,10 +88,10 @@ public class Main {
 	// TODO flag
 	public static JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
-	public static int selectedUnit=0;
-	public static int selectedSim=0;
-	public static int selectedSet=0;
-	public static boolean isWelcomed=true;
+	public static int selectedUnit=1;
+	public static int selectedSim=1;
+	public static int selectedSet=1;
+	public static boolean isWelcomed=false;
 	public static Color selectedColor = new Color(200,200,150);
 	public static Color defaultColor = Color.LIGHT_GRAY;
 	private int[] sliderValues = {5,6,7,6,3};
@@ -98,7 +99,6 @@ public class Main {
 	
 	private static int minSliderValue = 1;
 	private static int maxSliderValue = 9;
-	private JComboBox setSelector = new JComboBox();
 	public static JPanel dynamicPanel;
 	public static JScrollPane dynamicScrollPane; 
 	public static ArrayList additionalPanelList =  new ArrayList();
@@ -128,8 +128,6 @@ public class Main {
 	public static JLabel averageSystemEnergy;
 	public static JLabel elapsedTime;
 	public static JButton playBtn;
-	public static JButton setPrevBtn; 
-	public static JButton setNextBtn; 
 	public static boolean isFirst =true; 
 	
 	/**
@@ -153,11 +151,6 @@ public class Main {
 	 */
 	public Main() {
 		initialize();
-		String image = "images/sun.gif";
-		URL url = Main.class.getResource(image); 
-	        System.out.println("URL:"+url);
-
-		
 	}
 
 	protected String[] parseNames(String[] files) {
@@ -295,7 +288,7 @@ public class Main {
 		}
 	}
 	
-	public static void addDynamicPanel(){
+	public static void updateDynamicPanel(){
 		if (dynamicPanel!=null){
 			dynamicPanel.removeAll();
 			defaultSetMolecules =  new ArrayList();
@@ -349,7 +342,7 @@ public class Main {
 	}
 	
 	
-	public void createPopupMenu(){
+	public static void createPopupMenu(){
 		scrollablePopupMenu = new CustomPopupMenu();
 		for (int i=0;i<moleculeNames.length;i++){
 			CustomButton xx = new CustomButton(moleculeNames[i].replace("-", " "));
@@ -363,19 +356,20 @@ public class Main {
 		}
 	}
 	
-	public void reset(){
+	public static void reset(){
 		if (isWelcomed && welcomePanel !=null){
 			mainFrame.remove(welcomePanel);
 			mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
 			mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
 			mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
-			
 			isWelcomed = false;
 		}
 		
-		
 		p5Canvas.removeAllMolecules();
 		canvas.reset();
+		
+			
+		
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
 		if (a!=null) {
 			for (int i=0; i<a.size();i++){
@@ -385,47 +379,41 @@ public class Main {
 			}
 		}
 		
-		/*
+		
+		//CustomPopupMenu.additionalList = new ArrayList();
+		//additionalPanelList = new ArrayList();
+		updateDynamicPanel();
+		//createPopupMenu();
+		
+		
 		//if (P5Canvas.isEnable)
 		//	playBtn.doClick();
-		if (setPrevBtn!=null && setNextBtn !=null){
-			int numSet = setSelector.getItemCount();
-			if (setSelector.getSelectedIndex()==0)
-				setPrevBtn.disable(); 
-			else
-				setPrevBtn.enable(); 
-			if (setSelector.getSelectedIndex()>=numSet-1)
-				setNextBtn.disable();
-			else
-				setNextBtn.enable();
+		if (playBtn!=null && centerPanel!=null){
+			volumeSlider.requestFocus();
+			volumeSlider.lostFocus(null, null);
+			volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
+				
+			zoomSlider.requestFocus();
+			zoomSlider.lostFocus(null, null);
+			zoomSlider.enable(P5Canvas.yaml.getControlScaleSliderState(selectedUnit, selectedSim));
+			speedSlider.requestFocus();
+			speedSlider.lostFocus(null, null);
+			speedSlider.enable(P5Canvas.yaml.getControlSpeedSliderState(selectedUnit, selectedSim));
+			heatSlider.requestFocus();
+			heatSlider.lostFocus(null,null);
+			heatSlider.enable(P5Canvas.yaml.getControlHeatSliderState(selectedUnit, selectedSim));
+				
+			float heatMin =P5Canvas.yaml.getControlHeatSliderMin(selectedUnit, selectedSim);
+			float heatMax = P5Canvas.yaml.getControlHeatSliderMax(selectedUnit, selectedSim);
+			float heatInit =P5Canvas.yaml.getControlHeatSliderInit(selectedUnit, selectedSim);
+			heatSlider.setMaximum((int) heatMax);
+			heatSlider.setMinimum((int) heatMin);
+			heatSlider.setValue((int) heatInit);
+			speedSlider.setValue(defaultSpeed);
 			
-				volumeSlider.requestFocus();
-				volumeSlider.lostFocus(null, null);
-				volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
-				
-				
-				zoomSlider.requestFocus();
-				zoomSlider.lostFocus(null, null);
-				zoomSlider.enable(P5Canvas.yaml.getControlScaleSliderState(selectedUnit, selectedSim));
-				speedSlider.requestFocus();
-				speedSlider.lostFocus(null, null);
-				speedSlider.enable(P5Canvas.yaml.getControlSpeedSliderState(selectedUnit, selectedSim));
-				heatSlider.requestFocus();
-				heatSlider.lostFocus(null,null);
-				heatSlider.enable(P5Canvas.yaml.getControlHeatSliderState(selectedUnit, selectedSim));
-				
-				float heatMin =P5Canvas.yaml.getControlHeatSliderMin(selectedUnit, selectedSim);
-				float heatMax = P5Canvas.yaml.getControlHeatSliderMax(selectedUnit, selectedSim);
-				float heatInit =P5Canvas.yaml.getControlHeatSliderInit(selectedUnit, selectedSim);
-				heatSlider.setMaximum((int) heatMax);
-				heatSlider.setMinimum((int) heatMin);
-				heatSlider.setValue((int) heatInit);
-				speedSlider.setValue(defaultSpeed);
-				
-				leftPanel.updateUI();
-				centerPanel.updateUI();		
+			leftPanel.updateUI();
+			centerPanel.updateUI();		
 		}	
-		*/
 	} 
 		
 		
@@ -525,24 +513,13 @@ public class Main {
 											simMenu.getItem(i).setBackground(selectedColor);
 											((JMenuItem) (subMenuArrayList[i].get(j))).setBackground(selectedColor) ;
 										
-										
-											//Update set selector
-											ArrayList sets = getSets(selectedUnit,selectedSim);
-											
-											setSelector.removeAllItems();
-											setSelector.addItem("Select Set");
-											if (sets!=null){
-												for (int s=1; s<=sets.size();s++){
-													setSelector.addItem("Set "+s);
-												}
-											}
 										}	
 									}	
 								}
-								reset();
+								TableSet.updataSet();
+								TableSet.setSelectedRow(0);
 							}
 						});
-						
 					}
 				} catch (Exception e) {
 					System.out.println("No Submenu Items: " + e);
@@ -603,8 +580,7 @@ public class Main {
 		JPanel timerSubpanel = new JPanel();
 		//timerSubpanel.setBackground(new Color(211, 211, 211));
 		leftPanel.add(timerSubpanel, "cell 0 0,grow");
-		//timerSubpanel.setLayout(new MigLayout("", "[][56.00,fill][][grow][]", "[grow][]"));
-		timerSubpanel.setLayout(new MigLayout("insets 3, gap 4", "[][56.00,fill][][][grow]", "[grow][]"));
+		timerSubpanel.setLayout(new MigLayout("insets 3, gap 4", "[65.00][100.00][100px][50.00][grow]", "[12.00,grow][140px][]"));
 		
 		playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
@@ -626,35 +602,8 @@ public class Main {
 		else
 			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
 		
-		timerSubpanel.add(playBtn, "cell 0 0 1 2,growy");
+		timerSubpanel.add(playBtn, "cell 2 2 1 1,alignx right");
 
-		
-		//Select a Set from ComboBox -> Update Dynamic Panel
-		setSelector.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange()==e.SELECTED){
-					//mainController.addMolecule("Water");
-					selectedSet = setSelector.getSelectedIndex();
-					CustomPopupMenu.additionalList = new ArrayList();
-					additionalPanelList = new ArrayList();
-					addDynamicPanel();
-					createPopupMenu();
-					//Update Model
-						reset();
-				}
-			}
-		});
-		timerSubpanel.add(setSelector, "cell 1 0 2 1,growx");
-		ArrayList sets = getSets(selectedUnit,selectedSim);
-		setSelector.addItem("Select Set");
-		if (sets!=null){
-			for (int i=1; i<=sets.size();i++){
-				setSelector.addItem("Set "+i);
-			}
-		}
-		
-		//tableSet = new TableSet();
-		//timerSubpanel.add(tableSet, "cell 0 2 4 1,growx");
 		
 		JButton resetBtn = new JButton("");
 		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
@@ -663,41 +612,14 @@ public class Main {
 				reset();
 			}
 		});
-		timerSubpanel.add(resetBtn, "cell 3 0 1 2,grow");
+		timerSubpanel.add(resetBtn, "cell 3 2 1 1,alignx left");
 		
 		
-		setPrevBtn = new JButton("");
-		setPrevBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		setPrevBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-previous.png")));
-		timerSubpanel.add(setPrevBtn, "cell 1 1,alignx center");
-		setPrevBtn.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				int selectedIndex = setSelector.getSelectedIndex();
-				int numSets = setSelector.getItemCount();
-				if (selectedIndex>0){
-					setSelector.setSelectedIndex(selectedIndex-1);
-					//reset();
-				}
-			}
-		});
+		tableSet = new TableSet();
+		timerSubpanel.add(tableSet, "cell 0 1 5 1,growx");
 		
-		setNextBtn = new JButton("");
-		setNextBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/track-next.png")));
-		timerSubpanel.add(setNextBtn, "cell 2 1,growx");
-		setNextBtn.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				int selectedIndex = setSelector.getSelectedIndex();
-				int numSets = setSelector.getItemCount();
-				if (selectedIndex<numSets-1){
-					setSelector.setSelectedIndex(selectedIndex+1);
-					//reset();
-				}
-			}
-		});
-
+	
+		
 		
 		
 		//***************** Add elements Control panel
@@ -712,7 +634,7 @@ public class Main {
 		
 		dynamicPanel = new JPanel();
 		dynamicScrollPane.setViewportView(dynamicPanel);
-		dynamicPanel.setLayout(new MigLayout("insets 4", "[174.00,grow]", "[][]"));
+		dynamicPanel.setLayout(new MigLayout("insets 4", "[124.00,grow]", "[][]"));
 		
 		/*		JPanel panel_2 = new JPanel();
 		dynamicPanel.add(panel_2, "cell 0 0");

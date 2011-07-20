@@ -70,7 +70,7 @@ public class ProcessingDebugDraw extends DebugDraw {
 	}
 	
 	public Vec2 worldToScreen(Vec2 world) {
-		System.out.println("worldToScreen: transX :"+transX );
+		//System.out.println("worldToScreen: transX :"+transX );
 	    
 		float x = PApplet.map(world.x, 0f, 1f, transX, transX+scaleFactor);
 		float y = PApplet.map(world.y, 0f, 1f, transY, transY+scaleFactor);
@@ -242,6 +242,7 @@ public class ProcessingDebugDraw extends DebugDraw {
 
 	@Override
 	public void drawPoint(Vec2 position, float f, Color3f color) {
+		System.out.println("Center Circle *************************************************");
 		position = worldToScreen(position);
 		float k_segments = 5.0f;
 		float k_increment = 2.0f * (float)Math.PI / k_segments;

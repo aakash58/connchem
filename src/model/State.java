@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.jbox2d.util.sph.Particle;
 
 import view.Boundary;
-import view.Boundary2;
 import view.Molecule;
 
 public class State {
@@ -14,7 +13,6 @@ public class State {
 	public static ArrayList<Molecule> molecules = new ArrayList<Molecule>();
 	// A list we'll use to track fixed objects
 	public static Boundary[] boundaries = new Boundary[4];
-	public static ArrayList<Boundary2> b2 = new ArrayList<Boundary2>();
 	
 	
 	

@@ -10,16 +10,18 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
+
+import model.YAMLinterface;
+
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
 public class TableSet extends JPanel {
 	public static JTable table = null;
-	public static boolean stopUpdating = false;
 	public static JScrollPane scrollPane;
 	public static ArrayList[] data = new ArrayList[2];
-	public static int selectedRow=-1; 
+	public static int selectedRow=0; 
 	
 	
 	public TableSet() {
@@ -27,6 +29,7 @@ public class TableSet extends JPanel {
 
 		MyTableModel myTable = new MyTableModel();
 		table = new JTable(myTable);
+		
 	    scrollPane = new JScrollPane(table);
 		JScrollBar jj = new JScrollBar();
 		jj.setOrientation(JScrollBar.HORIZONTAL);
@@ -36,12 +39,12 @@ public class TableSet extends JPanel {
 		//table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.getSelectionModel().addListSelectionListener(new RowListener());
-		table.getColumnModel().getColumn(0).setPreferredWidth(20);
+		table.getColumnModel().getColumn(0).setPreferredWidth(50);
 		table.getColumnModel().getColumn(1).setPreferredWidth(180);
 		table.setSelectionBackground(Color.GRAY);//new Color(40,60,220));
 		
 		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
-		dtcr.setHorizontalAlignment(SwingConstants.RIGHT);
+		dtcr.setHorizontalAlignment(SwingConstants.CENTER);
 		table.getColumnModel().getColumn(0).setCellRenderer(dtcr);
 		
 		
@@ -57,25 +60,39 @@ public class TableSet extends JPanel {
 	}
 
 	
-	
 	public static void setSelectedRow(int row) {
 		selectedRow = row;
 		table.clearSelection();
-		if (selectedRow>=0){
-			table.addRowSelectionInterval(selectedRow, selectedRow);
-		}
+		if (selectedRow<0) selectedRow=0;
+		table.addRowSelectionInterval(selectedRow, selectedRow);
 		table.updateUI();
 	}
-	
 	private class RowListener implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent event) {
 			if (event.getValueIsAdjusting()) {
 				return;
 			}
 			selectedRow = table.getSelectedRow();
+			Main.selectedSet = selectedRow +1;
+			Main.reset();
 		}
 	}
 
+	public static void updataSet(){
+		data[0] = new ArrayList();
+		data[1] = new ArrayList();
+		ArrayList sets = YAMLinterface.getSets(Main.selectedUnit, Main.selectedSim);
+		if (sets==null) return;
+		
+		for (int i=0; i<sets.size();i++){
+			TableSet.data[0].add(i+1);
+			TableSet.data[1].add("Page "+(i*10+1));
+		}
+		if (Main.tableSet !=null){
+			table.updateUI();
+		}		
+	}
+	
 	class MyTableModel extends AbstractTableModel {
 		private String[] columnNames = {};
 		
@@ -83,8 +100,8 @@ public class TableSet extends JPanel {
 			data[0] = new ArrayList();
 			data[1] = new ArrayList();
 			columnNames = new String[2];
-			columnNames[0] = "Set";
-			columnNames[1] = "Compound(s)";
+			columnNames[0] = "     Set";
+			columnNames[1] = "Curriculum";
 		}
 
 		public int getColumnCount() {
@@ -120,6 +137,7 @@ public class TableSet extends JPanel {
 			fireTableCellUpdated(row, col);
 		}
 	}
+
 
 	
 }
