@@ -28,6 +28,8 @@ public class TableView extends JPanel {
 		super(new GridLayout(1, 0));
 
 		MyTableModel myTable = new MyTableModel();
+		
+		
 		table = new JTable(myTable);
 	    scrollPane = new JScrollPane(table);
 		JScrollBar jj = new JScrollBar();
@@ -144,5 +146,4 @@ public class TableView extends JPanel {
 		}
 	}
 
-	
 }

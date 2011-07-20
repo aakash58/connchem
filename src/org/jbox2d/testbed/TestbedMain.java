@@ -290,7 +290,7 @@ public class TestbedMain extends PApplet {
     	currentTest.mouseUp();
     }
     
-    /** Dispatch mouseMoved events to the current test. */
+    /** Dispatch mouseMoved events to  the current test. */
     public void mouseMoved() {
     	if (currentTest == null || handleOptions) return;
     	currentTest.mouseMove(new Vec2(mouseX,mouseY));
