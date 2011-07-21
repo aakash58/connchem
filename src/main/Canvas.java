@@ -157,7 +157,6 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				lines[i].add(l);
 			}
 			Main.elapsedTime.setText(formatTime(countTime));
-			P5Canvas.computeEnergy();
 			countTime =last;
 			before =now;
 			

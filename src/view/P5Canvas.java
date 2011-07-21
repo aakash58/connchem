@@ -27,8 +27,6 @@ public class P5Canvas extends PApplet{
 	public static float y;
 	public static float w;//width of the boundary
 	public static float h;//width of the boundary
-	public static float width;//width of this Panel
-	public static float height;//width of this  Panel
 	
 	// A reference to our box2d world
 	private PBox2D box2d = new PBox2D(this);
@@ -41,7 +39,7 @@ public class P5Canvas extends PApplet{
 	//Default value of heat
 	public static float heatRate = 1.f;
 	//Default value of scale slider
-	public static float scale = 1.f;
+	public static float scale = 0.8f;
 	//Default value of volume slider
 	public static int defaultVolume =50;
 	public static int currenttVolume =defaultVolume;
@@ -86,14 +84,14 @@ public class P5Canvas extends PApplet{
 		frameRate(frameRate);
 		
 		// Initialize box2d physics and create the world
-		box2d.createWorld(-400,-400, 600, 600);
-		box2d.setGravity(0f,-10f);
+		box2d.createWorld(-200,-200, 200, 200);
+		box2d.setGravity(0f,-15f);
 	
 		
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
-		setBoundary(0,0,648,600);	
+		setBoundary(0,0,604/0.8f,655/0.8f);	
 		//testDbInterface();
 	}
 	
@@ -107,8 +105,10 @@ public class P5Canvas extends PApplet{
 		y=yy;
 		w = ww;
 		h = hh;
+		System.out.println("SIZE: w:"+w+" h:"+h);
 		if (isFirstTime){
-			size((int) w, (int) h);
+			size((int) (604), (int) (658));
+					
 			isFirstTime =false;
 		}
 		
@@ -170,6 +170,8 @@ public class P5Canvas extends PApplet{
 		}
 		
 		this.scale(scale);
+		computeEnergy();
+		
 		if (isEnable){
 			float newFrameRate=24;
  			if (speedRate>=1){
@@ -219,16 +221,45 @@ public class P5Canvas extends PApplet{
 		float sum = 0f;
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			Vec2 vec = m.getSpeed();
+			Vec2 vec = m.getLinearVelocity();
 			if (vec!=null){
 				float v = vec.x*vec.x + vec.y*vec.y;
 				sum += v*m.getMass();
 			}
 		}
-		
 		float average =0f;
 		if (molecules.size()>0)
 			average = sum/molecules.size();
+		
+		float expectedAverage =0f;
+		if (0<temp && temp<100 )
+			expectedAverage = 1f+temp/10f;
+		else if (temp >=100)
+			expectedAverage = 30 +temp/10f;
+		float dif = expectedAverage - average;
+		float percent = 1+dif/10;
+		if (percent <0.5)  percent =0.5f ;
+		if (percent >1.5)  percent =1.5f ;
+		
+		//System.out.println("PERCENT: "+percent);
+		if (0<temp){
+			for (int i = 0; i < molecules.size(); i++) {
+				Molecule m = molecules.get(i);
+				Vec2 vec = m.getLinearVelocity();
+				float energy = 0f;
+				if (vec!=null){
+					float v = vec.x*vec.x + vec.y*vec.y;
+					energy += v*m.getMass();
+				}
+				if (energy>expectedAverage*2)
+					m.setLinearVelocity(vec.mul(0.9f) );
+				else
+					m.setLinearVelocity(vec.mul(percent) );
+			}
+		}
+		
+		
+		
 		
 		if (Main.totalSystemEnergy!=null){
 			DecimalFormat df = new DecimalFormat("#.##");
@@ -261,14 +292,14 @@ public class P5Canvas extends PApplet{
 				}
 				else if (temp<=fTemp){
 					gravityY = (bTemp-temp)/(bTemp-fTemp);
-					gravityX = gravityY*1.75f;
+					gravityX = gravityY*3f;
 				}	
 				else{
-					gravityY = (bTemp-temp)/(bTemp-fTemp);
-					gravityX = gravityY*0.5f;
+					gravityY = (bTemp-temp)*.05f/(bTemp-fTemp);
+					gravityX = gravityY*0.2f;
 				}	
-				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*5000;
-				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*5000;
+				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*2000;
+				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*2000;
 			}	
 			else{
 				float num = m.getNumElement();
@@ -393,14 +424,11 @@ public class P5Canvas extends PApplet{
 			float bTemp = m.boilingTem;
 			float res = (temp-fTemp)/(bTemp-fTemp);
 			
-			if (res>0 && res<1){
-				res =0.90f+res*0.13f;
-				//res = (float) Math.pow(res, 0.5);
+			if (res>0){
+				res =1;
 			}
-			else if (res>=1)
-				res =1.1f+res/10;
 			else
-				res=0.2f;
+				res=0.5f;
 			m.setRestitution(res);
 			
 			
@@ -429,7 +457,7 @@ public class P5Canvas extends PApplet{
 	public void setScale(int value, int defaultScale) {
 		boolean tmp = isEnable;
 		isEnable = false;
-		scale = (float) value/defaultScale;
+		scale = (float) value*0.8f/defaultScale;
 		isEnable = tmp;
 	}
 	
