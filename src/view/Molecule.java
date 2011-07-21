@@ -62,14 +62,11 @@ public class Molecule {
 		freezingTem = P5Canvas.db.getCompoundFreezingPointCelsius(name);
 		boilingTem = P5Canvas.db.getCompoundBoilingPointCelsius(name);
 		float temp = P5Canvas.temp;
-
 		res = (temp - freezingTem) / (boilingTem - freezingTem);
-		if (res > 0 && res < 1) {
-			res = 0.93f + res * 0.13f;
-		} else if (res >= 1) {
-			res = 1.1f + res / 10;
+		if (res > 0) {
+			res = 1f;
 		} else
-			res = 0.2f;
+			res = 0.5f;
 
 		if (temp <= freezingTem)
 			fric = 1;
@@ -82,9 +79,8 @@ public class Molecule {
 			scale = 1.05f;
 		
 		if (name.equals("Mercury")) {
-			res = 0.76f;
 		} else if (name.equals("Pentane")) {
-			res = 0.95f;
+			res = 0.7f;
 		}
 		
 		createBody(x, y);
@@ -104,11 +100,11 @@ public class Molecule {
 
 		float mul = 1;
 		if (name.equals("Pentane"))
-			mul = mul * 0.06f;
+			mul = mul * 0.15f;
 		else if (name.equals("Bromine"))
 			mul = mul * 0.50f;
 		else if (name.equals("Mercury"))
-			mul = mul * 2.0f;
+			mul = mul * 1.0f;
 		else if (name.equals("Sodium"))
 			mul = mul * 10.0f;
 
@@ -167,9 +163,6 @@ public class Molecule {
 		return body.getPosition();
 	}
 
-	public Vec2 getSpeed() {
-		return body.getLinearVelocity();
-	}
 
 	public void setRestitution(float r) {
 		Shape s = body.getShapeList();
@@ -220,7 +213,7 @@ public class Molecule {
 			yTmp = body.getPosition().y;
 		}
 
-		float t = P5Canvas.height - P5Canvas.y;
+		float t = P5Canvas.h - P5Canvas.y;
 		float yy = box2d.scalarWorldToPixels(body.getPosition().y);
 
 		if (yy > t - minSize / 3 + Boundary.difVolume) {

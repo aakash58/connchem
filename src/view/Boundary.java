@@ -55,7 +55,7 @@ public class Boundary {
 		sd.setAsBox(box2dW, box2dH);
 		sd.density = 0f;    // No density means it won't move!
 		sd.friction = 1f;
-		sd.restitution =0.8f;
+		sd.restitution =1f;
 		body.createShape(sd);
 		body.setMassFromShapes();
 		body.setUserData(this);

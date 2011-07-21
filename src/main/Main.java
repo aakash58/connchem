@@ -426,7 +426,7 @@ public class Main {
 		Dimension screenDimension = tk.getScreenSize();
 		    
 		mainFrame = new JFrame();
-		mainFrame.setBounds(0, 0, 1280, 690);
+		mainFrame.setBounds(0, 0, 1280, 720);
 		//mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -636,169 +636,7 @@ public class Main {
 		dynamicScrollPane.setViewportView(dynamicPanel);
 		dynamicPanel.setLayout(new MigLayout("insets 4", "[124.00,grow]", "[][]"));
 		
-		/*		JPanel panel_2 = new JPanel();
-		dynamicPanel.add(panel_2, "cell 0 0");
-		additionalPanelList.add(panel_2);
-		panel_2.setBackground(new Color(192, 192, 192));
-		panel_2.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
-		final JLabel label = new JLabel(""+sliderValues[0]);
-		panel_2.add(label, "cell 0 1");
-		
-		JLabel lblWater = new JLabel(controlCompoundName_1);
-		lblWater.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+controlCompoundName_1+".png")));
-		panel_2.add(lblWater, "cell 0 0 3 1,growx");
-		
-		JButton button = new JButton("");
-		button .setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		panel_2.add(button, "cell 2 1 1 1,growy");
-		button.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				int count = Integer.parseInt(label.getText());
-				p5Canvas.addMolecule(controlCompoundName_1,count);
-			}
-		});
-		
-		JSlider slider_4 = new JSlider(minSliderValue,maxSliderValue,sliderValues[0]);
-		panel_2.add(slider_4, "cell 1 1");
-		slider_4.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-			int value = ((JSlider) e.getSource()).getValue(); 
-				label.setText(""+value);
-			}
-		});
-		
-		JPanel panel = new JPanel();
-		panel.setBackground(Color.LIGHT_GRAY);
-		dynamicPanel.add(panel, "cell 0 1,grow");
-		additionalPanelList.add(panel);
-		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-		
-		JLabel lblHydrochloricAcid_1 = new JLabel(controlCompoundName_2);
-		final String fixedName2 = controlCompoundName_2.replace(" ", "-");
-		lblHydrochloricAcid_1.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName2+".png")));
-		panel.add(lblHydrochloricAcid_1, "cell 0 0 3 1,growx");
-		
-		final JLabel lblNewLabel_1 = new JLabel(""+sliderValues[1]);
-		panel.add(lblNewLabel_1, "cell 0 1");
-		
-		JButton button_1 = new JButton("");
-		button_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		panel.add(button_1, "cell 2 1,growy");
-		button_1.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				int count = Integer.parseInt(lblNewLabel_1.getText());
-				p5Canvas.addMolecule(fixedName2,count);
-			}
-		});
-		
-		JSlider slider = new JSlider(minSliderValue,maxSliderValue,sliderValues[1]);
-		panel.add(slider, "cell 1 1");
-		slider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-			int value = ((JSlider) e.getSource()).getValue(); 
-			lblNewLabel_1.setText(""+value);
-			}
-		});
-		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBackground(new Color(192, 192, 192));
-		dynamicPanel.add(panel_1, "cell 0 2,grow");
-		additionalPanelList.add(panel_1);
-		panel_1.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-		
-		final JLabel lblNewLabel_2 = new JLabel(""+sliderValues[2]);
-		panel_1.add(lblNewLabel_2, "cell 0 1");
-		
-		JLabel lblNewLabel_3 = new JLabel(controlCompoundName_3);
-		lblNewLabel_3.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+controlCompoundName_3+".png")));
-		panel_1.add(lblNewLabel_3, "cell 0 0 3 1,growx");
-		
-		JButton button_2 = new JButton("");
-		button_2.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		panel_1.add(button_2, "cell 2 1 1 1,growy");
-		button_2.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				int count = Integer.parseInt(lblNewLabel_2.getText());
-				p5Canvas.addMolecule(controlCompoundName_3,count);
-			}
-		});
-		
-		JSlider slider_1 = new JSlider(minSliderValue, maxSliderValue,sliderValues[2]);
-		panel_1.add(slider_1, "cell 1 1");
-		slider_1.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-			int value = ((JSlider) e.getSource()).getValue(); 
-			lblNewLabel_2.setText(""+value);
-			}
-		});
-		
-		JPanel panel_3 = new JPanel();
-		panel_3.setBackground(new Color(192, 192, 192));
-		dynamicPanel.add(panel_3, "cell 0 3,grow");
-		additionalPanelList.add(panel_3);
-		panel_3.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-		
-		final JLabel label_1 = new JLabel(""+sliderValues[3]);
-		panel_3.add(label_1, "cell 0 1");
-		
-		JLabel lblMethylammonium = new JLabel(controlCompoundName_4);
-		lblMethylammonium.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+ controlCompoundName_4+".png")));
-		panel_3.add(lblMethylammonium, "cell 0 0 3 1,growx");
-		
-		JButton button_3 = new JButton("");
-		button_3.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		panel_3.add(button_3, "cell 2 1 1 1,growy");
-		button_3.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				int count = Integer.parseInt(label_1.getText());
-				p5Canvas.addMolecule(controlCompoundName_4,count);
-			}
-		});
-		
-		
-		JSlider slider_2 = new JSlider(minSliderValue,maxSliderValue,sliderValues[3]);
-		panel_3.add(slider_2, "cell 1 1");
-		slider_2.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-			int value = ((JSlider) e.getSource()).getValue(); 
-			label_1.setText(""+value);
-			}
-		});
-		
-		JPanel panel_4 = new JPanel();
-		panel_4.setBackground(new Color(192, 192, 192));
-		dynamicPanel.add(panel_4, "cell 0 4,grow");
-		additionalPanelList.add(panel_4);
-		panel_4.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-		
-		final JLabel label_3 = new JLabel(""+sliderValues[4]);
-		panel_4.add(label_3, "cell 0 1");
-		
-		JLabel lblNewLabel_6 = new JLabel(controlCompoundName_5);
-		lblNewLabel_6.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+controlCompoundName_5+".png")));
-		panel_4.add(lblNewLabel_6, "cell 0 0 3 1,growx");
-		
-		JButton button_4 = new JButton("");
-		button_4.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-		panel_4.add(button_4, "cell 2 1 1 1,growy");
-		button_4.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				int count = Integer.parseInt(label_3.getText());
-				p5Canvas.addMolecule(controlCompoundName_5,count);
-			}
-		});
-		
-		JSlider slider_3 = new JSlider(minSliderValue,maxSliderValue,sliderValues[4]);
-		panel_4.add(slider_3, "cell 1 1");
-		slider_3.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				int value = ((JSlider) e.getSource()).getValue(); 
-				label_3.setText(""+value);
-			}
-		});
-
-*/
 		//****************************************** CENTER PANEL *****************************************************
 		centerPanel = new JPanel();
 		centerPanel.addComponentListener(new ComponentAdapter() {
@@ -812,7 +650,7 @@ public class Main {
 		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
 		int wCenter = screenDimension.width - 282 -300 -50; 
-		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[]["+wCenter+"px]", "[700px][center]"));
+		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[][604.00px][]", "[700px][center]"));
 
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
@@ -833,9 +671,9 @@ public class Main {
 				}
 			}
 		});
-	   clPanel.add(volumeLabel, "flowy,cell 0 0,alignx right");
+	    clPanel.add(volumeLabel, "flowy,cell 0 0,alignx right");
 		clPanel.add(volumeSlider, "cell 0 1,alignx right,growy");
-		JLabel canvasControlLabel_main_volume = new JLabel("Volume");
+		JLabel canvasControlLabel_main_volume = new JLabel("   Volume");
 		clPanel.add(canvasControlLabel_main_volume, "cell 0 2,alignx center");
 
 		
@@ -865,13 +703,14 @@ public class Main {
 		//Center bottom
 		
 		JPanel cbPanel = new JPanel();
-		cbPanel.setLayout(new MigLayout("insets 0, gap 0", "[][210.00][40.00][30.00][][290.00][43.00]", "[]"));
+		cbPanel.setLayout(new MigLayout("insets 0, gap 0", "[]", "[][210.00][][40.00][][210.00][]"));
 		
 		
 		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
 		final JLabel speedLabel = new JLabel("1x");
-		cbPanel.add(canvasControlLabel_main_speed, "cell 0 0");
+		cbPanel.add(speedLabel, "cell 0 0,alignx left");
 		speedSlider =  new JSlider(1,100,defaultSpeed);
+		speedSlider.setOrientation(SwingConstants.VERTICAL);
 		speedSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
@@ -885,16 +724,17 @@ public class Main {
 				speedLabel.setText(df.format(speedRate)+"x");
 			}
 		});
-		cbPanel.add(speedSlider, "cell 1 0,growx");
-		cbPanel.add(speedLabel, "cell 2 0,alignx left");
-		cbPanel.add(new JLabel("    "), "cell 3 0,alignx center");
+		cbPanel.add(speedSlider, "cell 0 1,alignx left,growy");
+		cbPanel.add(canvasControlLabel_main_speed, "cell 0 2");
+		cbPanel.add(new JLabel("    "), "cell 0 3,alignx center");
 		
 		
 		
 		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
 		final JLabel heatLabel = new JLabel(heatInit+"\u2103");
-		cbPanel.add(canvasControlLabel_main_heat, "cell 4 0");
+		cbPanel.add(heatLabel, "cell 0 4,alignx left");
 		p5Canvas.setHeat(heatInit);
+		heatSlider.setOrientation(SwingConstants.VERTICAL);
 		heatSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
@@ -902,10 +742,10 @@ public class Main {
 				heatLabel.setText(value+"\u2103");
 			}
 		});
-		cbPanel.add(heatSlider, "cell 5 0,growx");
-		cbPanel.add(heatLabel, "cell 6 0,alignx left");
+		cbPanel.add(heatSlider, "cell 0 5,alignx left,growy");
+		cbPanel.add(canvasControlLabel_main_heat, "cell 0 6");
 		
-		centerPanel.add(cbPanel,"cell 1 1");
+		centerPanel.add(cbPanel,"cell 2 0");
 		
 		
 		
