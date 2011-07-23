@@ -367,8 +367,7 @@ public class Main {
 		
 		p5Canvas.removeAllMolecules();
 		canvas.reset();
-		
-			
+		TableView.setSelectedRow(-1);
 		
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
 		if (a!=null) {
@@ -386,9 +385,11 @@ public class Main {
 		//createPopupMenu();
 		
 		
+		
+		
 		//if (P5Canvas.isEnable)
 		//	playBtn.doClick();
-		if (playBtn!=null && centerPanel!=null){
+	/*	if (playBtn!=null && centerPanel!=null){
 			volumeSlider.requestFocus();
 			volumeSlider.lostFocus(null, null);
 			volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
@@ -413,7 +414,7 @@ public class Main {
 			
 			leftPanel.updateUI();
 			centerPanel.updateUI();		
-		}	
+		}	*/
 	} 
 		
 		
@@ -426,7 +427,7 @@ public class Main {
 		Dimension screenDimension = tk.getScreenSize();
 		    
 		mainFrame = new JFrame();
-		mainFrame.setBounds(0, 0, 1280, 720);
+		mainFrame.setBounds(0, 0, 1280, 705);
 		//mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

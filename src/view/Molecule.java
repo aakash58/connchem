@@ -8,6 +8,7 @@ import pbox2d.*;
 
 import main.Canvas;
 import main.Main;
+import main.TableView;
 import model.DBinterface;
 
 import org.jbox2d.common.*;
@@ -40,6 +41,7 @@ public class Molecule {
 	private float minSize;
 	public boolean polarity;
 	public Vec2 off;
+	public boolean isBrushed =false;
 
 	// Constructor
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
@@ -66,7 +68,7 @@ public class Molecule {
 		if (res > 0) {
 			res = 1f;
 		} else
-			res = 0.5f;
+			res = 0.1f;
 
 		if (temp <= freezingTem)
 			fric = 1;
@@ -100,11 +102,11 @@ public class Molecule {
 
 		float mul = 1;
 		if (name.equals("Pentane"))
-			mul = mul * 0.15f;
+			mul = mul * 0.10f;
 		else if (name.equals("Bromine"))
-			mul = mul * 0.50f;
+			mul = mul * 0.40f;
 		else if (name.equals("Mercury"))
-			mul = mul * 1.0f;
+			mul = mul * 0.3f;
 		else if (name.equals("Sodium"))
 			mul = mul * 10.0f;
 
@@ -232,46 +234,27 @@ public class Molecule {
 		parent.pushMatrix();
 		parent.translate(pos.x, pos.y);
 		parent.rotate(-a);
-		parent.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH); // second
-																			// two
-																			// args
-																			// center
-																			// for
-																			// p5
-		parent.noFill();
-
-		if (name.equals(Canvas.getSelecttedmolecule())) {
-			parent.stroke(0);
-			Color c = Canvas.getSelecttedColor();
-			parent.stroke(c.getRGB(), c.getAlpha());
-			int margin = 5;
-			parent.rect(pShapeW / -2 - margin, pShapeH / -2 - margin, pShapeW
-					+ 2 * margin, pShapeH + 2 * margin);
+		parent.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH); 
+		//parent.noFill();
+		parent.fill(Color.GRAY.getRGB(),240);
+		if (TableView.selectedRow>=0){
+			if (!name.equals(Canvas.getSelecttedmolecule())) {
+				parent.noStroke();
+				for (int i=0; i<circles.length;i++){
+					parent.ellipse( circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2,circles[i][0]*2, circles[i][0]*2);
+				}
+			}
+		}
+		else if (parent.isBrushingEnable && !isBrushed){
+			parent.noStroke();
+			for (int i=0; i<circles.length;i++){
+				parent.ellipse( circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2,circles[i][0]*2, circles[i][0]*2);
+			}
 		}
 		parent.popMatrix();
 	}
 
-	public void display2() {
-
-		// We look at each body and get its screen position
-		Vec2 pos = box2d.getBodyPixelCoord(body);
-		// Get its angle of rotation
-
-		float a = body.getAngle();
-		// parent.rectMode(parent.CENTER);
-		parent.pushMatrix();
-		parent.translate(pos.x, pos.y);
-		parent.rotate(-a);
-
-		for (int i = 150; i > 1; i = i - 5) {
-			Color col = new Color(255, 0, 0, (150 - i) / 8);
-			parent.fill(col.getRGB());// .noFill();
-			parent.ellipse(0, 0, i * 2, i * 2);
-
-		}
-		parent.popMatrix();
-
-	}
+	
 
 	// This function removes the particle from the box2d world
 	public void killBody() {

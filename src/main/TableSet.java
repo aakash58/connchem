@@ -125,11 +125,7 @@ public class TableSet extends JPanel {
 		}
 
 		public boolean isCellEditable(int row, int col) {
-			if (col == 1) {
-				return true;
-			} else {
-				return false;
-			}
+			return false;
 		}
 
 		public void setValueAt(Object value, int row, int col) {

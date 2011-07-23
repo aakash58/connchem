@@ -22,15 +22,19 @@ import model.State;
 
 public class Canvas extends JPanel implements ActionListener, MouseListener, MouseMotionListener{
 	public static Timer timer1;
-	public static ArrayList mNames = new ArrayList();
-	public static ArrayList mCounts = new ArrayList();
+	public static ArrayList<String> mNames = new ArrayList<String>();
+	public static ArrayList<Integer> mCounts = new ArrayList<Integer>();
 	public static final int MAXCOMPOUND = 50;
 	public static ArrayList[] lines = new ArrayList[MAXCOMPOUND];
 	private long beginTime = 0;
 	public static long before = 0;
 	private long countTime = 0;
+	public static int count100Seconds = 0;
+	
 	public static int maxCount =8;
 	public static int maxTime =60;
+	public static boolean cretical=false;
+	
 	
 	public Canvas() {
 		for (int i=0; i<MAXCOMPOUND;i++){
@@ -125,18 +129,21 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			before = System.currentTimeMillis();
 		
 		long now = System.currentTimeMillis();
-		long ccc = (long) ((now - before)*P5Canvas.speedRate/(1000));
-		long last =countTime+ccc;
-		if (last>countTime){
+		count100Seconds = (int) ((now - before)*P5Canvas.speedRate/(100));
+		long last =countTime+count100Seconds/10;
+		if (!cretical && count100Seconds>3){
+			cretical =true;
 			resetMoleculeCount();
+			cretical =false;
+		}
+		if (last>countTime){
 			updateTableView();
-			
 			if (last>maxTime){
 				maxTime *=2;
 			}
 			//Rescale Y-axis
 			for (int i=0; i< mNames.size();i++){
-				int num2 = Integer.parseInt(mCounts.get(i).toString());
+				int num2 = mCounts.get(i);
 				
 				//Rescale X-axis
 				if (num2>=maxCount){
@@ -202,7 +209,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				mCounts.add(1);
 			}
 			else{
-				int count = Integer.parseInt(mCounts.get(index).toString());
+				int count =mCounts.get(index);
 				count++;
 				mCounts.set(index, count);
 			}
@@ -215,7 +222,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		TableView.data[2] = new ArrayList();
 		for (int i=0; i<mNames.size();i++){
 			String name = mNames.get(i).toString();
-			int count = Integer.parseInt(mCounts.get(i).toString());
+			int count = mCounts.get(i);
 			TableView.data[0].add(count);
 			TableView.data[1].add(TableView.colors[i]);
 			TableView.data[2].add(name);
@@ -235,7 +242,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 	public static String getSelecttedmolecule(){
 		int index = TableView.selectedRow;
-		if (index<0 || index>=mNames.size())
+		if (index<0 || index>=mNames.size() || mNames.get(index)==null)
 			return "";
 		return mNames.get(index).toString();
 	}
