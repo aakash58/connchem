@@ -78,7 +78,7 @@ units:
       #maxTemperature: 2000
       compounds:
       - compound: "Phosphorus"
-        qty: 10
+        qty: 15
   - sim: 3
     name: "Physical Changes"
     sets:
@@ -134,11 +134,11 @@ units:
     - set: 6
       compounds:
       - compound: "Water"
-        qty: 20
+        qty: 30
       - compound: "Bromine"
-        qty: 7
+        qty: 10
       - compound: "Pentane"
-        qty: 7
+        qty: 8
 - unit: 2
   name: "Solutions"
   sims:

@@ -91,10 +91,10 @@ public class TableView extends JPanel {
 	
 	private class RowListener implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent event) {
-			if (event.getValueIsAdjusting()) {
-				return;
+			if (!event.getValueIsAdjusting()) {
+				selectedRow = table.getSelectedRow();
 			}
-			selectedRow = table.getSelectedRow();
+			System.out.println(""+table.getSelectedRow());
 		}
 	}
 

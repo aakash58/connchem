@@ -706,7 +706,7 @@ public class Body {
 		xf1.position.set(m_sweep.c0.sub(Mat22.mul(xf1.R, m_sweep.localCenter)));
 		
 		boolean inRange = true;
-		for (Shape s = m_shapeList; s != null; s = s.m_next) {
+		for (Shape s = m_shapeList; s != null && m_world!=null; s = s.m_next) {
 			inRange = s.synchronize(m_world.m_broadPhase, xf1, m_xf);
 			if (inRange == false) break;
 		}
