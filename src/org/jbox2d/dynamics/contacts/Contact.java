@@ -1,260 +1,304 @@
-/*
- * JBox2D - A Java Port of Erin Catto's Box2D
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
- * Box2D homepage: http://www.box2d.org
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  * 
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- */
-
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 package org.jbox2d.dynamics.contacts;
 
-import java.util.ArrayList;
-import java.util.List;
 
+import org.jbox2d.callbacks.ContactListener;
+import org.jbox2d.collision.ContactID;
 import org.jbox2d.collision.Manifold;
-import org.jbox2d.collision.Shape;
-import org.jbox2d.collision.ShapeType;
-import org.jbox2d.common.MathUtils;
+import org.jbox2d.collision.ManifoldPoint;
+import org.jbox2d.collision.WorldManifold;
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.Transform;
 import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.ContactListener;
-import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.Fixture;
+import org.jbox2d.pooling.IWorldPool;
 
-// Updated to rev 142 of b2Contact.h/cpp
-
+// updated to rev 100
 /**
- * Base class for contacts between shapes.
- * @author ewjordan
- *
+ * The class manages contact between two shapes. A contact exists for each
+ * overlapping AABB in the broad-phase (except if filtered). Therefore a contact
+ * object may exist that has no contact points.
+ * 
+ * @author daniel
  */
 public abstract class Contact {
-
-	public static final int e_nonSolidFlag	= 0x0001;
-	public static final int e_slowFlag		= 0x0002;
-	public static final int e_islandFlag	= 0x0004;
-	public static final int e_toiFlag		= 0x0008;
-
-	static List<ContactRegister> s_registers;
-
-    static boolean s_initialized;
-
-    /** The parent world. */
-    public World m_world;
-
-    /* World pool and list pointers. */
-    public Contact m_prev;
-    public Contact m_next;
-
-    /** Node for connecting bodies. */
-    public ContactEdge m_node1;
-    /** Node for connecting bodies. */
-    public ContactEdge m_node2;
-
-    public Shape m_shape1;
-    public Shape m_shape2;
-
-    /** Combined friction */
-    public float m_friction;
-    /** Combined restitution */
-    public float m_restitution;
-
-    // public boolean m_islandFlag;
-    public int m_flags;
-    public int m_manifoldCount;
-    
-    public float m_toi;
 	
-    public abstract void evaluate(ContactListener listener);
-    
-	/** Get the manifold array. */
-    public abstract List<Manifold> getManifolds();
+	// Flags stored in m_flags
+	// Used when crawling contact graph when forming islands.
+	public static final int ISLAND_FLAG = 0x0001;
+	// Set when the shapes are touching.
+	public static final int TOUCHING_FLAG = 0x0002; // NO_UCD
+	// This contact can be disabled (by user)
+	public static final int ENABLED_FLAG = 0x0004;
+	// This contact needs filtering because a fixture filter was changed.
+	public static final int FILTER_FLAG = 0x0008;
+	// This bullet contact had a TOI event
+	public static final int BULLET_HIT_FLAG = 0x0010;
 
-    /**
-     * Get the number of manifolds. This is 0 or 1 between convex shapes.
-	 * This may be greater than 1 for convex-vs-concave shapes. Each
-	 * manifold holds up to two contact points with a shared contact normal.
+	public int m_flags;
+
+	// World pool and list pointers.
+	public Contact m_prev;
+	public Contact m_next;
+
+	// Nodes for connecting bodies.
+	public ContactEdge m_nodeA = null;
+	public ContactEdge m_nodeB = null;
+
+	public Fixture m_fixtureA;
+	public Fixture m_fixtureB;
+
+	public Manifold m_manifold;
+
+	public float m_toiCount;
+	
+	protected final IWorldPool pool;
+
+	protected Contact(IWorldPool argPool) {
+		m_fixtureA = null;
+		m_fixtureB = null;
+		m_nodeA = new ContactEdge();
+		m_nodeB = new ContactEdge();
+		m_manifold = new Manifold();
+		pool = argPool;
+	}
+
+	/** initialization for pooling */
+	public void init(Fixture fA, Fixture fB) {
+		m_flags = 0;
+
+		m_fixtureA = fA;
+		m_fixtureB = fB;
+
+		m_manifold.pointCount = 0;
+
+		m_prev = null;
+		m_next = null;
+
+		m_nodeA.contact = null;
+		m_nodeA.prev = null;
+		m_nodeA.next = null;
+		m_nodeA.other = null;
+
+		m_nodeB.contact = null;
+		m_nodeB.prev = null;
+		m_nodeB.next = null;
+		m_nodeB.other = null;
+
+		m_toiCount = 0;
+	}
+
+	/**
+	 * Get the contact manifold. Do not set the point count to zero. Instead
+	 * call Disable.
 	 */
-    public int getManifoldCount() {
-        /*
-         * List<Manifold> m = GetManifolds(); if (m == null) return 0; else
-         * return GetManifolds().size();
-         */
-        return m_manifoldCount;
-    }
-    
-    public boolean isSolid() {
-    	return (m_flags & e_nonSolidFlag) == 0;
-    }
-	
-    
-	
-    public Contact() {
-        m_node1 = new ContactEdge();
-        m_node2 = new ContactEdge();
-    }
+	public Manifold getManifold() {
+		return m_manifold;
+	}
 
-    public Contact(Shape s1, Shape s2) {
-        this();
+	/**
+	 * Get the world manifold.
+	 */
+	public void getWorldManifold(WorldManifold worldManifold) {
+		final Body bodyA = m_fixtureA.getBody();
+		final Body bodyB = m_fixtureB.getBody();
+		final Shape shapeA = m_fixtureA.getShape();
+		final Shape shapeB = m_fixtureB.getShape();
 
-        m_flags = 0;
-        
-        if (s1.isSensor() || s2.isSensor()) {
-    		m_flags |= e_nonSolidFlag;
-    	}
-        
-        m_shape1 = s1;
-        m_shape2 = s2;
+		worldManifold.initialize(m_manifold, bodyA.getTransform(),
+				shapeA.m_radius, bodyB.getTransform(), shapeB.m_radius);
+	}
 
-        m_manifoldCount = 0;
-        getManifolds().clear(); //unnecessary, I think
+	/**
+	 * Is this contact touching
+	 * 
+	 * @return
+	 */
+	public boolean isTouching() {
+		return (m_flags & TOUCHING_FLAG) == TOUCHING_FLAG;
+	}
 
-        m_friction = (float) Math.sqrt(m_shape1.m_friction * m_shape2.m_friction);
-        m_restitution = MathUtils.max(m_shape1.m_restitution, m_shape2.m_restitution);
-        //m_world = s1.m_body.m_world;
-        m_prev = null;
-        m_next = null;
-        m_node1.contact = null;
-        m_node1.prev = null;
-        m_node1.next = null;
-        m_node1.other = null;
-        
-        m_node2.contact = null;
-        m_node2.prev = null;
-        m_node2.next = null;
-        m_node2.other = null;
-    }
+	/**
+	 * Enable/disable this contact. This can be used inside the pre-solve
+	 * contact listener. The contact is only disabled for the current time step
+	 * (or sub-step in continuous collisions).
+	 * 
+	 * @param flag
+	 */
+	public void setEnabled(boolean flag) {
+		if (flag) {
+			m_flags |= ENABLED_FLAG;
+		} else {
+			m_flags &= ~ENABLED_FLAG;
+		}
+	}
 
-    public Contact getNext() {
-        return m_next;
-    }
+	/**
+	 * Has this contact been disabled?
+	 * 
+	 * @return
+	 */
+	public boolean isEnabled() {
+		return (m_flags & ENABLED_FLAG) == ENABLED_FLAG;
+	}
 
-    public Shape getShape1() {
-        return m_shape1;
-    }
+	/**
+	 * Get the next contact in the world's contact list.
+	 * 
+	 * @return
+	 */
+	public Contact getNext() {
+		return m_next;
+	}
 
-    public Shape getShape2() {
-        return m_shape2;
-    }
+	/**
+	 * Get the first fixture in this contact.
+	 * 
+	 * @return
+	 */
+	public Fixture getFixtureA() {
+		return m_fixtureA;
+	}
 
-    static void initializeRegisters() {
-        s_registers = new ArrayList<ContactRegister>();
-        addType(new CircleContact(), ShapeType.CIRCLE_SHAPE,
-                ShapeType.CIRCLE_SHAPE);
-        addType(new PolyAndCircleContact(), ShapeType.POLYGON_SHAPE,
-                ShapeType.CIRCLE_SHAPE);
-        addType(new PolyContact(), ShapeType.POLYGON_SHAPE, ShapeType.POLYGON_SHAPE);
-        // AddType(new PolyContact(), ShapeType.BOX_SHAPE, ShapeType.BOX_SHAPE);
-    }
+	/**
+	 * Get the second fixture in this contact.
+	 * 
+	 * @return
+	 */
+	public Fixture getFixtureB() {
+		return m_fixtureB;
+	}
 
-    static void addType(ContactCreateFcn createFcn, ShapeType type1,
-            ShapeType type2) {
-        ContactRegister cr = new ContactRegister();
-        cr.s1 = type1;
-        cr.s2 = type2;
-        cr.createFcn = createFcn;
-        cr.primary = true;
-        s_registers.add(cr);
+	public abstract void evaluate(Manifold manifold, Transform xfA,
+			Transform xfB);
 
-        if (type1 != type2) {
-            ContactRegister cr2 = new ContactRegister();
-            cr2.s2 = type1;
-            cr2.s1 = type2;
-            cr2.createFcn = createFcn;
-            cr2.primary = false;
-            s_registers.add(cr2);
-        }
-    }
+	/**
+	 * Flag this contact for filtering. Filtering will occur the next time step.
+	 */
+	public void flagForFiltering() {
+		m_flags |= FILTER_FLAG;
+	}
 
-    /* Java note:
-     * This function is called "create" in C++ version.
-     * Doing this in Java causes problems, so leave it as is.
-     */
-    public static Contact createContact(Shape shape1, Shape shape2) {
-        if (s_initialized == false) {
-            initializeRegisters();
-            s_initialized = true;
-        }
+	// djm pooling
+	private final Manifold oldManifold = new Manifold();
 
-        ShapeType type1 = shape1.m_type;
-        ShapeType type2 = shape2.m_type;
+	public void update(ContactListener listener) {
+		
+		oldManifold.set(m_manifold);
 
-        // assert ShapeType.UNKNOWN_SHAPE< type1 && type1 <
-        // ShapeType.SHAPE_TYPE_COUNT;
-        // assert ShapeType.UNKNOWN_SHAPE < type2 && type2 <
-        // ShapeType.SHAPE_TYPE_COUNT;
-        ContactRegister register = getContactRegister(type1, type2);
-        if (register != null) {
-            if (register.primary) {
-                return register.createFcn.create(shape1, shape2);
-            }
-            else {
-                Contact c = register.createFcn.create(shape2, shape1);
-                for (int i = 0; i < c.getManifoldCount(); ++i) {
-                    Manifold m = c.getManifolds().get(i);
-                    m.normal.negateLocal();
-                }
-                return c;
-            }
-        }
-        else {
-            return null;
-        }
-    }
+		// Re-enable this contact.
+		m_flags |= ENABLED_FLAG;
 
-    private static ContactRegister getContactRegister(ShapeType type1,
-            ShapeType type2) {
-        for (ContactRegister cr : s_registers) {
-            if (cr.s1 == type1 && cr.s2 == type2) {
-                return cr;
-            }
-        }
+		boolean touching = false;
+		boolean wasTouching = (m_flags & TOUCHING_FLAG) == TOUCHING_FLAG;
 
-        return null;
-    }
+		boolean sensorA = m_fixtureA.isSensor();
+		boolean sensorB = m_fixtureB.isSensor();
+		boolean sensor = sensorA || sensorB;
 
-    public static void destroy(Contact contact) {
-        assert (s_initialized == true);
+		Body bodyA = m_fixtureA.getBody();
+		Body bodyB = m_fixtureB.getBody();
+		Transform xfA = bodyA.getTransform();
+		Transform xfB = bodyB.getTransform();
+		//log.debug("TransformA: "+xfA);
+		//log.debug("TransformB: "+xfB);
+		
+		if (sensor) {
+			Shape shapeA = m_fixtureA.getShape();
+			Shape shapeB = m_fixtureB.getShape();
+			touching = pool.getCollision().testOverlap(shapeA, shapeB,
+					xfA, xfB);
 
-        if (contact.getManifoldCount() > 0) {
-            contact.getShape1().getBody().wakeUp();
-            contact.getShape2().getBody().wakeUp();
-        }
-    }
-    
-    public void update(ContactListener listener) {
-    	int oldCount = getManifoldCount();
-    	evaluate(listener);
-    	int newCount = getManifoldCount();
+			// Sensors don't generate manifolds.
+			m_manifold.pointCount = 0;
+		} else {
+			evaluate(m_manifold, xfA, xfB);
+			touching = m_manifold.pointCount > 0;
 
-    	Body body1 = m_shape1.getBody();
-    	Body body2 = m_shape2.getBody();
-    	
-    	if (newCount == 0 && oldCount > 0) {
-    		body1.wakeUp();
-    		body2.wakeUp();
-    	}
+			// Match old contact ids to new contact ids and copy the
+			// stored impulses to warm start the solver.
+			for (int i = 0; i < m_manifold.pointCount; ++i) {
+				ManifoldPoint mp2 = m_manifold.points[i];
+				mp2.normalImpulse = 0.0f;
+				mp2.tangentImpulse = 0.0f;
+				ContactID id2 = mp2.id;
 
-    	// Slow contacts don't generate TOI events.
-    	if (body1.isStatic() || body1.isBullet() || body2.isStatic() || body2.isBullet()) {
-    		m_flags &= ~e_slowFlag;
-    	} else {
-    		m_flags |= e_slowFlag;
-    	}
-    }
+				for (int j = 0; j < oldManifold.pointCount; ++j) {
+					ManifoldPoint mp1 = oldManifold.points[j];
 
-    public abstract Contact clone();
+					if (mp1.id.isEqual(id2)) {
+						mp2.normalImpulse = mp1.normalImpulse;
+						mp2.tangentImpulse = mp1.tangentImpulse;
+						break;
+					}
+				}
+			}
+
+			if (touching != wasTouching) {
+				bodyA.setAwake(true);
+				bodyB.setAwake(true);
+			}
+		}
+
+		if (touching) {
+			m_flags |= TOUCHING_FLAG;
+		} else {
+			m_flags &= ~TOUCHING_FLAG;
+		}
+
+		if (listener == null) {
+			return;
+		}
+
+		if (wasTouching == false && touching == true) {
+			listener.beginContact(this);
+		}
+
+		if (wasTouching == true && touching == false) {
+			listener.endContact(this);
+		}
+
+		if (sensor == false && touching) {
+			listener.preSolve(this, oldManifold);
+		}
+	}
+
+	// // djm pooled
+	// private static final TLTOIInput tlinput = new TLTOIInput();
+	//	
+	// protected float computeTOI(Sweep sweepA, Sweep sweepB){
+	// TOIInput input = tlinput.get();
+	// input.proxyA.set(m_fixtureA.getShape());
+	// input.proxyB.set(m_fixtureB.getShape());
+	// input.sweepA = sweepA;
+	// input.sweepB = sweepB;
+	// input.tolerance = Settings.linearSlop;
+	//
+	// return SingletonPool.getTOI().timeOfImpact(input);
+	// }
 }

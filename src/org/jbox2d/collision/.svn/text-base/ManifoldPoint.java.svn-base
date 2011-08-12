@@ -1,7 +1,33 @@
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 /*
  * JBox2D - A Java Port of Erin Catto's Box2D
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
+ * JBox2D homepage: http://jbox2d.sourceforge.net/
  * Box2D homepage: http://www.box2d.org
  * 
  * This software is provided 'as-is', without any express or implied
@@ -25,42 +51,57 @@ package org.jbox2d.collision;
 
 import org.jbox2d.common.Vec2;
 
-//Updated to rev 56->108->139 of b2Collision.h
-
+// updated to rev 100
 /**
  * A manifold point is a contact point belonging to a contact
  * manifold. It holds details related to the geometry and dynamics
  * of the contact points.
- * The point is stored in local coordinates because CCD
- * requires sub-stepping in which the separation is stale.
+ * The local point usage depends on the manifold type:
+ * <ul><li>e_circles: the local center of circleB</li>
+ * <li>e_faceA: the local center of cirlceB or the clip point of polygonB</li>
+ * <li>e_faceB: the clip point of polygonA</li></ul>
+ * This structure is stored across time steps, so we keep it small.<br/>
+ * Note: the impulses are used for internal caching and may not
+ * provide reliable contact forces, especially for high speed collisions.
  */
 public class ManifoldPoint {
-	/** Local position of the contact point in body1 */
-    public Vec2 localPoint1;
-    /** Local position of the contact point in body2 */
-    public Vec2 localPoint2;
-    /** The separation of the shapes along the normal vector */
-    public float separation;
-    /** The non-penetration force */
-    public float normalImpulse;
-    /** The friction force */
-    public float tangentImpulse;
-    /** Uniquely identifies a contact point between two shapes */
-    public ContactID id;
+	/** usage depends on manifold type */
+	public final Vec2 localPoint;
+	/** the non-penetration impulse */
+	public float normalImpulse;
+	/** the friction impulse */
+	public float tangentImpulse;
+	/** uniquely identifies a contact point between two shapes */
+	public final ContactID id;
 
-    public ManifoldPoint() {
-        localPoint1 = new Vec2();
-        localPoint2 = new Vec2();
-        separation = normalImpulse = tangentImpulse = 0f;
-        id = new ContactID();
-    }
+	/**
+	 * Blank manifold point with everything zeroed out.
+	 */
+	public ManifoldPoint() {
+		localPoint = new Vec2();
+		normalImpulse = tangentImpulse = 0f;
+		id = new ContactID();
+	}
 
-    public ManifoldPoint(ManifoldPoint cp) {
-        localPoint1 = cp.localPoint1.clone();
-        localPoint2 = cp.localPoint2.clone();
-        separation = cp.separation;
-        normalImpulse = cp.normalImpulse;
-        tangentImpulse = cp.tangentImpulse;
-        id = new ContactID(cp.id);
-    }
+	/**
+	 * Creates a manifold point as a copy of the given point
+	 * @param cp point to copy from
+	 */
+	public ManifoldPoint(final ManifoldPoint cp) {
+		localPoint = cp.localPoint.clone();
+		normalImpulse = cp.normalImpulse;
+		tangentImpulse = cp.tangentImpulse;
+		id = new ContactID(cp.id);
+	}
+
+	/**
+	 * Sets this manifold point form the given one
+	 * @param cp the point to copy from
+	 */
+	public void set(final ManifoldPoint cp){
+		localPoint.set(cp.localPoint);
+		normalImpulse = cp.normalImpulse;
+		tangentImpulse = cp.tangentImpulse;
+		id.set(cp.id);
+	}
 }

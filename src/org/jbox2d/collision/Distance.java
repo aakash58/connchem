@@ -1,406 +1,748 @@
-/*
- * JBox2D - A Java Port of Erin Catto's Box2D
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
- * Box2D homepage: http://www.box2d.org
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  * 
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- */
-
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 package org.jbox2d.collision;
 
-/*
-* Copyright (c) 2007 Erin Catto http://www.gphysics.com
-*
-* This software is provided 'as-is', without any express or implied
-* warranty.  In no event will the authors be held liable for any damages
-* arising from the use of this software.
-* Permission is granted to anyone to use this software for any purpose,
-* including commercial applications, and to alter it and redistribute it
-* freely, subject to the following restrictions:
-* 1. The origin of this software must not be misrepresented; you must not
-* claim that you wrote the original software. If you use this software
-* in a product, an acknowledgment in the product documentation would be
-* appreciated but is not required.
-* 2. Altered source versions must be plainly marked as such, and must not be
-* misrepresented as being the original software.
-* 3. This notice may not be removed or altered from any source distribution.
-*/
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.Mat22;
+import org.jbox2d.common.MathUtils;
+import org.jbox2d.common.Settings;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.common.Transform;
 
-import org.jbox2d.common.*;
+// updated to rev 100
+/**
+ * This is non-static for faster pooling. To get an instance,
+ * use the {@link SingletonPool}, don't construct a distance
+ * object.
+ * 
+ * @author Daniel Murphy
+ */
+public class Distance {
+	
+	public static int GJK_CALLS = 0;
+	public static int GJK_ITERS = 0;
+	public static int GJK_MAX_ITERS = 20;
 
-//updated to rev 108->139 of b2Distance.cpp
-
-/** Implements the GJK algorithm for computing distance between shapes. */
-public class Distance{
-	public static int g_GJK_Iterations = 0;
-
-	// GJK using Voronoi regions (Christer Ericson) and region selection
-	// optimizations (Casey Muratori).
-
-	// The origin is either in the region of points[1] or in the edge region. The origin is
-	// not in region of points[0] because that is the old point.
-	protected static int ProcessTwo(Vec2 x1, Vec2 x2, Vec2[] p1s, Vec2[] p2s, Vec2[] points) {
-		// If in point[1] region
-		Vec2 r = new Vec2(-points[1].x,-points[1].y);
-		Vec2 d = new Vec2(points[0].x - points[1].x,points[0].y - points[1].y);
-		float length = d.normalize();
-		float lambda = Vec2.dot(r, d);
-		if (lambda <= 0.0f || length < Settings.EPSILON) {
-			// The simplex is reduced to a point.
-			x1.set(p1s[1]);
-			x2.set(p2s[1]);
-			p1s[0].set(p1s[1]);
-			p2s[0].set(p2s[1]);
-			points[0].set(points[1]);
-			return 1;
+	/**
+	 * GJK using Voronoi regions (Christer Ericson) and Barycentric coordinates.
+	 */
+	private class SimplexVertex {
+		public final Vec2 wA = new Vec2(); // support point in shapeA
+		public final Vec2 wB = new Vec2(); // support point in shapeB
+		public final Vec2 w = new Vec2(); // wB - wA
+		public float a; // barycentric coordinate for closest point
+		public int indexA; // wA index
+		public int indexB; // wB index
+		
+		public void set(SimplexVertex sv) {
+			wA.set(sv.wA);
+			wB.set(sv.wB);
+			w.set(sv.w);
+			a = sv.a;
+			indexA = sv.indexA;
+			indexB = sv.indexB;
 		}
-
-		// Else in edge region
-		lambda /= length;
-		x1.set( p1s[1].x + lambda * (p1s[0].x - p1s[1].x),
-				p1s[1].y + lambda * (p1s[0].y - p1s[1].y));
-		x2.set( p2s[1].x + lambda * (p2s[0].x - p2s[1].x),
-				p2s[1].y + lambda * (p2s[0].y - p2s[1].y));
-		return 2;
 	}
-
-	// Possible regions:
-	// - points[2]
-	// - edge points[0]-points[2]
-	// - edge points[1]-points[2]
-	// - inside the triangle
-	protected static int ProcessThree(Vec2 x1, Vec2 x2, Vec2[] p1s, Vec2[] p2s, Vec2[] points) {
-		Vec2 a = points[0];
-		Vec2 b = points[1];
-		Vec2 c = points[2];
-
-		Vec2 ab = b.sub(a);
-		Vec2 ac = c.sub(a);
-		Vec2 bc = c.sub(b);
-
-		float sn = -Vec2.dot(a, ab), sd = Vec2.dot(b, ab);
-		float tn = -Vec2.dot(a, ac), td = Vec2.dot(c, ac);
-		float un = -Vec2.dot(b, bc), ud = Vec2.dot(c, bc);
-
-		// In vertex c region?
-		if (td <= 0.0f && ud <= 0.0f) {
-			// Single point
-			x1.set(p1s[2]);
-			x2.set(p2s[2]);
-			p1s[0].set(p1s[2]);
-			p2s[0].set(p2s[2]);
-			points[0].set(points[2]);
-			return 1;
-		}
-
-		// Should not be in vertex a or b region.
-		//B2_NOT_USED(sd);
-		//B2_NOT_USED(sn);
-		assert(sn > 0.0f || tn > 0.0f);
-		assert(sd > 0.0f || un > 0.0f);
-
-		float n = Vec2.cross(ab, ac);
-
-		// Should not be in edge ab region.
-		float vc = n * Vec2.cross(a, b);
-		assert(vc > 0.0f || sn > 0.0f || sd > 0.0f);
-
-		// In edge bc region?
-		float va = n * Vec2.cross(b, c);
-		if (va <= 0.0f && un >= 0.0f && ud >= 0.0f && (un+ud) > 0.0f){
-			assert(un + ud > 0.0f);
-			float lambda = un / (un + ud);
-			x1.set( p1s[1].x + lambda * (p1s[2].x - p1s[1].x),
-					p1s[1].y + lambda * (p1s[2].y - p1s[1].y));
-			x2.set( p2s[1].x + lambda * (p2s[2].x - p2s[1].x),
-					p2s[1].y + lambda * (p2s[2].y - p2s[1].y));
-			p1s[0].set(p1s[2]);
-			p2s[0].set(p2s[2]);
-			points[0].set(points[2]);
-			return 2;
-		}
-
-		// In edge ac region?
-		float vb = n * Vec2.cross(c, a);
-		if (vb <= 0.0f && tn >= 0.0f && td >= 0.0f && (tn+td) > 0.0f) {
-			assert(tn + td > 0.0f);
-			float lambda = tn / (tn + td);
-			x1.set( p1s[0].x + lambda * (p1s[2].x - p1s[0].x),
-					p1s[0].y + lambda * (p1s[2].y - p1s[0].y));
-			x2.set( p2s[0].x + lambda * (p2s[2].x - p2s[0].x),
-					p2s[0].y + lambda * (p2s[2].y - p2s[0].y));
-			p1s[1].set(p1s[2]);
-			p2s[1].set(p2s[2]);
-			points[1].set(points[2]);
-			return 2;
-		}
-
-		// Inside the triangle, compute barycentric coordinates
-		float denom = va + vb + vc;
-		assert(denom > 0.0f);
-		denom = 1.0f / denom;
-		float u = va * denom;
-		float v = vb * denom;
-		float w = 1.0f - u - v;
-		x1.set( u * p1s[0].x + v * p1s[1].x + w * p1s[2].x,
-				u * p1s[0].y + v * p1s[1].y + w * p1s[2].y);
-		x2.set( u * p2s[0].x + v * p2s[1].x + w * p2s[2].x,
-				u * p2s[0].y + v * p2s[1].y + w * p2s[2].y);
-		return 3;
-	}
-
-	protected static boolean InPoints(Vec2 w, Vec2[] points, int pointCount) {
-		float k_tolerance = 100.0f * Settings.EPSILON;
-		for (int i = 0; i < pointCount; ++i) {
-			Vec2 d =Vec2.abs(w.sub(points[i])); 
-//				new Vec2( Math.abs(w.x-points[i].x), Math.abs(w.y-points[i].y));//Vec2.abs(w - points[i]);
-			Vec2 m = Vec2.max(Vec2.abs(w), Vec2.abs(points[i]));
-			
-			if (d.x < k_tolerance * (m.x + 1.0f) &&
-				d.y < k_tolerance * (m.y + 1.0f)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	
 	/**
-	 * Distance between any two objects that implement SupportsGenericDistance.
-	 * Note that x1 and x2 are passed so that they may store results - they must
-	 * be instantiated before being passed, and the contents will be lost.
-	 * 
-	 * @param x1 Set to closest point on shape1 (result parameter)
-	 * @param x2 Set to closest point on shape2 (result parameter)
-	 * @param shape1 Shape to test
-	 * @param xf1 Transform of shape1
-	 * @param shape2 Shape to test
-	 * @param xf2 Transform of shape2
-	 * @return
+	 *  Used to warm start b2Distance.
+	 *  Set count to zero on first call.
+	 * @author daniel
 	 */
-	public static float DistanceGeneric(Vec2 x1, Vec2 x2,
-						  SupportsGenericDistance shape1, XForm xf1,
-						  SupportsGenericDistance shape2, XForm xf2) {
-		Vec2 p1s[] = new Vec2[3];
-		Vec2 p2s[] = new Vec2[3];
-		Vec2 points[] = new Vec2[3];
+	public static class SimplexCache {
+		/** length or area */
+		public float metric;
+		public int count;
+		/** vertices on shape A */
+		public final int indexA[] = new int[3];
+		/** vertices on shape B */
+		public final int indexB[] = new int[3];
 		
-		for (int i=0; i<3; ++i) {
-			p1s[i] = new Vec2();
-			p2s[i] = new Vec2();
-			points[i] = new Vec2();
+		public SimplexCache(){
+			metric = 0;
+			count = 0;
+			indexA[0] = Integer.MAX_VALUE;
+			indexA[1] = Integer.MAX_VALUE;
+			indexA[2] = Integer.MAX_VALUE;
+			indexB[0] = Integer.MAX_VALUE;
+			indexB[1] = Integer.MAX_VALUE;
+			indexB[2] = Integer.MAX_VALUE;
 		}
+
+		public void set(SimplexCache sc){
+			System.arraycopy(sc.indexA, 0, indexA, 0, indexA.length);
+			System.arraycopy(sc.indexB, 0, indexB, 0, indexB.length);
+			metric = sc.metric;
+			count = sc.count;
+		}
+	}
+	
+	private class Simplex {
+		public final SimplexVertex m_v1 = new SimplexVertex();
+		public final SimplexVertex m_v2 = new SimplexVertex();
+		public final SimplexVertex m_v3 = new SimplexVertex();
+		public final SimplexVertex vertices[] = {m_v1, m_v2, m_v3};
+		public int m_count;
 		
-		int pointCount = 0;
-
-		x1.set(shape1.getFirstVertex(xf1));
-		x2.set(shape2.getFirstVertex(xf2));
-
-		float vSqr = 0.0f;
-		int maxIterations = 20;
-		for (int iter = 0; iter < maxIterations; ++iter) {
-			Vec2 v = x2.sub(x1);
-			Vec2 w1 = shape1.support(xf1, v);
-			Vec2 w2 = shape2.support(xf2, v.negate());
-
-			vSqr = Vec2.dot(v, v);
-			Vec2 w = w2.sub(w1);
-			float vw = Vec2.dot(v, w);
-			if (vSqr - vw <= 0.01f * vSqr || InPoints(w, points, pointCount)) // or w in points
-			{
-				if (pointCount == 0) {
-					x1.set(w1);
-					x2.set(w2);
+		public void readCache(SimplexCache cache, DistanceProxy proxyA, Transform transformA, DistanceProxy proxyB,
+				Transform transformB) {
+			assert (cache.count <= 3);
+			
+			// Copy data from cache.
+			m_count = cache.count;
+			
+			for (int i = 0; i < m_count; ++i) {
+				SimplexVertex v = vertices[i];
+				v.indexA = cache.indexA[i];
+				v.indexB = cache.indexB[i];
+				Vec2 wALocal = proxyA.getVertex(v.indexA);
+				Vec2 wBLocal = proxyB.getVertex(v.indexB);
+				Transform.mulToOut(transformA, wALocal, v.wA);
+				Transform.mulToOut(transformB, wBLocal, v.wB);
+				v.w.set(v.wB).subLocal(v.wA);
+				v.a = 0.0f;
+			}
+			
+			// Compute the new simplex metric, if it is substantially different than
+			// old metric then flush the simplex.
+			if (m_count > 1) {
+				float metric1 = cache.metric;
+				float metric2 = getMetric();
+				if (metric2 < 0.5f * metric1 || 2.0f * metric1 < metric2 || metric2 < Settings.EPSILON) {
+					// Reset the simplex.
+					m_count = 0;
 				}
-				g_GJK_Iterations = iter;
-				return (float)Math.sqrt(vSqr);
 			}
-
-			switch (pointCount) {
-			case 0:
-				p1s[0].set(w1);
-				p2s[0].set(w2);
-				points[0].set(w);
-				x1.set(p1s[0]);
-				x2.set(p2s[0]);
-				++pointCount;
-				break;
-
-			case 1:
-				p1s[1].set(w1);
-				p2s[1].set(w2);
-				points[1].set(w);
-				pointCount = ProcessTwo(x1, x2, p1s, p2s, points);
-				break;
-
-			case 2:
-				p1s[2].set(w1);
-				p2s[2].set(w2);
-				points[2].set(w);
-				pointCount = ProcessThree(x1, x2, p1s, p2s, points);
-				break;
-			}
-
-			// If we have three points, then the origin is in the corresponding triangle.
-			if (pointCount == 3) {
-				g_GJK_Iterations = iter;
-				return 0.0f;
-				//
-			}
-
-			float maxSqr = -Float.MAX_VALUE;// -FLT_MAX;
-			for (int i = 0; i < pointCount; ++i) {
-				maxSqr = Math.max(maxSqr, Vec2.dot(points[i], points[i]));
-			}
-
-			if (pointCount == 3 || vSqr <= 100.0f * Settings.EPSILON * maxSqr) {
-				g_GJK_Iterations = iter;
-				v.set(x2.x - x1.x, x2.y - x1.y);// x2 - x1
-				vSqr = Vec2.dot(v, v);
-
-				return (float)Math.sqrt(vSqr);
-				//
+			
+			// If the cache is empty or invalid ...
+			if (m_count == 0) {
+				SimplexVertex v = vertices[0];
+				v.indexA = 0;
+				v.indexB = 0;
+				Vec2 wALocal = proxyA.getVertex(0);
+				Vec2 wBLocal = proxyB.getVertex(0);
+				Transform.mulToOut(transformA, wALocal, v.wA);
+				Transform.mulToOut(transformB, wBLocal, v.wB);
+				v.w.set(v.wB).subLocal(v.wA);
+				m_count = 1;
 			}
 		}
-
-		g_GJK_Iterations = maxIterations;
-		return (float)Math.sqrt(vSqr);
-		//
-	}
-
-	protected static float DistanceCC(
-		Vec2 x1, Vec2 x2,
-		CircleShape circle1, XForm xf1,
-		CircleShape circle2, XForm xf2) {
 		
-		Vec2 p1 = XForm.mul(xf1, circle1.getLocalPosition());
-		Vec2 p2 = XForm.mul(xf2, circle2.getLocalPosition());
-
-		Vec2 d = new Vec2(p2.x - p1.x, p2.y - p1.y);
-		float dSqr = Vec2.dot(d, d);
-		float r1 = circle1.getRadius() - Settings.toiSlop;
-		float r2 = circle2.getRadius() - Settings.toiSlop;
-		float r = r1 + r2;
-		if (dSqr > r * r){
-			float dLen = d.normalize();
-			float distance = dLen - r;
-			x1.set( p1.x + r1 * d.x,
-					p1.y + r1 * d.y);
-			x2.set( p2.x - r2 * d.x,
-					p2.y - r2 * d.y);
-			return distance;
-		} else if (dSqr > Settings.EPSILON * Settings.EPSILON) {
-			d.normalize();
-			x1.set( p1.x + r1 * d.x,
-					p1.y + r1 * d.y);
-			x2.set(x1);
-			return 0.0f;
+		public void writeCache(SimplexCache cache) {
+			cache.metric = getMetric();
+			cache.count = m_count;
+			
+			for (int i = 0; i < m_count; ++i) {
+				cache.indexA[i] = (vertices[i].indexA);
+				cache.indexB[i] = (vertices[i].indexB);
+			}
 		}
-
-		x1.set(p1);
-		x2.set(x1);
-		return 0.0f;
-	}
-
-
-	// GJK is more robust with polygon-vs-point than polygon-vs-circle.
-	// So we convert polygon-vs-circle to polygon-vs-point.
-	protected static float DistancePC(
-		Vec2 x1, Vec2 x2,
-		PolygonShape polygon, XForm xf1,
-		CircleShape circle,   XForm xf2) {
-		Point point = new Point(new Vec2(0.0f, 0.0f));
-		point.p = XForm.mul(xf2, circle.getLocalPosition());
-
-		float distance = DistanceGeneric(x1, x2, polygon, xf1, point, XForm.identity);
-
-		float r = circle.getRadius() - Settings.toiSlop;
-
-		if (distance > r) {
-			distance -= r;
-			Vec2 d = x2.sub(x1);
-			d.normalize();
-			x2.x -= r * d.x;
-			x2.y -= r * d.y;
-		} else {
-			distance = 0.0f;
-			x2.set(x1);
+		
+		private final Vec2 e12 = new Vec2();
+		
+		public final void getSearchDirection(final Vec2 out) {
+			switch (m_count) {
+				case 1 :
+					out.set(m_v1.w).negateLocal();
+					return;
+				case 2 :
+					e12.set(m_v2.w).subLocal(m_v1.w);
+					// use out for a temp variable real quick
+					out.set(m_v1.w).negateLocal();
+					float sgn = Vec2.cross(e12, out);
+					
+					if (sgn > 0f) {
+						// Origin is left of e12.
+						Vec2.crossToOut(1f, e12, out);
+						return;
+					}
+					else {
+						// Origin is right of e12.
+						Vec2.crossToOut(e12, 1f, out);
+						return;
+					}
+				default :
+					assert (false);
+					out.setZero();
+					return;
+			}
 		}
-
-		return distance;
+		
+		// djm pooled
+		private final Vec2 case2 = new Vec2();
+		private final Vec2 case22 = new Vec2();
+		
+		/**
+		 * this returns pooled objects. don't keep or modify them
+		 * 
+		 * @return
+		 */
+		public void getClosestPoint(final Vec2 out) {
+			switch (m_count) {
+				case 0 :
+					assert (false);
+					out.setZero();
+					return;
+				case 1 :
+					out.set(m_v1.w);
+					return;
+				case 2 :
+					case22.set(m_v2.w).mulLocal(m_v2.a);
+					case2.set(m_v1.w).mulLocal(m_v1.a).addLocal(case22);
+					out.set(case2);
+					return;
+				case 3 :
+					out.setZero();
+					return;
+				default :
+					assert (false);
+					out.setZero();
+					return;
+			}
+		}
+		
+		// djm pooled, and from above
+		private final Vec2 case3 = new Vec2();
+		private final Vec2 case33 = new Vec2();
+		
+		public void getWitnessPoints(Vec2 pA, Vec2 pB) {
+			switch (m_count) {
+				case 0 :
+					assert (false);
+					break;
+				
+				case 1 :
+					pA.set(m_v1.wA);
+					pB.set(m_v1.wB);
+					break;
+				
+				case 2 :
+					case2.set(m_v1.wA).mulLocal(m_v1.a);
+					pA.set(m_v2.wA).mulLocal(m_v2.a).addLocal(case2);
+					// m_v1.a * m_v1.wA + m_v2.a * m_v2.wA;
+					// *pB = m_v1.a * m_v1.wB + m_v2.a * m_v2.wB;
+					case2.set(m_v1.wB).mulLocal(m_v1.a);
+					pB.set(m_v2.wB).mulLocal(m_v2.a).addLocal(case2);
+					
+					break;
+				
+				case 3 :
+					pA.set(m_v1.wA).mulLocal(m_v1.a);
+					case3.set(m_v2.wA).mulLocal(m_v2.a);
+					case33.set(m_v3.wA).mulLocal(m_v3.a);
+					pA.addLocal(case3).addLocal(case33);
+					pB.set(pA);
+					// *pA = m_v1.a * m_v1.wA + m_v2.a * m_v2.wA + m_v3.a * m_v3.wA;
+					// *pB = *pA;
+					break;
+				
+				default :
+					assert (false);
+					break;
+			}
+		}
+		
+		// djm pooled, from above
+		public float getMetric() {
+			switch (m_count) {
+				case 0 :
+					assert (false);
+					return 0.0f;
+					
+				case 1 :
+					return 0.0f;
+					
+				case 2 :
+					return MathUtils.distance(m_v1.w, m_v2.w);
+					
+				case 3 :
+					case3.set(m_v2.w).subLocal(m_v1.w);
+					case33.set(m_v3.w).subLocal(m_v1.w);
+					// return Vec2.cross(m_v2.w - m_v1.w, m_v3.w - m_v1.w);
+					return Vec2.cross(case3, case33);
+					
+				default :
+					assert (false);
+					return 0.0f;
+			}
+		}
+		
+		// djm pooled from above
+		/**
+		 * Solve a line segment using barycentric coordinates.
+		 */
+		public void solve2() {
+			// Solve a line segment using barycentric coordinates.
+			//
+			// p = a1 * w1 + a2 * w2
+			// a1 + a2 = 1
+			//
+			// The vector from the origin to the closest point on the line is
+			// perpendicular to the line.
+			// e12 = w2 - w1
+			// dot(p, e) = 0
+			// a1 * dot(w1, e) + a2 * dot(w2, e) = 0
+			//
+			// 2-by-2 linear system
+			// [1 1 ][a1] = [1]
+			// [w1.e12 w2.e12][a2] = [0]
+			//
+			// Define
+			// d12_1 = dot(w2, e12)
+			// d12_2 = -dot(w1, e12)
+			// d12 = d12_1 + d12_2
+			//
+			// Solution
+			// a1 = d12_1 / d12
+			// a2 = d12_2 / d12
+			final Vec2 w1 = m_v1.w;
+			final Vec2 w2 = m_v2.w;
+			e12.set(w2).subLocal(w1);
+			
+			// w1 region
+			float d12_2 = -Vec2.dot(w1, e12);
+			if (d12_2 <= 0.0f) {
+				// a2 <= 0, so we clamp it to 0
+				m_v1.a = 1.0f;
+				m_count = 1;
+				return;
+			}
+			
+			// w2 region
+			float d12_1 = Vec2.dot(w2, e12);
+			if (d12_1 <= 0.0f) {
+				// a1 <= 0, so we clamp it to 0
+				m_v2.a = 1.0f;
+				m_count = 1;
+				m_v1.set(m_v2);
+				return;
+			}
+			
+			// Must be in e12 region.
+			float inv_d12 = 1.0f / (d12_1 + d12_2);
+			m_v1.a = d12_1 * inv_d12;
+			m_v2.a = d12_2 * inv_d12;
+			m_count = 2;
+		}
+		
+		// djm pooled, and from above
+		private final Vec2 e13 = new Vec2();
+		private final Vec2 e23 = new Vec2();
+		private final Vec2 w1 = new Vec2();
+		private final Vec2 w2 = new Vec2();
+		private final Vec2 w3 = new Vec2();
+		
+		/**
+		 * Solve a line segment using barycentric coordinates.<br/>
+		 * Possible regions:<br/>
+		 * - points[2]<br/>
+		 * - edge points[0]-points[2]<br/>
+		 * - edge points[1]-points[2]<br/>
+		 * - inside the triangle
+		 */
+		public void solve3() {
+			w1.set(m_v1.w);
+			w2.set(m_v2.w);
+			w3.set(m_v3.w);
+			
+			// Edge12
+			// [1 1 ][a1] = [1]
+			// [w1.e12 w2.e12][a2] = [0]
+			// a3 = 0
+			e12.set(w2).subLocal(w1);
+			float w1e12 = Vec2.dot(w1, e12);
+			float w2e12 = Vec2.dot(w2, e12);
+			float d12_1 = w2e12;
+			float d12_2 = -w1e12;
+			
+			// Edge13
+			// [1 1 ][a1] = [1]
+			// [w1.e13 w3.e13][a3] = [0]
+			// a2 = 0
+			e13.set(w3).subLocal(w1);
+			float w1e13 = Vec2.dot(w1, e13);
+			float w3e13 = Vec2.dot(w3, e13);
+			float d13_1 = w3e13;
+			float d13_2 = -w1e13;
+			
+			// Edge23
+			// [1 1 ][a2] = [1]
+			// [w2.e23 w3.e23][a3] = [0]
+			// a1 = 0
+			e23.set(w3).subLocal(w2);
+			float w2e23 = Vec2.dot(w2, e23);
+			float w3e23 = Vec2.dot(w3, e23);
+			float d23_1 = w3e23;
+			float d23_2 = -w2e23;
+			
+			// Triangle123
+			float n123 = Vec2.cross(e12, e13);
+			
+			float d123_1 = n123 * Vec2.cross(w2, w3);
+			float d123_2 = n123 * Vec2.cross(w3, w1);
+			float d123_3 = n123 * Vec2.cross(w1, w2);
+			
+			// w1 region
+			if (d12_2 <= 0.0f && d13_2 <= 0.0f) {
+				m_v1.a = 1.0f;
+				m_count = 1;
+				return;
+			}
+			
+			// e12
+			if (d12_1 > 0.0f && d12_2 > 0.0f && d123_3 <= 0.0f) {
+				float inv_d12 = 1.0f / (d12_1 + d12_2);
+				m_v1.a = d12_1 * inv_d12;
+				m_v2.a = d12_2 * inv_d12;
+				m_count = 2;
+				return;
+			}
+			
+			// e13
+			if (d13_1 > 0.0f && d13_2 > 0.0f && d123_2 <= 0.0f) {
+				float inv_d13 = 1.0f / (d13_1 + d13_2);
+				m_v1.a = d13_1 * inv_d13;
+				m_v3.a = d13_2 * inv_d13;
+				m_count = 2;
+				m_v2.set(m_v3);
+				return;
+			}
+			
+			// w2 region
+			if (d12_1 <= 0.0f && d23_2 <= 0.0f) {
+				m_v2.a = 1.0f;
+				m_count = 1;
+				m_v1.set(m_v2);
+				return;
+			}
+			
+			// w3 region
+			if (d13_1 <= 0.0f && d23_1 <= 0.0f) {
+				m_v3.a = 1.0f;
+				m_count = 1;
+				m_v1.set(m_v3);
+				return;
+			}
+			
+			// e23
+			if (d23_1 > 0.0f && d23_2 > 0.0f && d123_1 <= 0.0f) {
+				float inv_d23 = 1.0f / (d23_1 + d23_2);
+				m_v2.a = d23_1 * inv_d23;
+				m_v3.a = d23_2 * inv_d23;
+				m_count = 2;
+				m_v1.set(m_v3);
+				return;
+			}
+			
+			// Must be in triangle123
+			float inv_d123 = 1.0f / (d123_1 + d123_2 + d123_3);
+			m_v1.a = d123_1 * inv_d123;
+			m_v2.a = d123_2 * inv_d123;
+			m_v3.a = d123_3 * inv_d123;
+			m_count = 3;
+		}
 	}
-
-	/** 
-	 * Find the closest distance between shapes shape1 and shape2, 
-	 * and load the closest points into x1 and x2.
-	 * Note that x1 and x2 are passed so that they may store results - they must
-	 * be instantiated before being passed, and the contents will be lost.
-	 * 
-	 * @param x1 Closest point on shape1 is put here (result parameter)
-	 * @param x2 Closest point on shape2 is put here (result parameter)
-	 * @param shape1 First shape to test
-	 * @param xf1 Transform of first shape
-	 * @param shape2 Second shape to test
-	 * @param xf2 Transform of second shape
+	
+	/**
+	 * A distance proxy is used by the GJK algorithm.
+	 * It encapsulates any shape.
+	 *
+	 * @author daniel
 	 */
-	public static float distance(Vec2 x1, Vec2 x2,
-					 Shape shape1, XForm xf1,
-					 Shape shape2, XForm xf2) {
+	public static class DistanceProxy {
+		public final Vec2[] m_vertices;
+		public int m_count;
+		public float m_radius;
 		
-		ShapeType type1 = shape1.getType();
-		ShapeType type2 = shape2.getType();
-
-		if (type1 == ShapeType.CIRCLE_SHAPE && type2 == ShapeType.CIRCLE_SHAPE) {
-			return DistanceCC(x1, x2, (CircleShape)shape1, xf1, (CircleShape)shape2, xf2);
+		public DistanceProxy(){
+			m_vertices = new Vec2[Settings.maxPolygonVertices];
+			for(int i=0; i<m_vertices.length; i++){
+				m_vertices[i] = new Vec2();
+			}
+			m_count = 0;
+			m_radius = 0f;
 		}
 		
-		if (type1 == ShapeType.POLYGON_SHAPE && type2 == ShapeType.CIRCLE_SHAPE) {
-			return DistancePC(x1, x2, (PolygonShape)shape1, xf1, (CircleShape)shape2, xf2);
+		/**
+		 * Initialize the proxy using the given shape. The shape
+		 * must remain in scope while the proxy is in use.
+		 */
+		public final void set(final Shape shape){
+			switch(shape.getType()){
+				case CIRCLE:
+					final CircleShape circle = (CircleShape) shape;
+					m_vertices[0].set(circle.m_p);
+					m_count = 1;
+					m_radius = circle.m_radius;
+					
+					break;
+				case POLYGON:
+					final PolygonShape poly = (PolygonShape) shape;
+					m_count = poly.m_vertexCount;
+					m_radius = poly.m_radius;
+					for(int i=0; i<m_count; i++){
+						m_vertices[i].set(poly.m_vertices[i]);
+					}
+					break;
+				default:
+					assert(false);
+			}
 		}
-
-		if (type1 == ShapeType.CIRCLE_SHAPE && type2 == ShapeType.POLYGON_SHAPE) {
-			return DistancePC(x2, x1, (PolygonShape)shape2, xf2, (CircleShape)shape1, xf1);
+		
+		/**
+		 * Get the supporting vertex index in the given direction.
+		 * @param d
+		 * @return
+		 */
+		public final int getSupport(final Vec2 d){
+			int bestIndex = 0;
+			float bestValue = Vec2.dot(m_vertices[0], d);
+			for( int i=1; i<m_count; i++){
+				float value = Vec2.dot(m_vertices[i], d);
+				if(value > bestValue){
+					bestIndex = i;
+					bestValue = value;
+				}
+			}
+			
+			return bestIndex;
 		}
-
-		if (type1 == ShapeType.POLYGON_SHAPE && type2 == ShapeType.POLYGON_SHAPE) {
-			return DistanceGeneric(x1, x2, (PolygonShape)shape1, xf1, (PolygonShape)shape2, xf2);
+		
+		/**
+		 * Get the supporting vertex in the given direction.
+		 * @param d
+		 * @return
+		 */
+		public final Vec2 getSupportVertex(final Vec2 d){
+			int bestIndex = 0;
+			float bestValue = Vec2.dot(m_vertices[0], d);
+			for( int i=1; i<m_count; i++){
+				float value = Vec2.dot(m_vertices[i], d);
+				if(value > bestValue){
+					bestIndex = i;
+					bestValue = value;
+				}
+			}
+			
+			return m_vertices[bestIndex];
 		}
-
-		return 0.0f;
-	}
-
-}
-
-// This is used for polygon-vs-circle distance.
-class Point implements SupportsGenericDistance{
-	public Vec2 p;
-	
-	public Point(Vec2 _p) {
-		p = _p.clone();
-	}
-	
-	public Vec2 support(XForm xf, Vec2 v) {
-		return p;
-	}
-
-	public Vec2 getFirstVertex(XForm xf) {
-		return p;
+		
+		/**
+		 * Get the vertex count.
+		 * @return
+		 */
+		public final int getVertexCount(){
+			return m_count;
+		}
+		
+		/**
+		 * Get a vertex by index. Used by b2Distance.
+		 * @param index
+		 * @return
+		 */
+		public final Vec2 getVertex(int index){
+			assert(0 <= index && index < m_count);
+			return m_vertices[index];
+		}
 	}
 	
+	private Simplex simplex = new Simplex();
+	private int[] saveA = new int[3];
+	private int[] saveB = new int[3];
+	private Vec2 closestPoint = new Vec2();
+	private Vec2 d = new Vec2();
+	private Vec2 temp = new Vec2();
+	private Vec2 normal = new Vec2();
+	
+	/**
+	 * Compute the closest points between two shapes. Supports any combination of:
+	 * CircleShape and PolygonShape. The simplex cache is input/output.
+	 * On the first call set SimplexCache.count to zero.
+	 * 
+	 * @param output
+	 * @param cache
+	 * @param input
+	 */
+	public final void distance(final DistanceOutput output, final SimplexCache cache, final DistanceInput input) {
+		GJK_CALLS++;
+		
+		final DistanceProxy proxyA = input.proxyA;
+		final DistanceProxy proxyB = input.proxyB;
+		
+		Transform transformA = input.transformA;
+		Transform transformB = input.transformB;
+		
+		// Initialize the simplex.
+		simplex.readCache(cache, proxyA, transformA, proxyB, transformB);
+		
+		// Get simplex vertices as an array.
+		SimplexVertex[] vertices = simplex.vertices;
+		
+		// These store the vertices of the last simplex so that we
+		// can check for duplicates and prevent cycling.
+		// (pooled above)
+		int saveCount = 0;
+		
+		simplex.getClosestPoint(closestPoint);
+		float distanceSqr1 = closestPoint.lengthSquared();
+		float distanceSqr2 = distanceSqr1;
+		
+		// Main iteration loop
+		int iter = 0;
+		while (iter < GJK_MAX_ITERS) {
+			
+			// Copy simplex so we can identify duplicates.
+			saveCount = simplex.m_count;
+			for (int i = 0; i < saveCount; i++) {
+				saveA[i] = vertices[i].indexA;
+				saveB[i] = vertices[i].indexB;
+			}
+			
+			switch (simplex.m_count) {
+				case 1 :
+					break;
+				case 2 :
+					simplex.solve2();
+					break;
+				case 3 :
+					simplex.solve3();
+					break;
+				default :
+					assert (false);
+			}
+			
+			// If we have 3 points, then the origin is in the corresponding triangle.
+			if (simplex.m_count == 3) {
+				break;
+			}
+			
+			// Compute closest point.
+			simplex.getClosestPoint(closestPoint);
+			distanceSqr2 = closestPoint.lengthSquared();
+			
+			// ensure progress
+			if (distanceSqr2 >= distanceSqr1) {
+				// break;
+			}
+			distanceSqr1 = distanceSqr2;
+			
+			// get search direction;
+			simplex.getSearchDirection(d);
+			
+			// Ensure the search direction is numerically fit.
+			if (d.lengthSquared() < Settings.EPSILON * Settings.EPSILON) {
+				// The origin is probably contained by a line segment
+				// or triangle. Thus the shapes are overlapped.
+				
+				// We can't return zero here even though there may be overlap.
+				// In case the simplex is a point, segment, or triangle it is difficult
+				// to determine if the origin is contained in the CSO or very close to it.
+				break;
+			}
+			/*
+			 * b2SimplexVertex* vertex = vertices + simplex.m_count;
+			 * vertex.indexA = proxyA.GetSupport(b2MulT(transformA.R, -d));
+			 * vertex.wA = b2Mul(transformA, proxyA.GetVertex(vertex.indexA));
+			 * b2Vec2 wBLocal;
+			 * vertex.indexB = proxyB.GetSupport(b2MulT(transformB.R, d));
+			 * vertex.wB = b2Mul(transformB, proxyB.GetVertex(vertex.indexB));
+			 * vertex.w = vertex.wB - vertex.wA;
+			 */
+
+			// Compute a tentative new simplex vertex using support points.
+			SimplexVertex vertex = vertices[simplex.m_count];
+			
+			Mat22.mulTransToOut(transformA.R, d.negateLocal(), temp);
+			vertex.indexA = proxyA.getSupport(temp);
+			Transform.mulToOut(transformA, proxyA.getVertex(vertex.indexA), vertex.wA);
+			// Vec2 wBLocal;
+			Mat22.mulTransToOut(transformB.R, d.negateLocal(), temp);
+			vertex.indexB = proxyB.getSupport(temp);
+			Transform.mulToOut(transformB, proxyB.getVertex(vertex.indexB), vertex.wB);
+			vertex.w.set(vertex.wB).subLocal(vertex.wA);
+			
+			// Iteration count is equated to the number of support point calls.
+			++iter;
+			++GJK_ITERS;
+			
+			// Check for duplicate support points. This is the main termination criteria.
+			boolean duplicate = false;
+			for (int i = 0; i < saveCount; ++i) {
+				if (vertex.indexA == saveA[i] && vertex.indexB == saveB[i]) {
+					duplicate = true;
+					break;
+				}
+			}
+			
+			// If we found a duplicate support point we must exit to avoid cycling.
+			if (duplicate) {
+				break;
+			}
+			
+			// New vertex is ok and needed.
+			++simplex.m_count;
+		}
+		
+		GJK_MAX_ITERS = MathUtils.max(GJK_MAX_ITERS, iter);
+		
+		// Prepare output.
+		simplex.getWitnessPoints(output.pointA, output.pointB);
+		output.distance = MathUtils.distance(output.pointA, output.pointB);
+		output.iterations = iter;
+		
+		// Cache the simplex.
+		simplex.writeCache(cache);
+		
+		// Apply radii if requested.
+		if (input.useRadii) {
+			float rA = proxyA.m_radius;
+			float rB = proxyB.m_radius;
+			
+			if (output.distance > rA + rB && output.distance > Settings.EPSILON) {
+				// Shapes are still no overlapped.
+				// Move the witness points to the outer surface.
+				output.distance -= rA + rB;
+				normal.set(output.pointB).subLocal(output.pointA);
+				normal.normalize();
+				temp.set(normal).mulLocal(rA);
+				output.pointA.addLocal(temp);
+				temp.set(normal).mulLocal(rB);
+				output.pointB.subLocal(temp);
+			}
+			else {
+				// Shapes are overlapped when radii are considered.
+				// Move the witness points to the middle.
+				// b2Vec2 p = 0.5f * (output.pointA + output.pointB);
+				output.pointA.addLocal(output.pointB).mulLocal(.5f);
+				output.pointB.set(output.pointA);
+				output.distance = 0.0f;
+			}
+		}
+	}
 }

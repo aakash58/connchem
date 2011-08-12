@@ -1,126 +1,159 @@
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 package org.jbox2d.testbed.tests;
 
-import org.jbox2d.collision.CircleDef;
-import org.jbox2d.collision.Distance;
-import org.jbox2d.collision.PolygonDef;
-import org.jbox2d.collision.Shape;
+import org.jbox2d.collision.Distance.SimplexCache;
+import org.jbox2d.collision.DistanceInput;
+import org.jbox2d.collision.DistanceOutput;
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Color3f;
+import org.jbox2d.common.MathUtils;
+import org.jbox2d.common.Settings;
+import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.World;
-import org.jbox2d.testbed.AbstractExample;
-import org.jbox2d.testbed.TestSettings;
-import org.jbox2d.testbed.TestbedMain;
+import org.jbox2d.testbed.framework.TestbedSettings;
+import org.jbox2d.testbed.framework.TestbedTest;
 
-public class DistanceTest extends AbstractExample {
-	Body m_body1;
-	Body m_body2;
-	Shape m_shape1;
-	Shape m_shape2;
+public class DistanceTest extends TestbedTest {
 	
-	private boolean firstTime = true;
+	Vec2 m_positionB;
+	float m_angleB;
 	
-	public DistanceTest(TestbedMain _parent) {
-		super(_parent);
+	Transform m_transformA;
+	Transform m_transformB;
+	PolygonShape m_polygonA;
+	PolygonShape m_polygonB;
+	
+	@Override
+	public String getTestName() {
+		return "Distance";
 	}
 	
-	public void create() {
-		if (firstTime) {
-			setCamera(0.0f,10.0f,20.0f);
-			firstTime = false;
-		}
-
+	@Override
+	public void initTest() {
+		
+		input.transformA = new Transform();
+		input.transformB = new Transform();
 		{
-			PolygonDef sd = new PolygonDef();
-			sd.setAsBox(1.0f, 1.0f);
-			sd.density = 0.0f;
-
-			BodyDef bd = new BodyDef();
-			bd.position.set(0.0f, 10.0f);
-			m_body1 = m_world.createBody(bd);
-			m_shape1 = m_body1.createShape(sd);
+			m_transformA = new Transform();
+			m_transformA.setIdentity();
+			m_transformA.position.set(0.0f, -0.2f);
+			m_polygonA = new PolygonShape();
+			m_polygonA.setAsBox(10.0f, 0.2f);
 		}
 		
 		{
-			/*PolygonDef sd = new PolygonDef();
-			sd.vertices.add(new Vec2(-1.0f, 0.0f));
-			sd.vertices.add(new Vec2(1.0f, 0.0f));
-			sd.vertices.add(new Vec2(0.0f, 15.0f));*/
-			CircleDef sd = new CircleDef();
-			sd.radius = 2.0f;
-			sd.density = 1.0f;
-
-			BodyDef bd = new BodyDef();
-			bd.position.set(0.0f, 10.0f);
-			m_body2 = m_world.createBody(bd);
-			m_shape2 = m_body2.createShape(sd);
-			m_body2.setMassFromShapes();
+			m_positionB = new Vec2();
+			m_positionB.set(12.017401f, 0.13678508f);
+			m_angleB = -0.0109265f;
+			
+			m_transformB = new Transform();
+			m_transformB.set(m_positionB, m_angleB);
+			
+			m_polygonB = new PolygonShape();
+			m_polygonB.setAsBox(2.0f, 0.1f);
 		}
-
-		m_world.setGravity(new Vec2(0.0f,0.0f));
+		for (int i = 0; i < v.length; i++) {
+			v[i] = new Vec2();
+		}
 	}
-
-	public void step() {
-		settings.pause = true;
-		settings.enablePositionCorrection = false;
-		super.step();
-		settings.enablePositionCorrection = true;
-		settings.pause = false;
-
-		Vec2 x1 = new Vec2();
-		Vec2 x2 = new Vec2();
-		float distance = Distance.distance(x1, x2, m_shape1, m_body1.getXForm(), m_shape2, m_body2.getXForm());
-
-		m_debugDraw.drawString(5, m_textLine, "distance = "+distance, white);
-		m_textLine += 15;
-
-		m_debugDraw.drawString(5, m_textLine, "iterations = "+Distance.g_GJK_Iterations, white);
-		m_textLine += 15;
-
-		m_debugDraw.drawPoint(x1, 2.0f, white);
-		m_debugDraw.drawPoint(x2, 2.0f, white);
-		m_debugDraw.drawSegment(x1,x2,white);		
-	}
-
-	public void keyPressed(int key) {
-		// This is possible if the key event hits before
-		// initialization.
-		if (m_body2 == null) return;
+	
+	DistanceInput input = new DistanceInput();
+	SimplexCache cache = new SimplexCache();
+	DistanceOutput output = new DistanceOutput();
+	Color3f color = new Color3f(0.9f, 0.9f, 0.9f);
+	Vec2[] v = new Vec2[Settings.maxPolygonVertices];
+	Color3f c1 = new Color3f(1.0f, 0.0f, 0.0f);
+	Color3f c2 = new Color3f(1.0f, 1.0f, 0.0f);
+	
+	@Override
+	public void step(TestbedSettings settings) {
+		super.step(settings);
 		
-		Vec2 p = m_body2.getPosition();
-		float a = m_body2.getAngle();
-
-		switch (key) {
-		case 'a':
-			p.x -= 0.1f;
-			break;
-
-		case 'd':
-			p.x += 0.1f;
-			break;
-
-		case 's':
-			p.y -= 0.1f;
-			break;
-
-		case 'w':
-			p.y += 0.1f;
-			break;
-
-		case 'q':
-			a += 0.1f * (float)Math.PI;
-			break;
-
-		case 'e':
-			a -= 0.1f * (float)Math.PI;
-			break;
+		input.proxyA.set(m_polygonA);
+		input.proxyB.set(m_polygonB);
+		input.transformA.set(m_transformA);
+		input.transformB.set(m_transformB);
+		input.useRadii = true;
+		cache.count = 0;
+		m_world.getPool().getDistance().distance(output, cache, input);
+		
+		addTextLine("distance = " + output.distance);
+		addTextLine("iterations = " + output.iterations);
+		
+		{
+			for (int i = 0; i < m_polygonA.m_vertexCount; ++i) {
+				Transform.mulToOut(m_transformA, m_polygonA.m_vertices[i], v[i]);
+			}
+			m_debugDraw.drawPolygon(v, m_polygonA.m_vertexCount, color);
+			
+			for (int i = 0; i < m_polygonB.m_vertexCount; ++i) {
+				Transform.mulToOut(m_transformB, m_polygonB.m_vertices[i], v[i]);
+			}
+			m_debugDraw.drawPolygon(v, m_polygonB.m_vertexCount, color);
 		}
-
-		m_body2.setXForm(p, a);
+		
+		Vec2 x1 = output.pointA;
+		Vec2 x2 = output.pointB;
+		
+		m_debugDraw.drawPoint(x1, 4.0f, c1);
+		
+		m_debugDraw.drawPoint(x2, 4.0f, c2);
 	}
-
-	public String getName() {
-		return "Distance Test";
+	
+	@Override
+	public void keyPressed(char argKeyChar, int argKeyCode) {
+		
+		switch (argKeyChar) {
+			case 'a' :
+				m_positionB.x -= 0.1f;
+				break;
+			
+			case 'd' :
+				m_positionB.x += 0.1f;
+				break;
+			
+			case 's' :
+				m_positionB.y -= 0.1f;
+				break;
+			
+			case 'w' :
+				m_positionB.y += 0.1f;
+				break;
+			
+			case 'q' :
+				m_angleB += 0.1f * MathUtils.PI;
+				break;
+			
+			case 'e' :
+				m_angleB -= 0.1f * MathUtils.PI;
+				break;
+		}
+		
+		m_transformB.set(m_positionB, m_angleB);
 	}
-
 }

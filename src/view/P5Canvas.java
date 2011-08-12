@@ -6,24 +6,29 @@ import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import pbox2d.*;
 import processing.core.PApplet;
 
 import main.Canvas;
 import main.Main;
 
-import org.jbox2d.collision.Shape;
+import org.jbox2d.callbacks.ContactImpulse;
+import org.jbox2d.collision.Manifold;
 import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 import Util.ColorScales;
-import Util.MP3;
 import static model.State.*;
+import static view.Water.*;
+import static view.Compound.*;
+import static view.Unit2.*;
 import model.DBinterface;
 import model.YAMLinterface;
 
 public class P5Canvas extends PApplet{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static float x;
 	public static float y;
 	public static float w;//width of the boundary
@@ -32,6 +37,10 @@ public class P5Canvas extends PApplet{
 	// A reference to our box2d world
 	private PBox2D box2d = new PBox2D(this);
 	public static boolean isEnable = false; 
+	public static boolean isEnableBrushing = false;
+	public static boolean isDisplayForces = false;
+	public static boolean isDisplayJoints = false;
+	
 	public static int creationCount = 0;
 	public static float temp =25.f;
 	
@@ -40,7 +49,7 @@ public class P5Canvas extends PApplet{
 	//Default value of heat
 	public static float heatRate = 1.f;
 	//Default value of scale slider
-	public static float scale = 0.8f;
+	public static float scale = 0.77f;
 	//Default value of volume slider
 	public static int defaultVolume =50;
 	public static int currenttVolume =defaultVolume;
@@ -49,7 +58,8 @@ public class P5Canvas extends PApplet{
 	
 	public static int heatRGB = 0;
 	
-	public static int count = 0;
+	public static long count = 0;
+	public static long second = 0;
 	public static int xStart = 0;
 	public static int yStart = 0;
 	public static int xDrag = 0;
@@ -60,7 +70,6 @@ public class P5Canvas extends PApplet{
 	public static int draggingBoundary =-1;
 	private boolean isFirstTime =true;
 	private float frameRate =24;
-	public boolean isBrushingEnable =true;
 	public boolean isBrushing=false;
 	
 	
@@ -87,31 +96,25 @@ public class P5Canvas extends PApplet{
 		frameRate(frameRate);
 		
 		// Initialize box2d physics and create the world
-		box2d.createWorld(-150,-150, 150, 150);
+		box2d.createWorld();
 		box2d.setGravity(0f,-10f);
 	
 		
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
-		setBoundary(0,0,604/0.8f,640/0.8f);	
+		setBoundary(0,0,560/0.77f,635/0.77f);	
 		//testDbInterface();
 	}
 	
-	
-	
-	
-		
 	public void setBoundary(float xx, float yy, float ww, float hh) {
 		if (hh>maxH) return;
 		x=xx;
 		y=yy;
 		w = ww;
 		h = hh;
-		System.out.println("SIZE: w:"+w+" h:"+h);
 		if (isFirstTime){
-			size((int) (604), (int) (643));
-					
+			size((int) (560), (int) (638));
 			isFirstTime =false;
 		}
 		
@@ -140,9 +143,6 @@ public class P5Canvas extends PApplet{
 	
 		
 	public void draw() {
-		if (getSize().width != w || getSize().height!=h){
-			//setBoundary(0,0,this.getSize().width,this.getSize().height);
-		}
 		drawBackground();
 		// We must always step through time!
 		if (products!=null && products.size()>0){
@@ -150,72 +150,125 @@ public class P5Canvas extends PApplet{
 			Molecule m2 = (Molecule) killingList.get(1);
 			for (int i=0;i<products.size();i++){
 				Vec2 loc =m1.getPosition();
-				float x1 = box2d.scalarWorldToPixels(loc.x);
-				float y1 = h*0.8f-box2d.scalarWorldToPixels(loc.y);
-				Vec2 newVec =removeDuplicatePosition(new Vec2(x1,y1));
-				Molecule m = new Molecule(newVec.x, newVec.y,products.get(i), box2d, this);
+				float x1 = PBox2D.scalarWorldToPixels(loc.x);
+				float y1 = h*0.77f-PBox2D.scalarWorldToPixels(loc.y);
+				Vec2 newVec =new Vec2(x1,y1);
+				Molecule m = new Molecule(newVec.x, newVec.y,products.get(i), box2d, this,0);
 				molecules.add(m);
 				if (i==0)
-					m.setLinearVelocity(m1.getLinearVelocity());
+					m.body.setLinearVelocity(m1.body.getLinearVelocity());
 				
 				else{
-					m.setLinearVelocity(m2.getLinearVelocity());
+					m.body.setLinearVelocity(m2.body.getLinearVelocity());
 				}
-					
 			}
 			m1.killBody();
 			m2.killBody();
 			molecules.remove(m1);
 			molecules.remove(m2);
-			
 			products = new ArrayList<String>();
 			killingList = new ArrayList();
 		}
 		
 		this.scale(scale);
-		if (!Canvas.cretical){
-			Canvas.cretical = true;
-			computeEnergy();
-			Canvas.cretical = false;
-		}
-		if (isEnable){
-			float newFrameRate=24;
- 			if (speedRate>=1){
- 				newFrameRate = newFrameRate*speedRate;
-			}
-			if (frameRate !=newFrameRate){
-				frameRate = newFrameRate;
-				frameRate(frameRate);
-			}
-				
+ 		if (isEnable && !isDrag){
 			float timeStep = 1 / 60.0f;
 			if (speedRate<1){
 				timeStep *= speedRate;
 			}
- 			box2d.step(timeStep,5);
+ 			box2d.step(timeStep,5,5);
+ 			count++;
+ 			
+ 			long sec = count/24;
+ 			if (sec>second){
+ 				second =sec;
+ 				Main.canvas.repaint();
+ 			}
+ 			
+			computeEnergy();
+ 			
+ 			
+			for (int i = 0; i < molecules.size(); i++) {
+				Molecule m = molecules.get(i);
+				m.waterPartner =-1;
+				m.NaClPartner =-1;
+				m.ionDis =0;
+			}
+		
 			
-			//System.out.println("speedRate: "+speedRate);
-			// Apply gravity to molecules
+ 			/*for (int i = 0; i < molecules.size(); i++) {
+				Molecule m = molecules.get(i);
+				computeWaterPartner(i,m);
+			}
+ 			
+ 			
+			for (int i = 0; i < molecules.size(); i++) {
+				Molecule m = molecules.get(i);
+				//Unit 2, Set 1
+				if (m.getName().equals("Sodium-Ion"))
+					computeNaClPartner(i,m);
+				//Unit 2, Set 4
+				else if (m.getName().equals("Calcium-Ion"))
+					computeCaClPartner(i,m);
+			}
+			*/
+			
+			
+			for (int i = 0; i < molecules.size(); i++) {
+				Molecule m = molecules.get(i);
+				if (m.getName().equals("Water"))
+					setForceWater(i,m);
+				else if (Main.selectedUnit==1)
+					setForce(i,m);
+				else{
+					if(Main.selectedSet==1)
+						computeForceNaCl(i,m);
+					else if(Main.selectedSet==2)
+						computeForceSiliconDioxide(i,m);
+					else if(Main.selectedSet==3)
+						computeForceGlycerol(i,m);
+					else if(Main.selectedSet==4){
+						computeForceCaCl(i,m);	
+						computeForceFromWater(i,m);	
+					}
+					else if(Main.selectedSet==5)
+						computeForceAceticAcid(i,m);
+					else if(Main.selectedSet==7){
+						computeForceNaHCO3(i,m);
+						computeForceFromWater(i,m);	
+					}
+				}
+				if (Main.selectedUnit!=1 && !m.getName().equals("Water")){
+					//checkSpeed(i,m);
+				}
+					
+			}
+			
 			for (int i = 0; i < molecules.size(); i++) {
 				Molecule m = molecules.get(i);
 				if (m!=null && !isDrag){
-					setForce(i,m);
+					if (!m.getName().equals("Water") && Main.selectedUnit==2){
+						applyForceUnit2(i,m);
+					}
 				}	
 			}
 		}	
-		for (int i = 0; i < 4; i++) {
-			boundaries[i].display();
-		}
-		
-		if (isBrushingEnable && isBrushing){
+		if (isEnableBrushing && isBrushing){
 			this.stroke(Color.WHITE.getRGB());
 			this.noFill();
 			this.rect(xStart/scale,yStart/scale, (mouseX/scale-xStart/scale), (mouseY/scale-yStart/scale));	
 		}
+		
+		
+		
+		for (int i = 0; i < 4; i++) {
+			boundaries[i].display();
+		}
+		
 		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			if (isBrushingEnable && isBrushing){
+			if (isEnableBrushing && isBrushing){
 				Vec2 p = box2d.coordWorldToPixels(m.getPosition());
 				if (xStart/scale <p.x && p.x< mouseX/scale &&
 						yStart/scale <p.y && p.y< mouseY/scale )
@@ -225,12 +278,10 @@ public class P5Canvas extends PApplet{
 			}
 			m.display();
 		}
-		
 	}
+	
 	public static void computeEnergy(){
-		
-		float sum = 0f;
-		int numCompounds = Canvas.mNames.size();
+		/*float sum = 0f;
 		float[] mAverage =  new float[numCompounds];
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
@@ -239,58 +290,45 @@ public class P5Canvas extends PApplet{
 				float energy = (vec.x*vec.x + vec.y*vec.y)*m.getMass();
 				sum += energy;
 				for (int j=0; j<numCompounds;j++){
-					//System.out.println("numCompounds:"+numCompounds+" Canvas.mNames.size():"+Canvas.mNames.size()+" j:"+j );
-					
 					if (Canvas.mNames.get(j).equals(m.getName()))
 						mAverage[j] += energy;
 				}
-					
 			}
-		}
-		for (int i=0; i<numCompounds;i++){
-			mAverage[i] = mAverage[i]/Canvas.mCounts.get(i); 
-			String mName = Canvas.mNames.get(i);
-			
-			float freezingTem = P5Canvas.db.getCompoundFreezingPointCelsius(mName);
-			float boilingTem = P5Canvas.db.getCompoundBoilingPointCelsius(mName);
-			
+		}*/
+		for (int i=0; i<names.size();i++){
+			//mAverage[i] = mAverage[i]/Canvas.mCounts.get(i); 
+			float freezingTem = fTemp.get(i);
+			float boilingTem = bTemp.get(i);
+			String mName = names.get(i);
 			float expectedAverage =0f;
-			if (freezingTem<temp && temp<boilingTem)
-				expectedAverage = 2f+(temp-freezingTem)*4.5f/(boilingTem-freezingTem);
-			else if (temp >=boilingTem)
-				expectedAverage = 30 +(temp-freezingTem)*5.5f/(boilingTem-freezingTem);
-			float dif = expectedAverage - mAverage[i];
-			float percent = 1+dif/100;
-			if (percent<0.95) percent = 0.97f;
-			else if (percent>1.05) percent = 1.03f;
-			
-				
-		//	System.out.println("MOlecule:"+Canvas.mNames.get(i) +" "+expectedAverage+" "+ mAverage[i]);
-		//	System.out.println(" 	freezingTem:"+freezingTem+" boilingTem:"+boilingTem +" PERCENT:"+percent);
-		
+			if (freezingTem<temp && temp<boilingTem){
+				expectedAverage = minLiquidEnergy.get(i)+(temp-freezingTem)*
+						rangeLiquidEnergy.get(i)/(boilingTem-freezingTem);
+			}	
+			else if (temp >=boilingTem){
+				expectedAverage = minGasEnergy.get(i) +(temp-freezingTem)/(boilingTem-freezingTem);
+			}	
+		 	
 			if (temp>freezingTem){
 				for (int j = 0; j < molecules.size(); j++) {
 					Molecule m = molecules.get(j);
-					if (m.getName() != mName)
+					if (!m.getName().equals(mName))
 						continue;
-					Vec2 vec = m.getLinearVelocity();
+					Vec2 vec = m.body.getLinearVelocity();
 					float energy = 0f;
 					if (vec!=null){
 						float v = vec.x*vec.x + vec.y*vec.y;
 						energy = v*m.getMass();
 					}
+					//System.out.println("mName:"+mName+"  expectedAverage:"+expectedAverage+" "+energy);
 					if (energy>expectedAverage*2)
-						m.setLinearVelocity(vec.mul(0.97f) );
+						m.body.setLinearVelocity(vec.mul(0.9f) );
 					else if (energy<expectedAverage/2)
-						m.setLinearVelocity(vec.mul(1.03f) );
-					else
-						m.setLinearVelocity(vec.mul(percent) );
+						m.body.setLinearVelocity(vec.mul(1.2f) );
 				}
 			}
 		}
-		
-		
-		if (Canvas.count100Seconds>=10){
+		/*if (Canvas.count100Seconds>=10){
 			float average =0f;
 			if (molecules.size()>0)
 				average = sum/molecules.size();
@@ -299,8 +337,21 @@ public class P5Canvas extends PApplet{
 				Main.totalSystemEnergy.setText(df.format(sum)+" kJ");
 				Main.averageSystemEnergy.setText(df.format(average )+" kJ");
 			}	
-		}
+		}*/
 	}
+	
+	public static void checkSpeed(int index, Molecule m){
+		float expectedAverage = 100f;
+		Vec2 vec = m.body.getLinearVelocity();
+		float v = 0f;
+		if (vec!=null){
+			v = vec.x*vec.x + vec.y*vec.y;
+		}
+		if (v>expectedAverage*2)
+			m.body.setLinearVelocity(vec.mul(0.5f) );
+		else if (v>expectedAverage)
+			m.body.setLinearVelocity(vec.mul(0.9f) );
+	}	
 	
 	private void setForce(int index, Molecule mIndex) { // draw background
 		for (int i = 0; i < molecules.size(); i++) {
@@ -329,11 +380,11 @@ public class P5Canvas extends PApplet{
 					gravityX = gravityY*2f;
 				}	
 				else{
-					gravityY = (bTemp-temp)*.04f/(bTemp-fTemp);
-					gravityX = gravityY*0.2f;
+					gravityY = (bTemp-temp)/(bTemp-fTemp);
+					gravityX = gravityY*0.6f;
 				}	
-				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*4000;
-				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*4000;
+				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*3000;
+				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*3000;
 			}	
 			else{
 				float num = m.getNumElement();
@@ -344,7 +395,7 @@ public class P5Canvas extends PApplet{
 		}
 	}
 		
-	private Vec2 normalizeForce(Vec2 v){
+	public static Vec2 normalizeForce(Vec2 v){
 		float dis = (float) Math.sqrt(v.x*v.x + v.y*v.y);
 		return new Vec2(v.x/dis,v.y/dis);
 		
@@ -354,16 +405,109 @@ public class P5Canvas extends PApplet{
 	 * Background methods
 	 */
 	private void drawBackground() { // draw background
-		count++;
-		if (count>10000)
-			count =0;
-		Main.canvas.repaint();
+		
+
 		pushStyle();
 		fill(127, 127, 127);
 		rect(0, 0, width, height);
 		popStyle();
 	}
 	
+	public void computeOutput(String compoundName, int count) {
+		if (compoundName.equals("Water")){
+			Unit2.numWater += count;
+			DecimalFormat df = new DecimalFormat("###.#");
+			Main.waterVolume.setText(df.format(Unit2.numWater/(Unit2.water100mL/100.))+" mL");
+			computeSaturation();
+		}
+		if (Main.selectedUnit==2 && !compoundName.equals("Water") && count>0){
+			num_total+=count;
+			num_remain+=count;
+			DecimalFormat df = new DecimalFormat("###.#");
+			Main.m1Label.setText(compoundName+":");
+			float total = Unit2.num_total*Unit2.mToMass;
+			Main.m1Mass.setText(df.format(total)+" g");
+			Main.dashboard.updateUI();
+		}
+		Canvas.satCount=0;
+	}
+	public void computeSaturation() {
+		float sat = Unit2.computeSat();
+		if (Main.satMass!=null){
+			DecimalFormat df = new DecimalFormat("###.#");
+			Main.satMass.setText(df.format(sat)+" g");
+			if (Main.selectedSet==3 || Main.selectedSet==5)
+				Main.satMass.setText("\u221e");
+			Main.dashboard.updateUI();
+		}
+
+	}
+	
+	public static int numGone_atSaturation() { 
+		int num = Math.round(computeSat()/ mToMass); 
+		return num;
+	}
+	
+	public static void computeDisolved() {
+		if (Main.m1Disolved==null) return;
+		DecimalFormat df = new DecimalFormat("###.#");
+		if (Unit2.num_gone<numGone_atSaturation() || numGone_atSaturation()==0){
+			float dis = Unit2.num_gone*Unit2.mToMass;
+			Main.m1Disolved.setText(df.format(dis)+" g");
+		}
+		else{
+			float sat = Unit2.computeSat();
+			float dis = computeIonSeperation()/((Unit2.num_gone+1)*(1+Canvas.satCount));
+			Main.m1Disolved.setText(df.format(sat-dis)+" g");
+			if (Main.selectedSet==3 || Main.selectedSet==5)
+				Main.m1Disolved.setText("\u221e");
+		}
+		Main.dashboard.updateUI();
+		
+	}
+	public static float computeIonSeperation() {
+		float dis = 0;
+		for (int i = 0; i < molecules.size(); i++) {
+			Molecule m = molecules.get(i);
+			if (m.ionDis>0){
+				dis += (2*Molecule.clRadius)/m.ionDis;
+			}		
+		}
+		return dis*dis;
+	}
+		
+	
+
+	public void addMoleculeRandomly(String compoundName, int count) {
+		boolean tmp = isEnable;
+		isEnable = false;
+		
+		computeOutput(compoundName,count);
+		
+		float PAD =60;
+		float freezingTem = P5Canvas.db.getCompoundFreezingPointCelsius(compoundName);
+		if (temp<=freezingTem){
+			if (compoundName.equals("Sodium-Chloride"))
+				Unit2.add2Ions("Sodium-Ion","Chlorine-Ion",count, box2d, this);
+			else if (compoundName.equals("Silicon-Dioxide"))
+				Unit2.addSiliconDioxide(compoundName,count, box2d, this); 
+			else if (compoundName.equals("Calcium-Chloride"))
+				Unit2.addCalciumChloride(compoundName,count, box2d, this); 
+			else if (compoundName.equals("Sodium-Bicarbonate"))
+				Unit2.addSodiumBicarbonate(compoundName,count, box2d, this); 
+			else	
+				addSolid(compoundName,count);
+		
+		}
+		else{
+			for (int i=0;i<count;i++){
+				float x_ = x+ this.random(PAD, w-2*PAD);
+				float y_ = y+ this.random(PAD, h-2*PAD);
+				molecules.add(new Molecule(x_, y_,compoundName, box2d, this,0));
+			}
+		}
+		isEnable = tmp;
+	}
 	
 	/*
 	 * Function to create compounds from outside the PApplet
@@ -377,56 +521,63 @@ public class P5Canvas extends PApplet{
 		boolean tmp = isEnable;
 		isEnable = false;
 		
-		if (tmp) //if Applet is enable
-			creationCount =0;
-		else
-			creationCount++;
-									// variables are used to distribute molecules
-		int mod = creationCount%4;  // When the system is paused; Otherwise, molecules are create at the same position
-		for (int i=0;i<count;i++){
-			float x_ =x + w/2 +40+ (i-count/2.f)*(w/11) + creationCount;
-			float y_ =y + 80-Boundary.difVolume +(mod-1.5f)*20;
-			Vec2 newVec =removeDuplicatePosition(new Vec2(x_,y_));
-			molecules.add(new Molecule(newVec.x, newVec.y,compoundName, box2d, this));
+		computeOutput(compoundName,count);
+		int index = Compound.names.indexOf(compoundName);
+		int addCount = Compound.counts.get(index)+count;
+		Compound.counts.set(index, addCount);
+
+		
+		float freezingTem = P5Canvas.db.getCompoundFreezingPointCelsius(compoundName);
+		if (temp<=freezingTem){
+			if (compoundName.equals("Sodium-Chloride"))
+				Unit2.add2Ions("Sodium-Ion","Chlorine-Ion",count, box2d, this);
+			else if (compoundName.equals("Silicon-Dioxide"))
+				Unit2.addSiliconDioxide(compoundName,count, box2d, this); 
+			else if (compoundName.equals("Calcium-Chloride"))
+				Unit2.addCalciumChloride(compoundName,count, box2d, this); 
+			else if (compoundName.equals("Sodium-Bicarbonate"))
+				Unit2.addSodiumBicarbonate(compoundName,count, box2d, this); 
+			else	
+				addSolid(compoundName,count);
+		}
+		else{
+			if (tmp) //if Applet is enable
+				creationCount =0;
+			else
+				creationCount++;
+										// variables are used to distribute molecules
+			int mod = creationCount%4;  // When the system is paused; Otherwise, molecules are create at the same position
+			for (int i=0;i<count;i++){
+				float x_ =x + w/2 +40+ (i-count/2.f)*(w/11) + creationCount;
+				float y_ =y + 80-Boundary.difVolume +(mod-1.5f)*20;
+				molecules.add(new Molecule(x_, y_,compoundName, box2d, this,0));
+			}
 		}
 		isEnable = tmp;
 	}
-	public void addMoleculeRandomly(String compoundName, int count) {
-		boolean tmp = isEnable;
-		isEnable = false;
-		
-		float PAD =60;
+	
+	public void addSolid(String compoundName, int count) {
+		int numRow = (int) (Math.ceil(count/6.)+1);
 		for (int i=0;i<count;i++){
-			float x_ = x+ this.random(PAD, w-2*PAD);
-			float y_ = y+ this.random(PAD, h-2*PAD);
-			Vec2 newVec =removeDuplicatePosition(new Vec2(x_,y_));
-			molecules.add(new Molecule(newVec.x, newVec.y,compoundName, box2d, this));
+			float x_,y_,angle;
+			Vec2 size = Molecule.getShapeSize(compoundName, this);
+			x_ =x + 200+ (i/numRow)*2*size.x;
+			y_ =y + 80-Boundary.difVolume+(numRow-1-i%numRow)*2*size.y;
+			if ((i%numRow)%2==0){
+				angle = 0;
+			}
+			else{
+				angle = (float) Math.PI;
+			}
+			molecules.add(new Molecule(x_, y_,compoundName, 
+					box2d, this,angle));
 		}
-		isEnable = tmp;
 	}
 		
-	public boolean isDuplicatePosition(Vec2 v) {
-		for (int i = 0; i < molecules.size(); i++) {
-			Molecule m = molecules.get(i);
-			if (m!=null){
-				Vec2 vec = box2d.coordWorldToPixels(m.getPosition());
-				if (v.x-25 <= vec.x && vec.x<=v.x+25 && v.y-25<=vec.y && vec.y<=v.y+25)
-					return true;
-			}	
-		}
-		return false;
-	}
-	public Vec2 removeDuplicatePosition(Vec2 v) {
-		while (isDuplicatePosition(v)){
-			v.x=v.x+25;
-			v.y=v.y+25;
-		}
-		return v;
-	}	
+	
 	
 	public void addMolecule(float x_, float y_, String compoundName) {
-		Vec2 newVec =removeDuplicatePosition(new Vec2(x_,y_));
-		Molecule m = new Molecule(newVec.x, newVec.y,compoundName, box2d, this);
+		Molecule m = new Molecule(x_, y_,compoundName, box2d, this,0);
 		molecules.add(m);
  	}
 	
@@ -448,50 +599,28 @@ public class P5Canvas extends PApplet{
 		speedRate = speed;
 	}
 	
-	
 	//Set Speed of Molecules; values are from 0 to 100; 50 is default value 
 	public void setHeat(int value) {
 		temp = value;
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			float fTemp = m.freezingTem;
-			float bTemp = m.boilingTem;
-			float res = (temp-fTemp)/(bTemp-fTemp);
-			
-			if (res>0){
-				res =1;
-			}
-			else
-				res=0.1f;
-			m.setRestitution(res);
-			
-			
-			float fric;
-			if (temp<fTemp) fric =1;
-			else  			fric =0; 
-			m.setFriction(fric);
-	
-			float scale=1;
-			if (m.getName().equals("Water") && temp<40){
-				scale = 1+(40-temp)/200f;
-			}	
-			m.setRadius(scale);
-			//System.out.println( "Res:"+res+" fric:"+fric+" scale"+scale);
+			m.setPropertyByHeat(false);
 		}
-		
-		
 		double v = (double) (value-Main.heatMin)/200;
 		v=v+0.3;
 		if (v>1) v=1;
 		Color color = ColorScales.getColor(1-v, "redblue", 1f);
 		heatRGB = color.getRGB();
+		
+		computeSaturation();
+		Canvas.satCount=0;
 	}
 	
 	//Set Scale of Molecules; values are from 0 to 100; 50 is default value 
 	public void setScale(int value, int defaultScale) {
 		boolean tmp = isEnable;
 		isEnable = false;
-		scale = (float) value*0.8f/defaultScale;
+		scale = (float) value*0.77f/defaultScale;
 		isEnable = tmp;
 	}
 	
@@ -507,6 +636,10 @@ public class P5Canvas extends PApplet{
 	
 	
 	//********************************************************* MOUSE EVENT ******************************
+	public void keyPressed() {	
+		
+	}
+		
 	public void mouseMoved() {	
 	
 		//Check the top boundary
@@ -540,7 +673,7 @@ public class P5Canvas extends PApplet{
 	}
 	
 	public void mouseDragged() {
-		if (isBrushingEnable){
+		if (isEnableBrushing){
 			
 		}
 		else{	
@@ -559,6 +692,7 @@ public class P5Canvas extends PApplet{
 		
 	public void mouseClicked() {
 		addMolecule(mouseX/scale, mouseY/scale,"Water");
+		//addMolecule(mouseX/scale, mouseY/scale,"Water");
 	}
 	
 	
@@ -572,7 +706,6 @@ public class P5Canvas extends PApplet{
 			products.add("Water");
 			products.add("Water");
 			products.add("Oxygen");
-			
 			return products;
 		}
 		else{
@@ -580,37 +713,16 @@ public class P5Canvas extends PApplet{
 		}
 	}
 	// Collision event functions!
-	public void addContact(ContactPoint cp) {
-		// Get both shapes
-		Shape s1 = cp.shape1;
-		Shape s2 = cp.shape2;
-		// Get both bodies
-		Body b1 = s1.getBody();
-		Body b2 = s2.getBody();
+	public void beginContact(Contact c) {
 		// Get our objects that reference these bodies
-		Object o1 = b1.getUserData();
-		Object o2 = b2.getUserData();
-
+		Object o1 = c.m_fixtureA.m_body.getUserData();
+		Object o2 = c.m_fixtureB.m_body.getUserData();
+		
+			if (o1 ==null || o2==null)
+			return;
 		// What class are they?  Box or Particle?
 		String c1 = o1.getClass().getName();
 		String c2 = o2.getClass().getName();
-		// If object 1 is a Box, then object 2 must be a particle
-		// Note we are ignoring particle on particle collisions
-		/*if (c1.contains("Boundary")) {
-			Boundary b = (Boundary) o1;
-			if (b.getId()==3){
-				//Molecule p = (Molecule) o2;
-				//p.setSpeedByHeat(1.5f);
-			}
-			
-			
-		} 
-		// If object 2 is a Box, then object 1 must be a particle
-		else if (c2.contains("Boundary")) {
-			//Molecule p = (Molecule) o1;
-			//p.setSpeedByHeat(heatRate);
-		}
-		else */
 		if (c1.contains("Molecule") && c2.contains("Molecule")){
 			Molecule m1 = (Molecule) o1;
 			Molecule m2 = (Molecule) o2;
@@ -628,13 +740,12 @@ public class P5Canvas extends PApplet{
 				}
 			}
 		}
+
 	}
-	
-	public void persistContact(ContactPoint cp) {
+	public void endContact(Contact c) {
 	}
-	public void removeContact(ContactPoint cp) {
+	public void postSolve(Contact c, ContactImpulse i) {
 	}
-	public void resultContact(ContactResult cr) {
+	public void preSolve(Contact c, Manifold m) {
 	}
-	
 }

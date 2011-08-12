@@ -1,164 +1,225 @@
-/*
- * JBox2D - A Java Port of Erin Catto's Box2D
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
- * Box2D homepage: http://www.box2d.org
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  * 
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- */
-
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 package org.jbox2d.dynamics.joints;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.TimeStep;
+import org.jbox2d.dynamics.World;
+import org.jbox2d.pooling.IWorldPool;
 
-
-//Updated to rev 56->97->144 of b2Joint.cpp/.h
-
+// updated to rev 100
+/**
+ * The base joint class. Joints are used to raint two bodies together in
+ * various fashions. Some joints also feature limits and motors.
+ * 
+ * @author Daniel Murphy
+ */
 public abstract class Joint {
-
-    public JointType m_type;
-
-    public Joint m_prev;
-
-    public Joint m_next;
-
-    public JointEdge m_node1;
-
-    public JointEdge m_node2;
-
-    public Body m_body1;
-
-    public Body m_body2;
-
-    public boolean m_islandFlag;
-
-    public boolean m_collideConnected;
-
-    public Object m_userData;
-    
-    public float m_inv_dt;
-
-    public Joint(JointDef description) {
-        m_type = description.type;
-        m_prev = null;
-        m_next = null;
-        m_node1 = new JointEdge();
-        m_node2 = new JointEdge();
-        m_body1 = description.body1;
-        m_body2 = description.body2;
-        m_collideConnected = description.collideConnected;
-        m_islandFlag = false;
-        m_userData = description.userData;
-    }
-
-    // ewjordan: I've added a Destroy method because although
-    // these usually just deallocate memory, it is possible that
-    // Erin may alter them to do more nontrivial things, and we
-    // should be prepared for this possibility.
-    public static void destroy(Joint j) {
-        j.destructor();
-        return;
-    }
-
-    public void destructor() {
-    }
-
-    public static Joint create(JointDef description) {
-        Joint joint = null;
-
-        if (description.type == JointType.DISTANCE_JOINT) {
-            joint = new DistanceJoint((DistanceJointDef) description);
-        }
-        else if (description.type == JointType.MOUSE_JOINT) {
-            joint = new MouseJoint((MouseJointDef) description);
-        }
-        else if (description.type == JointType.PRISMATIC_JOINT) {
-            joint = new PrismaticJoint((PrismaticJointDef) description);
-        }
-        else if (description.type == JointType.REVOLUTE_JOINT) {
-            joint = new RevoluteJoint((RevoluteJointDef) description);
-        }
-        else if (description.type == JointType.PULLEY_JOINT) {
-            joint = new PulleyJoint((PulleyJointDef) description);
-        }
-        else if (description.type == JointType.GEAR_JOINT) {
-            joint = new GearJoint((GearJointDef) description);
-        }
-        else {
-            assert false;
-        }
-
-        return joint;
-    }
-
-    /** Get the type of the concrete joint. */
-    public JointType getType() {
-    	return m_type;
-    }
-    
-	/** Get the first body attached to this joint. */
-    public Body getBody1() {
-        return m_body1;
-    }
-    
-	/** Get the second body attached to this joint. */
-    public Body getBody2() {
-        return m_body2;
-    }
-
-    
-    /** Get the anchor point on body1 in world coordinates. */
-	public abstract Vec2 getAnchor1();
-
-	/** Get the anchor point on body2 in world coordinates. */
-	public abstract Vec2 getAnchor2();
 	
-    /** Get the reaction force on body2 at the joint anchor. */
-	public abstract Vec2 getReactionForce();
-
-	/** Get the reaction torque on body2. */
-	public abstract float getReactionTorque();
-    
-    /** Get the next joint the world joint list. */
-    public Joint getNext() {
-        return m_next;
-    }
-    
-    /** Get the user data pointer. */
-    public Object getUserData() {
-        return m_userData;
-    }
-    
-    /** Set the user data pointer. */
-    public void setUserData(Object o) {
-    	m_userData = o;
-    }
-
-    public abstract void initVelocityConstraints(TimeStep step);
-
-    public abstract void solveVelocityConstraints(TimeStep step);
-
-    public void initPositionConstraints() {
-        return;
-    }
-    
-    /** This returns true if the position errors are within tolerance. */
-    public abstract boolean solvePositionConstraints();
-
+	public static Joint create(World argWorld, JointDef def) {
+		//Joint joint = null;
+		switch(def.type){
+			case MOUSE:
+				return new MouseJoint(argWorld.getPool(), (MouseJointDef) def);
+			case DISTANCE:
+				return new DistanceJoint(argWorld.getPool(), (DistanceJointDef) def);
+			case PRISMATIC:
+				return new PrismaticJoint(argWorld.getPool(), (PrismaticJointDef) def);
+			case REVOLUTE:
+				return new RevoluteJoint(argWorld.getPool(), (RevoluteJointDef) def);
+			case WELD:
+				return new WeldJoint(argWorld.getPool(), (WeldJointDef) def);
+			case FRICTION:
+				return new FrictionJoint(argWorld.getPool(), (FrictionJointDef) def);
+			case LINE:
+				return new LineJoint(argWorld.getPool(), (LineJointDef) def);
+			case GEAR:
+				return new GearJoint(argWorld.getPool(), (GearJointDef) def);
+			case PULLEY:
+				return new PulleyJoint(argWorld.getPool(), (PulleyJointDef) def);
+			case CONSTANT_VOLUME:
+				return new ConstantVolumeJoint(argWorld, (ConstantVolumeJointDef) def);
+		}
+		return null;
+	}
+	
+	public static void destroy(Joint joint) {
+		joint.destructor();
+	}
+	
+	public JointType m_type;
+	public Joint m_prev;
+	public Joint m_next;
+	public JointEdge m_edgeA;
+	public JointEdge m_edgeB;
+	public Body m_bodyA;
+	public Body m_bodyB;
+	
+	public boolean m_islandFlag;
+	public boolean m_collideConnected;
+	
+	public Object m_userData;
+	
+	protected IWorldPool pool;
+	
+	// Cache here per time step to reduce cache misses.
+	final Vec2 m_localCenterA, m_localCenterB;
+	float m_invMassA, m_invIA;
+	float m_invMassB, m_invIB;
+	
+	protected Joint(IWorldPool argWorldPool, JointDef def) {
+		assert (def.bodyA != def.bodyB);
+		
+		pool = argWorldPool;
+		m_type = def.type;
+		m_prev = null;
+		m_next = null;
+		m_bodyA = def.bodyA;
+		m_bodyB = def.bodyB;
+		m_collideConnected = def.collideConnected;
+		m_islandFlag = false;
+		m_userData = def.userData;
+		
+		m_edgeA = new JointEdge();
+		m_edgeA.joint = null;
+		m_edgeA.other = null;
+		m_edgeA.prev = null;
+		m_edgeA.next = null;
+		
+		m_edgeB = new JointEdge();
+		m_edgeB.joint = null;
+		m_edgeB.other = null;
+		m_edgeB.prev = null;
+		m_edgeB.next = null;
+		
+		m_localCenterA = new Vec2();
+		m_localCenterB = new Vec2();
+	}
+	
+	/**
+	 * get the type of the concrete joint.
+	 * 
+	 * @return
+	 */
+	public JointType getType() {
+		return m_type;
+	}
+	
+	/**
+	 * get the first body attached to this joint.
+	 */
+	public Body getBodyA() {
+		return m_bodyA;
+	}
+	
+	/**
+	 * get the second body attached to this joint.
+	 * 
+	 * @return
+	 */
+	public Body getBodyB() {
+		return m_bodyB;
+	}
+	
+	/**
+	 * get the anchor point on bodyA in world coordinates.
+	 * 
+	 * @return
+	 */
+	public abstract void getAnchorA(Vec2 argOut);
+	
+	/**
+	 * get the anchor point on bodyB in world coordinates.
+	 * 
+	 * @return
+	 */
+	public abstract void getAnchorB(Vec2 argOut);
+	
+	/**
+	 * get the reaction force on body2 at the joint anchor in Newtons.
+	 * 
+	 * @param inv_dt
+	 * @return
+	 */
+	public abstract void getReactionForce(float inv_dt, Vec2 argOut);
+	
+	/**
+	 * get the reaction torque on body2 in N*m.
+	 * 
+	 * @param inv_dt
+	 * @return
+	 */
+	public abstract float getReactionTorque(float inv_dt);
+	
+	/**
+	 * get the next joint the world joint list.
+	 */
+	public Joint getNext() {
+		return m_next;
+	}
+	
+	/**
+	 * get the user data pointer.
+	 */
+	public Object getUserData() {
+		return m_userData;
+	}
+	
+	/**
+	 * Set the user data pointer.
+	 */
+	public void setUserData(Object data) {
+		m_userData = data;
+	}
+	
+	/**
+	 * Short-cut function to determine if either body is inactive.
+	 * 
+	 * @return
+	 */
+	public boolean IsActive() {
+		return m_bodyA.isActive() && m_bodyB.isActive();
+	}
+	
+	public abstract void initVelocityConstraints(TimeStep step);
+	
+	public abstract void solveVelocityConstraints(TimeStep step);
+	
+	/**
+	 * This returns true if the position errors are within tolerance.
+	 * 
+	 * @param baumgarte
+	 * @return
+	 */
+	public abstract boolean solvePositionConstraints(float baumgarte);
+	
+	/**
+	 * Override to handle destruction of joint
+	 */
+	public void destructor() { }
 }
