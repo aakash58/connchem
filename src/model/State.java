@@ -2,9 +2,6 @@ package model;
 import static model.YAMLinterface.*;
 
 import java.util.ArrayList;
-
-import org.jbox2d.util.sph.Particle;
-
 import view.Boundary;
 import view.Molecule;
 

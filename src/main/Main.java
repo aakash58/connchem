@@ -31,6 +31,8 @@ package main;
 
 
 import java.awt.EventQueue;
+
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
@@ -53,7 +55,10 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
 import view.P5Canvas;
+import view.Compound;
+import view.Unit2;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
@@ -71,6 +76,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.io.File;
@@ -88,13 +94,12 @@ public class Main {
 	// TODO flag
 	public static JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
-	public static int selectedUnit=1;
-	public static int selectedSim=1;
+	public static int selectedUnit=2;
+	public static int selectedSim=2;
 	public static int selectedSet=1;
 	public static boolean isWelcomed=false;
 	public static Color selectedColor = new Color(200,200,150);
 	public static Color defaultColor = Color.LIGHT_GRAY;
-	private int[] sliderValues = {5,6,7,6,3};
 	private static int sliderValue = 5;
 	
 	private static int minSliderValue = 1;
@@ -106,6 +111,8 @@ public class Main {
 	public static CustomPopupMenu scrollablePopupMenu;
 	public static String[] moleculeNames = null;
 	public static JPanel rightPanel;
+	public static JPanel dashboard;
+	
 	public static JPanel leftPanel;
 	public static JPanel centerPanel;
 	public static JPanel welcomePanel;
@@ -127,6 +134,13 @@ public class Main {
 	public static JLabel totalSystemEnergy;
 	public static JLabel averageSystemEnergy;
 	public static JLabel elapsedTime;
+	public static JLabel waterVolume;
+	public static JLabel m1Mass;
+	public static JLabel m1Disolved;
+	public static JLabel satMass;
+	public static JLabel m1Label;
+	public static JLabel satLabel;
+	
 	public static JButton playBtn;
 	public static boolean isFirst =true; 
 	
@@ -234,13 +248,6 @@ public class Main {
 		
 	public static void addAdditionalMolecule(){
 		//Default unit setting
-		if (selectedUnit==0 && defaultSetMolecules.size()==0){
-			defaultSetMolecules.add("Water");
-			defaultSetMolecules.add("Hydrochloric Acid");
-			defaultSetMolecules.add("Hydronium");
-			defaultSetMolecules.add("Methylammonium");
-			defaultSetMolecules.add("Phenylpthalein");
-		}
 		JPanel panel = new JPanel();
 		panel.setBackground(Main.selectedColor);
 		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
@@ -357,6 +364,8 @@ public class Main {
 	}
 	
 	public static void reset(){
+		boolean temp = P5Canvas.isEnable;
+		P5Canvas.isEnable =false;
 		if (isWelcomed && welcomePanel !=null){
 			mainFrame.remove(welcomePanel);
 			mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
@@ -368,14 +377,44 @@ public class Main {
 		p5Canvas.removeAllMolecules();
 		canvas.reset();
 		TableView.setSelectedRow(-1);
+		P5Canvas.count=0;
+		P5Canvas.second=0;
 		
+		
+		Unit2.reset();
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
 		if (a!=null) {
+			Compound.names = new ArrayList<String>();
+			Compound.counts = new ArrayList<Integer>();
 			for (int i=0; i<a.size();i++){
 				String s = (String) getCompoundName(selectedUnit,selectedSim,selectedSet,i);
 				int num = Integer.parseInt(getCompoundQty(selectedUnit,selectedSim,selectedSet,i).toString());
-				p5Canvas.addMoleculeRandomly(s.replace(" ","-"),num);
+				s =s.replace(" ","-");
+				p5Canvas.addMoleculeRandomly(s,num);
+				Compound.names.add(s);
+				Compound.counts.add(num);
 			}
+			if (selectedUnit==2){
+				if (selectedSet==1 && selectedSim<4){
+					Compound.names.add("Sodium-Ion");
+					Compound.counts.add(0);
+					Compound.names.add("Chlorine-Ion");
+					Compound.counts.add(0);
+				}
+				else if (selectedUnit==2 && selectedSet==4){
+					Compound.names.add("Calcium-Ion");
+					Compound.counts.add(0);
+					Compound.names.add("Chlorine-Ion");
+					Compound.counts.add(0);
+				}
+				else if (selectedUnit==2 && selectedSet==7){
+					Compound.names.add("Sodium-Ion");
+					Compound.counts.add(0);
+					Compound.names.add("Bicarbonate");
+					Compound.counts.add(0);
+				}
+			}	
+			Compound.setProperties();
 		}
 		
 		
@@ -386,10 +425,9 @@ public class Main {
 		
 		
 		
-		
 		//if (P5Canvas.isEnable)
 		//	playBtn.doClick();
-	/*	if (playBtn!=null && centerPanel!=null){
+		if (playBtn!=null && centerPanel!=null){
 			volumeSlider.requestFocus();
 			volumeSlider.lostFocus(null, null);
 			volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
@@ -414,7 +452,9 @@ public class Main {
 			
 			leftPanel.updateUI();
 			centerPanel.updateUI();		
-		}	*/
+		}	
+		P5Canvas.isEnable =temp;
+		
 	} 
 		
 		
@@ -427,7 +467,7 @@ public class Main {
 		Dimension screenDimension = tk.getScreenSize();
 		    
 		mainFrame = new JFrame();
-		mainFrame.setBounds(0, 0, 1280, 705);
+		mainFrame.setBounds(0, 0, 1280, 700);
 		//mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -555,7 +595,7 @@ public class Main {
 		createPopupMenu();
 		moleculeChooserBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				  scrollablePopupMenu.show(moleculeChooserBtn, -160,37,mainFrame.getHeight()-39);
+				  scrollablePopupMenu.show(moleculeChooserBtn, -160,52,mainFrame.getHeight()-39);
 			}
 		});
 			//moleculeChooserBtn.setEnabled(false);
@@ -569,19 +609,18 @@ public class Main {
 		periodicTableBtn.setEnabled(false);
 		periodicTableBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconPeriodicTable.png")));
 		menuBar.add(periodicTableBtn);
-		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[263.00][480px,grow][300px]", "[grow]"));
+		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[285.00][480px,grow][320px]", "[grow]"));
 
 		
 		
 		//*********************************** LEFT PANEL ********************************************
 		leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
-		leftPanel.setLayout(new MigLayout("insets 6, gap 18", "14[grow]", "[][][grow]"));
+		leftPanel.setLayout(new MigLayout("insets 6, gap 18", "20[260]", "20[215][]"));
 
 		JPanel timerSubpanel = new JPanel();
-		//timerSubpanel.setBackground(new Color(211, 211, 211));
 		leftPanel.add(timerSubpanel, "cell 0 0,grow");
-		timerSubpanel.setLayout(new MigLayout("insets 3, gap 4", "[65.00][100.00][100px][50.00][grow]", "[12.00,grow][140px][]"));
+		timerSubpanel.setLayout(new MigLayout("insets 3, gap 4", "[110px][50px]", "[180px][grow]"));
 		
 		playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
@@ -603,7 +642,42 @@ public class Main {
 		else
 			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
 		
-		timerSubpanel.add(playBtn, "cell 2 2 1 1,alignx right");
+		timerSubpanel.add(playBtn, "cell 1 0 1 1");
+
+		JPanel checkBoxPanel = new JPanel();
+		checkBoxPanel.setLayout(new BorderLayout());
+		JCheckBox cBox1 =  new JCheckBox("Enable Brushing"); 
+		cBox1.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED)
+					P5Canvas.isEnableBrushing =true;
+				else if	(e.getStateChange() == ItemEvent.DESELECTED)
+					P5Canvas.isEnableBrushing = false;
+			}
+		});
+		JCheckBox cBox2 =  new JCheckBox("Display Forces"); 
+		cBox2.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED)
+					P5Canvas.isDisplayForces =true;
+				else if	(e.getStateChange() == ItemEvent.DESELECTED)
+					P5Canvas.isDisplayForces = false;
+			}
+		});
+		
+		JCheckBox cBox3 =  new JCheckBox("Display Joints"); 
+		cBox3.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED)
+					P5Canvas.isDisplayJoints =true;
+				else if	(e.getStateChange() == ItemEvent.DESELECTED)
+					P5Canvas.isDisplayJoints = false;
+			}
+		});
+		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
+		checkBoxPanel.add(cBox2, BorderLayout.CENTER);
+		checkBoxPanel.add(cBox3, BorderLayout.SOUTH);
+		timerSubpanel.add(checkBoxPanel, "cell 1 1 1 1");
 
 		
 		JButton resetBtn = new JButton("");
@@ -613,29 +687,21 @@ public class Main {
 				reset();
 			}
 		});
-		timerSubpanel.add(resetBtn, "cell 3 2 1 1,alignx left");
+		timerSubpanel.add(resetBtn, "cell 1 0 1 1");
 		
 		
 		tableSet = new TableSet();
-		timerSubpanel.add(tableSet, "cell 0 1 5 1,growx");
-		
-	
-		
+		timerSubpanel.add(tableSet, "cell 0 0 1 2,growy");
+			
 		
 		
 		//***************** Add elements Control panel
-		final String controlCompoundName_1 = "Water";
-		final String controlCompoundName_2 = "Hydrochloric Acid";
-		final String controlCompoundName_3 = "Hydronium";
-		final String controlCompoundName_4 = "Methylammonium";
-		final String controlCompoundName_5 = "Phenylpthalein";
-		
 		dynamicScrollPane = new JScrollPane();
 		leftPanel.add(dynamicScrollPane, "cell 0 1,grow");
 		
 		dynamicPanel = new JPanel();
 		dynamicScrollPane.setViewportView(dynamicPanel);
-		dynamicPanel.setLayout(new MigLayout("insets 4", "[124.00,grow]", "[][]"));
+		dynamicPanel.setLayout(new MigLayout("insets 4", "[200.00,grow]", "[][]"));
 		
 		
 		//****************************************** CENTER PANEL *****************************************************
@@ -650,8 +716,7 @@ public class Main {
 		});
 		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
-		int wCenter = screenDimension.width - 282 -300 -50; 
-		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[][604.00px][]", "[700px][center]"));
+		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[][560.00px][]", "[690px][center]"));
 
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
@@ -753,14 +818,14 @@ public class Main {
 		//***************************************** RIGHT PANEL *******************************************
 		rightPanel = new JPanel();
 		mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
-		rightPanel.setLayout(new MigLayout("insets 0, gap 0", "[297.00]", "[380.00,grow][grow]"));
+		rightPanel.setLayout(new MigLayout("insets 0, gap 0", "[320.00]", "[350.00,grow][grow]"));
 
 		JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP);
 		rightPanel.add(graphTabs, "cell 0 0,grow");
 
 		JPanel graphSet_1 = new JPanel();
 		graphTabs.addTab("Compounds", null, graphSet_1, null);
-		graphSet_1.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]", "[178.00:n][grow]"));
+		graphSet_1.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]", "[235.00:n][grow]"));
 		graphSet_1.add(canvas, "cell 0 0,grow");
 
 		JButton graphPopoutBtn_1 = new JButton("");
@@ -774,7 +839,7 @@ public class Main {
 		JPanel graphSet_2 = new JPanel();
 		graphTabs.addTab("pH", null, graphSet_2, null);
 
-		JPanel dashboard = new JPanel();
+		dashboard = new JPanel();
 		rightPanel.add(dashboard, "cell 0 1,alignx center,growy");
 		dashboard.setLayout(new MigLayout("", "[][100]", "[][][][]"));
 
@@ -783,19 +848,39 @@ public class Main {
 
 		elapsedTime = new JLabel("00");
 		elapsedTime.setForeground(new Color(0, 128, 0));
-		elapsedTime.setFont(new Font("Digital", Font.PLAIN, 30));
+		elapsedTime.setFont(new Font("Digital", Font.PLAIN, 28));
 		dashboard.add(elapsedTime, "cell 1 0");
 
 		
-		JLabel totalSystemEnergyLabel = new JLabel("Total System Energy:");
+	/*	JLabel totalSystemEnergyLabel = new JLabel("Total System Energy:");
 		dashboard.add(totalSystemEnergyLabel, "cell 0 1,alignx right");
 		totalSystemEnergy= new JLabel("0 kJ");
 		dashboard.add(totalSystemEnergy, "cell 1 1");
 
 		JLabel averageSystemEnergyLabel = new JLabel("Average Molecule Energy:");
 		dashboard.add(averageSystemEnergyLabel, "cell 0 2,alignx right");
-		averageSystemEnergy= new JLabel("a kJ");
-		dashboard.add(averageSystemEnergy, "cell 1 2");
+		averageSystemEnergy= new JLabel("0 kJ");
+		dashboard.add(averageSystemEnergy, "cell 1 2");*/
+		
+		
+		m1Label = new JLabel("Mass of Compound:");
+		dashboard.add(m1Label, "cell 0 1,alignx right");
+		m1Mass= new JLabel("0 g");
+		dashboard.add(m1Mass, "cell 1 1");
+		
+		JLabel m1Label = new JLabel("Disolved:");
+		dashboard.add(m1Label, "cell 0 2,alignx right");
+		m1Disolved= new JLabel("0 g");
+		dashboard.add(m1Disolved, "cell 1 2");
+		satLabel = new JLabel("Saturation:");
+		dashboard.add(satLabel, "cell 0 3,alignx right");
+		satMass= new JLabel("0 g");
+		dashboard.add(satMass, "cell 1 3");
+		
+		JLabel waterLabel = new JLabel("Water Volume:");
+		dashboard.add(waterLabel, "cell 0 4,alignx right");
+		waterVolume= new JLabel("0 mL");
+		dashboard.add(waterVolume, "cell 1 4");
 
 /*		JLabel totalSystemPressureLabel = new JLabel("Total System Pressure:");
 		dashboard.add(totalSystemPressureLabel, "cell 0 3,alignx right");
@@ -803,6 +888,8 @@ public class Main {
 		JLabel totalSystemPressureOutput = new JLabel("100 kPa");
 		dashboard.add(totalSystemPressureOutput, "cell 1 3");
 */
+		
+		
 		if (isWelcomed){
 			welcomePanel = new JPanel();
 			welcomePanel.setLayout(new MigLayout("insets 10, gap 10", "[][]", "[100px][]"));
@@ -821,7 +908,6 @@ public class Main {
 			label3.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/cccLogo.png")));
 			welcomePanel.add(label3, "cell 1 3,alignx center");
 		    
-			
 			
 			mainFrame.remove(leftPanel);
 			mainFrame.remove(centerPanel);

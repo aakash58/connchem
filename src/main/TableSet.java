@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class TableSet extends JPanel {
 	public static JTable table = null;
 	public static JScrollPane scrollPane;
-	public static ArrayList[] data = new ArrayList[2];
+	public static ArrayList set = new ArrayList();
 	public static int selectedRow=0; 
 	
 	
@@ -40,7 +40,6 @@ public class TableSet extends JPanel {
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.getSelectionModel().addListSelectionListener(new RowListener());
 		table.getColumnModel().getColumn(0).setPreferredWidth(50);
-		table.getColumnModel().getColumn(1).setPreferredWidth(180);
 		table.setSelectionBackground(Color.GRAY);//new Color(40,60,220));
 		
 		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
@@ -53,7 +52,7 @@ public class TableSet extends JPanel {
 		table.setDefaultEditor(Color.class, new ColorEditor());
 		// Add the scroll pane to this panel.
 		add(scrollPane);
-		Color c = new Color(241,241,241);
+		Color c = new Color(245,245,245);
 		scrollPane.getViewport().setBackground(c);
 		table.setBackground(c);
 		
@@ -79,14 +78,12 @@ public class TableSet extends JPanel {
 	}
 
 	public static void updataSet(){
-		data[0] = new ArrayList();
-		data[1] = new ArrayList();
+		set = new ArrayList();
 		ArrayList sets = YAMLinterface.getSets(Main.selectedUnit, Main.selectedSim);
 		if (sets==null) return;
 		
 		for (int i=0; i<sets.size();i++){
-			TableSet.data[0].add(i+1);
-			TableSet.data[1].add("Page "+(i*10+1));
+			TableSet.set.add(i+1);
 		}
 		if (Main.tableSet !=null){
 			table.updateUI();
@@ -97,11 +94,9 @@ public class TableSet extends JPanel {
 		private String[] columnNames = {};
 		
 		public MyTableModel() {
-			data[0] = new ArrayList();
-			data[1] = new ArrayList();
-			columnNames = new String[2];
-			columnNames[0] = "     Set";
-			columnNames[1] = "Curriculum";
+			set = new ArrayList();
+			columnNames = new String[1];
+			columnNames[0] = "             Set";
 		}
 
 		public int getColumnCount() {
@@ -109,7 +104,7 @@ public class TableSet extends JPanel {
 		}
 
 		public int getRowCount() {
-			return data[0].size();
+			return set.size();
 		}
 
 		public String getColumnName(int col) {
@@ -117,7 +112,7 @@ public class TableSet extends JPanel {
 		}
 
 		public Object getValueAt(int row, int col) {
-			return data[col].get(row);
+			return set.get(row);
 		}
 
 		public Class getColumnClass(int c) {
@@ -129,7 +124,7 @@ public class TableSet extends JPanel {
 		}
 
 		public void setValueAt(Object value, int row, int col) {
-			data[col].set(row, value);
+			set.set(row, value);
 			fireTableCellUpdated(row, col);
 		}
 	}

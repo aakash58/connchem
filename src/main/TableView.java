@@ -55,7 +55,7 @@ public class TableView extends JPanel {
 		table.setDefaultEditor(Color.class, new ColorEditor());
 		// Add the scroll pane to this panel.
 		add(scrollPane);
-		Color c = new Color(241,241,241);
+		Color c = new Color(245,245,245);
 		scrollPane.getViewport().setBackground(c);
 		table.setBackground(c);
 		
@@ -94,7 +94,6 @@ public class TableView extends JPanel {
 			if (!event.getValueIsAdjusting()) {
 				selectedRow = table.getSelectedRow();
 			}
-			System.out.println(""+table.getSelectedRow());
 		}
 	}
 
