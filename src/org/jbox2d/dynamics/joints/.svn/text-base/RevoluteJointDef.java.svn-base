@@ -1,7 +1,33 @@
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 /*
  * JBox2D - A Java Port of Erin Catto's Box2D
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
+ * JBox2D homepage: http://jbox2d.sourceforge.net/
  * Box2D homepage: http://www.box2d.org
  * 
  * This software is provided 'as-is', without any express or implied
@@ -26,24 +52,73 @@ package org.jbox2d.dynamics.joints;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
-//Updated to rev. 56->108 of b2RevoluteJoint.cpp/.h
-
-/// Revolute joint definition. This requires defining an
-/// anchor point where the bodies are joined. The definition
-/// uses local anchor points so that the initial configuration
-/// can violate the constraint slightly. You also need to
-/// specify the initial relative angle for joint limits. This
-/// helps when saving and loading a game.
-/// The local anchor points are measured from the body's origin
-/// rather than the center of mass because:
-/// 1. you might not know where the center of mass will be.
-/// 2. if you add/remove shapes from a body and recompute the mass,
-///    the joints will be broken.
+/**
+ *  Revolute joint definition. This requires defining an
+ *  anchor point where the bodies are joined. The definition
+ *  uses local anchor points so that the initial configuration
+ *  can violate the constraint slightly. You also need to
+ *  specify the initial relative angle for joint limits. This
+ *  helps when saving and loading a game.
+ *  The local anchor points are measured from the body's origin
+ *  rather than the center of mass because:<br/>
+ *  <ul>
+ *  <li>you might not know where the center of mass will be.</li>
+ *  <li>if you add/remove shapes from a body and recompute the mass,
+ *     the joints will be broken.</li></ul>
+ */
 public class RevoluteJointDef extends JointDef {
+	
+
+	/**
+	 *  The local anchor point relative to body1's origin.
+	 */
+	public Vec2 localAnchorA;
+
+	/**
+	 *  The local anchor point relative to body2's origin.
+	 */
+	public Vec2 localAnchorB;
+
+	/**
+	 *  The body2 angle minus body1 angle in the reference state (radians).
+	 */
+	public float referenceAngle;
+
+	/**
+	 *  A flag to enable joint limits.
+	 */
+	public boolean enableLimit;
+
+	/**
+	 *  The lower angle for the joint limit (radians).
+	 */
+	public float lowerAngle;
+
+	/**
+	 *  The upper angle for the joint limit (radians).
+	 */
+	public float upperAngle;
+
+	/**
+	 *  A flag to enable the joint motor.
+	 */
+	public boolean enableMotor;
+
+	/**
+	 *  The desired motor speed. Usually in radians per second.
+	 */
+	public float motorSpeed;
+
+	/**
+	 *  The maximum motor torque used to achieve the desired motor speed.
+	 *  Usually in N-m.
+	 */
+	public float maxMotorTorque;
+	
 	public RevoluteJointDef() {
-		type = JointType.REVOLUTE_JOINT;
-		localAnchor1 = new Vec2(0.0f, 0.0f);
-		localAnchor2 = new Vec2(0.0f, 0.0f);
+		type = JointType.REVOLUTE;
+		localAnchorA = new Vec2(0.0f, 0.0f);
+		localAnchorB = new Vec2(0.0f, 0.0f);
 		referenceAngle = 0.0f;
 		lowerAngle = 0.0f;
 		upperAngle = 0.0f;
@@ -53,41 +128,19 @@ public class RevoluteJointDef extends JointDef {
 		enableMotor = false;
 	}
 
-	/// Initialize the bodies, anchors, and reference angle using the world
-	/// anchor.
-	public void initialize(Body b1, Body b2, Vec2 anchor) {
-		body1 = b1;
-		body2 = b2;
-		localAnchor1 = body1.getLocalPoint(anchor);
-		localAnchor2 = body2.getLocalPoint(anchor);
-		referenceAngle = body2.getAngle() - body1.getAngle();
+	/**
+	 * Initialize the bodies, anchors, and reference angle using the world
+	 * anchor.
+	 * @param b1
+	 * @param b2
+	 * @param anchor
+	 */
+	public void initialize(final Body b1, final Body b2, final Vec2 anchor) {
+		bodyA = b1;
+		bodyB = b2;
+		bodyA.getLocalPointToOut(anchor, localAnchorA);
+		bodyB.getLocalPointToOut(anchor, localAnchorB);
+		referenceAngle = bodyA.getAngle() - bodyB.getAngle();
 	}
 
-	/// The local anchor point relative to body1's origin.
-	public Vec2 localAnchor1;
-
-	/// The local anchor point relative to body2's origin.
-	public Vec2 localAnchor2;
-
-	/// The body2 angle minus body1 angle in the reference state (radians).
-	public float referenceAngle;
-
-	/// A flag to enable joint limits.
-	public boolean enableLimit;
-
-	/// The lower angle for the joint limit (radians).
-	public float lowerAngle;
-
-	/// The upper angle for the joint limit (radians).
-	public float upperAngle;
-
-	/// A flag to enable the joint motor.
-	public boolean enableMotor;
-
-	/// The desired motor speed. Usually in radians per second.
-	public float motorSpeed;
-
-	/// The maximum motor torque used to achieve the desired motor speed.
-	/// Usually in N-m.
-	public float maxMotorTorque;
 }

@@ -2,9 +2,7 @@ package view;
 
 import java.awt.Color;
 
-import pbox2d.*;
-
-import org.jbox2d.collision.PolygonDef;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 
@@ -43,21 +41,27 @@ public class Boundary {
 		box2dH = box2d.scalarPixelsToWorld(h_/2);
 		
 		// Create the body
+		
+		// Define the polygon
+		PolygonShape polygonShape = new PolygonShape();
+		polygonShape.setAsBox(box2dW, box2dH);
+		
 		BodyDef bd = new BodyDef();
-		bd.position.set(box2d.coordPixelsToWorld(new Vec2(x_,y_)));
+		bd.type = BodyType.STATIC;
+        bd.position.set(box2d.coordPixelsToWorld(new Vec2(x_,y_)));
 		body = box2d.createBody(bd);
 		while (body ==null){ 
 			body = box2d.createBody(bd);
 		}	
 		
-		// Define the polygon
-		PolygonDef sd = new PolygonDef();
-		sd.setAsBox(box2dW, box2dH);
-		sd.density = 0f;    // No density means it won't move!
-		sd.friction = 1f;
-		sd.restitution =1f;
-		body.createShape(sd);
-		body.setMassFromShapes();
+		FixtureDef fd = new FixtureDef();
+        fd.shape = polygonShape;
+    	fd.density = 0f;    // No density means it won't move!
+        fd.friction = 1.0f;
+    	fd.restitution =1f;
+        body.createFixture(fd);
+        
+	//	body.setMassFromShapes();
 		body.setUserData(this);
 		yOriginal = body.getPosition().y ;
 		isTransformed =true;
@@ -93,7 +97,7 @@ public class Boundary {
 		if (id==2 && isTransformed){
 			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
 					box2d.scalarPixelsToWorld(difVolume));
-			body.setXForm(v, body.getAngle());
+			body.setTransform(v, body.getAngle());
 			isTransformed =false;
 		}	
 		if (id==3)

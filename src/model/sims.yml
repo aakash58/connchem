@@ -148,108 +148,108 @@ units:
     - set: 1
       compounds: 
       - compound: "Water"
-        qty: 25
+        qty: 0
       - compound: "Sodium Chloride"
-        qty: 10
+        qty: 8
   - sim: 2
     name: "Solubility"
     sets:      
     - set: 1
       compounds: 
       - compound: "Water"
-        qty: 25
+        qty: 0
       - compound: "Sodium Chloride"
-        qty: 10
+        qty: 0
     - set: 2
       compounds:
       - compound: "Water"
-        qty: 25
+        qty: 0
       - compound: "Silicon Dioxide"
-        qty: 10
+        qty: 12
     - set: 3
       compounds:
       - compound: "Water"
         qty: 25
       - compound: "Glycerol"
-        qty: 10
+        qty: 5
     - set: 4
       compounds:
       - compound: "Water"
-        qty: 25
-      - compound: "Calcium Chloride"
-        qty: 10
+        qty: 0
+      - compound: "Calcium-Chloride"
+        qty: 4
     - set: 5
       compounds:
       - compound: "Water"
-        qty: 25
+        qty: 20
       - compound: "Acetic Acid"
-        qty: 10    
+        qty: 8    
     - set: 6
       compounds:
       - compound: "Water"
         qty: 25
       - compound: "Pentane"
-        qty: 10    
+        qty: 6   
     - set: 7
       compounds:
       - compound: "Water"
-        qty: 25
+        qty: 0
       - compound: "Sodium Bicarbonate"
-        qty: 10
+        qty: 6
   - sim: 3
     name: "Solubility Changes"
     sets:
     - set: 1
       compounds: 
       - compound: "Water"
-        qty: 25
+        qty: 0
       - compound: "Sodium Chloride"
-        qty: 10
+        qty: 8
     - set: 2
       compounds: 
       - compound: "Water"
-        qty: 25
+        qty: 0
       - compound: "Silicon Dioxide"
-        qty: 10             
+        qty: 12             
     - set: 3
       compounds: 
       - compound: "Water"
         qty: 25
       - compound: "Glycerol"
-        qty: 10    
+        qty: 5    
     - set: 4
       compounds: 
       - compound: "Water"
-        qty: 25
-      - compound: "Calcium Chloride"
-        qty: 10    
+        qty: 0
+      - compound: "Calcium-Chloride"
+        qty: 4
     - set: 5
       compounds: 
       - compound: "Water"
         qty: 25
       - compound: "Acetic Acid"
-        qty: 10    
+        qty: 8    
     - set: 6
       compounds: 
       - compound: "Water"
         qty: 25
       - compound: "Pentane"
-        qty: 10    
+        qty: 6  
     - set: 7
       compounds: 
       - compound: "Water"
-        qty: 25
+        qty: 0
       - compound: "Sodium Bicarbonate"
-        qty: 10
+        qty: 6
   - sim: 4
     name: "Saturation"
     sets:
     - set: 1
       compounds:
       - compound: "Water"
-        qty: 25
+        qty: 0
       - compound: "Potassium Chloride"
-        qty: 10         
+        qty: 8         
 - unit: 3
   name: "Reactions and Stoichiometry"
   sims:

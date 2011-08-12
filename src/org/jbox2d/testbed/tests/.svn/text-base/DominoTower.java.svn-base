@@ -1,37 +1,47 @@
-/*
- * JBox2D - A Java Port of Erin Catto's Box2D
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
- * Box2D homepage: http://www.gphysics.com
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  * 
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+/**
+ * Created at 8:41:50 PM Jan 23, 2011
  */
 package org.jbox2d.testbed.tests;
 
-import org.jbox2d.collision.PolygonDef;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
-import org.jbox2d.testbed.AbstractExample;
-import org.jbox2d.testbed.TestbedMain;
+import org.jbox2d.testbed.framework.TestbedTest;
 
-
-public class DominoTower extends AbstractExample {
+/**
+ * @author Daniel Murphy
+ */
+public class DominoTower extends TestbedTest {
 	private boolean firstTime = true;
     final float dwidth = .20f;
     final float dheight = 1.0f;
@@ -39,89 +49,93 @@ public class DominoTower extends AbstractExample {
     final float dfriction = 0.1f;
     int baseCount = 25;
     
-    public DominoTower(TestbedMain _parent) {
-        super(_parent);
-    }
-
     public void makeDomino(float x, float y, boolean horizontal, World world) {
 
-    	PolygonDef sd = new PolygonDef();
+    	PolygonShape sd = new PolygonShape();
         sd.setAsBox(.5f*dwidth, .5f*dheight);
-        sd.density = ddensity;
+        FixtureDef fd = new FixtureDef();
+        fd.shape = sd;
+        fd.density = ddensity;
         BodyDef bd = new BodyDef();
-        sd.friction = dfriction;
-        sd.restitution = 0.65f;
+        bd.type = BodyType.DYNAMIC;
+        fd.friction = dfriction;
+        fd.restitution = 0.65f;
         bd.position = new Vec2(x, y);
         bd.angle = horizontal? (float)(Math.PI/2.0):0f;
         Body myBody = world.createBody(bd);
-        myBody.createShape(sd);
-        myBody.setMassFromShapes();
+        myBody.createFixture(fd);
     }
-
-    @Override
-    public void create() {
-    	if (firstTime) {
+    
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest()
+	 */
+	@Override
+	public void initTest() {
+		if (firstTime) {
 			setCamera(0f, 12f, 10f);
 			firstTime = false;
-	    	settings.hz = 120;
 		}
     	
         { // Floor
-            PolygonDef sd = new PolygonDef();
+            PolygonShape sd = new PolygonShape();
             sd.setAsBox(50.0f, 10.0f);
 
             BodyDef bd = new BodyDef();
             bd.position = new Vec2(0.0f, -10.0f);
-            m_world.createBody(bd).createShape(sd);
+            m_world.createBody(bd).createFixture(sd, 0f);
         }
         
         {
             ddensity = 10f;
             //Make bullet
-            PolygonDef sd = new PolygonDef();
+            PolygonShape sd = new PolygonShape();
             sd.setAsBox(.7f, .7f);
-            sd.density = 35f;
+            FixtureDef fd = new FixtureDef();
+            fd.density = 35f;
             BodyDef bd = new BodyDef();
-            sd.friction = 0f;
-            sd.restitution = 0.85f;
-            bd.isBullet = true;
+            bd.type = BodyType.DYNAMIC;
+            fd.shape = sd;
+            fd.friction = 0f;
+            fd.restitution = 0.85f;
+            bd.bullet = true;
             //bd.addShape(sd);
             bd.position = new Vec2(30f, 50f);
             Body b = m_world.createBody(bd);
-            b.createShape(sd);
+            b.createFixture(fd);
             b.setLinearVelocity(new Vec2(-25f,-25f));
             b.setAngularVelocity(6.7f);
-            b.setMassFromShapes();
-            sd.density = 25f;
+            
+            fd.density = 25f;
             bd.position = new Vec2(-30, 25f);
             b = m_world.createBody(bd);
-            b.createShape(sd);
+            b.createFixture(fd);
             b.setLinearVelocity(new Vec2(35f, -10f));
             b.setAngularVelocity(-8.3f);
-            b.setMassFromShapes();
         }
 
         { 
-            
+            float currX;
             //Make base
             for (int i=0; i<baseCount; ++i) {
-                float currX = i*1.5f*dheight - (1.5f*dheight*baseCount/2f);
+                currX = i*1.5f*dheight - (1.5f*dheight*baseCount/2f);
                 makeDomino(currX, dheight/2.0f, false, m_world);
                 makeDomino(currX, dheight+dwidth/2.0f, true, m_world);
             }
+            currX = baseCount*1.5f*dheight - (1.5f*dheight*baseCount/2f);            
             //Make 'I's
             for (int j=1; j<baseCount; ++j) {
                 if (j > 3) ddensity *= .8f;
                 float currY = dheight*.5f + (dheight+2f*dwidth)*.99f*j; //y at center of 'I' structure
                 
                 for (int i=0; i<baseCount - j; ++i) {
-                    float currX = i*1.5f*dheight - (1.5f*dheight*(baseCount-j)/2f);// + random(-.05f, .05f);
+                    currX = i*1.5f*dheight - (1.5f*dheight*(baseCount-j)/2f);// + parent.random(-.05f, .05f);
                     ddensity *= 2.5f;
                     if (i==0) {
                         makeDomino(currX - (1.25f*dheight) + .5f*dwidth, currY-dwidth, false, m_world);
                     }
                     if (i==baseCount-j-1) {
-                        if (j != 1) makeDomino(currX + (1.25f*dheight) - .5f*dwidth, currY-dwidth, false, m_world);
+                        //if (j != 1) //djm: why is this here? it makes it off balance
+                    	makeDomino(currX + (1.25f*dheight) - .5f*dwidth, currY-dwidth, false, m_world);
                     }
                     ddensity /= 2.5f;
                     makeDomino(currX, currY, false, m_world);
@@ -130,9 +144,14 @@ public class DominoTower extends AbstractExample {
                 }
             }
         }
-    }
-
-    public String getName() {
-    	return "Domino Tower Stress Test";
-    }
+	}
+	
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#getTestName()
+	 */
+	@Override
+	public String getTestName() {
+		return "Domino Tower";
+	}
+	
 }

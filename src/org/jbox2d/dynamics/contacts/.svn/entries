@@ -1,15 +1,15 @@
 8
 
 dir
-115
-https://jbox2d.svn.sourceforge.net/svnroot/jbox2d/trunk/src/org/jbox2d/dynamics/contacts
-https://jbox2d.svn.sourceforge.net/svnroot/jbox2d
+495
+http://jbox2d.googlecode.com/svn/trunk/jbox2d-library/src/main/java/org/jbox2d/dynamics/contacts
+http://jbox2d.googlecode.com/svn
 
 
 
-2008-04-01T22:19:05.702039Z
-111
-ewjordan
+2011-07-20T07:33:05.388254Z
+488
+toucansam99@gmail.com
 
 
 svn:special svn:externals svn:needs-lock
@@ -24,92 +24,33 @@ svn:special svn:externals svn:needs-lock
 
 
 
-6f22cd85-313b-0410-a2db-fd6cdd1a72a6
-
-CircleContact.java
-file
-127
-
-
-
-2008-05-08T08:27:45.000000Z
-84fa8c6e409f24848fde0732d5b69479
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
-has-props
-
-Contact.java
-file
-127
-
-
-
-2008-05-08T08:28:48.000000Z
-af9120602f8461a8828bd05b3304d7c6
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
+bc622014-446a-afc6-a9a4-7d0e215fe39e
 
 ContactConstraint.java
 file
-127
-
-
-
-2008-05-08T08:41:50.000000Z
-07475f90cf156a7502562ff5408fc08a
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
-
-ContactConstraintPoint.java
-file
-117
-
-
-
-2008-04-20T13:39:46.000000Z
-528a49804dd2727449282dd9fc510054
-2008-04-21T22:22:24.835629Z
-117
-ewjordan
-
-ContactCreateFcn.java
-file
 
 
 
 
-2008-03-26T06:29:03.000000Z
-951368e025573f16e387a57ab471b60e
-2008-03-26T06:39:20.556876Z
-93
-ewjordan
+2011-07-23T20:54:58.000000Z
+bce8e154d2d9bb56a8eb113c73469015
+2011-01-23T21:05:54.521023Z
+434
+toucansam99
+has-props
 
 ContactEdge.java
 file
-127
 
 
 
-2008-05-08T08:39:03.000000Z
-155b05de8762ac55a97afb6a34a504a9
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
-
-ContactPoint.java
-file
-127
 
-
-
-2008-05-08T08:33:54.000000Z
-f04c8709faed81b69577fda9f8df8461
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
+2011-07-23T20:54:58.000000Z
+373e73cf2ad4f87c76220f8f05419b68
+2011-01-23T21:05:54.521023Z
+434
+toucansam99
+has-props
 
 ContactRegister.java
 file
@@ -117,94 +58,127 @@ file
 
 
 
-2008-03-26T06:29:19.000000Z
-fdfb74169533ff65eb42bf8ca0dbaafd
-2008-03-26T06:39:20.556876Z
-93
-ewjordan
+2011-07-23T20:54:58.000000Z
+2fb9bd46014d8584f24c111d59b11f8d
+2011-07-05T23:45:40.924228Z
+450
+toucansam99@gmail.com
+has-props
 
-ContactResult.java
+TOIConstraint.java
 file
-127
 
 
 
-2008-05-08T09:16:42.000000Z
-a96ebfb2f722b2b9da1e75bb1536d2f9
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
+
+2011-07-23T20:54:58.000000Z
+a7883d076587455b4d3786d0e2122ca2
+2011-01-23T21:05:54.521023Z
+434
+toucansam99
+has-props
+
+PolygonContact.java
+file
+
+
+
+
+2011-07-23T20:54:58.000000Z
+3e1c87123bdd3173090dc2fb3859745a
+2011-07-05T23:45:40.924228Z
+450
+toucansam99@gmail.com
+has-props
+
+TOISolver.java
+file
+
+
+
+
+2011-07-23T20:54:58.000000Z
+ba07d5892103ea96061bf2c2e048dc86
+2011-07-05T23:45:40.924228Z
+450
+toucansam99@gmail.com
+has-props
 
 ContactSolver.java
 file
-117
 
 
 
-2008-04-20T14:31:16.000000Z
-ada3610c1dd7b86660e857b71987f80b
-2008-04-21T22:22:24.835629Z
-117
-ewjordan
-
-NullContact.java
-file
-127
 
-
-
-2008-05-08T08:43:11.000000Z
-5a4386d43073ea7bb0f7d8748bd4e0e8
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
-
-PolyAndCircleContact.java
-file
-127
-
-
-
-2008-05-08T08:55:06.000000Z
-18bcbb7a7cdb2bdbef945237eba77a7d
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
+2011-07-23T20:54:59.000000Z
+01888e8bb8f11a741301c728737d3772
+2011-07-05T23:45:40.924228Z
+450
+toucansam99@gmail.com
 has-props
 
-PolyContact.java
+PolygonAndCircleContact.java
 file
-127
 
 
 
-2008-05-08T09:05:17.000000Z
-0a29d8ed7bf94c2d1f5a113666853563
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
+
+2011-07-23T20:54:59.000000Z
+f33faff374f8b180fb466f67d87be3ba
+2011-07-05T23:45:40.924228Z
+450
+toucansam99@gmail.com
+has-props
 
-package.html
+ContactConstraintPoint.java
 file
 
 
 
 
-2008-04-01T18:57:12.000000Z
-8c79ee6a4a3f286d1dda3db5b100f8e7
-2008-04-01T22:19:05.702039Z
-111
-ewjordan
+2011-07-23T20:54:59.000000Z
+638a94024bf3c3a2f43fd12c3273eaa2
+2011-01-23T21:05:54.521023Z
+434
+toucansam99
+has-props
 
-portversion.txt
+Contact.java
 file
-127
 
 
 
-2008-05-08T08:56:13.000000Z
-cd228e87c6df41b441a3c829af8c8517
-2008-05-08T09:22:56.553330Z
-127
-ewjordan
+
+2011-07-23T20:54:59.000000Z
+62743a6515b1b00c23f35c65290e23ec
+2011-07-20T07:33:05.388254Z
+488
+toucansam99@gmail.com
+has-props
+
+ContactCreator.java
+file
+
+
+
+
+2011-07-23T20:54:59.000000Z
+3e43f1c3d7de57d6fcd61e0565066709
+2011-07-05T23:45:40.924228Z
+450
+toucansam99@gmail.com
+has-props
+
+CircleContact.java
+file
+
+
+
+
+2011-07-23T20:54:59.000000Z
+b84d285ab9a03e1b63015aee33c891e7
+2011-07-05T23:45:40.924228Z
+450
+toucansam99@gmail.com
+has-props
 
