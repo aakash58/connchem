@@ -1,119 +1,114 @@
-/*
- * JBox2D - A Java Port of Erin Catto's Box2D
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
- * Box2D homepage: http://www.gphysics.com
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  * 
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+/**
+ * Created at 4:25:03 AM Jan 15, 2011
  */
 package org.jbox2d.testbed.tests;
 
-import org.jbox2d.collision.CircleDef;
-import org.jbox2d.collision.PolygonDef;
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.joints.GearJoint;
 import org.jbox2d.dynamics.joints.GearJointDef;
 import org.jbox2d.dynamics.joints.PrismaticJoint;
 import org.jbox2d.dynamics.joints.PrismaticJointDef;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
-import org.jbox2d.testbed.AbstractExample;
-import org.jbox2d.testbed.TestbedMain;
+import org.jbox2d.testbed.framework.TestbedSettings;
+import org.jbox2d.testbed.framework.TestbedTest;
 
-import processing.core.PApplet;
-
-public class Gears extends AbstractExample {
-
-    RevoluteJoint m_joint1;
-
-    RevoluteJoint m_joint2;
-
-    PrismaticJoint m_joint3;
-
-    GearJoint m_joint4;
-
-    GearJoint m_joint5;
-
-    public Gears(TestbedMain _parent) {
-        super(_parent);
-    }
-    
-    public String getName() {
-    	return "Gears";
-    }
-
-    @Override
-    public void create() {
-    	Body ground = null;
+/**
+ * @author Daniel Murphy
+ */
+public class Gears extends TestbedTest {
+	
+	RevoluteJoint m_joint1;
+	RevoluteJoint m_joint2;
+	PrismaticJoint m_joint3;
+	GearJoint m_joint4;
+	GearJoint m_joint5;
+	
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest()
+	 */
+	@Override
+	public void initTest() {
+		Body ground = null;
 		{
 			BodyDef bd = new BodyDef();
-			bd.position.set(0.0f, -10.0f);
 			ground = m_world.createBody(bd);
 
-			PolygonDef sd = new PolygonDef();
-			sd.setAsBox(50.0f, 10.0f);
-			ground.createShape(sd);
+			PolygonShape shape = new PolygonShape();
+			shape.setAsEdge(new Vec2(50.0f, 0.0f), new Vec2(-50.0f, 0.0f));
+			ground.createFixture(shape, 0.0f);
 		}
 
 		{
-			CircleDef circle1 = new CircleDef();
-			circle1.radius = 1.0f;
-			circle1.density = 5.0f;
-			
-			CircleDef circle2 = new CircleDef();
-			circle2.radius = 2.0f;
-			circle2.density = 5.0f;
+			CircleShape circle1 = new CircleShape();
+			circle1.m_radius = 1.0f;
 
-			PolygonDef box = new PolygonDef();
+			CircleShape circle2 = new CircleShape();
+			circle2.m_radius = 2.0f;
+			
+			PolygonShape box = new PolygonShape();
 			box.setAsBox(0.5f, 5.0f);
-			box.density = 5.0f;
 
 			BodyDef bd1 = new BodyDef();
+			bd1.type = BodyType.DYNAMIC;
 			bd1.position.set(-3.0f, 12.0f);
 			Body body1 = m_world.createBody(bd1);
-			body1.createShape(circle1);
-			body1.setMassFromShapes();
+			body1.createFixture(circle1, 5.0f);
 
 			RevoluteJointDef jd1 = new RevoluteJointDef();
-			jd1.body1 = ground;
-			jd1.body2 = body1;
-			jd1.localAnchor1 = ground.getLocalPoint(bd1.position);
-			jd1.localAnchor2 = body1.getLocalPoint(bd1.position);
+			jd1.bodyA = ground;
+			jd1.bodyB = body1;
+			jd1.localAnchorA = ground.getLocalPoint(bd1.position);
+			jd1.localAnchorB = body1.getLocalPoint(bd1.position);
 			jd1.referenceAngle = body1.getAngle() - ground.getAngle();
-			m_joint1 = (RevoluteJoint)(m_world.createJoint(jd1));
+			m_joint1 = (RevoluteJoint)m_world.createJoint(jd1);
 
 			BodyDef bd2 = new BodyDef();
+			bd2.type = BodyType.DYNAMIC;
 			bd2.position.set(0.0f, 12.0f);
 			Body body2 = m_world.createBody(bd2);
-			body2.createShape(circle2);
-			body2.setMassFromShapes();
+			body2.createFixture(circle2, 5.0f);
 
 			RevoluteJointDef jd2 = new RevoluteJointDef();
 			jd2.initialize(ground, body2, bd2.position);
-			m_joint2 = (RevoluteJoint)(m_world.createJoint(jd2));
+			m_joint2 = (RevoluteJoint)m_world.createJoint(jd2);
 
 			BodyDef bd3 = new BodyDef();
+			bd3.type = BodyType.DYNAMIC;
 			bd3.position.set(2.5f, 12.0f);
 			Body body3 = m_world.createBody(bd3);
-			body3.createShape(box);
-			body3.setMassFromShapes();
+			body3.createFixture(box, 5.0f);
 
 			PrismaticJointDef jd3 = new PrismaticJointDef();
 			jd3.initialize(ground, body3, bd3.position, new Vec2(0.0f, 1.0f));
@@ -121,24 +116,50 @@ public class Gears extends AbstractExample {
 			jd3.upperTranslation = 5.0f;
 			jd3.enableLimit = true;
 
-			m_joint3 = (PrismaticJoint)(m_world.createJoint(jd3));
+			m_joint3 = (PrismaticJoint)m_world.createJoint(jd3);
 
 			GearJointDef jd4 = new GearJointDef();
-			jd4.body1 = body1;
-			jd4.body2 = body2;
+			jd4.bodyA = body1;
+			jd4.bodyB = body2;
 			jd4.joint1 = m_joint1;
 			jd4.joint2 = m_joint2;
-			jd4.ratio = circle2.radius / circle1.radius;
-			m_joint4 = (GearJoint)(m_world.createJoint(jd4));
+			jd4.ratio = circle2.m_radius / circle1.m_radius;
+			m_joint4 = (GearJoint)m_world.createJoint(jd4);
 
 			GearJointDef jd5 = new GearJointDef();
-			jd5.body1 = body2;
-			jd5.body2 = body3;
+			jd5.bodyA = body2;
+			jd5.bodyB = body3;
 			jd5.joint1 = m_joint2;
 			jd5.joint2 = m_joint3;
-			jd5.ratio = -1.0f / circle2.radius;
-			m_joint5 = (GearJoint)(m_world.createJoint(jd5));
+			jd5.ratio = -1.0f / circle2.m_radius;
+			m_joint5 = (GearJoint)m_world.createJoint(jd5);
 		}
-    }
+	}
+	
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#step(org.jbox2d.testbed.framework.TestbedSettings)
+	 */
+	@Override
+	public void step(TestbedSettings settings) {
+		super.step(settings);
+		
+		float ratio, value;
+		
+		ratio = m_joint4.getRatio();
+		value = m_joint1.getJointAngle() + ratio * m_joint2.getJointAngle();
+		
+		addTextLine("theta1 + "+ratio+" * theta2 = "+value);
 
+		ratio = m_joint5.getRatio();
+		value = m_joint2.getJointAngle() + ratio * m_joint3.getJointTranslation();
+		addTextLine("theta2 + "+ratio+" * delta = "+value);
+	}
+	
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#getTestName()
+	 */
+	@Override
+	public String getTestName() {
+		return "Gears";
+	}
 }

@@ -1,245 +1,270 @@
-/*
- * JBox2D - A Java Port of Erin Catto's Box2D
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
- * Box2D homepage: http://www.box2d.org
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  * 
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- */
-
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 package org.jbox2d.dynamics;
 
-import java.util.List;
-
-import org.jbox2d.collision.Collision;
-import org.jbox2d.collision.ContactID;
-import org.jbox2d.collision.Manifold;
-import org.jbox2d.collision.ManifoldPoint;
-import org.jbox2d.collision.PairCallback;
-import org.jbox2d.collision.Shape;
-import org.jbox2d.common.Vec2;
-import org.jbox2d.common.XForm;
+import org.jbox2d.callbacks.ContactFilter;
+import org.jbox2d.callbacks.ContactListener;
+import org.jbox2d.callbacks.PairCallback;
+import org.jbox2d.collision.broadphase.BroadPhase;
+import org.jbox2d.collision.broadphase.DynamicTreeNode;
 import org.jbox2d.dynamics.contacts.Contact;
-import org.jbox2d.dynamics.contacts.ContactPoint;
-import org.jbox2d.dynamics.contacts.NullContact;
+import org.jbox2d.dynamics.contacts.ContactEdge;
 
-
-//Updated to rev 56->104->142 of b2ContactManager.cpp/.h
-
-/** Delegate of World - for internal use. */
-public class ContactManager extends PairCallback {
-    World m_world;
-
-    // This lets us provide broadphase proxy pair user data for
-    // contacts that shouldn't exist.
-    NullContact m_nullContact;
-
-    boolean m_destroyImmediate;
-
-    public ContactManager() {
-        m_nullContact = new NullContact();
-        m_destroyImmediate = false;
-    }
-
-    public Object pairAdded(Object proxyUserData1, Object proxyUserData2) {
-        Shape shape1 = (Shape) proxyUserData1;
-        Shape shape2 = (Shape) proxyUserData2;
-
-        Body body1 = shape1.getBody();
-        Body body2 = shape2.getBody();
-
-        if (body1.isStatic() && body2.isStatic()) {
-            return m_nullContact;
-        }
-
-        if (shape1.getBody() == shape2.getBody()) {
-            return m_nullContact;
-        }
-        
-        if (body2.isConnected(body1)) {
-    		return m_nullContact;
-    	}
-        
-        if (m_world.m_contactFilter != null && m_world.m_contactFilter.shouldCollide(shape1, shape2) == false){
-            return m_nullContact;
-        }
-
-     // Call the factory.
-    	Contact c = Contact.createContact(shape1, shape2);
-
-    	if (c == null) {
-    		return m_nullContact;
-    	}
-
-    	// Contact creation may swap shapes.
-    	shape1 = c.getShape1();
-    	shape2 = c.getShape2();
-    	body1 = shape1.getBody();
-    	body2 = shape2.getBody();
-
-    	// Insert into the world.
-    	c.m_prev = null;
-    	c.m_next = m_world.m_contactList;
-    	if (m_world.m_contactList != null) {
-    		m_world.m_contactList.m_prev = c;
-    	}
-    	m_world.m_contactList = c;
-
-    	// Connect to island graph.
-
-    	// Connect to body 1
-    	c.m_node1.contact = c;
-    	c.m_node1.other = body2;
-
-    	c.m_node1.prev = null;
-    	c.m_node1.next = body1.m_contactList;
-    	if (body1.m_contactList != null) {
-    		body1.m_contactList.prev = c.m_node1;
-    	}
-    	body1.m_contactList = c.m_node1;
-
-    	// Connect to body 2
-    	c.m_node2.contact = c;
-    	c.m_node2.other = body1;
-
-    	c.m_node2.prev = null;
-    	c.m_node2.next = body2.m_contactList;
-    	if (body2.m_contactList != null) {
-    		body2.m_contactList.prev = c.m_node2;
-    	}
-    	body2.m_contactList = c.m_node2;
-
-    	++m_world.m_contactCount;
-    	return c;
-    }
-
- // This is a callback from the broadphase when two AABB proxies cease
- // to overlap. We retire the b2Contact.
-    public void pairRemoved(Object proxyUserData1, Object proxyUserData2,
-            Object pairUserData) {
-    	//B2_NOT_USED(proxyUserData1);
-    	//B2_NOT_USED(proxyUserData2);
-
-    	if (pairUserData == null) {
-    		return;
-    	}
-
-    	Contact c = (Contact)pairUserData;
-    	if (c == m_nullContact) {
-    		return;
-    	}
-
-    	// An attached body is being destroyed, we must destroy this contact
-    	// immediately to avoid orphaned shape pointers.
-    	destroy(c);
-    }
-
-    public void destroy(Contact c) {
-    	Shape shape1 = c.getShape1();
-    	Shape shape2 = c.getShape2();
-
-    	// Inform the user that this contact is ending.
-    	int manifoldCount = c.getManifoldCount();
-    	if (manifoldCount > 0 && (m_world.m_contactListener != null))
-    	{
-    		Body b1 = shape1.getBody();
-    		Body b2 = shape2.getBody();
-    		List<Manifold> manifolds = c.getManifolds();
-    		ContactPoint cp = new ContactPoint();
-    		cp.shape1 = c.getShape1();
-    		cp.shape2 = c.getShape2();
-    		cp.friction = c.m_friction;
-    		cp.restitution = c.m_restitution;
-    		for (int i = 0; i < manifoldCount; ++i)
-    		{
-    			Manifold manifold = manifolds.get(i);
-    			cp.normal.set(manifold.normal);
-    			for (int j = 0; j < manifold.pointCount; ++j) {
-
-    				ManifoldPoint mp = manifold.points[j];
-    				cp.position = b1.getWorldPoint(mp.localPoint1);
-    				Vec2 v1 = b1.getLinearVelocityFromLocalPoint(mp.localPoint1);
-    				Vec2 v2 = b2.getLinearVelocityFromLocalPoint(mp.localPoint2);
-    				cp.velocity = v2.sub(v1);
-    				cp.separation = mp.separation;
-    				cp.id = new ContactID(mp.id);
-    				m_world.m_contactListener.remove(cp);
-    			}
-    		}
-    	}
-
-    	// Remove from the world.
-    	if (c.m_prev != null) {
-    		c.m_prev.m_next = c.m_next;
-    	}
-
-    	if (c.m_next != null) {
-    		c.m_next.m_prev = c.m_prev;
-    	}
-
-    	if (c == m_world.m_contactList) {
-    		m_world.m_contactList = c.m_next;
-    	}
-
-    	Body body1 = shape1.getBody();
-    	Body body2 = shape2.getBody();
-
-    	// Remove from body 1
-    	if (c.m_node1.prev != null) {
-    		c.m_node1.prev.next = c.m_node1.next;
-    	}
-
-    	if (c.m_node1.next != null) {
-    		c.m_node1.next.prev = c.m_node1.prev;
-    	}
-
-    	if (c.m_node1 == body1.m_contactList) {
-    		body1.m_contactList = c.m_node1.next;
-    	}
-
-    	// Remove from body 2
-    	if (c.m_node2.prev != null) {
-    		c.m_node2.prev.next = c.m_node2.next;
-    	}
-
-    	if (c.m_node2.next != null) {
-    		c.m_node2.next.prev = c.m_node2.prev;
-    	}
-
-    	if (c.m_node2 == body2.m_contactList) {
-    		body2.m_contactList = c.m_node2.next;
-    	}
-
-    	// Call the factory.
-    	Contact.destroy(c);
-    	--m_world.m_contactCount;
-    }
-
-    public void collide() {
-    	// Update awake contacts.
-    	for (Contact c = m_world.m_contactList; c != null; c = c.getNext()) {
-    		Body body1 = c.getShape1().getBody();
-    		Body body2 = c.getShape2().getBody();
-    		if (body1.isSleeping() && body2.isSleeping()) {
-    			continue;
-    		}
-
-    		c.update(m_world.m_contactListener);
-
-    	}
-    }
+// updated to rev 100
+/**
+ * Delegate of World.
+ * 
+ * @author Daniel Murphy
+ */
+public class ContactManager implements PairCallback {
+	
+	public BroadPhase m_broadPhase;
+	public Contact m_contactList;
+	public int m_contactCount;
+	public ContactFilter m_contactFilter;
+	public ContactListener m_contactListener;
+	
+	private final World pool;
+	
+	public ContactManager(World argPool) {
+		m_contactList = null;
+		m_contactCount = 0;
+		m_contactFilter = new ContactFilter();
+		m_contactListener = null;
+		m_broadPhase = new BroadPhase();
+		pool = argPool;
+	}
+	
+	/**
+	 * Broad-phase callback.
+	 * 
+	 * @param proxyUserDataA
+	 * @param proxyUserDataB
+	 */
+	public void addPair(Object proxyUserDataA, Object proxyUserDataB) {
+		Fixture fixtureA = (Fixture) proxyUserDataA;
+		Fixture fixtureB = (Fixture) proxyUserDataB;
+		
+		Body bodyA = fixtureA.getBody();
+		Body bodyB = fixtureB.getBody();
+		
+		// Are the fixtures on the same body?
+		if (bodyA == bodyB) {
+			return;
+		}
+		
+		// Does a contact already exist?
+		ContactEdge edge = bodyB.getContactList();
+		while (edge != null) {
+			if (edge.other == bodyA) {
+				Fixture fA = edge.contact.getFixtureA();
+				Fixture fB = edge.contact.getFixtureB();
+				if (fA == fixtureA && fB == fixtureB) {
+					// A contact already exists.
+					return;
+				}
+				
+				if (fA == fixtureB && fB == fixtureA) {
+					// A contact already exists.
+					return;
+				}
+			}
+			
+			edge = edge.next;
+		}
+		
+		// Does a joint override collision? is at least one body dynamic?
+		if (bodyB.shouldCollide(bodyA) == false) {
+			return;
+		}
+		
+		// Check user filtering.
+		if (m_contactFilter != null && m_contactFilter.shouldCollide(fixtureA, fixtureB) == false) {
+			return;
+		}
+		
+		// Call the factory.
+		Contact c = pool.popContact(fixtureA, fixtureB);
+		
+		// Contact creation may swap fixtures.
+		fixtureA = c.getFixtureA();
+		fixtureB = c.getFixtureB();
+		bodyA = fixtureA.getBody();
+		bodyB = fixtureB.getBody();
+		
+		// Insert into the world.
+		c.m_prev = null;
+		c.m_next = m_contactList;
+		if (m_contactList != null) {
+			m_contactList.m_prev = c;
+		}
+		m_contactList = c;
+		
+		// Connect to island graph.
+		
+		// Connect to body A
+		c.m_nodeA.contact = c;
+		c.m_nodeA.other = bodyB;
+		
+		c.m_nodeA.prev = null;
+		c.m_nodeA.next = bodyA.m_contactList;
+		if (bodyA.m_contactList != null) {
+			bodyA.m_contactList.prev = c.m_nodeA;
+		}
+		bodyA.m_contactList = c.m_nodeA;
+		
+		// Connect to body B
+		c.m_nodeB.contact = c;
+		c.m_nodeB.other = bodyA;
+		
+		c.m_nodeB.prev = null;
+		c.m_nodeB.next = bodyB.m_contactList;
+		if (bodyB.m_contactList != null) {
+			bodyB.m_contactList.prev = c.m_nodeB;
+		}
+		bodyB.m_contactList = c.m_nodeB;
+		
+		++m_contactCount;
+	}
+	
+	public void findNewContacts() {
+		m_broadPhase.updatePairs(this);
+	}
+	
+	public void destroy(Contact c) {
+		Fixture fixtureA = c.getFixtureA();
+		Fixture fixtureB = c.getFixtureB();
+		Body bodyA = fixtureA.getBody();
+		Body bodyB = fixtureB.getBody();
+		
+		if (m_contactListener != null && c.isTouching()) {
+			m_contactListener.endContact(c);
+		}
+		
+		// Remove from the world.
+		if (c.m_prev != null) {
+			c.m_prev.m_next = c.m_next;
+		}
+		
+		if (c.m_next != null) {
+			c.m_next.m_prev = c.m_prev;
+		}
+		
+		if (c == m_contactList) {
+			m_contactList = c.m_next;
+		}
+		
+		// Remove from body 1
+		if (c.m_nodeA.prev != null) {
+			c.m_nodeA.prev.next = c.m_nodeA.next;
+		}
+		
+		if (c.m_nodeA.next != null) {
+			c.m_nodeA.next.prev = c.m_nodeA.prev;
+		}
+		
+		if (c.m_nodeA == bodyA.m_contactList) {
+			bodyA.m_contactList = c.m_nodeA.next;
+		}
+		
+		// Remove from body 2
+		if (c.m_nodeB.prev != null) {
+			c.m_nodeB.prev.next = c.m_nodeB.next;
+		}
+		
+		if (c.m_nodeB.next != null) {
+			c.m_nodeB.next.prev = c.m_nodeB.prev;
+		}
+		
+		if (c.m_nodeB == bodyB.m_contactList) {
+			bodyB.m_contactList = c.m_nodeB.next;
+		}
+		
+		// Call the factory.
+		pool.pushContact(c);
+		--m_contactCount;
+	}
+	
+	/**
+	 * This is the top level collision call for the time step. Here
+	 * all the narrow phase collision is processed for the world
+	 * contact list.
+	 */
+	public void collide() {
+		// Update awake contacts.
+		Contact c = m_contactList;
+		while (c != null) {
+			Fixture fixtureA = c.getFixtureA();
+			Fixture fixtureB = c.getFixtureB();
+			Body bodyA = fixtureA.getBody();
+			Body bodyB = fixtureB.getBody();
+			
+			if (bodyA.isAwake() == false && bodyB.isAwake() == false) {
+				c = c.getNext();
+				continue;
+			}
+			
+			// is this contact flagged for filtering?
+			if ((c.m_flags & Contact.FILTER_FLAG) == Contact.FILTER_FLAG) {
+				// Should these bodies collide?
+				if (bodyB.shouldCollide(bodyA) == false) {
+					Contact cNuke = c;
+					c = cNuke.getNext();
+					destroy(cNuke);
+					continue;
+				}
+				
+				// Check user filtering.
+				if (m_contactFilter != null && m_contactFilter.shouldCollide(fixtureA, fixtureB) == false) {
+					Contact cNuke = c;
+					c = cNuke.getNext();
+					destroy(cNuke);
+					continue;
+				}
+				
+				// Clear the filtering flag.
+				c.m_flags &= ~Contact.FILTER_FLAG;
+			}
+			
+			DynamicTreeNode proxyIdA = fixtureA.m_proxy;
+			DynamicTreeNode proxyIdB = fixtureB.m_proxy;
+			boolean overlap = m_broadPhase.testOverlap(proxyIdA, proxyIdB);
+			
+			// Here we destroy contacts that cease to overlap in the broad-phase.
+			if (overlap == false) {
+				Contact cNuke = c;
+				c = cNuke.getNext();
+				destroy(cNuke);
+				continue;
+			}
+			
+			// The contact persists.
+			c.update(m_contactListener);
+			c = c.getNext();
+		}
+	}
 }

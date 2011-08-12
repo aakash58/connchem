@@ -53,7 +53,7 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		scroll.setBorder(null);
 		scroll.setMinimumSize(new Dimension(240, 40));
 
-		scroll.setMaximumSize(new Dimension(340,650));
+		scroll.setMaximumSize(new Dimension(340,690));
 		super.add(scroll, BorderLayout.CENTER);
 		//		super.add(scroll);
 	}
@@ -73,11 +73,11 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		this.setInvoker(invoker);
 		if (sizescroll != 0) {
 			//Set popup size only if scrollbar is visible
-			this.setPopupSize(new Dimension(scroll.getPreferredSize().width + 20, scroll.getMaximumSize().height - 20));
+			this.setPopupSize(new Dimension(scroll.getPreferredSize().width + 20, scroll.getMaximumSize().height - 26));
 		}
 		//        this.setMaximumSize(scroll.getMaximumSize());
 		Point invokerOrigin = invoker.getLocationOnScreen();
-		this.setLocation((int) invokerOrigin.getX() + x, (int) invokerOrigin.getY() + y);
+		this.setLocation((int) invokerOrigin.getX() + x, (int) (invokerOrigin.getY() + y));
 		this.setVisible(true);
 		
 		

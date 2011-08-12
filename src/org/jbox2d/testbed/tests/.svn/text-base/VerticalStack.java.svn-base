@@ -1,108 +1,161 @@
-/*
- * JBox2D - A Java Port of Erin Catto's Box2D
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
- * Box2D homepage: http://www.gphysics.com
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  * 
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+/**
+ * Created at 4:56:29 AM Jan 14, 2011
  */
 package org.jbox2d.testbed.tests;
 
-import org.jbox2d.collision.PolygonDef;
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.World;
-import org.jbox2d.testbed.AbstractExample;
-import org.jbox2d.testbed.TestbedMain;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.testbed.framework.TestbedSettings;
+import org.jbox2d.testbed.framework.TestbedTest;
 
-import processing.core.PApplet;
-
-
-
-public class VerticalStack extends AbstractExample {
-	private boolean firstTime = true;
+/**
+ * @author Daniel Murphy
+ */
+public class VerticalStack extends TestbedTest {
 	
-    public VerticalStack(TestbedMain parent) {
-        super(parent);
-    }
-    
-    public String getName() {
-    	return "Vertical Stack";
-    }
-
-    public void create() {
-    	if (firstTime) {
-			setCamera(0f, 10f, 10f);
-			firstTime = false;
-		}
-    	
-    	{
-			PolygonDef sd = new PolygonDef();
-			sd.setAsBox(50.0f, 10.0f, new Vec2(0.0f, -10.0f), 0.0f);
-
-			BodyDef bd = new BodyDef();
-			bd.position.set(0.0f, 0.0f);
-			Body ground = m_world.createBody(bd);
-			ground.createShape(sd);
-
-			sd.setAsBox(0.1f, 10.0f, new Vec2(20.0f, 10.0f), 0.0f);
-			ground.createShape(sd);
-		}
-
-		float[] xs = {0.0f, -10.0f, -5.0f, 5.0f, 10.0f};
-
-		for (int j = 0; j < xs.length; ++j)
+	public static final int e_columnCount = 5;
+	public static final int e_rowCount = 16;
+	
+	Body m_bullet;
+	Body m_bodies[] = new Body[e_rowCount * e_columnCount];
+	int m_indices[] = new int[e_rowCount * e_columnCount];
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest()
+	 */
+	@Override
+	public void initTest() {
 		{
-			PolygonDef sd = new PolygonDef();
-			sd.setAsBox(0.5f, 0.5f);
-			sd.density = 1.0f;
-			sd.friction = 0.3f;
+			BodyDef bd = new BodyDef();
+			Body ground = m_world.createBody(bd);
 
-			for (int i = 0; i < 12; ++i)
+			PolygonShape shape = new PolygonShape();
+			shape.setAsEdge(new Vec2(-40.0f, 0.0f), new Vec2(40.0f, 0.0f));
+			ground.createFixture(shape, 0.0f);
+
+			shape.setAsEdge(new Vec2(20.0f, 0.0f), new Vec2(20.0f, 20.0f));
+			ground.createFixture(shape, 0.0f);
+		}
+
+		float xs[] = new float[]{0.0f, -10.0f, -5.0f, 5.0f, 10.0f};
+
+		for (int j = 0; j < e_columnCount; ++j)
+		{
+			PolygonShape shape = new PolygonShape();
+			shape.setAsBox(0.5f, 0.5f);
+
+			FixtureDef fd = new FixtureDef();
+			fd.shape = shape;
+			fd.density = 1.0f;
+			fd.friction = 0.3f;
+
+			for (int i = 0; i < e_rowCount; ++i)
 			{
 				BodyDef bd = new BodyDef();
+				bd.type = BodyType.DYNAMIC;
 
-				// For this test we are using continuous physics for all boxes.
-				// This is a stress test, you normally wouldn't do this for
-				// performance reasons.
-				bd.isBullet = true;
-				bd.allowSleep = true;
+				int n = j * e_rowCount + i;
+				assert(n < e_rowCount * e_columnCount);
+				m_indices[n] = n;
+				bd.userData = m_indices[n];
 
-				//float32 x = b2Random(-0.1f, 0.1f);
-				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;
-				bd.position.set(xs[j]+parent.random(-.05f,.05f), 0.752f + 1.54f * i);
-				//bd.position.Set(xs[j], 2.51f + 4.02f * i);
+				float x = 0.0f;
+				//float x = RandomFloat(-0.02f, 0.02f);
+				//float x = i % 2 == 0 ? -0.025f : 0.025f;
+				bd.position.set(xs[j] + x, 0.752f + 1.54f * i);
 				Body body = m_world.createBody(bd);
 
-				body.createShape(sd);
-				body.setMassFromShapes();
+				m_bodies[n] = body;
+
+				body.createFixture(fd);
 			}
 		}
-    }
-    
-    public String getExampleInstructions() {
-    	return "Press , to shoot sideways bullet\n";
-    }
-    
-    public void postStep() {
-    	if (newKeyDown[',']) {
-    		launchBomb(new Vec2(-40.0f,parent.random(1.0f,10.0f)),new Vec2(200.0f,parent.random(-5.0f,5.0f)));
-    	}
-    }
+
+		m_bullet = null;
+	}
+	
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#keyPressed(char, int)
+	 */
+	@Override
+	public void keyPressed(char argKeyChar, int argKeyCode) {
+		switch (argKeyChar)
+		{
+		case ',':
+			if (m_bullet != null)
+			{
+				m_world.destroyBody(m_bullet);
+				m_bullet = null;
+			}
+
+			{
+				CircleShape shape = new CircleShape();
+				shape.m_radius = 0.25f;
+
+				FixtureDef fd = new FixtureDef();
+				fd.shape = shape;
+				fd.density = 20.0f;
+				fd.restitution = 0.05f;
+
+				BodyDef bd = new BodyDef();
+				bd.type = BodyType.DYNAMIC;
+				bd.bullet = true;
+				bd.position.set(-31.0f, 5.0f);
+
+				m_bullet = m_world.createBody(bd);
+				m_bullet.createFixture(fd);
+
+				m_bullet.setLinearVelocity(new Vec2(400.0f, 0.0f));
+			}
+			break;
+		}
+	}
+	
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#step(org.jbox2d.testbed.framework.TestbedSettings)
+	 */
+	@Override
+	public void step(TestbedSettings settings) {
+		super.step(settings);
+		addTextLine("Press ',' to launch bullet.");
+	}
+
+	/**
+	 * @see org.jbox2d.testbed.framework.TestbedTest#getTestName()
+	 */
+	@Override
+	public String getTestName() {
+		return "Vertical Stack";
+	}
 
 }

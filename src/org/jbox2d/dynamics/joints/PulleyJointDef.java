@@ -1,96 +1,125 @@
-/*
- * JBox2D - A Java Port of Erin Catto's Box2D
+/*******************************************************************************
+ * Copyright (c) 2011, Daniel Murphy
+ * All rights reserved.
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
- * Box2D homepage: http://www.box2d.org
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  * 
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- * 
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- * 
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DANIEL MURPHY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+/**
+ * Created at 12:11:41 PM Jan 23, 2011
  */
-
 package org.jbox2d.dynamics.joints;
 
 import org.jbox2d.common.Settings;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
-// Updated to rev 130 of b2PulleyJoint.cpp/.h
-
+/**
+ * Pulley joint definition. This requires two ground anchors,
+ * two dynamic body anchor points, max lengths for each side,
+ * and a pulley ratio.
+ * 
+ * @author Daniel Murphy
+ */
 public class PulleyJointDef extends JointDef {
-
+	
+	/**
+	 * The first ground anchor in world coordinates. This point never moves.
+	 */
+	public Vec2 groundAnchorA;
+	
+	/**
+	 * The second ground anchor in world coordinates. This point never moves.
+	 */
+	public Vec2 groundAnchorB;
+	
+	/**
+	 * The local anchor point relative to bodyA's origin.
+	 */
+	public Vec2 localAnchorA;
+	
+	/**
+	 * The local anchor point relative to bodyB's origin.
+	 */
+	public Vec2 localAnchorB;
+	
+	/**
+	 * The a reference length for the segment attached to bodyA.
+	 */
+	public float lengthA;
+	
+	/**
+	 * The maximum length of the segment attached to bodyA.
+	 */
+	public float maxLengthA;
+	
+	/**
+	 * The a reference length for the segment attached to bodyB.
+	 */
+	public float lengthB;
+	
+	/**
+	 * The maximum length of the segment attached to bodyB.
+	 */
+	public float maxLengthB;
+	
+	/**
+	 * The pulley ratio, used to simulate a block-and-tackle.
+	 */
+	public float ratio;
+	
 	public PulleyJointDef() {
-		type = JointType.PULLEY_JOINT;
-		groundAnchor1 = new Vec2(-1.0f, 1.0f);
-		groundAnchor2 = new Vec2(1.0f, 1.0f);
-		localAnchor1 = new Vec2(-1.0f, 0.0f);
-		localAnchor2 = new Vec2(1.0f, 0.0f);
-		length1 = 0.0f;
-		maxLength1 = 0.0f;
-		length2 = 0.0f;
-		maxLength2 = 0.0f;
+		type = JointType.PULLEY;
+		groundAnchorA = new Vec2(-1.0f, 1.0f);
+		groundAnchorB = new Vec2(1.0f, 1.0f);
+		localAnchorA = new Vec2(-1.0f, 0.0f);
+		localAnchorB = new Vec2(1.0f, 0.0f);
+		lengthA = 0.0f;
+		maxLengthA = 0.0f;
+		lengthB = 0.0f;
+		maxLengthB = 0.0f;
 		ratio = 1.0f;
 		collideConnected = true;
 	}
-
-	/// Initialize the bodies, anchors, lengths, max lengths, and ratio using the world anchors.
-	public void initialize(Body b1, Body b2,
-					Vec2 ga1, Vec2 ga2,
-					Vec2 anchor1, Vec2 anchor2,
-					float r){
-		body1 = b1;
-		body2 = b2;
-		groundAnchor1 = ga1;
-		groundAnchor2 = ga2;
-		localAnchor1 = body1.getLocalPoint(anchor1);
-		localAnchor2 = body2.getLocalPoint(anchor2);
-		Vec2 d1 = anchor1.sub(ga1);
-		length1 = d1.length();
-		Vec2 d2 = anchor2.sub(ga2);
-		length2 = d2.length();
-		ratio = r;
-		assert(ratio > Settings.EPSILON);
-		float C = length1 + ratio * length2;
-		maxLength1 = C - ratio * PulleyJoint.MIN_PULLEY_LENGTH;
-		maxLength2 = (C - PulleyJoint.MIN_PULLEY_LENGTH) / ratio;
-	}
 	
-	/// The first ground anchor in world coordinates. This point never moves.
-	public Vec2 groundAnchor1;
-
-	/// The second ground anchor in world coordinates. This point never moves.
-	public Vec2 groundAnchor2;
-
-	/// The local anchor point relative to body1's origin.
-	public Vec2 localAnchor1;
-
-	/// The local anchor point relative to body2's origin.
-	public Vec2 localAnchor2;
-
-	/// The a reference length for the segment attached to body1.
-	public float length1;
-
-	/// The maximum length of the segment attached to body1.
-	public float maxLength1;
-
-	/// The a reference length for the segment attached to body2.
-	public float length2;
-
-	/// The maximum length of the segment attached to body2.
-	public float maxLength2;
-
-	/// The pulley ratio, used to simulate a block-and-tackle.
-	public float ratio;
+	/**
+	 * Initialize the bodies, anchors, lengths, max lengths, and ratio using the world
+	 * anchors.
+	 */
+	public void initialize(Body b1, Body b2, Vec2 ga1, Vec2 ga2, Vec2 anchor1, Vec2 anchor2, float r) {
+		bodyA = b1;
+		bodyB = b2;
+		groundAnchorA = ga1;
+		groundAnchorB = ga2;
+		localAnchorA = bodyA.getLocalPoint(anchor1);
+		localAnchorB = bodyB.getLocalPoint(anchor2);
+		Vec2 d1 = anchor1.sub(ga1);
+		lengthA = d1.length();
+		Vec2 d2 = anchor2.sub(ga2);
+		lengthB = d2.length();
+		ratio = r;
+		assert (ratio > Settings.EPSILON);
+		float C = lengthA + ratio * lengthB;
+		maxLengthA = C - ratio * PulleyJoint.MIN_PULLEY_LENGTH;
+		maxLengthB = (C - PulleyJoint.MIN_PULLEY_LENGTH) / ratio;
+	}
 }

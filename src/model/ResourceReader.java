@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
-import sun.misc.Resource;
 
 public class ResourceReader extends PApplet{
 	private String url;

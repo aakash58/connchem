@@ -14,12 +14,7 @@ public class DBinterface {
 	public static ArrayList dbConnect(String[] args) {
 		ArrayList output = new ArrayList();
 		try {
-			
-
-			
-			
 			Class.forName("org.sqlite.JDBC");
-
 			
 			//Connection conn = DriverManager.getConnection("jdbc:sqlite:Users/tuandang/Desktop/GA/Workspace/ConnChem3/src/model/chemdb");
 			Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
@@ -91,6 +86,59 @@ public class DBinterface {
 		}
 	}
 
+	// TUAN
+	public static int getElementCharge(String elementName_) {
+		if (elementName_.equals("Hydrogen"))
+			return 1;
+		else if (elementName_.equals("Oxygen"))
+			return -2;	
+		else if (elementName_.equals("Sodium"))
+			return 1;	
+		else if (elementName_.equals("Chloride"))
+			return -1;	
+		else if (elementName_.equals("Chlorine"))
+			return -1;	
+		else if (elementName_.equals("Chlorine"))
+			return -1;	
+		else if (elementName_.equals("Silicon"))
+			return 4;	
+		else if (elementName_.equals("Calcium"))
+			return 2;	
+		return 0;  	
+	}
+		
+	
+	public static float[] getMinimumLiquidEnergy(String elementName_) {
+		float[] result = new float[2];
+		float min = 0.2f;
+		float range = 0.45f;
+		if (elementName_.equals("Glycerol")){
+			min = 3.5f;
+			range =4;
+		}
+		else if (elementName_.equals("Pentane")){
+			min = 0f;
+			range =0.15f;
+		}
+		else if (elementName_.equals("Acetic-Acid")){
+			min = 2f;
+			range =0.5f;
+		}
+		result[0]=min;
+		result[1]=range;
+		return result;  	
+	}
+	public static float getMinimumGasEnergy(String elementName_) {
+		float min = 3.5f;
+		if (elementName_.equals("Acetic-Acid")){
+			min = 17f;
+		}
+		return min;  	
+	}
+	
+	
+	//********************************************
+	
 	public static Float getElementRadiusAtomic(String elementName_) {
 		String[] args = new String[2];
 		args[0] = "SELECT radiusAtomic FROM elements WHERE name = \"" + elementName_ + "\"";
@@ -269,7 +317,6 @@ public class DBinterface {
 	}
 
 	public static Boolean getCompoundPolarity(String compoundName_) {
-
 		String[] args = new String[2];
 		args[0] = "SELECT polarity FROM compounds WHERE name = \"" + compoundName_ + "\"";
 		args[1] = "polarity";
