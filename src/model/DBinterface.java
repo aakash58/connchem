@@ -17,7 +17,7 @@ public class DBinterface {
 			Class.forName("org.sqlite.JDBC");
 			
 			//Connection conn = DriverManager.getConnection("jdbc:sqlite:Users/tuandang/Desktop/GA/Workspace/ConnChem3/src/model/chemdb");
-			Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+			Connection conn = DriverManager.getConnection("jdbc:sqlite:chemdb");
 			
 			Statement stat = conn.createStatement();
 
@@ -33,8 +33,6 @@ public class DBinterface {
 			System.out.println(e);
 		}
 		return output;
-
-
 	}
 
 	public static ArrayList getAllCompoundNames(String order_) {
@@ -103,7 +101,9 @@ public class DBinterface {
 		else if (elementName_.equals("Silicon"))
 			return 4;	
 		else if (elementName_.equals("Calcium"))
-			return 2;	
+			return 2;
+		else if (elementName_.equals("Potassium"))
+			return 1;	
 		return 0;  	
 	}
 		
@@ -117,11 +117,15 @@ public class DBinterface {
 			range =4;
 		}
 		else if (elementName_.equals("Pentane")){
-			min = 0f;
-			range =0.15f;
+			min = 0.035f;
+			range =0.0f;
 		}
 		else if (elementName_.equals("Acetic-Acid")){
 			min = 2f;
+			range =0.5f;
+		}
+		else if (elementName_.equals("Mercury")){
+			min = 0.5f;
 			range =0.5f;
 		}
 		result[0]=min;
@@ -129,9 +133,12 @@ public class DBinterface {
 		return result;  	
 	}
 	public static float getMinimumGasEnergy(String elementName_) {
-		float min = 3.5f;
+		float min = 3f;
 		if (elementName_.equals("Acetic-Acid")){
 			min = 17f;
+		}
+		else if (elementName_.equals("Pentane")){
+			min = 0.7f;
 		}
 		return min;  	
 	}

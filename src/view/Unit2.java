@@ -17,9 +17,9 @@ import static view.P5Canvas.*;
 
 public class Unit2 {
 	public static int num_total =0;
-	public static int num_remain =0;
 	public static int num_gone =0;
 	public static int numWater =0;
+	public static float massDissolved=0;
 	public static int water100mL =25;
 	public static int mToMass =10;
 	
@@ -46,10 +46,28 @@ public class Unit2 {
 			angle2 = 0;
 			molecules.add(new Molecule(x1, y1,ion1,box2d_, parent_,angle1));
 			molecules.add(new Molecule(x2, y2,ion2,box2d_, parent_,angle2));
+			int index1 = molecules.size()-2;
+			int index2 = molecules.size()-1;
+			Molecule m1 = molecules.get(index1);
+			Molecule m2 = molecules.get(index2);
+			joint2Ions(index1, index2,m1,m2);
 		}
 	}
 	
-	public static void addSiliconDioxide(String compoundName_, int count, PBox2D box2d_, P5Canvas parent_) {
+	public static void joint2Ions(int index1, int index2, Molecule m1, Molecule m2) { // draw background
+		DistanceJointDef djd = new DistanceJointDef();
+		djd.bodyA = m1.body;
+		djd.bodyB = m2.body;
+		djd.length =PBox2D.scalarPixelsToWorld(2*Molecule.clRadius);
+		djd.frequencyHz = 10.0f;
+		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		m1.compoundJ = index2;
+		m2.compoundJ = index1;
+		m1.compoundJoints = dj;
+		m2.compoundJoints = dj;
+	}
+	
+	public static void addSiO2(String compoundName_, int count, PBox2D box2d_, P5Canvas parent_) {
 		int numRow = (int) (Math.ceil(count/4)+1);
 		int numCol = count/numRow;
 			Vec2 size1 = Molecule.getShapeSize(compoundName_, parent_);
@@ -130,7 +148,7 @@ public class Unit2 {
 	
 	
 	
-	public static void addSodiumBicarbonate(String compoundName_, int count, PBox2D box2d_, P5Canvas parent_) {
+	public static void addNaHCO3(String compoundName_, int count, PBox2D box2d_, P5Canvas parent_) {
 		String ion1 = "Bicarbonate";
 		String ion2 = "Sodium-Ion";
 		Vec2 size1 = Molecule.getShapeSize(ion1, parent_);
@@ -147,7 +165,6 @@ public class Unit2 {
 			molecules.add(new Molecule(x1, y1,ion1,box2d_, parent_,angle1));
 			molecules.add(new Molecule(x2, y2,ion2,box2d_, parent_,angle2));
 			
-			
 			int index1 = molecules.size()-2;
 			int index2 = molecules.size()-1;
 			Molecule m1 = molecules.get(index1);
@@ -162,6 +179,7 @@ public class Unit2 {
 		djd.bodyB = m2.body;
 		//djd.initialize(m1.body, m2.body, new Vec2(0,0), new Vec2(0,0));
 		djd.length =PBox2D.scalarPixelsToWorld(Molecule.oRadius +34);
+		
 		//djd.dampingRatio = 0.5f;
 		
 		djd.frequencyHz = 10.0f;
@@ -176,46 +194,18 @@ public class Unit2 {
 		m2.compoundJoints2 = pj;
 	}
 	
-	public static void computeNaClPartner(int index, Molecule mIndex) { // draw background
-		Vec2 locIndex = mIndex.getElementLocation(0);
-		for (int i = 0; i < molecules.size(); i++) {
-			Molecule m = molecules.get(i);
-			if (!m.getName().equals("Chlorine-Ion") )
-				continue;
-			Vec2 loc = m.getElementLocation(0);
-			if(loc==null || locIndex==null) continue;
-			float x = locIndex.x-loc.x;
-			float y = locIndex.y-loc.y;
-		    float dis = x*x +y*y;
-		    float dif =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)) - Molecule.clRadius*2);
-		
-		    if (dif<5){
-		    	mIndex.NaClPartner = i;
-		    	m.NaClPartner = index;
-		    }
-
-		}
-	}	
-	
-	public static void computeForceSiliconDioxide(int index, Molecule mIndex) { // draw background
-		float xMul = 1.4f;	
-		for (int i=0; i<mIndex.getNumElement();i++){
-			mIndex.faInternalX[i]=0;
-			mIndex.faInternalY[i]=0;
-			mIndex.frInternalX[i]=0;
-			mIndex.frInternalY[i]=0;
-			mIndex.faExternalX[i]=0;
-			mIndex.faExternalY[i]=0;
-			mIndex.frExternalX[i]=0;
-			mIndex.frExternalY[i]=0;
-		}
+	public static void computeForceSiO2(int index, Molecule mIndex) { // draw background
 		for (int e = 0; e < mIndex.getNumElement(); e++) {
 			int indexCharge = mIndex.elementCharges.get(e);
 			Vec2 locIndex = mIndex.getElementLocation(e);
+			mIndex.sumForceX[e]=0;
+			mIndex.sumForceY[e]=0;
 			for (int i = 0; i < molecules.size(); i++) {
 				if (i==index)
 					continue;
 				Molecule m = molecules.get(i);
+				if (m.getName().equals("Water")) continue;
+				
 				float forceX;
 				float forceY;
 				for (int e2 = 0; e2 < m.getNumElement(); e2++) {
@@ -224,53 +214,18 @@ public class Unit2 {
 					float x = locIndex.x-loc.x;
 					float y = locIndex.y-loc.y;
 				    float dis = x*x +y*y;
-					Vec2 normV = normalizeForce(new Vec2(x,y));
-					float fTemp = mIndex.freezingTem;
-					float bTemp = mIndex.boilingTem;
-					float	gravityY = (bTemp-temp)/(bTemp-fTemp);
-					float	gravityX = gravityY*xMul;
-					forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*1000;
-					forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*1000;
-					
-					
-					if (!mIndex.getName().equals("Water") && m.getName().equals("Water")){
-						if (m.elementNames.get(e2).equals("Hydrogen")){
-							float r = temp/100f;
-							forceX*=0.2*r;
-							forceY*=0.2*r;
-						}
-						else if (m.elementNames.get(e2).equals("Oxygen")){
-							float r = temp/100f;
-							forceX*=0.4*r;
-							forceY*=0.4*r;
-						}
-						if (temp>=100){
-							forceX=0;
-							forceY=0;
-						}
-					}
+					forceX =  (float) ((x/Math.pow(dis,1.5))*10);
+					forceY =  (float) ((y/Math.pow(dis,1.5))*10);
 					
 					int charge = m.elementCharges.get(e2);
-					int mulCharge = charge*indexCharge;
-					if (mulCharge<0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.faExternalX[e] +=-mulCharge*forceX;
-							mIndex.faExternalY[e] +=-mulCharge*forceY;
-						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.faInternalX[e] +=-mulCharge*forceX;
-							mIndex.faInternalY[e] +=-mulCharge*forceY;
-						}
+					int mul = charge*indexCharge;
+					if (mul<0){
+						mIndex.sumForceX[e] += mul*forceX;
+						mIndex.sumForceY[e] += mul*forceY;
 					}
-					else if (mulCharge>0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.frExternalX[e] +=-mulCharge*forceX*mIndex.chargeRate;
-							mIndex.frExternalY[e] +=-mulCharge*forceY*mIndex.chargeRate;
-						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.frInternalX[e] +=-mulCharge*forceX*mIndex.chargeRate;
-							mIndex.frInternalY[e] +=-mulCharge*forceY*mIndex.chargeRate;
-						}
+					else if (mul>0){
+						mIndex.sumForceX[e] += mul*forceX*mIndex.chargeRate;
+						mIndex.sumForceY[e] += mul*forceY*mIndex.chargeRate;
 					}
 				}
 			}
@@ -279,24 +234,17 @@ public class Unit2 {
 	
 	public static void computeForceGlycerol(int index, Molecule mIndex) { // draw background
 		float xMul = 1.4f;	
-		for (int i=0; i<mIndex.getNumElement();i++){
-			mIndex.faInternalX[i]=0;
-			mIndex.faInternalY[i]=0;
-			mIndex.frInternalX[i]=0;
-			mIndex.frInternalY[i]=0;
-			mIndex.faExternalX[i]=0;
-			mIndex.faExternalY[i]=0;
-			mIndex.frExternalX[i]=0;
-			mIndex.frExternalY[i]=0;
-		}
-		
 		for (int e = 0; e < mIndex.getNumElement(); e++) {
 			int indexCharge = mIndex.elementCharges.get(e);
 			Vec2 locIndex = mIndex.getElementLocation(e);
+			mIndex.sumForceX[e]=0;
+			mIndex.sumForceY[e]=0;
 			for (int i = 0; i < molecules.size(); i++) {
 				if (i==index)
 					continue;
 				Molecule m = molecules.get(i);
+				if (m.getName().equals("Water"))
+					continue;
 				float forceX;
 				float forceY;
 				for (int e2 = 0; e2 < m.getNumElement(); e2++) {
@@ -305,60 +253,21 @@ public class Unit2 {
 					float x = locIndex.x-loc.x;
 					float y = locIndex.y-loc.y;
 				    float dis = x*x +y*y;
-					Vec2 normV = normalizeForce(new Vec2(x,y));
-					float fTemp = mIndex.freezingTem;
-					float bTemp = mIndex.boilingTem;
-					float	gravityY = (bTemp-temp)/(bTemp-fTemp);
-					float	gravityX = gravityY*xMul;
-					forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*5;
-					forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*5;
-					if (temp<fTemp){
+					forceX =  (float) ((x/Math.pow(dis, 1.5))*0.3);
+					forceY =  (float) ((y/Math.pow(dis, 1.5))*0.3);
+					if (temp<mIndex.freezingTem){
 						forceX *=90;
 						forceY *=90;
 					}
-					
-					if (!mIndex.getName().equals("Water") && m.getName().equals("Water")){
-						if (m.elementNames.get(e2).equals("Hydrogen")){
-							float r = temp/100f;
-							forceX*=0.9*r;
-							forceY*=0.9*r;
-						}
-						else if (m.elementNames.get(e2).equals("Oxygen")){
-							float r = temp/100f;
-							forceX*=0.19*r;
-							forceY*=0.19*r;
-						}
-						if (temp>=100){
-							forceX=0;
-							forceY=0;
-						}
-						else if (temp<=0){
-							forceX=-forceX;
-							forceY=-forceY;
-						}
-					}
-					
 					int charge = m.elementCharges.get(e2);
-					int mulCharge = charge*indexCharge;
-					if (mulCharge<0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.faExternalX[e] +=-mulCharge*forceX;
-							mIndex.faExternalY[e] +=-mulCharge*forceY;
-						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.faInternalX[e] +=-mulCharge*forceX;
-							mIndex.faInternalY[e] +=-mulCharge*forceY;
-						}
+					int mul = charge*indexCharge;
+					if (mul<0){
+						mIndex.sumForceX[e] += mul*forceX;
+						mIndex.sumForceY[e] += mul*forceY;
 					}
-					else if (mulCharge>0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.frExternalX[e] +=-mulCharge*forceX*mIndex.chargeRate;
-							mIndex.frExternalY[e] +=-mulCharge*forceY*mIndex.chargeRate;
-						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.frInternalX[e] +=-mulCharge*forceX*mIndex.chargeRate;
-							mIndex.frInternalY[e] +=-mulCharge*forceY*mIndex.chargeRate;
-						}
+					else if (mul>0){
+						mIndex.sumForceX[e] += mul*forceX*mIndex.chargeRate;
+						mIndex.sumForceY[e] += mul*forceY*mIndex.chargeRate;
 					}
 				}
 			}
@@ -366,103 +275,181 @@ public class Unit2 {
 	}
 	
 	public static void computeForceNaCl(int index, Molecule mIndex) { // draw background
-		float xMul = 1.4f;	
-		for (int i=0; i<mIndex.getNumElement();i++){
-			mIndex.faInternalX[i]=0;
-			mIndex.faInternalY[i]=0;
-			mIndex.frInternalX[i]=0;
-			mIndex.frInternalY[i]=0;
-			mIndex.faExternalX[i]=0;
-			mIndex.faExternalY[i]=0;
-			mIndex.frExternalX[i]=0;
-			mIndex.frExternalY[i]=0;
-		}
 		for (int e = 0; e < mIndex.getNumElement(); e++) {
 			int indexCharge = mIndex.elementCharges.get(e);
 			Vec2 locIndex = mIndex.getElementLocation(e);
+			mIndex.sumForceWaterX[e]=0;
+			mIndex.sumForceWaterY[e]=0;
+			mIndex.sumForceX[e]=0;
+			mIndex.sumForceY[e]=0;
 			for (int i = 0; i < molecules.size(); i++) {
 				if (i==index)
 					continue;
 				Molecule m = molecules.get(i);
-				
-				float rate =1f;
-				if (m.isGone) {
-					float r = temp/99f;
-					r = r*0.1f;
-					rate =0.1f-r;
-					if (temp>=100) rate=1;
-				}	
-				else if (mIndex.isGone && !m.getName().equals("Water")) {
-					float r = temp/99f;
-					r = r*0.4f;
-					rate =0.4f-r;
-					if (temp>=100) rate=1;
-					
-				}
-				if (m.getName().equals("Water") && m.waterPartner!=index) {
-					continue;
-				}
-				
 				float forceX;
 				float forceY;
 				for (int e2 = 0; e2 < m.getNumElement(); e2++) {
 					Vec2 loc = m.getElementLocation(e2);
-					if(loc==null || locIndex==null) continue;
 					float x = locIndex.x-loc.x;
 					float y = locIndex.y-loc.y;
-				    float dis = x*x +y*y;
-					Vec2 normV = normalizeForce(new Vec2(x,y));
-					float fTemp = mIndex.freezingTem;
-					float bTemp = mIndex.boilingTem;
-					float	gravityY = (bTemp-temp)/(bTemp-fTemp);
-					float	gravityX = gravityY*xMul;
-					forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*30000;
-					forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*30000;
+					float dis = x*x +y*y;
+					forceX =  (float) ((x/Math.pow(dis,1.5))*40);
+					forceY =  (float) ((y/Math.pow(dis,1.5))*40);
 					
 					int charge = m.elementCharges.get(e2);
-					if (!mIndex.getName().equals("Water") && m.getName().equals("Water")){
-						if (m.elementNames.get(e2).equals("Hydrogen")){
-							float r = temp/100f;
-							forceX*=0.19*4*r;
-							forceY*=0.19*4*r;
+					int mul = charge*indexCharge;
+					if (m.getName().equals("Water")){
+						float r = 0.002f+temp/10000;
+						if (mIndex.compoundJ>=0){
+							forceX *=r;
+							forceY *=r;
 						}
-						else if (m.elementNames.get(e2).equals("Oxygen")){
-							float r = temp/100f;
-							forceX*=0.36*4*r;
-							forceY*=0.36*4*r;
+						else{
+							forceX *=0.10;
+							forceY *=0.10;
 						}
 						if (temp>=100){
 							forceX=0;
 							forceY=0;
 						}
-					}
-					
-					forceX *=rate;
-					forceY *=rate;
-					if (charge*indexCharge<0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.faExternalX[e] +=forceX;
-							mIndex.faExternalY[e] +=forceY;
+						if (mul<0){
+							mIndex.sumForceWaterX[e] += mul*forceX;
+							mIndex.sumForceWaterY[e] += mul*forceY;
 						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.faInternalX[e] +=forceX;
-							mIndex.faInternalY[e] +=forceY;
+						else if (mul>0){
+							mIndex.sumForceWaterX[e] += mul*forceX*mIndex.chargeRate;
+							mIndex.sumForceWaterY[e] += mul*forceY*mIndex.chargeRate;
 						}
 					}
-					else if (charge*indexCharge>0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.frExternalX[e] +=-forceX*mIndex.chargeRate;
-							mIndex.frExternalY[e] +=-forceY*mIndex.chargeRate;
+					else{
+						if (mIndex.compoundJ<0){             //Compute IonDis
+							float dis2 =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)));
+							if (mIndex.ionDis==0)
+								mIndex.ionDis = dis2;
+							else{
+								if (dis2<mIndex.ionDis){
+									mIndex.ionDis =dis2;
+								}
+							}
 						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.frInternalX[e] +=-forceX*mIndex.chargeRate;
-							mIndex.frInternalY[e] +=-forceY*mIndex.chargeRate;
+						
+						if ((m.compoundJ<0 || mIndex.compoundJ<0)&& 0<temp && temp<100){
+							forceX *=0.05f;
+							forceY *=0.05f;
+						}
+						if (num_gone>numGone_atSaturation()
+					    		&&m.compoundJ<0 && mIndex.compoundJ<0
+					    		&&mIndex.getName().equals("Sodium-Ion")
+					    		&&m.getName().equals("Chlorine-Ion")){
+							float dif =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)) - Molecule.clRadius*2);
+						    if (dif<2){
+					    		joint2Ions(index,i,mIndex,m);
+					    		num_gone--;
+					    	}
+					    }
+					    
+						if (mul<0){
+							mIndex.sumForceX[e] += mul*forceX;
+							mIndex.sumForceY[e] += mul*forceY;
+						}
+						else if (mul>0){
+							mIndex.sumForceX[e] += mul*forceX*mIndex.chargeRate;
+							mIndex.sumForceY[e] += mul*forceY*mIndex.chargeRate;
 						}
 					}
 				}
 			}
 		}
 	}
+	
+	public static void computeForceKCl(int index, Molecule mIndex) { 
+		for (int e = 0; e < mIndex.getNumElement(); e++) {
+			int indexCharge = mIndex.elementCharges.get(e);
+			Vec2 locIndex = mIndex.getElementLocation(e);
+			mIndex.sumForceWaterX[e]=0;
+			mIndex.sumForceWaterY[e]=0;
+			mIndex.sumForceX[e]=0;
+			mIndex.sumForceY[e]=0;
+			for (int i = 0; i < molecules.size(); i++) {
+				if (i==index)
+					continue;
+				Molecule m = molecules.get(i);
+				float forceX;
+				float forceY;
+				for (int e2 = 0; e2 < m.getNumElement(); e2++) {
+					Vec2 loc = m.getElementLocation(e2);
+					float x = locIndex.x-loc.x;
+					float y = locIndex.y-loc.y;
+					float dis = x*x +y*y;
+					forceX =  (float) ((x/Math.pow(dis,1.5))*40);
+					forceY =  (float) ((y/Math.pow(dis,1.5))*40);
+					
+					int charge = m.elementCharges.get(e2);
+					int mul = charge*indexCharge;
+					if (m.getName().equals("Water")){
+						float r = 0.002f+temp/10000;
+						if (mIndex.compoundJ>=0){
+							forceX *=r;
+							forceY *=r;
+						}
+						else{
+							forceX *=0.10;
+							forceY *=0.10;
+						}
+						if (temp>=100){
+							forceX=0;
+							forceY=0;
+						}
+						if (mul<0){
+							mIndex.sumForceWaterX[e] += mul*forceX;
+							mIndex.sumForceWaterY[e] += mul*forceY;
+						}
+						else if (mul>0){
+							mIndex.sumForceWaterX[e] += mul*forceX*mIndex.chargeRate;
+							mIndex.sumForceWaterY[e] += mul*forceY*mIndex.chargeRate;
+						}
+					}
+					else{
+						if (mIndex.compoundJ<0){             //Compute IonDis
+							float dis2 =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)));
+							if (mIndex.ionDis==0)
+								mIndex.ionDis = dis2;
+							else{
+								if (dis2<mIndex.ionDis){
+									mIndex.ionDis =dis2;
+								}
+							}
+						}
+						
+						if ((m.compoundJ<0 || mIndex.compoundJ<0)&& 0<temp && temp<100){
+							forceX *=0.05f;
+							forceY *=0.05f;
+						}
+						if (num_gone>numGone_atSaturation()
+					    		&&m.compoundJ<0 && mIndex.compoundJ<0
+					    		&&mIndex.getName().equals("Potassium-Ion")
+					    		&&m.getName().equals("Chlorine-Ion")){
+							float dif =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)) - Molecule.clRadius*2);
+						    if (dif<2){
+					    		joint2Ions(index,i,mIndex,m);
+					    		num_gone--;
+					    	}
+					    }
+					    
+						if (mul<0){
+							mIndex.sumForceX[e] += mul*forceX;
+							mIndex.sumForceY[e] += mul*forceY;
+						}
+						else if (mul>0){
+							mIndex.sumForceX[e] += mul*forceX*mIndex.chargeRate;
+							mIndex.sumForceY[e] += mul*forceY*mIndex.chargeRate;
+						}
+					}
+				}
+			}
+		}
+	}
+
 
 	public static void jointCaCl(int index1, int index2, int index3, Molecule m1, Molecule m2, Molecule m3) { // draw background
 		DistanceJointDef djd = new DistanceJointDef();
@@ -496,9 +483,9 @@ public class Unit2 {
 		
 	
 	public static void computeCaClPartner(int index, Molecule mIndex) { // draw background
-		mIndex.ClPartners[0]=-1;
-		mIndex.ClPartners[1]=-1;
-		
+		int[] ClPartners = new int[2]; 
+		ClPartners[0]=-1;
+		ClPartners[1]=-1;
 		if (temp<=0) return;
 		Vec2 locIndex = mIndex.getElementLocation(0);
 		for (int i = 0; i < molecules.size(); i++) {
@@ -515,20 +502,27 @@ public class Unit2 {
 		    float dis = x*x +y*y;
 		    float dif =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)) - Molecule.clRadius*2);
 		
+		    if (mIndex.compoundJ<0){             //Compute IonDis
+				float dis1 =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)));
+				if (mIndex.ionDis==0)
+					mIndex.ionDis = dis1;
+				else{
+					if (dis1<mIndex.ionDis){
+						mIndex.ionDis =dis1;
+					}
+				}
+			}
 		    //Computer Ca Cl partner to form a compound
 		    if (mIndex.compoundJ<0 && m.compoundJ<0 && dif<10){
-				if (mIndex.ClPartners[0]<0)
-					mIndex.ClPartners[0] = i;
-				else if (mIndex.ClPartners[1]<0)
-					mIndex.ClPartners[1] = i;
+				if (ClPartners[0]<0)
+					ClPartners[0] = i;
+				else if (ClPartners[1]<0)
+					ClPartners[1] = i;
 			}
-		
-		    if (dif<5){
-//		    	isCaClConnected  =true;
-				//Joint CaCl with another CaCl
-				if (mIndex.compoundJ<0 || m.compoundJ<0 
-						|| mIndex.otherJ>=0)
-					continue;
+		    if (dif<3){
+				if (mIndex.compoundJ<0 || m.compoundJ<0 || mIndex.otherJ>=0) continue;
+				
+		    	//Joint CaCl with another CaCl
 				DistanceJointDef djd = new DistanceJointDef();
 				
 				// Connect Na to Cl of another NaCl
@@ -548,174 +542,101 @@ public class Unit2 {
 					anotherClIndex = anotherCl.compoundJ;
 					anotherCl = molecules.get(anotherClIndex);
 				}	
-					anotherCl.CaOtherJ = index;
-					int clIndex1 =  mIndex.compoundJ;
-					Molecule mCl1 = molecules.get(clIndex1);
-					djd.bodyA = mCl1.body;
-					djd.bodyB = anotherCl.body;
-					djd.length =PBox2D.scalarPixelsToWorld((float) (Molecule.clRadius*Math.sqrt(40)));
-					djd.dampingRatio = 0.f;
-					djd.frequencyHz = 1000.0f;
-					dj = (DistanceJoint) PBox2D.world.createJoint(djd);
-					mCl1.otherJ=anotherClIndex;
-					mCl1.otherJoints= dj;
-					
-					int clIndex2 =  molecules.get(mIndex.compoundJ).compoundJ;
-					Molecule mCl2 = molecules.get(clIndex2);
-					djd.bodyA = mCl2.body;
-					djd.bodyB = anotherCl.body;
-					djd.length =PBox2D.scalarPixelsToWorld((float) (Molecule.clRadius*Math.sqrt(40)));
-					djd.dampingRatio = 0.f;
-					djd.frequencyHz = 1000.0f;
-					dj = (DistanceJoint) PBox2D.world.createJoint(djd);
-					mCl2.otherJ=anotherClIndex;
-					mCl2.otherJoints=dj;
+				anotherCl.CaOtherJ = index;
+				int clIndex1 =  mIndex.compoundJ;
+				Molecule mCl1 = molecules.get(clIndex1);
+				djd.bodyA = mCl1.body;
+				djd.bodyB = anotherCl.body;
+				djd.length =PBox2D.scalarPixelsToWorld((float) (Molecule.clRadius*Math.sqrt(40)));
+				djd.dampingRatio = 0.f;
+				djd.frequencyHz = 1000.0f;
+				dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+				mCl1.otherJ=anotherClIndex;
+				mCl1.otherJoints= dj;
+				
+				int clIndex2 =  molecules.get(mIndex.compoundJ).compoundJ;
+				Molecule mCl2 = molecules.get(clIndex2);
+				djd.bodyA = mCl2.body;
+				djd.bodyB = anotherCl.body;
+				djd.length =PBox2D.scalarPixelsToWorld((float) (Molecule.clRadius*Math.sqrt(40)));
+				djd.dampingRatio = 0.f;
+				djd.frequencyHz = 1000.0f;
+				dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+				mCl2.otherJ=anotherClIndex;
+				mCl2.otherJoints=dj;
 			}
 		}
-		int index1 = mIndex.ClPartners[0];
-		int index3 = mIndex.ClPartners[1];
+		int index1 = ClPartners[0];
+		int index3 = ClPartners[1];
 		if (index1>=0 && index3>=0){
 			Molecule m1 = molecules.get(index1);
 			Molecule m3 = molecules.get(index3);
-			
-			if (mIndex.compoundJ<0 && m1.compoundJ<0 && m3.compoundJ<0){
+			if (num_gone>numGone_atSaturation() && mIndex.compoundJ<0 && m1.compoundJ<0 && m3.compoundJ<0){
 				jointCaCl(index1, index, index3, m1, mIndex,m3);
+				num_gone--;
 			}
 		}
 	}	
-	
-	public static boolean isContained(int e, ArrayList<Integer> a) {
-		for (int i =0;i<a.size();i++){
-			if (a.get(i)==e)
-				return true;
-		}
-		return false;
-	}
-	public static int isIntersec(int[] a1, int[] a2) {
-		for (int i =0;i<a1.length;i++){
-			if (a1[i]<0) continue;
-			for (int j =0;j<a2.length;j++){
-				if (a1[i]==a2[j])
-					return a1[i];
-			}
-		}
-		return -1;
-		
-	}
 		
 	public static void computeForceCaCl(int index, Molecule mIndex) {
-		for (int i=0; i<mIndex.getNumElement();i++){
-			mIndex.faInternalX[i]=0;
-			mIndex.faInternalY[i]=0;
-			mIndex.frInternalX[i]=0;
-			mIndex.frInternalY[i]=0;
-			mIndex.faExternalX[i]=0;
-			mIndex.faExternalY[i]=0;
-			mIndex.frExternalX[i]=0;
-			mIndex.frExternalY[i]=0;
-		}
-		if (mIndex.getName().equals("Calcium-Ion") ){
-			for (int i = 0; i < molecules.size(); i++) {
-				if (i==index)
-					continue;
-				Molecule m = molecules.get(i);
-				Vec2 locIndex = mIndex.getElementLocation(0);
-				Vec2 loc = m.getElementLocation(0);
-				float x = locIndex.x-loc.x;
-				float y = locIndex.y-loc.y;
-				float dis2 = x*x +y*y;
-				float dis = (float) Math.sqrt(dis2);
-				Vec2 normV = normalizeForce(new Vec2(x,y));
-				float forceX;
-				float forceY;
-				
+		mIndex.sumForceX[0] =0;
+		mIndex.sumForceY[0] =0;
+		for (int i = 0; i < molecules.size(); i++) {
+			if (i==index)
+				continue;
+			Molecule m = molecules.get(i);
+			Vec2 locIndex = mIndex.getElementLocation(0);
+			Vec2 loc = m.getElementLocation(0);
+			float x = locIndex.x-loc.x;
+			float y = locIndex.y-loc.y;
+			float dis3 = x*x +y*y;
+			float dis = (float) Math.sqrt(dis3);
+			dis3 = (float) Math.pow(dis3,1.5);
+			float forceX=0;
+			float forceY=0;
+			if (mIndex.getName().equals("Calcium-Ion") ){
 				if (m.getName().equals("Calcium-Ion")){
 					if (PBox2D.scalarWorldToPixels(dis)<=Molecule.clRadius*4){
-						forceX =  (normV.x/dis2)*100;
-						forceY =  (normV.y/dis2)*100;
+						forceX =  (x/dis3)*100;
+						forceY =  (y/dis3)*100;
 					}
 					else{
-						forceX =  (normV.x/dis2)*5;
-						forceY =  (normV.y/dis2)*5;
+						forceX =  (x/dis3)*3;
+						forceY =  (y/dis3)*3;
 					}
-					mIndex.frInternalX[0] +=forceX;
-					mIndex.frInternalY[0] +=forceY;
-			   }
+				}
 				else if (m.getName().equals("Chlorine-Ion")){
-					forceX =  (normV.x/dis2)*40;
-					forceY =  (normV.y/dis2)*40;
-					float r = (99-temp)/150f;
-					if (0<temp && temp<100){
-						forceX *=  r;
-						forceY *=  r;
-						if (mIndex.isGone){
-							forceX *=  r;
-							forceY *=  r;
-						}
-					}	
-					else if (temp>=100){
-						forceX /=2;
-						forceY /=2;
-					}
-					
-					mIndex.faExternalX[0] -=forceX;
-					mIndex.faExternalY[0] -=forceY;
-					
-						
+					forceX =  -(x/dis3)*16;
+					forceY =  -(y/dis3)*16;	
 				}
 			}	
-		}
-		else if (mIndex.getName().equals("Chlorine-Ion") ){
-			for (int i = 0; i < molecules.size(); i++) {
-				if (i==index)
-					continue;
-				Molecule m = molecules.get(i);
-				Vec2 locIndex = mIndex.getElementLocation(0);
-				Vec2 loc = m.getElementLocation(0);
-				float x = locIndex.x-loc.x;
-				float y = locIndex.y-loc.y;
-				float dis2 = (x*x +y*y);
-				float dis = (float) Math.sqrt(dis2);
-				Vec2 normV = normalizeForce(new Vec2(x,y));
-				float forceX;
-				float forceY;
-				
+			else if (mIndex.getName().equals("Chlorine-Ion") ){
 				if (m.getName().equals("Chlorine-Ion")){
-					if (PBox2D.scalarWorldToPixels(dis) <= Molecule.clRadius*2.8285){
-						forceX =  (normV.x/dis2)*60;
-						forceY =  (normV.y/dis2)*60;
+					if (PBox2D.scalarWorldToPixels(dis) <= Molecule.clRadius*2.8282){
+						forceX =  (x/dis3)*100;
+						forceY =  (y/dis3)*100;
 					}
 					else {
-						forceX =  (normV.x/dis2)*5;
-						forceY =  (normV.y/dis2)*5;
+						forceX =  (x/dis3)*3;
+						forceY =  (y/dis3)*3;
 					}
-					mIndex.frInternalX[0] +=forceX;
-					mIndex.frInternalY[0] +=forceY;
-			    
 				}
 				else if (m.getName().equals("Calcium-Ion")){
-					forceX =  (normV.x/dis2)*40;
-					forceY =  (normV.y/dis2)*40;
-					float r = (99-temp)/150f;
-					if (0<temp && temp<100){
-						forceX *=  r;
-						forceY *=  r;
-						if (mIndex.isGone){
-							forceX *=  r;
-							forceY *=  r;
-						}
-					}	
-					else if (temp>=100){
-						forceX /=2;
-						forceY /=2;
-					}
-					mIndex.faExternalX[0] -=forceX;
-					mIndex.faExternalY[0] -=forceY;
+					forceX = -(x/dis3)*24;
+					forceY = -(y/dis3)*24;
 				}
 			}	
+			if (mIndex.compoundJ<0 || m.compoundJ<0) {
+				forceX *=0.11;
+				forceY *=0.11;
+			}
+			mIndex.sumForceX[0] += forceX;
+			mIndex.sumForceY[0] += forceY;
 		}
+		
+			
 	}
-
+	
 	public static void computeForceFromWater(int index, Molecule mIndex) {
 		int numElements = mIndex.getNumElement();
 		mIndex.sumForceWaterX = new float[numElements];
@@ -738,20 +659,23 @@ public class Unit2 {
 					Vec2 normV = normalizeForce(new Vec2(x,y));
 
 					int charge = m.elementCharges.get(e2);
-					int sign = (int) Math.signum(charge*indexCharge);
+					int mul = charge*indexCharge;
 					float r = temp/100f;
-					if (m.elementNames.get(e2).equals("Hydrogen")){
+					
+					//if (m.elementNames.get(e2).equals("Oxygen")){
+					//	if (mIndex.getName().equals("Sodium-Ion") && Main.selectedSet==7)
+					//		r *=1.5; 
+					//}
+					
+					if (mIndex.compoundJ>=0){
+						mIndex.sumForceWaterX[e] += mul*(normV.x/dis)*0.1;
+						mIndex.sumForceWaterY[e] += mul*(normV.y/dis)*0.1;
 					}
-					else if (m.elementNames.get(e2).equals("Oxygen")){
-						r *=2f;
-						if (mIndex.getName().equals("Sodium-Ion") && Main.selectedSet==7)
-							r *=1.5; 
+					else{
+						mIndex.sumForceWaterX[e] += mul*(normV.x/dis)*(3+r);
+						mIndex.sumForceWaterY[e] += mul*(normV.y/dis)*(3+r);
 					}
-					if (mIndex.compoundJ<0){
-						r =r*4;
-					}
-					mIndex.sumForceWaterX[e] += sign*(normV.x/dis)*(2f+1*r);
-					mIndex.sumForceWaterY[e] += sign*(normV.y/dis)*(2f+1*r);
+					
 					if (temp>=100){
 						mIndex.sumForceWaterX[e]=0;
 						mIndex.sumForceWaterY[e]=0;
@@ -796,20 +720,11 @@ public class Unit2 {
 	// Unit2 Set5
 	public static void computeForceAceticAcid(int index, Molecule mIndex) { // draw background
 		float xMul = 2f;
-		for (int i=0; i<mIndex.getNumElement();i++){
-			mIndex.faInternalX[i]=0;
-			mIndex.faInternalY[i]=0;
-			mIndex.frInternalX[i]=0;
-			mIndex.frInternalY[i]=0;
-			mIndex.faExternalX[i]=0;
-			mIndex.faExternalY[i]=0;
-			mIndex.frExternalX[i]=0;
-			mIndex.frExternalY[i]=0;
-		}
-		
 		for (int e = 0; e < mIndex.getNumElement(); e++) {
 			int indexCharge = mIndex.elementCharges.get(e);
 			Vec2 locIndex = mIndex.getElementLocation(e);
+			mIndex.sumForceX[e] =0;
+			mIndex.sumForceY[e] =0;
 			for (int i = 0; i < molecules.size(); i++) {
 				if (i==index)
 					continue;
@@ -822,60 +737,22 @@ public class Unit2 {
 					float x = locIndex.x-loc.x;
 					float y = locIndex.y-loc.y;
 				    float dis = x*x +y*y;
-					Vec2 normV = normalizeForce(new Vec2(x,y));
-					float fTemp = mIndex.freezingTem;
-					float bTemp = mIndex.boilingTem;
-					float	gravityY = (bTemp-temp)/(bTemp-fTemp);
-					float	gravityX = gravityY*xMul;
-					forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*5;
-					forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*5;
-					if (temp<fTemp){
-						forceX *=500;
-						forceY *=500;
+					forceX =  (float) ((x/Math.pow(dis,1.5))*0.1);
+					forceY =  (float) ((y/Math.pow(dis,1.5))*0.1);
+					if ((temp<=0) || (temp<mIndex.freezingTem && !m.getName().equals("Water"))){
+						forceX *=40;
+						forceY *=40;
 					}
-					
-					if (!mIndex.getName().equals("Water") && m.getName().equals("Water")){
-						if (temp>=100){
-							forceX=0;
-							forceY=0;
-						}else if (temp<=0){
-							
-						}
-						else {
-							if (m.elementNames.get(e2).equals("Hydrogen")){
-								float r = temp/100f;
-								forceX*=r;
-								forceY*=r;
-							}
-							else if (m.elementNames.get(e2).equals("Oxygen")){
-								float r = temp/100f;
-								forceX*=2*r;
-								forceY*=2*r;
-							}
-						}
-					}
-					
 					int charge = m.elementCharges.get(e2);
-					int sign = (int) Math.signum(charge*indexCharge);
-					if (sign<0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.faExternalX[e] +=forceX;
-							mIndex.faExternalY[e] +=forceY;
-						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.faInternalX[e] +=forceX;
-							mIndex.faInternalY[e] +=forceY;
-						}
+					int mul = charge*indexCharge;
+					if (mul<0){
+						mIndex.sumForceX[e] +=mul*forceX;
+						mIndex.sumForceY[e] +=mul*forceY;
+						
 					}
-					else if (sign>0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.frExternalX[e] -=forceX*mIndex.chargeRate;
-							mIndex.frExternalY[e] -=forceY*mIndex.chargeRate;
-						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.frInternalX[e] -=forceX*mIndex.chargeRate;
-							mIndex.frInternalY[e] -=forceY*mIndex.chargeRate;
-						}
+					else if (mul>0){
+						mIndex.sumForceX[e] +=mul*forceX*mIndex.chargeRate;
+						mIndex.sumForceY[e] +=mul*forceY*mIndex.chargeRate;
 					}
 				}
 			}
@@ -885,20 +762,11 @@ public class Unit2 {
 	
 	// Unit2 Set7
 	public static void computeForceNaHCO3(int index, Molecule mIndex) { // draw background
-		for (int i=0; i<mIndex.getNumElement();i++){
-			mIndex.faInternalX[i]=0;
-			mIndex.faInternalY[i]=0;
-			mIndex.frInternalX[i]=0;
-			mIndex.frInternalY[i]=0;
-			mIndex.faExternalX[i]=0;
-			mIndex.faExternalY[i]=0;
-			mIndex.frExternalX[i]=0;
-			mIndex.frExternalY[i]=0;
-		}
-		
 		for (int e = 0; e < mIndex.getNumElement(); e++) {
 			int indexCharge = mIndex.elementCharges.get(e);
 			Vec2 locIndex = mIndex.getElementLocation(e);
+			mIndex.sumForceX[e] =0;
+			mIndex.sumForceY[e] =0;
 			for (int i = 0; i < molecules.size(); i++) {
 				Molecule m = molecules.get(i);
 				if (i==index || i == mIndex.compoundJ || index==m.compoundJ     // No interMolecule force
@@ -913,13 +781,13 @@ public class Unit2 {
 					float x = locIndex.x-loc.x;
 					float y = locIndex.y-loc.y;
 				    float dis = x*x +y*y;
-					Vec2 normV = normalizeForce(new Vec2(x,y));
-					forceX =  (-normV.x/dis)*20;
-					forceY =  (-normV.y/dis)*20;
+				    float dis3 = (float) Math.pow(dis, 1.5);
+					forceX = (x/dis3)*20;
+					forceY = (y/dis3)*20;
 					
-					if (mIndex.compoundJ<0 || m.compoundJ<0){   // Losing mIndex
-						forceX *=0.10f;
-						forceY *=0.10f;
+					if ((mIndex.compoundJ<0 || m.compoundJ<0) && 0<temp&& temp<100){   // Losing mIndex
+						forceX *=0.05f;
+						forceY *=0.05f;
 					}
 					if (mIndex.compoundJ<0){             //Compute IonDis
 						float dis2 =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)));
@@ -930,29 +798,33 @@ public class Unit2 {
 								mIndex.ionDis =dis2;
 							}
 						}
-					}
+					} 
+					if (num_gone>numGone_atSaturation() // Recombine compound
+				    		&&m.compoundJ<0 && mIndex.compoundJ<0
+				    		&&mIndex.getName().equals("Bicarbonate")
+				    		&&m.getName().equals("Sodium-Ion")){
+						float dif =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis)) - (Molecule.oRadius +34));
+					    if (dif<2){
+					    	Vec2 p1 = mIndex.body.getPosition();
+					    	float a= mIndex.body.getAngle();
+					    	float d = PBox2D.scalarPixelsToWorld(Molecule.oRadius +30);
+							float x2 =  (float) (p1.x+d*Math.cos(a));
+							float y2 =  (float) (p1.y+d*Math.sin(a));
+					    	m.body.setTransform(new Vec2(x2,y2), 0);
+				    		jointNaHCO3(index,i,mIndex,m);
+				    		num_gone--;
+				    	}
+				    }
 					
 					int charge = m.elementCharges.get(e2);
-					int sign = (int) Math.signum(charge*indexCharge);
-					if (sign<0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.faExternalX[e] +=forceX;
-							mIndex.faExternalY[e] +=forceY;
-						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.faInternalX[e] +=forceX;
-							mIndex.faInternalY[e] +=forceY;
-						}
+					int mul = (int) Math.signum(charge*indexCharge);
+					if (mul<0){
+						mIndex.sumForceX[e] += mul*forceX;
+						mIndex.sumForceY[e] += mul*forceY;
 					}
-					else if (sign>0){
-						if (!m.getName().equals(mIndex.getName())){
-							mIndex.frExternalX[e] -=forceX*mIndex.chargeRate;
-							mIndex.frExternalY[e] -=forceY*mIndex.chargeRate;
-						}
-						else if (m.getName().equals(mIndex.getName())){
-							mIndex.frInternalX[e] -=forceX*mIndex.chargeRate;
-							mIndex.frInternalY[e] -=forceY*mIndex.chargeRate;
-						}
+					else if (mul>0){
+						mIndex.sumForceX[e] += mul*forceX*mIndex.chargeRate;
+						mIndex.sumForceY[e] += mul*forceY*mIndex.chargeRate;
 					}
 				}
 				
@@ -966,7 +838,7 @@ public class Unit2 {
 			return 0;
 		}
 		float r = (float) (temp/99.);
-		float sat =-1;
+		float sat =0;
 		if (Main.selectedSet==1 && Main.selectedSim<=3)
 			sat= (35.7f + r*(39.9f-35.7f)); //Take number of Water to account
 		else if (Main.selectedSet==2)
@@ -974,7 +846,26 @@ public class Unit2 {
 		else if (Main.selectedSet==3)
 			sat= 0; 
 		else if (Main.selectedSet==4){
-			sat= (59.5f + r*(159f-59.5f)); 
+			if (0<temp && temp<=20){
+				r = (float) (temp/20.);
+				sat= (59.5f + r*(74.5f-59.5f)); 
+			}
+			if (20<temp && temp<=40){
+				r = (float) ((temp-20)/20.);
+				sat= (74.5f + r*(128f-74.5f)); 
+			}
+			if (40<temp && temp<=60){
+				r = (float) ((temp-40)/20.);
+				sat= (128f + r*(137f-128f)); 
+			}
+			if (60<temp && temp<=80){
+				r = (float) ((temp-60)/20.);
+				sat= (137f + r*(147f-137)); 
+			}
+			if (80<temp && temp<=100){
+				r = (float) ((temp-80)/20.);
+				sat= (147f + r*(159f-147f)); 
+			}
 		}	
 		else if (Main.selectedSet==5){
 			sat= 0; 
@@ -994,16 +885,37 @@ public class Unit2 {
 	
 	public static void applyForceUnit2(int index, Molecule mIndex) { // draw background
 		for (int e = 0; e < mIndex.getNumElement(); e++) {
-			mIndex.sumForceX[e] = mIndex.faInternalX[e] +mIndex.faExternalX[e]+mIndex.frInternalX[e]+mIndex.frExternalX[e];
-			mIndex.sumForceY[e] = mIndex.faInternalY[e] +mIndex.faExternalY[e]+mIndex.frInternalY[e]+mIndex.frExternalY[e];
 			mIndex.addForce(new Vec2(mIndex.sumForceX[e],mIndex.sumForceY[e]), e);
 			mIndex.addForce(new Vec2(mIndex.sumForceWaterX[e],mIndex.sumForceWaterY[e]), e);
 		
-			if (Main.selectedUnit==2 && Main.selectedSet==4){
+			if (Main.selectedUnit==2 && Main.selectedSet==1){
+				int num = mIndex.getNumElement();
+				float fX =0;
+				float fY =0;
+				for (int i=0;i<num;i++){
+					fX += mIndex.sumForceWaterX[i];
+					fY += mIndex.sumForceWaterY[i];
+				}
+				float s = fX*fX + fY*fY;
+				float f = (float) Math.sqrt(s);
+				//System.out.println(" numGone_atSaturation():"+numGone_atSaturation()
+				//		+" num_gone:"+num_gone+" "+f);
+				if (num_gone<numGone_atSaturation() && mIndex.compoundJ>=0 && f>0.02){
+					DistanceJoint dj1 = mIndex.compoundJoints;
+					PBox2D.world.destroyJoint(dj1);
+					mIndex.compoundJoints = null;
+					Molecule m2  = molecules.get(mIndex.compoundJ);
+					mIndex.compoundJ =-1;
+					m2.compoundJ =-1;
+					m2.compoundJoints = null;
+					num_gone++;
+				}
+			}
+			else if (Main.selectedUnit==2 && Main.selectedSet==4){
 				float s = mIndex.sumForceWaterX[0]*mIndex.sumForceWaterX[0]
 						+ mIndex.sumForceWaterY[0]*mIndex.sumForceWaterY[0];
 				float f = (float) Math.sqrt(s);
-				if (f>0.5f &&  mIndex.compoundJ>=0){
+				if (num_gone<numGone_atSaturation() &&  mIndex.compoundJ>=0 && f>0.02f){
 					DistanceJoint dj1 = mIndex.compoundJoints;
 					PBox2D.world.destroyJoint(dj1);
 					mIndex.compoundJoints = null;
@@ -1047,6 +959,7 @@ public class Unit2 {
 						m.otherJ =-1;
 					}
 					removeCaOtherJ(m);
+					num_gone++;
 				}	
 			}
 			else if (Main.selectedUnit==2 && Main.selectedSet==7){
@@ -1058,10 +971,9 @@ public class Unit2 {
 					fY += mIndex.sumForceWaterY[i];
 					
 				}
-				float s = fX*fX + fY*fY;
-				float f = (float) Math.sqrt(s);
+				float f = fX*fX + fY*fY;
 				//System.out.println(" satNaHCO3():"+satNaHCO3()+" numNaHC03Gone:"+numNaHC03Gone);
-				if (num_gone<numGone_atSaturation() && mIndex.compoundJ>=0 && f>2){
+				if (num_gone<numGone_atSaturation() && mIndex.compoundJ>=0 && f>0.01){
 					
 					Molecule mCa = mIndex;
 					if (mIndex.getName().equals("Bicarbonate")){
@@ -1079,7 +991,6 @@ public class Unit2 {
 					PBox2D.world.destroyJoint(dj2);
 					mCa.compoundJoints2 = null;
 						
-					num_remain--;
 					num_gone++;
 				}
 			}
@@ -1091,8 +1002,10 @@ public class Unit2 {
 	public static void reset() { // draw background
 		num_total=0;
 		num_gone=0;
-		num_remain=0;
 		numWater=0;
+		Unit2.mToMass =10;
+		if (Main.selectedSet==4)
+			Unit2.mToMass =20;
 	}
 		
 }

@@ -95,9 +95,9 @@ public class Main {
 	public static JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
 	public static int selectedUnit=2;
-	public static int selectedSim=2;
+	public static int selectedSim=4;
 	public static int selectedSet=1;
-	public static boolean isWelcomed=false;
+	public static boolean isWelcomed=true;
 	public static Color selectedColor = new Color(200,200,150);
 	public static Color defaultColor = Color.LIGHT_GRAY;
 	private static int sliderValue = 5;
@@ -123,7 +123,7 @@ public class Main {
 	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
 	public static int defaultZoom =50;
 	public static JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
-	public static int defaultSpeed =50;
+	public static int defaultSpeed =100;
 	public static JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
 	public static int heatInit =25;
 	public static int heatMin =-10;
@@ -134,12 +134,17 @@ public class Main {
 	public static JLabel totalSystemEnergy;
 	public static JLabel averageSystemEnergy;
 	public static JLabel elapsedTime;
-	public static JLabel waterVolume;
 	public static JLabel m1Mass;
 	public static JLabel m1Disolved;
 	public static JLabel satMass;
+	public static JLabel waterVolume;
 	public static JLabel m1Label;
+	public static JLabel m1MassLabel;
+	public static JLabel waterLabel;
 	public static JLabel satLabel;
+	public static JLabel soluteLabel;
+	public static JLabel soluteVolume;
+	public static JCheckBox cBoxConvert;
 	
 	public static JButton playBtn;
 	public static boolean isFirst =true; 
@@ -375,12 +380,27 @@ public class Main {
 		}
 		
 		p5Canvas.removeAllMolecules();
-		canvas.reset();
-		TableView.setSelectedRow(-1);
 		P5Canvas.count=0;
 		P5Canvas.second=0;
 		
-		
+		dashboard.removeAll();
+		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
+		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
+		dashboard.add(elapsedTime, "cell 1 0");
+		if (selectedUnit==2){
+			dashboard.add(cBoxConvert, "cell 0 1");
+			dashboard.add(m1Label, "cell 0 2,alignx right");
+			dashboard.add(m1Mass, "cell 1 2");
+			dashboard.add(m1MassLabel, "cell 0 3,alignx right");
+			dashboard.add(m1Disolved, "cell 1 3");
+			//dashboard.add(satLabel, "cell 0 3,alignx right");
+			//dashboard.add(satMass, "cell 1 3");
+			dashboard.add(waterLabel, "cell 0 4,alignx right");
+			dashboard.add(waterVolume, "cell 1 4");
+			dashboard.add(soluteLabel, "cell 0 5,alignx right");
+			dashboard.add(soluteVolume, "cell 1 5");
+		}
+			
 		Unit2.reset();
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
 		if (a!=null) {
@@ -390,32 +410,49 @@ public class Main {
 				String s = (String) getCompoundName(selectedUnit,selectedSim,selectedSet,i);
 				int num = Integer.parseInt(getCompoundQty(selectedUnit,selectedSim,selectedSet,i).toString());
 				s =s.replace(" ","-");
-				p5Canvas.addMoleculeRandomly(s,num);
 				Compound.names.add(s);
 				Compound.counts.add(num);
+				p5Canvas.addMoleculeRandomly(s,num);
 			}
-			if (selectedUnit==2){
+			if (selectedUnit==1){
+				if (selectedSim==4){
+					Compound.names.add("Water");
+					Compound.counts.add(0);
+					Compound.names.add("Oxygen");
+					Compound.counts.add(0);
+				}
+			}
+				
+			else if (selectedUnit==2){
 				if (selectedSet==1 && selectedSim<4){
 					Compound.names.add("Sodium-Ion");
 					Compound.counts.add(0);
 					Compound.names.add("Chlorine-Ion");
 					Compound.counts.add(0);
 				}
-				else if (selectedUnit==2 && selectedSet==4){
+				else if (selectedSet==4){
 					Compound.names.add("Calcium-Ion");
 					Compound.counts.add(0);
 					Compound.names.add("Chlorine-Ion");
 					Compound.counts.add(0);
 				}
-				else if (selectedUnit==2 && selectedSet==7){
+				else if (selectedSet==7){
 					Compound.names.add("Sodium-Ion");
 					Compound.counts.add(0);
 					Compound.names.add("Bicarbonate");
 					Compound.counts.add(0);
 				}
+				else if (selectedSet==1 && selectedSim==4){
+					Compound.names.add("Potassium-Ion");
+					Compound.counts.add(0);
+					Compound.names.add("Chlorine-Ion");
+					Compound.counts.add(0);
+				}
 			}	
 			Compound.setProperties();
 		}
+		canvas.reset();
+		TableView.setSelectedRow(-1);
 		
 		
 		//CustomPopupMenu.additionalList = new ArrayList();
@@ -598,7 +635,7 @@ public class Main {
 				  scrollablePopupMenu.show(moleculeChooserBtn, -160,52,mainFrame.getHeight()-39);
 			}
 		});
-			//moleculeChooserBtn.setEnabled(false);
+			moleculeChooserBtn.setEnabled(false);
 			moleculeChooserBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconCompound.png")));
 			menuBar.add(moleculeChooserBtn);
 		
@@ -676,7 +713,7 @@ public class Main {
 		});
 		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
 		checkBoxPanel.add(cBox2, BorderLayout.CENTER);
-		checkBoxPanel.add(cBox3, BorderLayout.SOUTH);
+		//checkBoxPanel.add(cBox3, BorderLayout.SOUTH);
 		timerSubpanel.add(checkBoxPanel, "cell 1 1 1 1");
 
 		
@@ -781,12 +818,9 @@ public class Main {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
 				float speedRate = (float) value/defaultSpeed;
-				if (value>defaultSpeed)
-					speedRate =1+2*(speedRate-1);
 				p5Canvas.setSpeed(speedRate);
 				
-				DecimalFormat df = new DecimalFormat("#.#");
-
+				DecimalFormat df = new DecimalFormat("#.##");
 				speedLabel.setText(df.format(speedRate)+"x");
 			}
 		});
@@ -867,9 +901,8 @@ public class Main {
 		dashboard.add(m1Label, "cell 0 1,alignx right");
 		m1Mass= new JLabel("0 g");
 		dashboard.add(m1Mass, "cell 1 1");
-		
-		JLabel m1Label = new JLabel("Disolved:");
-		dashboard.add(m1Label, "cell 0 2,alignx right");
+		m1MassLabel = new JLabel("Disolved:");
+		dashboard.add(m1MassLabel, "cell 0 2,alignx right");
 		m1Disolved= new JLabel("0 g");
 		dashboard.add(m1Disolved, "cell 1 2");
 		satLabel = new JLabel("Saturation:");
@@ -877,11 +910,33 @@ public class Main {
 		satMass= new JLabel("0 g");
 		dashboard.add(satMass, "cell 1 3");
 		
-		JLabel waterLabel = new JLabel("Water Volume:");
+		waterLabel = new JLabel("Volume Solvent:");
 		dashboard.add(waterLabel, "cell 0 4,alignx right");
 		waterVolume= new JLabel("0 mL");
 		dashboard.add(waterVolume, "cell 1 4");
 
+		soluteLabel = new JLabel("Volume Solute:");
+		dashboard.add(soluteLabel, "cell 0 5,alignx right");
+		soluteVolume= new JLabel("0 mL");
+		dashboard.add(soluteVolume, "cell 1 5");
+
+		
+		cBoxConvert =  new JCheckBox("Conver Mass to Mol"); 
+		cBoxConvert.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED){
+					P5Canvas.isConvertMol =true;
+					P5Canvas.convertMassMol1();
+				}	
+				else if	(e.getStateChange() == ItemEvent.DESELECTED){
+					P5Canvas.isConvertMol = false;
+					P5Canvas.convertMolMass1();
+				}	
+			}
+		});
+		dashboard.add(cBoxConvert, "cell 0 7");
+
+		
 /*		JLabel totalSystemPressureLabel = new JLabel("Total System Pressure:");
 		dashboard.add(totalSystemPressureLabel, "cell 0 3,alignx right");
 

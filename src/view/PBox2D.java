@@ -32,7 +32,7 @@ public class PBox2D {
 	public float transX;// = 320.0f;
 	public float transY;// = 240.0f;
 	public static float scaleFactor;// = 10.0f;
-	public float yFlip;// = -1.0f; //flip y coordinate
+	public static float yFlip;// = -1.0f; //flip y coordinate
 
 	PContactListener contactlistener;
 
@@ -148,8 +148,8 @@ public class PBox2D {
 	}
 
 	// Scale scalar quantity between worlds
-	public static float scalarPixelsToWorld(float val) {
-		return val / scaleFactor;
+	public static float scalarPixelsToWorld(float xy) {
+		return xy / scaleFactor;
 	}
 
 	public static float scalarWorldToPixels(float val) {
@@ -163,13 +163,13 @@ public class PBox2D {
 		return u;
 	}
 
-	public Vec2 vectorPixelsToWorld(PVector v) {
+	public static Vec2 vectorPixelsToWorld(PVector v) {
 		Vec2 u = new Vec2(v.x / scaleFactor, v.y / scaleFactor);
 		u.y *= yFlip;
 		return u;
 	}
 
-	public Vec2 vectorWorldToPixels(Vec2 v) {
+	public static Vec2 vectorWorldToPixels(Vec2 v) {
 		Vec2 u = new Vec2(v.x * scaleFactor, v.y * scaleFactor);
 		u.y *= yFlip;
 		return u;

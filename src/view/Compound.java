@@ -2,6 +2,8 @@ package view;
 
 import java.util.ArrayList;
 
+import Util.SVGReader;
+
 import model.DBinterface;
 
 // This class maintains all information about all compounds in a Simulation
@@ -33,4 +35,5 @@ public class Compound {
 			
 		}
 	}
+	
 }
