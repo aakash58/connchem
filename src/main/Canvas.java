@@ -174,12 +174,50 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	
 
 	public static void resetMoleculeCount(){
-		if (Main.selectedUnit==2 && Main.selectedSet==4){
+		if (Main.selectedUnit==1 && Main.selectedSim==4){
+			int H2OIndex = names.indexOf("Water");
+			int OIndex = names.indexOf("Oxygen");
+			int H2O2Index = names.indexOf("Hydrogen-Peroxide");
+			int H2OCount =0;
+			int OCount =0;
+			int H2O2Count =0;
+			for (int i=0; i<State.molecules.size();i++){
+				Molecule m = (Molecule) State.molecules.get(i);
+				if (m.getName().equals("Water")){
+					H2OCount++;
+				}
+				else if (m.getName().equals("Oxygen")){
+					OCount++;
+				}
+				else if (m.getName().equals("Hydrogen-Peroxide")){
+					H2O2Count++;
+				}
+			}
+			counts.set(H2OIndex,H2OCount);
+			counts.set(OIndex, OCount);
+			counts.set(H2O2Index, H2O2Count);
+			
+		}
+		if (Main.selectedUnit==2 && Main.selectedSet==1 && Main.selectedSim<4){
+			int NaIndex = names.indexOf("Sodium-Ion");
+			int ClIndex = names.indexOf("Chlorine-Ion");
+			int NaClIndex = names.indexOf("Sodium-Chloride");
+			int NaClCount =0;
+			for (int i=0; i<State.molecules.size();i++){
+				Molecule m = (Molecule) State.molecules.get(i);
+				if (m.getName().equals("Sodium-Ion") && m.compoundJ>=0){
+					NaClCount++;
+				}
+			}
+			counts.set(NaIndex,Unit2.num_total-NaClCount);
+			counts.set(ClIndex,Unit2.num_total-NaClCount);
+			counts.set(NaClIndex,NaClCount);
+			
+		}
+		else if (Main.selectedUnit==2 && Main.selectedSet==4){
 			int CaIndex = names.indexOf("Calcium-Ion");
 			int ClIndex = names.indexOf("Chlorine-Ion");
 			int CaClIndex = names.indexOf("Calcium-Chloride");
-			int CaCount = counts.get(CaIndex);
-			int ClCount = counts.get(ClIndex);
 			int CaClCount =0;
 			for (int i=0; i<State.molecules.size();i++){
 				Molecule m = (Molecule) State.molecules.get(i);
@@ -187,50 +225,42 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					CaClCount++;
 				}
 			}
-			counts.set(CaIndex,CaCount-CaClCount);
-			counts.set(ClIndex,ClCount-CaClCount*2);
+			counts.set(CaIndex,Unit2.num_total-CaClCount);
+			counts.set(ClIndex,2*(Unit2.num_total-CaClCount));
 			counts.set(CaClIndex,CaClCount);
-			
-		}
-		/*else if (Main.selectedUnit==2 && Main.selectedSet==1 && Main.selectedSim<=3){
-			int NaIndex = names.indexOf("Sodium-Ion");
-			int ClIndex = getNameIndex("Chlorine-Ion");
-			if (NaIndex>=0){
-				int NaCount = mCounts.get(NaIndex);
-				int ClCount = mCounts.get(ClIndex);
-				int NaClCount =0;
-				int NaClCount1 =0;
-				int NaClCount2 =0;
-				for (int i=0; i<State.molecules.size();i++){
-					Molecule m = (Molecule) State.molecules.get(i);
-					if (m.getName().equals("Sodium-Ion") && m.NaClPartner>=0){
-						NaClCount1++;
-					}
-					else if (m.getName().equals("Chlorine-Ion") && m.NaClPartner>=0){
-						NaClCount2++;
-					}
-				}
-				NaClCount = Math.min(NaClCount1, NaClCount2);
-				mNames.add(2,"Calcium-Chloride");
-				mCounts.add(2,NaClCount);
-				mCounts.set(NaIndex,NaCount-NaClCount);
-				mCounts.set(ClIndex,ClCount-NaClCount);
-			}
 		}
 		else if (Main.selectedUnit==2 && Main.selectedSet==7){
-			int NaIndex = getNameIndex("Sodium-Ion");
-			int HCO3Index = getNameIndex("Bicarbonate");
-			if (NaIndex>=0){
-				int NaCount = mCounts.get(NaIndex);
-				int ClCount = mCounts.get(HCO3Index);
-				int NaHCO3Count =Unit2.num_remain;
-			
-				mNames.add(2,"Sodium-Bicarbonate");
-				mCounts.add(2,NaHCO3Count);
-				mCounts.set(NaIndex,NaCount-NaHCO3Count);
-				mCounts.set(HCO3Index,ClCount-NaHCO3Count);
+			int NaIndex = names.indexOf("Sodium-Ion");
+			int HCO3Index = names.indexOf("Bicarbonate");
+			int NaHCO3Index = names.indexOf("Sodium-Bicarbonate");
+			int NaHCO3Count =0;
+			for (int i=0; i<State.molecules.size();i++){
+				Molecule m = (Molecule) State.molecules.get(i);
+				if (m.getName().equals("Sodium-Ion") && m.compoundJ>=0){
+					NaHCO3Count++;
+				}
 			}
-		}*/
+			counts.set(NaIndex,Unit2.num_total-NaHCO3Count);
+			counts.set(HCO3Index,Unit2.num_total-NaHCO3Count);
+			counts.set(NaHCO3Index, NaHCO3Count);
+		}
+		else if (Main.selectedUnit==2 && Main.selectedSet==1 && Main.selectedSim==4){
+			int KIndex = names.indexOf("Potassium-Ion");
+			if (KIndex<0) return;
+			int ClIndex = names.indexOf("Chlorine-Ion");
+			int KClIndex = names.indexOf("Potassium-Chloride");
+			int KClCount =0;
+			for (int i=0; i<State.molecules.size();i++){
+				Molecule m = (Molecule) State.molecules.get(i);
+				if (m.getName().equals("Potassium-Ion") && m.compoundJ>=0){
+					KClCount++;
+				}
+			}
+			counts.set(KIndex, Unit2.num_total-KClCount);
+			counts.set(ClIndex,Unit2.num_total-KClCount);
+			counts.set(KClIndex,KClCount);
+		}
+		
 		
 	}
 	public static void updateTableView(){

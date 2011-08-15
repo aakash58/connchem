@@ -6,49 +6,8 @@ import main.Main;
 import org.jbox2d.common.Vec2;
 
 public class Water {
-
-	public static void computeWaterPartner(int index, Molecule mIndex) { // draw background
-		mIndex.isGone =false;
-		if (temp<=0) return;
-		for (int e = 0; e < mIndex.getNumElement(); e++) {
-			Vec2 locIndex = mIndex.getElementLocation(e);
-			for (int i = 0; i < molecules.size(); i++) {
-				if (i==index)
-					continue;
-				Molecule m = molecules.get(i);
-				for (int e2 = 0; e2 < m.getNumElement(); e2++) {
-					Vec2 loc = m.getElementLocation(e2);
-					if(loc==null || locIndex==null) continue;
-					float x = locIndex.x-loc.x;
-					float y = locIndex.y-loc.y;
-				    float dis = x*x +y*y;
-					if (!mIndex.getName().equals("Water")
-							&& m.getName().equals("Water")){
-						float sum = (mIndex.circles[e][0]+m.circles[e2][0]);
-						float dif =(float) (PBox2D.scalarWorldToPixels((float) Math.sqrt(dis))
-								-sum);
-						if (dif<12 && m.waterPartner<0){
-							mIndex.isGone =true;
-							mIndex.waterPartner = i;
-							m.waterPartner = index;
-						}
-					}
-				}	
-			}
-		}
-	}	
 	public static void setForceWater(int indexWater, Molecule mWater) { // draw background
 		if (temp<=0){
-			for (int i=0; i<mWater.getNumElement();i++){
-				mWater.faInternalX[i]=0;
-				mWater.faInternalY[i]=0;
-				mWater.frInternalX[i]=0;
-				mWater.frInternalY[i]=0;
-				mWater.faExternalX[i]=0;
-				mWater.faExternalY[i]=0;
-				mWater.frExternalX[i]=0;
-				mWater.frExternalY[i]=0;
-			}
 			for (int e = 0; e < mWater.getNumElement(); e++) {
 				float sumForceX=0;
 				float sumForceY=0;
@@ -66,9 +25,8 @@ public class Water {
 						float x = locIndex.x-loc.x;
 						float y = locIndex.y-loc.y;
 					    float dis = x*x +y*y;
-						Vec2 normV = normalizeForce(new Vec2(x,y));
-						forceX =  (-normV.x/dis)*m.getMass()*mWater.getMass()*9000;
-						forceY =  (-normV.y/dis)*m.getMass()*mWater.getMass()*9000;
+						forceX =  (float) ((x/Math.pow(dis,1.5))*3);
+						forceY =  (float) ((y/Math.pow(dis,1.5))*3);
 						if (m.getName().equals("Silicon-Dioxide")){
 							forceX *=0.1;
 							forceY *=0.1;
@@ -78,38 +36,31 @@ public class Water {
 							forceY *=0.08;
 						}
 						else if (m.getName().equals("Acetic-Acid")){
-							forceX *=0.2;
-							forceY *=0.2;
+							forceX *=0.3;
+							forceY *=0.3;
 						}
 						else if (m.getName().equals("Pentane")){
 							forceX *=0.08;
 							forceY *=0.08;
 						}
+						else if (m.getName().equals("Oxygen")){
+							forceX *=0.0;
+							forceY *=0.0;
+						}
+						else if (m.getName().equals("Hydrogen-Peroxide")){
+							forceX *=0.02;
+							forceY *=0.02;
+						}
 						
 						int charge = m.elementCharges.get(e2);
-						if (charge*indexCharge<0){
-							if (!m.getName().equals(mWater.getName())){
-								mWater.faExternalX[e] +=forceX;
-								mWater.faExternalY[e] +=forceY;
-							}
-							else if (m.getName().equals(mWater.getName())){
-								mWater.faInternalX[e] +=forceX;
-								mWater.faInternalY[e] +=forceY;
-							}
-							sumForceX += forceX;
-							sumForceY += forceY;
+						int mul = charge*indexCharge;
+						if (mul<0){
+							sumForceX += mul*forceX;
+							sumForceY += mul*forceY;
 						}
 						else if (charge*indexCharge>0){
-							if (!m.getName().equals(mWater.getName())){
-								mWater.frExternalX[e] +=-forceX*mWater.chargeRate;
-								mWater.frExternalY[e] +=-forceY*mWater.chargeRate;
-							}
-							else if (m.getName().equals(mWater.getName())){
-								mWater.frInternalX[e] +=-forceX*mWater.chargeRate;
-								mWater.frInternalY[e] +=-forceY*mWater.chargeRate;
-							}
-							sumForceX += -forceX*mWater.chargeRate;
-							sumForceY += -forceY*mWater.chargeRate;
+							sumForceX += mul*forceX*mWater.chargeRate;
+							sumForceY += mul*forceY*mWater.chargeRate;
 						}
 					}
 				}
@@ -178,26 +129,48 @@ public class Water {
 						forceX =  (float) (x/Math.pow(dis,1.5));
 						forceY =  (float) (y/Math.pow(dis,1.5));
 						int charge = m.elementCharges.get(e2);
-						/*if (m.getName().equals("Chlorine-Ion") || m.getName().equals("Sodium-Ion")){
+						if (m.getName().equals("Chlorine-Ion") ){
 							forceX *=2;
 							forceY *=2;
 						}
-						else if (m.getName().equals("Silicon-Dioxide")){
-							forceX *=1f;
-							forceY *=1f;
+						else if (m.getName().equals("Sodium-Ion")){
+							forceX *=3f;
+							forceY *=3f;
+						}
+						else if (m.getName().equals("Calcium-Ion")){
+							forceX *=3f;
+							forceY *=3f;
+						}
+						else if (m.getName().equals("Glycerol")){
+							forceX *=0.05;
+							forceY *=0.05;
+						}
+						else if (m.getName().equals("Acetic-Acid")){
+							forceX *=0.4;
+							forceY *=0.4;
+						}
+						else if (m.getName().equals("Pentane")){
+							forceX *=0.08;
+							forceY *=0.08;
 						}
 						else if (m.getName().equals("Bicarbonate")){
-							forceX *=2;
-							forceY *=2;
-						}*/
-							
-						if (charge*indexCharge<0){
-							sumForceX -= forceX;
-							sumForceY -= forceY;
+							forceX *=1;
+							forceY *=1;
 						}
-						else if (charge*indexCharge>0){
-							sumForceX += forceX*mWater.chargeRate;
-							sumForceY += forceY*mWater.chargeRate;
+						else if (m.getName().equals("Potassium-Ion")){
+							forceX *=3f;
+							forceY *=3f;
+						}
+						float mul = charge*indexCharge;
+						if (mWater.elementNames.get(e).equals("Oxygen"))
+							mul *=0.8;
+						if (mul<0){
+							sumForceX += mul*forceX;
+							sumForceY += mul*forceY;
+						}
+						else if (mul>0){
+							sumForceX += mul*forceX*mWater.chargeRate;
+							sumForceY += mul*forceY*mWater.chargeRate;
 						}
 					}
 				}

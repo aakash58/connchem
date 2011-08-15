@@ -10,7 +10,7 @@ public class Boundary {
 
 	private P5Canvas parent;
 	// But we also have to make a body for box2d to know about it
-	Body body;
+	public Body body;
 	PBox2D box2d;
 	private float x;
 	private float y;

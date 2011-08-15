@@ -33,8 +33,6 @@ public class Molecule {
 	public ArrayList<String> elementNames;
 	public ArrayList<Integer> elementCharges;
 	private String name;
-	public float freezingTem;
-	public float boilingTem;
 	public float fric;
 	public float res;
 	private float scale = 1;
@@ -42,38 +40,26 @@ public class Molecule {
 	private float xTmp;
 	private float yTmp;
 	private float minSize;
+	private float maxSize;
 	public boolean polarity;
-	public Vec2 off;
 	public boolean isBrushed =false;
-
+	public float freezingTem;
+	public float boilingTem;
+	
 	public Vec2 force = new Vec2(0,0);
-	public Vec2 offset1 = new Vec2(0,0);
-	public Vec2 offset2 = new Vec2(0,0);
-	public Vec2 offset3 = new Vec2(0,0);
-	public Vec2[] loc = new Vec2[30];
-	public Vec2[] fff = new Vec2[30];
-	public float[] faInternalX;
-	public float[] faInternalY;
-	public float[] frInternalX;
-	public float[] frInternalY;
-	public float[] faExternalX;
-	public float[] faExternalY;
-	public float[] frExternalX;
-	public float[] frExternalY;
+	public Vec2[] loc = new Vec2[20];
+	public Vec2[] locWorld = new Vec2[20];
+	public float[] gap = new float[20];
+	public float[] a1 = new float[20];
+	
 	public float[] sumForceX;
 	public float[] sumForceY;
 	public float[] sumForceWaterX;
 	public float[] sumForceWaterY;
 	
 	public float chargeRate = 1;
-	public boolean isGone = false;
-	public int waterPartner = -1;	 // Set1 Unit2 
-	public int NaClPartner = -1;  // Set1 Unit2
-	
 	public static float clRadius = 28f;
 	public static float oRadius = 18.495f; // Oxygen Radius. This depends on SVG file
-	
-	public int[] ClPartners = new int[2];
 	
 	public int compoundJ = -1;
 	public int otherJ = -1;
@@ -87,13 +73,6 @@ public class Molecule {
 	// Constructor
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
 			P5Canvas parent_, float angle) {
-		loc[0] = new Vec2(0,0);
-		loc[1] = new Vec2(0,0);
-		loc[2] = new Vec2(0,0);
-		fff[0] = new Vec2(0,0);
-		fff[1] = new Vec2(0,0);
-		fff[2] = new Vec2(0,0);
-		
 		parent = parent_;
 		box2d = box2d_;
 		name = compoundName_;
@@ -103,6 +82,7 @@ public class Molecule {
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
 		minSize = Math.min(pShapeW, pShapeH);
+		maxSize = Math.max(pShapeW, pShapeH);
 		polarity = parent.db.getCompoundPolarity(compoundName_);
 
 		circles = SVGReader.getSVG(path);
@@ -111,33 +91,36 @@ public class Molecule {
 		
 		int numElement = elementNames.size();
 		for (int i=0; i<numElement;i++){
-			int charge = P5Canvas.db.getElementCharge(elementNames.get(i));
+			int charge = DBinterface.getElementCharge(elementNames.get(i));
 			elementCharges.add(charge);
 		}
-		faInternalX=new float[numElement];
-		faInternalY=new float[numElement];
-		frInternalX=new float[numElement];
-		frInternalY=new float[numElement];
-		faExternalX=new float[numElement];
-		faExternalY=new float[numElement];
-		frExternalX=new float[numElement];
-		frExternalY=new float[numElement];
 		sumForceX = new float[numElement];
 		sumForceY = new float[numElement];
 		sumForceWaterX = new float[numElement];
 		sumForceWaterY = new float[numElement];
-
-		if (name.equals("Sodium-Ion") && (Main.selectedUnit==2 && Main.selectedSet!=7)){
+		freezingTem = DBinterface.getCompoundFreezingPointCelsius(name);
+		boilingTem = DBinterface.getCompoundBoilingPointCelsius(name);
+		
+		if ((name.equals("Sodium-Ion") || name.equals("Potassium-Ion"))
+				&& (Main.selectedUnit==2 && Main.selectedSet!=7)){
 			circles[0][0] = 28;
 		}
 		else if (name.equals("Calcium-Ion")){
 			circles[0][0] = 28;
 		}
 		
-		freezingTem = P5Canvas.db.getCompoundFreezingPointCelsius(name);
-		boilingTem = P5Canvas.db.getCompoundBoilingPointCelsius(name);
-		setPropertyByHeat(true);
+		for (int i=0; i<numElement;i++){
+			float xx = circles[i][1]-pShapeW/2;
+			float yy = -(circles[i][2]-pShapeH/2);
+			gap[i] = (float) Math.sqrt(xx*xx+yy*yy);
+			gap[i] = PBox2D.scalarPixelsToWorld(gap[i]);
+			if (xx!=0)
+				a1[i] = (float) (Math.atan(yy/xx));
+			if (xx<0) a1[i]+= Math.PI;
+		}
 		
+		
+		setPropertyByHeat(true);
 		createBody(x, y,angle);
 	}
 	
@@ -151,11 +134,12 @@ public class Molecule {
 		if (name.equals("Water") && temp < 40) 	scale = 1 + (40 - temp) / 200f;
 		else									scale = 1f;
 		
-		if (name.equals("Water"))	chargeRate = 0.80f;
+		if (name.equals("Water"))	
+			chargeRate = 0.95f;
 		else if (name.equals("Sodium-Ion")){
 			chargeRate = 0.93f;
 			fric = 1;
-			res=0.5f;
+			res=0.55f;
 		}
 		else if (name.equals("Chlorine-Ion")){
 			chargeRate = 0.93f;
@@ -165,7 +149,7 @@ public class Molecule {
 		else if (name.equals("Calcium-Ion")){
 			chargeRate = 0.93f;
 			fric = 1;
-			res=0.f;
+			res=0.9f;
 		}
 		else if (name.equals("Silicon-Dioxide")){
 			chargeRate = 0.98f;
@@ -187,6 +171,11 @@ public class Molecule {
 			res=0.0f;
 			scale = 1.1f;
 		}
+		else if (name.equals("Potassium-Ion")){
+			chargeRate = 0.93f;
+			fric = 1;
+			res=0.55f;
+		}
 		
 		if (!isInitial){
 			setRestitution(res);
@@ -199,7 +188,7 @@ public class Molecule {
 	public void createBody(float x, float y,float angle) {
 		float mul = 1;
 		if (name.equals("Pentane"))
-			mul = 0.10f;
+			mul = 0.04f;
 		else if (name.equals("Bromine"))
 			mul = 0.45f;
 		else if (name.equals("Mercury"))
@@ -209,7 +198,7 @@ public class Molecule {
 		else if (name.equals("Sodium-Chloride"))
 			mul = 1.0f;
 		else if (name.equals("Sodium-Ion"))
-			mul = 0.015f/0.006448616f;
+			mul = 0.011f/0.006448616f;
 		else if (name.equals("Chlorine-Ion"))
 			mul = 0.015f/0.009944542f;
 		else if (name.equals("Glycerol"))
@@ -220,6 +209,8 @@ public class Molecule {
 			mul = 1.6f;
 		else if (name.equals("Bicarbonate"))
 			mul = 1.50f;
+		else if (name.equals("Potassium-Ion"))
+			mul = 1.1f;
 		
 		// Define the body and make it from the shape
 		BodyDef bd = new BodyDef();
@@ -269,7 +260,7 @@ public class Molecule {
 	
 	public static Vec2 getShapeSize(String compoundName_, P5Canvas parent_) {
 		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
-		if (compoundName_.equals("Sodium-Ion") && 
+		if ((compoundName_.equals("Sodium-Ion") || compoundName_.equals("Potassium-Ion")) && 
 				(main.Main.selectedUnit==2 && main.Main.selectedSet!=7)){
 			path = "resources/compoundsSvg/" + "Chlorine-Ion" + ".svg";
 		}	
@@ -284,13 +275,6 @@ public class Molecule {
 		}	
 		return new Vec2(pShapeW ,pShapeH);
 	}
-	public static int getNumberElement(String compoundName_, P5Canvas parent_) {
-		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
-		float[][] circles = SVGReader.getSVG(path);
-		return circles.length;
-	}
-	
-	
 	
 	public int getNumElement() {
 		return circles.length;
@@ -328,19 +312,10 @@ public class Molecule {
 
 	public Vec2 getElementLocation(int e) {
 		Vec2 pos = body.getPosition();
-		Vec2 offset = new Vec2(circles[e][1]-pShapeW/2,circles[e][2]-pShapeH/2);
-		float x = offset.x;
-		float y = -offset.y;
-		float xy = (float) Math.sqrt(x*x+y*y);
-		xy = PBox2D.scalarPixelsToWorld(xy);
-		float a1 = 0;
-		if (x!=0)
-			a1 = (float) (Math.atan(y/x));
-		if (x<0) a1+= Math.PI;
 		float a2 = body.getAngle();
-		Vec2 v = new Vec2((float) Math.cos(a1+a2), (float)  Math.sin(a1+a2));
-		return pos.add(v.mul(xy));
-	}
+		Vec2 v = new Vec2((float) Math.cos(a1[e]+a2), (float)  Math.sin(a1[e]+a2));
+		return pos.add(v.mul(gap[e]));
+	} 
 		
 	
 	public void addForce(Vec2 f) {
@@ -353,7 +328,6 @@ public class Molecule {
 		force =f;
 		Vec2 l =  getElementLocation(e);
 		loc[e] = l;
-		fff[e] =force;
 		body.applyForce(force, l);	
 	}
 	
@@ -381,13 +355,10 @@ public class Molecule {
 			xTmp = body.getPosition().x;
 			yTmp = body.getPosition().y;
 		}
-
-		float t = P5Canvas.h - P5Canvas.y;
-		float yy = PBox2D.scalarWorldToPixels(body.getPosition().y);
-
-		if (yy > t - minSize / 3 + Boundary.difVolume) {
-			Vec2 v = new Vec2(body.getPosition().x, PBox2D.scalarPixelsToWorld(t
-					- minSize + Boundary.difVolume));
+	
+		if (body.getPosition().y > boundaries[2].body.getPosition().y) {
+			Vec2 v = new Vec2(body.getPosition().x, 
+					boundaries[2].body.getPosition().y-PBox2D.scalarPixelsToWorld(maxSize));
 			if (body != null && v != null)
 				body.setTransform(v, body.getAngle());
 		}
@@ -429,6 +400,7 @@ public class Molecule {
 		if (P5Canvas.isDisplayForces && !name.equals("Water")){
 			int numElement = elementNames.size();
 			for (int i=0; i<numElement;i++){
+				if (loc[i]==null) continue;
 				parent.stroke(Color.BLUE.getRGB());
 				parent.line(PBox2D.scalarWorldToPixels(loc[i].x), parent.height-PBox2D.scalarWorldToPixels(loc[i].y),
 					PBox2D.scalarWorldToPixels(loc[i].x)+PBox2D.scalarWorldToPixels(sumForceWaterX[i]+sumForceX[i]), 

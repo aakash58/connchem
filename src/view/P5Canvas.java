@@ -40,6 +40,7 @@ public class P5Canvas extends PApplet{
 	public static boolean isEnableBrushing = false;
 	public static boolean isDisplayForces = false;
 	public static boolean isDisplayJoints = false;
+	public static boolean isConvertMol = false;
 	
 	public static int creationCount = 0;
 	public static float temp =25.f;
@@ -98,13 +99,11 @@ public class P5Canvas extends PApplet{
 		// Initialize box2d physics and create the world
 		box2d.createWorld();
 		box2d.setGravity(0f,-10f);
-	
 		
 		// Turn on collision listening!
 		// TODO turn on collisions by un-commenting below
 		box2d.listenForCollisions();
 		setBoundary(0,0,560/0.77f,635/0.77f);	
-		//testDbInterface();
 	}
 	
 	public void setBoundary(float xx, float yy, float ww, float hh) {
@@ -187,49 +186,35 @@ public class P5Canvas extends PApplet{
  			
 			computeEnergy();
  			
- 			
-			for (int i = 0; i < molecules.size(); i++) {
-				Molecule m = molecules.get(i);
-				m.waterPartner =-1;
-				m.NaClPartner =-1;
-				m.ionDis =0;
+			if (Main.selectedUnit==2){
+				if (Main.selectedSet==1 || Main.selectedSet==4 || Main.selectedSet==7){
+					for (int i = 0; i < molecules.size(); i++) {
+						Molecule m = molecules.get(i);
+						m.ionDis =0;
+						if (Main.selectedSet==4 && m.getName().equals("Calcium-Ion"))
+								computeCaClPartner(i,m);
+					}
+					
+				}
+				
 			}
-		
-			
- 			/*for (int i = 0; i < molecules.size(); i++) {
-				Molecule m = molecules.get(i);
-				computeWaterPartner(i,m);
-			}
- 			
- 			
-			for (int i = 0; i < molecules.size(); i++) {
-				Molecule m = molecules.get(i);
-				//Unit 2, Set 1
-				if (m.getName().equals("Sodium-Ion"))
-					computeNaClPartner(i,m);
-				//Unit 2, Set 4
-				else if (m.getName().equals("Calcium-Ion"))
-					computeCaClPartner(i,m);
-			}
-			*/
-			
-			
 			for (int i = 0; i < molecules.size(); i++) {
 				Molecule m = molecules.get(i);
 				if (m.getName().equals("Water"))
 					setForceWater(i,m);
 				else if (Main.selectedUnit==1)
 					setForce(i,m);
-				else{
-					if(Main.selectedSet==1)
+				else {
+					if(Main.selectedSet==1 && Main.selectedSim<4)
 						computeForceNaCl(i,m);
 					else if(Main.selectedSet==2)
-						computeForceSiliconDioxide(i,m);
+						computeForceSiO2(i,m);
 					else if(Main.selectedSet==3)
 						computeForceGlycerol(i,m);
 					else if(Main.selectedSet==4){
 						computeForceCaCl(i,m);	
 						computeForceFromWater(i,m);	
+						checkSpeed(i,m);
 					}
 					else if(Main.selectedSet==5)
 						computeForceAceticAcid(i,m);
@@ -237,11 +222,11 @@ public class P5Canvas extends PApplet{
 						computeForceNaHCO3(i,m);
 						computeForceFromWater(i,m);	
 					}
+					else if(Main.selectedSet==1 && Main.selectedSim==4){
+						computeForceKCl(i,m);
+					}
+						
 				}
-				if (Main.selectedUnit!=1 && !m.getName().equals("Water")){
-					//checkSpeed(i,m);
-				}
-					
 			}
 			
 			for (int i = 0; i < molecules.size(); i++) {
@@ -258,8 +243,6 @@ public class P5Canvas extends PApplet{
 			this.noFill();
 			this.rect(xStart/scale,yStart/scale, (mouseX/scale-xStart/scale), (mouseY/scale-yStart/scale));	
 		}
-		
-		
 		
 		for (int i = 0; i < 4; i++) {
 			boundaries[i].display();
@@ -405,12 +388,72 @@ public class P5Canvas extends PApplet{
 	 * Background methods
 	 */
 	private void drawBackground() { // draw background
-		
-
 		pushStyle();
 		fill(127, 127, 127);
 		rect(0, 0, width, height);
 		popStyle();
+	}
+	
+	public float getDensity(String compoundName) {
+		if (compoundName.equals("Sodium-Chloride"))
+			return 2.165f;
+		else if (compoundName.equals("Silicon-Dioxide"))
+			return 1.52f;
+		else if (compoundName.equals("Calcium-Chloride"))
+			return 2.15f; 
+		else if (compoundName.equals("Sodium-Bicarbonate"))
+			return 2.20f; 
+		else if (compoundName.equals("Potassium-Chloride"))
+			return 1.984f; 
+		else if (compoundName.equals("Glycerol"))
+			return 1.261f; 	
+		else if (compoundName.equals("Pentane"))
+			return 0.63f; 	
+		else if (compoundName.equals("Acetic-Acid"))
+			return 1.049f;
+		else 
+			return 1;
+	}
+	public static float getMolMass(String compoundName) {
+		if (compoundName.equals("Sodium-Chloride"))
+			return 58f;
+		else if (compoundName.equals("Silicon-Dioxide"))
+			return 60f;
+		else if (compoundName.equals("Calcium-Chloride"))
+			return 110f; 
+		else if (compoundName.equals("Sodium-Bicarbonate"))
+			return 84f; 
+		else if (compoundName.equals("Potassium-Chloride"))
+			return 74.5f; 
+		else if (compoundName.equals("Glycerol"))
+			return 92f; 	
+		else if (compoundName.equals("Pentane"))
+			return 72; 	
+		else if (compoundName.equals("Acetic-Acid"))
+			return 60f;
+		else 
+			return 1;
+	}
+	
+	public static void convertMassMol1() {
+		double mass = Unit2.num_total*Unit2.mToMass;
+		if (Compound.names.size()<=1) return;
+		float mol = (float) (mass/getMolMass(Compound.names.get(1))); 
+		DecimalFormat df = new DecimalFormat("###.##");
+		Main.m1Mass.setText(df.format(mol)+" mol");
+	}
+	public static void convertMassMol2() {
+		double dis = Unit2.massDissolved;
+		if (Compound.names.size()<=1) return;
+		float mol2 = (float) (dis/getMolMass(Compound.names.get(1))); 
+		DecimalFormat df = new DecimalFormat("###.##");
+		Main.m1Disolved.setText(df.format(mol2)+" mol");
+	}
+	
+	public static void convertMolMass1() {
+		double mass = Unit2.num_total*Unit2.mToMass;
+		DecimalFormat df = new DecimalFormat("###.##");
+		Main.m1Mass.setText(df.format(mass)+" g");
 	}
 	
 	public void computeOutput(String compoundName, int count) {
@@ -422,13 +465,26 @@ public class P5Canvas extends PApplet{
 		}
 		if (Main.selectedUnit==2 && !compoundName.equals("Water") && count>0){
 			num_total+=count;
-			num_remain+=count;
 			DecimalFormat df = new DecimalFormat("###.#");
 			Main.m1Label.setText(compoundName+":");
 			float total = Unit2.num_total*Unit2.mToMass;
 			Main.m1Mass.setText(df.format(total)+" g");
-			Main.dashboard.updateUI();
+			if (isConvertMol){
+				convertMassMol1();
+			}
 		}
+		//Compute SoluteVolume
+		float waterVolume = (float) (Unit2.numWater/(Unit2.water100mL/100.));
+		float cVolume =0;
+		if (Compound.names.size()>1){
+			float dens = getDensity(Compound.names.get(1));
+			float total = Unit2.num_total*Unit2.mToMass;
+			cVolume = total/dens;
+		}
+		DecimalFormat df = new DecimalFormat("###.#");
+		Main.soluteVolume.setText(df.format(waterVolume + cVolume)+" mL");
+	
+		Main.dashboard.updateUI();
 		Canvas.satCount=0;
 	}
 	public void computeSaturation() {
@@ -453,14 +509,45 @@ public class P5Canvas extends PApplet{
 		DecimalFormat df = new DecimalFormat("###.#");
 		if (Unit2.num_gone<numGone_atSaturation() || numGone_atSaturation()==0){
 			float dis = Unit2.num_gone*Unit2.mToMass;
-			Main.m1Disolved.setText(df.format(dis)+" g");
+			Unit2.massDissolved = dis;
+			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
 		}
-		else{
+		else if (Unit2.num_gone==numGone_atSaturation()) {
 			float sat = Unit2.computeSat();
-			float dis = computeIonSeperation()/((Unit2.num_gone+1)*(1+Canvas.satCount));
-			Main.m1Disolved.setText(df.format(sat-dis)+" g");
-			if (Main.selectedSet==3 || Main.selectedSet==5)
-				Main.m1Disolved.setText("\u221e");
+			float dis = computeIonSeperation()/(1+Canvas.satCount);
+			Unit2.massDissolved = sat - dis;
+			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
+		}
+		else if (Unit2.num_gone>numGone_atSaturation()) {
+			float sat = Unit2.computeSat();
+			float gone = Unit2.num_gone*Unit2.mToMass;
+			float average = (sat+gone)/2;
+			float dis = computeIonSeperation()/(1+Canvas.satCount);
+			Unit2.massDissolved = average+dis;
+			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
+			if (Canvas.satCount>10){
+				Unit2.massDissolved = sat+dis;
+				Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
+			}
+		}
+		
+		double dis = Unit2.massDissolved;
+		double total =  Unit2.num_total*Unit2.mToMass;
+		if (dis>total){
+			Unit2.massDissolved = (float) total;
+			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
+		}
+		if (Main.selectedSet==3 || Main.selectedSet==5){
+			Unit2.massDissolved = Unit2.num_total*Unit2.mToMass;
+			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
+		}	
+		if (temp<=0 || temp>=100){ 
+			Unit2.massDissolved =0;
+			Main.m1Disolved.setText("0 g");
+		}
+		
+		if (isConvertMol){
+			convertMassMol2();
 		}
 		Main.dashboard.updateUI();
 		
@@ -485,16 +572,18 @@ public class P5Canvas extends PApplet{
 		computeOutput(compoundName,count);
 		
 		float PAD =60;
-		float freezingTem = P5Canvas.db.getCompoundFreezingPointCelsius(compoundName);
+		float freezingTem = DBinterface.getCompoundFreezingPointCelsius(compoundName);
 		if (temp<=freezingTem){
 			if (compoundName.equals("Sodium-Chloride"))
 				Unit2.add2Ions("Sodium-Ion","Chlorine-Ion",count, box2d, this);
 			else if (compoundName.equals("Silicon-Dioxide"))
-				Unit2.addSiliconDioxide(compoundName,count, box2d, this); 
+				Unit2.addSiO2(compoundName,count, box2d, this); 
 			else if (compoundName.equals("Calcium-Chloride"))
 				Unit2.addCalciumChloride(compoundName,count, box2d, this); 
 			else if (compoundName.equals("Sodium-Bicarbonate"))
-				Unit2.addSodiumBicarbonate(compoundName,count, box2d, this); 
+				Unit2.addNaHCO3(compoundName,count, box2d, this); 
+			else if (compoundName.equals("Potassium-Chloride"))
+				Unit2.add2Ions("Potassium-Ion","Chlorine-Ion",count, box2d, this); 
 			else	
 				addSolid(compoundName,count);
 		
@@ -527,16 +616,18 @@ public class P5Canvas extends PApplet{
 		Compound.counts.set(index, addCount);
 
 		
-		float freezingTem = P5Canvas.db.getCompoundFreezingPointCelsius(compoundName);
+		float freezingTem = DBinterface.getCompoundFreezingPointCelsius(compoundName);
 		if (temp<=freezingTem){
 			if (compoundName.equals("Sodium-Chloride"))
 				Unit2.add2Ions("Sodium-Ion","Chlorine-Ion",count, box2d, this);
 			else if (compoundName.equals("Silicon-Dioxide"))
-				Unit2.addSiliconDioxide(compoundName,count, box2d, this); 
+				Unit2.addSiO2(compoundName,count, box2d, this); 
 			else if (compoundName.equals("Calcium-Chloride"))
 				Unit2.addCalciumChloride(compoundName,count, box2d, this); 
 			else if (compoundName.equals("Sodium-Bicarbonate"))
-				Unit2.addSodiumBicarbonate(compoundName,count, box2d, this); 
+				Unit2.addNaHCO3(compoundName,count, box2d, this); 
+			else if (compoundName.equals("Potassium-Chloride"))
+				Unit2.add2Ions("Potassium-Ion","Chlorine-Ion",count, box2d, this); 
 			else	
 				addSolid(compoundName,count);
 		}
@@ -594,7 +685,7 @@ public class P5Canvas extends PApplet{
 		isEnable = tmp;
 	}
 	
-	//Set Speed of Molecules; values are from 0 to 100; 20 is default value 
+	//Set Speed of Molecules; values are from 0 to 100; 100 is default value 
 	public void setSpeed(float speed) {
 		speedRate = speed;
 	}
