@@ -88,7 +88,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 public class Main {
-	// Controllers
+	// Controllers  
 	// this is a different change. 
 	private static P5Canvas p5Canvas = new P5Canvas();
 	// TODO flag
