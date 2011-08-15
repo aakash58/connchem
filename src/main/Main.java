@@ -6,7 +6,7 @@ package main;
 //Project Leader: Mike Stieff, PhD, University of Illinois at Chicago
 //Modeled in Processing by: Tuan Dang and Allan Berry
 
-//This software is Copyright © 2010, 2011 University of Illinois at Chicago,
+//This software is Copyright ï¿½ 2010, 2011 University of Illinois at Chicago,
 //and is released under the GNU General Public License.
 //Please see "resources/copying.txt" for more details.
 
