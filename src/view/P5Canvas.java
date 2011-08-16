@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Timer;
 
 import processing.core.PApplet;
 
@@ -60,7 +61,8 @@ public class P5Canvas extends PApplet{
 	public static int heatRGB = 0;
 	
 	public static long count = 0;
-	public static long second = 0;
+	public static long curTime = 0;
+	public static long oldTime =0;
 	public static int xStart = 0;
 	public static int yStart = 0;
 	public static int xDrag = 0;
@@ -94,7 +96,7 @@ public class P5Canvas extends PApplet{
 		
 	public void setup() {
 		smooth();
-		frameRate(frameRate);
+		//frameRate(frameRate);
 		
 		// Initialize box2d physics and create the world
 		box2d.createWorld();
@@ -171,18 +173,22 @@ public class P5Canvas extends PApplet{
 		
 		this.scale(scale);
  		if (isEnable && !isDrag){
-			float timeStep = 1 / 60.0f;
+			float timeStep = 1 / 30.0f;
 			if (speedRate<1){
 				timeStep *= speedRate;
 			}
  			box2d.step(timeStep,5,5);
+			//box2d.step();
  			count++;
  			
  			long sec = count/24;
+ 			//Repaint graph
+ 			/*
  			if (sec>second){
  				second =sec;
  				Main.canvas.repaint();
  			}
+ 			*/
  			
 			computeEnergy();
  			
