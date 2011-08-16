@@ -41,6 +41,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JButton;
+import javax.swing.Timer;
+
 import java.awt.Component;
 import javax.swing.Box;
 
@@ -148,6 +150,11 @@ public class Main {
 	
 	public static JButton playBtn;
 	public static boolean isFirst =true; 
+	
+	public int pause = 0;   // the length of the pause at the begginning
+	public int speed = 1000;  // recur every second.
+	public Timer timer;
+	public static int time = 0;
 	
 	/**
 	 * Launch the application.
@@ -381,7 +388,8 @@ public class Main {
 		
 		p5Canvas.removeAllMolecules();
 		P5Canvas.count=0;
-		P5Canvas.second=0;
+		P5Canvas.curTime=0;
+		P5Canvas.oldTime=0;
 		
 		dashboard.removeAll();
 		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
@@ -492,7 +500,14 @@ public class Main {
 		}	
 		P5Canvas.isEnable =temp;
 		
+		//reset timer
+		resetTimer();
+		
 	} 
+	public static void resetTimer()
+	{
+		time = 0 ;
+	}
 		
 		
 	/**
@@ -662,14 +677,17 @@ public class Main {
 		playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (P5Canvas.isEnable){
+				if (P5Canvas.isEnable){ //playing, turning to PAUSE					
+					//pause timer
+					timer.stop();
 					P5Canvas.isEnable = false;
 					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
 					
 				}	
-				else{ 
+				else{ //Pausing, turning to PLAY
 					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
 					P5Canvas.isEnable = true; 
+					timer.start();
 				}	
 			}
 		});
@@ -969,6 +987,18 @@ public class Main {
 			mainFrame.remove(rightPanel);
 			mainFrame.getContentPane().add(welcomePanel, "cell 1 0,grow");
 		}
+		
+		//Set up timer, start when users press PLAY button
+	       timer = new Timer(speed, new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					System.out.print(time+"  ");
+					time++;
+					canvas.repaint();
+				}
+			});
+	        timer.setInitialDelay(pause);
+	        
+
 	}
 
 }

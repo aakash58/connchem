@@ -120,7 +120,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		computeDisolved();
 		resetMoleculeCount();
 		updateTableView();
-		if (second>maxTime){
+		if (Main.time>maxTime){
 			maxTime *=2;
 		}
 		//Rescale Y-axis
@@ -141,10 +141,10 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
 				num1 = tmpLine.getNum2();
 			}	
-			Line l = new Line(margin, 225-margin, (int) second-1, (int) second,  num1, num2, h2, w2);
+			Line l = new Line(margin, 225-margin, (int) Main.time-1, (int) Main.time,  num1, num2, h2, w2);
 			lines[i].add(l);
 		}
-		Main.elapsedTime.setText(formatTime(second));
+		Main.elapsedTime.setText(formatTime(Main.time));
 		
 		
 		for (int i=0; i< MAXCOMPOUND;i++){
