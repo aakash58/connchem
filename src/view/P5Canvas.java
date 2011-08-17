@@ -38,7 +38,7 @@ public class P5Canvas extends PApplet{
 	// A reference to our box2d world
 	private PBox2D box2d;
 	public static boolean isEnable = false; 
-	public static boolean isEnableBrushing = false;
+	public static boolean isHidingEnabled = false;
 	public static boolean isDisplayForces = false;
 	public static boolean isDisplayJoints = false;
 	public static boolean isConvertMol = false;
@@ -72,7 +72,7 @@ public class P5Canvas extends PApplet{
 	ArrayList<Molecule> killingList = new ArrayList<Molecule>();
 	public static int draggingBoundary =-1;
 	private boolean isFirstTime =true;
-	public boolean isBrushing=false;
+	public boolean isHidden=false;
 	
 	//Time step property
 	private float timeStep= 1.0f/60.0f;
@@ -242,7 +242,7 @@ public class P5Canvas extends PApplet{
 				}	
 			}
 		}	
-		if (isEnableBrushing && isBrushing){
+		if (isHidingEnabled && isHidden){
 			this.stroke(Color.WHITE.getRGB());
 			this.noFill();
 			this.rect(xStart/scale,yStart/scale, (mouseX/scale-xStart/scale), (mouseY/scale-yStart/scale));	
@@ -255,13 +255,13 @@ public class P5Canvas extends PApplet{
 		// Display all molecules
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			if (isEnableBrushing && isBrushing){
+			if (isHidingEnabled && isHidden){
 				Vec2 p = box2d.coordWorldToPixels(m.getPosition());
 				if (xStart/scale <p.x && p.x< mouseX/scale &&
 						yStart/scale <p.y && p.y< mouseY/scale )
-					m.isBrushed =true;
+					m.isHidden =true;
 				else
-					m.isBrushed =false;
+					m.isHidden =false;
 			}
 			m.display();
 		}
@@ -765,14 +765,14 @@ public class P5Canvas extends PApplet{
 	}
 		
 	public void mousePressed() {
-		isBrushing = true;
+		isHidden = true;
 		xStart = mouseX;
 		yStart = mouseY;
 		draggingBoundary = boundaries[2].isIn(mouseX, mouseY);
 	}
 	
 	public void mouseReleased() {
-		isBrushing =false;
+		isHidden =false;
 		xDrag =0;
 		yDrag =0;
 		isDrag = false;
@@ -787,7 +787,7 @@ public class P5Canvas extends PApplet{
 	}
 	
 	public void mouseDragged() {
-		if (isEnableBrushing){
+		if (isHidingEnabled){
 			
 		}
 		else{	

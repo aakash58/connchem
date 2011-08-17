@@ -42,7 +42,7 @@ public class Joint {
 	private float minSize;
 	public boolean polarity;
 	public Vec2 off;
-	public boolean isBrushed =false;
+	public boolean isHidden =false;
 
 	public Vec2 force = new Vec2(0,0);
 	public Vec2 offset1 = new Vec2(0,0);
