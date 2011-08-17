@@ -4,7 +4,7 @@ package main;
 //part of the Connected Chemistry Curriculum
 
 //Project Leader: Mike Stieff, PhD, University of Illinois at Chicago
-//Modeled in Processing by: Tuan Dang and Allan Berry
+//Modeled in Processing by: Tuan Dang, Qin Li and Allan Berry
 
 //This software is Copyright � 2010, 2011 University of Illinois at Chicago,
 //and is released under the GNU General Public License.
@@ -145,9 +145,9 @@ public class Main {
 	public static JLabel waterVolume;
 	public static JLabel m1Label;
 	public static JLabel m1MassLabel;
-	public static JLabel waterLabel;
+	public static JLabel solventLabel;
 	public static JLabel satLabel;
-	public static JLabel soluteLabel;
+	public static JLabel solutionLabel;
 	public static JLabel soluteVolume;
 	public static JCheckBox cBoxConvert;
 	
@@ -420,9 +420,9 @@ public class Main {
 			dashboard.add(m1Disolved, "cell 1 3");
 			//dashboard.add(satLabel, "cell 0 3,alignx right");
 			//dashboard.add(satMass, "cell 1 3");
-			dashboard.add(waterLabel, "cell 0 4,alignx right");
+			dashboard.add(solventLabel, "cell 0 4,alignx right");
 			dashboard.add(waterVolume, "cell 1 4");
-			dashboard.add(soluteLabel, "cell 0 5,alignx right");
+			dashboard.add(solutionLabel, "cell 0 5,alignx right");
 			dashboard.add(soluteVolume, "cell 1 5");
 		}
 			
@@ -567,12 +567,12 @@ public class Main {
 		
 			}
 		});
-		simMenu.addMouseListener(new MouseAdapter() {
+		/*simMenu.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				simMenu.doClick();
 			}
-		});
+		});*/
 		menuBar.add(simMenu);
 		simMenu.setBackground(selectedColor);
 		
@@ -680,17 +680,21 @@ public class Main {
 		periodicTableBtn.setEnabled(false);
 		periodicTableBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconPeriodicTable.png")));
 		menuBar.add(periodicTableBtn);
-		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[285.00][480px,grow][320px]", "[grow]"));
+		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[285.00][480px,grow][320px]", "[][][grow]"));
 
 		
 		
 		//*********************************** LEFT PANEL ********************************************
 		leftPanel = new JPanel();
-		mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
-		leftPanel.setLayout(new MigLayout("insets 6, gap 18", "20[260]", "20[215][]"));
+		mainFrame.getContentPane().add(leftPanel, "cell 0 2,grow");
+		leftPanel.setLayout(new MigLayout("insets 6, gap 18", "[260]", "[]20[215,top][][]"));
+		
+		JLabel lblInput = new JLabel("Input");
+		lblInput.setFont(new Font("Lucida Grande", Font.BOLD, 14));
+		leftPanel.add(lblInput, "cell 0 0,alignx center");
 
 		JPanel timerSubpanel = new JPanel();
-		leftPanel.add(timerSubpanel, "cell 0 0,grow");
+		leftPanel.add(timerSubpanel, "cell 0 1,grow");
 		timerSubpanel.setLayout(new MigLayout("insets 3, gap 4", "[110px][50px]", "[180px][grow]"));
 		
 		playBtn = new JButton("");
@@ -720,13 +724,13 @@ public class Main {
 
 		JPanel checkBoxPanel = new JPanel();
 		checkBoxPanel.setLayout(new BorderLayout());
-		JCheckBox cBox1 =  new JCheckBox("Enable Brushing"); 
+		JCheckBox cBox1 =  new JCheckBox("Enable Molecule Hiding"); 
 		cBox1.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
-					P5Canvas.isEnableBrushing =true;
+					P5Canvas.isHidingEnabled =true;
 				else if	(e.getStateChange() == ItemEvent.DESELECTED)
-					P5Canvas.isEnableBrushing = false;
+					P5Canvas.isHidingEnabled = false;
 			}
 		});
 		JCheckBox cBox2 =  new JCheckBox("Display Forces"); 
@@ -766,12 +770,12 @@ public class Main {
 		
 		tableSet = new TableSet();
 		timerSubpanel.add(tableSet, "cell 0 0 1 2,growy");
-			
+		
 		
 		
 		//**************************************** Add elements Control panel ************************************
 		dynamicScrollPane = new JScrollPane();
-		leftPanel.add(dynamicScrollPane, "cell 0 1,grow");
+		leftPanel.add(dynamicScrollPane, "cell 0 2,grow");
 		
 		dynamicPanel = new JPanel();
 		dynamicScrollPane.setViewportView(dynamicPanel);
@@ -788,7 +792,7 @@ public class Main {
 				volumeLabel.setText(volume+" mL");
 			}
 		});
-		mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
+		mainFrame.getContentPane().add(centerPanel, "cell 1 2,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
 		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[][560.00px][]", "[690px][center]"));
 
@@ -799,8 +803,10 @@ public class Main {
 		
 		JPanel clPanel = new JPanel();
 		clPanel.setLayout(new MigLayout("insets 0, gap 0", "[]", "[][210.00][][40.00][][210.00][]"));
+		volumeSlider.setEnabled(false);
 		
 		volumeSlider.setOrientation(SwingConstants.VERTICAL);
+		
 		volumeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				if (!isVolumeblocked){
@@ -813,7 +819,9 @@ public class Main {
 		});
 	    clPanel.add(volumeLabel, "flowy,cell 0 0,alignx right");
 		clPanel.add(volumeSlider, "cell 0 1,alignx right,growy");
-		JLabel canvasControlLabel_main_volume = new JLabel("   Volume");
+		JLabel canvasControlLabel_main_volume = new JLabel("Volume");
+		
+		
 		clPanel.add(canvasControlLabel_main_volume, "cell 0 2,alignx center");
 
 		
@@ -888,11 +896,21 @@ public class Main {
 		
 		//***************************************** RIGHT PANEL *******************************************
 		rightPanel = new JPanel();
-		mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
-		rightPanel.setLayout(new MigLayout("insets 0, gap 0", "[320.00]", "[350.00,grow][grow]"));
+		mainFrame.getContentPane().add(rightPanel, "cell 2 2,grow");
+		rightPanel.setLayout(new MigLayout("insets 0, gap 0", "[320.00,grow,center]", "[][][350.00,grow][][grow][grow]"));
+		
+		JLabel lblOutput = new JLabel("Output");
+		lblOutput.setLabelFor(rightPanel);
+		lblOutput.setFont(new Font("Lucida Grande", Font.BOLD, 14));
+		rightPanel.add(lblOutput, "cell 0 0");
+		
+		JLabel lblMacroscopid = new JLabel("Submicroscopic Level");
+		lblMacroscopid.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		rightPanel.add(lblMacroscopid, "cell 0 1");
 
 		JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP);
-		rightPanel.add(graphTabs, "cell 0 0,grow");
+		lblMacroscopid.setLabelFor(graphTabs);
+		rightPanel.add(graphTabs, "cell 0 2,grow");
 
 		JPanel graphSet_1 = new JPanel();
 		graphTabs.addTab("Compounds", null, graphSet_1, null);
@@ -908,11 +926,16 @@ public class Main {
 		graphSet_1.add(tableView, "cell 0 1,grow");
 		
 		JPanel graphSet_2 = new JPanel();
-		graphTabs.addTab("pH", null, graphSet_2, null);
+		
+		JLabel lblOutputMacroscopicLevel = new JLabel("Macroscopic Level");
+		lblOutputMacroscopicLevel.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
+		//graphTabs.addTab("pH", null, graphSet_2, null); // this will get reactivated in Unit 8
 
 		dashboard = new JPanel();
-		rightPanel.add(dashboard, "cell 0 1,alignx center,growy");
-		dashboard.setLayout(new MigLayout("", "[][100]", "[][][][]"));
+		lblOutputMacroscopicLevel.setLabelFor(dashboard);
+		rightPanel.add(dashboard, "cell 0 4,grow");
+		dashboard.setLayout(new MigLayout("", "[grow,right][100]", "[][][][][][]"));
 
 		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
 		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
@@ -934,11 +957,11 @@ public class Main {
 		dashboard.add(averageSystemEnergy, "cell 1 2");*/
 		
 		
-		m1Label = new JLabel("Mass of Compound:");
+		m1Label = new JLabel("Compound Mass:");
 		dashboard.add(m1Label, "cell 0 1,alignx right");
 		m1Mass= new JLabel("0 g");
 		dashboard.add(m1Mass, "cell 1 1");
-		m1MassLabel = new JLabel("Disolved:");
+		m1MassLabel = new JLabel("Dissolved:");
 		dashboard.add(m1MassLabel, "cell 0 2,alignx right");
 		m1Disolved= new JLabel("0 g");
 		dashboard.add(m1Disolved, "cell 1 2");
@@ -947,31 +970,38 @@ public class Main {
 		satMass= new JLabel("0 g");
 		dashboard.add(satMass, "cell 1 3");
 		
-		waterLabel = new JLabel("Volume Solvent:");
-		dashboard.add(waterLabel, "cell 0 4,alignx right");
+		solventLabel = new JLabel("Solvent Volume:");
+		dashboard.add(solventLabel, "cell 0 4,alignx right");
 		waterVolume= new JLabel("0 mL");
 		dashboard.add(waterVolume, "cell 1 4");
 
-		soluteLabel = new JLabel("Volume Solution:");
-		dashboard.add(soluteLabel, "cell 0 5,alignx right");
+		solutionLabel = new JLabel("Solution Volume:");
+		dashboard.add(solutionLabel, "cell 0 5,alignx right");
 		soluteVolume= new JLabel("0 mL");
 		dashboard.add(soluteVolume, "cell 1 5");
 
 		
-		cBoxConvert =  new JCheckBox("Conver Mass to Mol"); 
-		cBoxConvert.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED){
-					P5Canvas.isConvertMol =true;
-					P5Canvas.convertMassMol1();
-				}	
-				else if	(e.getStateChange() == ItemEvent.DESELECTED){
-					P5Canvas.isConvertMol = false;
-					P5Canvas.convertMolMass1();
-				}	
-			}
-		});
-		dashboard.add(cBoxConvert, "cell 0 7");
+				
+				cBoxConvert =  new JCheckBox("Convert Mass to Moles"); 
+				cBoxConvert.addItemListener(new ItemListener() {
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED){
+							P5Canvas.isConvertMol =true;
+							P5Canvas.convertMassMol1();
+						}	
+						else if	(e.getStateChange() == ItemEvent.DESELECTED){
+							P5Canvas.isConvertMol = false;
+							P5Canvas.convertMolMass1();
+						}	
+					}
+				});
+				//dashboard.add(cBoxConvert, "cell 1 6");
+				
+				JPanel outputControls = new JPanel();
+				rightPanel.add(outputControls, "cell 0 5,grow");
+				outputControls.setLayout(new MigLayout("", "[]", "[]"));
+				
+				outputControls.add(cBoxConvert, "cell 0 0");
 
 		
 /*		JLabel totalSystemPressureLabel = new JLabel("Total System Pressure:");
@@ -991,7 +1021,7 @@ public class Main {
 			label1.setForeground(Color.blue);
 			welcomePanel.add(label1, "cell 1 1,alignx center");
 	    
-			JLabel label2 = new JLabel("Please select a simuation on the top left coner");
+			JLabel label2 = new JLabel("Please select a simuation from the menu at top left.");
 			label2.setFont(new Font("Serif", Font.PLAIN, 33));
 			//label2.setForeground(Color.RED);
 			welcomePanel.add(label2, "cell 1 2,alignx center");

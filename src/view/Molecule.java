@@ -42,7 +42,7 @@ public class Molecule {
 	private float minSize;
 	private float maxSize;
 	public boolean polarity;
-	public boolean isBrushed =false;
+	public boolean isHidden =false;
 	public float freezingTem;
 	public float boilingTem;
 	
@@ -387,7 +387,7 @@ public class Molecule {
 				}
 			}
 		}
-		else if (P5Canvas.isEnableBrushing && !isBrushed){
+		else if (P5Canvas.isHidingEnabled && !isHidden){
 			parent.noStroke();
 			for (int i=0; i<circles.length;i++){
 				parent.ellipse( circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2,circles[i][0]*2, circles[i][0]*2);
