@@ -38,12 +38,12 @@ public class Compound {
 	}
 	public static int getMoleculeNum(int index){
 		int num = counts.get(index);
-		System.out.println("Molecule number is "+num);
+		//System.out.println("Molecule number is "+num);
 		return num;
 	}
 	public static int getMoleculeCap(int index){
 		int cap = caps.get(index);
-		System.out.println("Molecule cap is "+cap);
+		//System.out.println("Molecule cap is "+cap);
 		return cap;
 	}
 	

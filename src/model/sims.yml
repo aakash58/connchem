@@ -34,7 +34,6 @@ units:
       compounds:
       - compound: "Water"
         qty: 20
-        cap: 95
   - sim: 2
     name: "Classifying Matter"
     controls:
@@ -168,44 +167,58 @@ units:
       compounds: 
       - compound: "Water"
         qty: 0
+        cap: 95
       - compound: "Sodium Chloride"
-        qty: 6
+        qty: 2
+        cap: 10
     - set: 2
       compounds:
       - compound: "Water"
         qty: 0
+        cap: 95
       - compound: "Silicon Dioxide"
-        qty: 12
+        qty: 2
+        cap: 20
     - set: 3
       compounds:
       - compound: "Water"
-        qty: 25
+        qty: 0
+        cap: 50
       - compound: "Glycerol"
-        qty: 5
+        qty: 2
+        cap: 8
     - set: 4
       compounds:
       - compound: "Water"
         qty: 0
+        cap: 95
       - compound: "Calcium-Chloride"
-        qty: 6
+        qty: 2
+        cap: 8
     - set: 5
       compounds:
       - compound: "Water"
-        qty: 25
+        qty: 0
+        cap: 45
       - compound: "Acetic Acid"
-        qty: 8    
+        qty: 2 
+        cap: 13
     - set: 6
       compounds:
       - compound: "Water"
-        qty: 30
+        qty: 0
+        cap: 60
       - compound: "Pentane"
-        qty: 8   
+        qty: 2  
+        cap: 8
     - set: 7
       compounds:
       - compound: "Water"
         qty: 0
+        cap: 50
       - compound: "Sodium Bicarbonate"
-        qty: 6
+        qty: 2
+        cap: 15
   - sim: 3
     name: "Solubility Changes"
     sets:
@@ -213,44 +226,58 @@ units:
       compounds: 
       - compound: "Water"
         qty: 0
+        cap: 95
       - compound: "Sodium Chloride"
-        qty: 6
+        qty: 2
+        cap: 10
     - set: 2
       compounds: 
       - compound: "Water"
         qty: 0
+        cap: 95
       - compound: "Silicon Dioxide"
-        qty: 12             
+        qty: 2
+        cap: 20   
     - set: 3
       compounds: 
       - compound: "Water"
-        qty: 25
+        qty: 0
+        cap: 50
       - compound: "Glycerol"
-        qty: 5    
+        qty: 2
+        cap: 8
     - set: 4
       compounds: 
       - compound: "Water"
         qty: 0
+        cap: 95
       - compound: "Calcium-Chloride"
-        qty: 6
+        qty: 2
+        cap: 8
     - set: 5
       compounds: 
       - compound: "Water"
-        qty: 25
+        qty: 0
+        cap: 45
       - compound: "Acetic Acid"
-        qty: 8    
+        qty: 2
+        cap: 13  
     - set: 6
       compounds: 
       - compound: "Water"
-        qty: 30
+        qty: 0
+        cap: 40
       - compound: "Pentane"
-        qty: 8  
+        qty: 2
+        cap: 8
     - set: 7
       compounds: 
       - compound: "Water"
         qty: 0
+        cap: 50
       - compound: "Sodium Bicarbonate"
-        qty: 6
+        qty: 2
+        cap: 15
   - sim: 4
     name: "Saturation"
     sets:
@@ -258,8 +285,10 @@ units:
       compounds:
       - compound: "Water"
         qty: 0
+        cap: 95
       - compound: "Potassium Chloride"
-        qty: 6         
+        qty: 2
+        cap: 10
 - unit: 3
   name: "Reactions and Stoichiometry"
   sims:

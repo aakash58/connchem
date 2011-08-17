@@ -427,7 +427,12 @@ public class YAMLinterface {
 	//Get maximum available number of Compounds
 	public static String getCompoundCap(int unitNumber, int simNumber, int setNumber, int comNumber) {
 		HashMap set = getCompound(unitNumber, simNumber, setNumber,comNumber);
-		if (set==null) return null;
+		String defaultMax = new String("95");
+		if (set==null) 
+			return null;
+		else if (set.get("cap")==null)
+			return defaultMax;
+		else
 		return (String)set.get("cap");
 	}
 
