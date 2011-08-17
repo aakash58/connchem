@@ -5,7 +5,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Timer;
+//import java.util.Timer;
 
 import processing.core.PApplet;
 
@@ -36,7 +36,7 @@ public class P5Canvas extends PApplet{
 	public static float h;//width of the boundary
 	
 	// A reference to our box2d world
-	private PBox2D box2d = new PBox2D(this);
+	private PBox2D box2d;
 	public static boolean isEnable = false; 
 	public static boolean isEnableBrushing = false;
 	public static boolean isDisplayForces = false;
@@ -60,7 +60,7 @@ public class P5Canvas extends PApplet{
 	
 	public static int heatRGB = 0;
 	
-	public static long count = 0;
+	//public static long count = 0;
 	public static long curTime = 0;
 	public static long oldTime =0;
 	public static int xStart = 0;
@@ -72,8 +72,14 @@ public class P5Canvas extends PApplet{
 	ArrayList<Molecule> killingList = new ArrayList<Molecule>();
 	public static int draggingBoundary =-1;
 	private boolean isFirstTime =true;
-	private float frameRate =24;
 	public boolean isBrushing=false;
+	
+	//Time step property
+	private float timeStep= 1.0f/60.0f;
+	private int velocityIterations = 6;
+	private int positionIterations =2;
+	
+	private float FRAME_RATE =30;
 	
 	
 	/*
@@ -96,9 +102,10 @@ public class P5Canvas extends PApplet{
 		
 	public void setup() {
 		smooth();
-		//frameRate(frameRate);
+		frameRate(FRAME_RATE);
 		
 		// Initialize box2d physics and create the world
+		box2d = new PBox2D(this);
 		box2d.createWorld();
 		box2d.setGravity(0f,-10f);
 		
@@ -168,27 +175,18 @@ public class P5Canvas extends PApplet{
 			molecules.remove(m1);
 			molecules.remove(m2);
 			products = new ArrayList<String>();
-			killingList = new ArrayList();
+			killingList = new ArrayList<Molecule>();
 		}
 		
 		this.scale(scale);
  		if (isEnable && !isDrag){
-			float timeStep = 1 / 30.0f;
 			if (speedRate<1){
 				timeStep *= speedRate;
 			}
- 			box2d.step(timeStep,5,5);
+ 			box2d.step(timeStep,velocityIterations,positionIterations);
 			//box2d.step();
- 			count++;
+ 			//count++;
  			
- 			long sec = count/24;
- 			//Repaint graph
- 			/*
- 			if (sec>second){
- 				second =sec;
- 				Main.canvas.repaint();
- 			}
- 			*/
  			
 			computeEnergy();
  			
@@ -267,6 +265,13 @@ public class P5Canvas extends PApplet{
 			}
 			m.display();
 		}
+		
+		//Print out framerate for testing
+		/*
+		fill(255, 255, 255);
+		text("framerate: " + (int)frameRate,12,16);
+		*/
+		
 	}
 	
 	public static void computeEnergy(){
@@ -651,6 +656,18 @@ public class P5Canvas extends PApplet{
 			}
 		}
 		isEnable = tmp;
+	}
+	public int getMoleculesNum(String compoundName)
+	{
+		int index = Compound.names.indexOf(compoundName);
+		int num= Compound.getMoleculeNum(index);	
+		return num;
+	}
+	public int getMoleculesCap(String compoundName)
+	{
+		int index = Compound.names.indexOf(compoundName);
+		int cap= Compound.getMoleculeCap(index);	
+		return cap;
 	}
 	
 	public void addSolid(String compoundName, int count) {

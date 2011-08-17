@@ -293,11 +293,15 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		return c1;
 	}*/
 	public static Color blinkingColor(Color c1){
-		int num = (int) ((count%26+1)*10);
+		//int num = (int) ((count%26+1)*10);
+		int num = 30;
 		int r,g,b;
-		r = c1.getRed()+num;   if (r>255) r = 255;
-		g = c1.getGreen()+num; if (g>255) g = 255;
-		b = c1.getBlue()+num;  if (b>255) b = 255;
+		r = c1.getRed()+num;   
+		if (r>255) r = 255;
+		g = c1.getGreen()+num; 
+		if (g>255) g = 255;
+		b = c1.getBlue()+num;  
+		if (b>255) b = 255;
 		Color c2 = new Color(r, g,b);
 		return c2;
 	}

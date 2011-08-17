@@ -49,7 +49,7 @@ public class Molecule {
 	public Vec2 force = new Vec2(0,0);
 	public Vec2[] loc = new Vec2[20];
 	public Vec2[] locWorld = new Vec2[20];
-	public float[] gap = new float[20];
+	public float[] gap = new float[20];     //Distance from a molecule`s top left corner to its center
 	public float[] a1 = new float[20];
 	
 	public float[] sumForceX;
@@ -101,6 +101,7 @@ public class Molecule {
 		freezingTem = DBinterface.getCompoundFreezingPointCelsius(name);
 		boilingTem = DBinterface.getCompoundBoilingPointCelsius(name);
 		
+		//Identify specific situation
 		if ((name.equals("Sodium-Ion") || name.equals("Potassium-Ion"))
 				&& (Main.selectedUnit==2 && Main.selectedSet!=7)){
 			circles[0][0] = 28;
@@ -109,6 +110,7 @@ public class Molecule {
 			circles[0][0] = 28;
 		}
 		
+		//Set up gap: distance from a molecule`s top left corner to its center
 		for (int i=0; i<numElement;i++){
 			float xx = circles[i][1]-pShapeW/2;
 			float yy = -(circles[i][2]-pShapeH/2);
@@ -368,7 +370,9 @@ public class Molecule {
 		// Get its angle of rotation
 		
 		float a = body.getAngle();
-		// parent.rectMode(parent.CENTER);
+		
+
+		//Draw bodies
 		parent.pushMatrix();
 		parent.translate(pos.x, pos.y);
 		parent.rotate(-a);
@@ -396,7 +400,10 @@ public class Molecule {
 			//parent.ellipse( circles[0][0], 0,6, 6);
 		}
 		parent.popMatrix();
+		//End drawing
 		
+		
+		//Check if it is displaying forces
 		if (P5Canvas.isDisplayForces && !name.equals("Water")){
 			int numElement = elementNames.size();
 			for (int i=0; i<numElement;i++){
@@ -408,7 +415,7 @@ public class Molecule {
 			}
 		}
 		
-		//pos = body.getPosition();
+		//Check if it is displaying joints
 		if (P5Canvas.isDisplayJoints){
 			
 				if (compoundJ>=0) {

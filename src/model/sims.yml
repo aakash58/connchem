@@ -34,6 +34,7 @@ units:
       compounds:
       - compound: "Water"
         qty: 20
+        cap: 95
   - sim: 2
     name: "Classifying Matter"
     controls:
@@ -56,6 +57,7 @@ units:
       compounds:
       - compound: "Water"
         qty: 20
+        cap: 95
     - set: 2
       compounds:
       - compound: "Hydrogen Peroxide"
@@ -152,8 +154,10 @@ units:
       compounds: 
       - compound: "Water"
         qty: 0
+        cap: 95
       - compound: "Sodium Chloride"
-        qty: 6
+        qty: 2
+        cap: 10
   - sim: 2
     name: "Solubility"
     controls:
