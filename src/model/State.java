@@ -11,7 +11,10 @@ public class State {
 	// A list we'll use to track fixed objects
 	public static Boundary[] boundaries = new Boundary[4];
 	
+	public State()
+	{
 	
+	}
 	
 	/*
 	 * Unit, set and sim status

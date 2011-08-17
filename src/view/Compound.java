@@ -10,6 +10,7 @@ import model.DBinterface;
 public class Compound {
 	public static ArrayList<String> names=new ArrayList<String>();
 	public static ArrayList<Integer> counts = new ArrayList<Integer>();
+	public static ArrayList<Integer> caps = new ArrayList<Integer>();
 	public static ArrayList<Float> fTemp = new ArrayList<Float>();
 	public static ArrayList<Float> bTemp = new ArrayList<Float>();
 	public static ArrayList<Float> minLiquidEnergy = new ArrayList<Float>();
@@ -34,6 +35,16 @@ public class Compound {
 			minGasEnergy.add(gasEnergy);
 			
 		}
+	}
+	public static int getMoleculeNum(int index){
+		int num = counts.get(index);
+		System.out.println("Molecule number is "+num);
+		return num;
+	}
+	public static int getMoleculeCap(int index){
+		int cap = caps.get(index);
+		System.out.println("Molecule cap is "+cap);
+		return cap;
 	}
 	
 }

@@ -418,12 +418,20 @@ public class YAMLinterface {
 		return compound;
 	}
 
+	//Get initial quantity of Compounds
 	public static String getCompoundQty(int unitNumber, int simNumber, int setNumber, int comNumber) {
 		HashMap set = getCompound(unitNumber, simNumber, setNumber,comNumber);
 		if (set==null) return null;
 		return (String)set.get("qty");
 	}
+	//Get maximum available number of Compounds
+	public static String getCompoundCap(int unitNumber, int simNumber, int setNumber, int comNumber) {
+		HashMap set = getCompound(unitNumber, simNumber, setNumber,comNumber);
+		if (set==null) return null;
+		return (String)set.get("cap");
+	}
 
+	//Get Compound Name
 	public static String getCompoundName(int unitNumber, int simNumber, int setNumber, int comNumber) {
 		HashMap set = getCompound(unitNumber, simNumber, setNumber,comNumber);
 		if (set==null) return null;

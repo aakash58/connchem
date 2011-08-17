@@ -115,6 +115,9 @@ public class Main {
 	public static JPanel rightPanel;
 	public static JPanel dashboard;
 	
+	//Label parameter on left panel
+	private static String sliderLabel = new String("Add ");
+	
 	public static JPanel leftPanel;
 	public static JPanel centerPanel;
 	public static JPanel welcomePanel;
@@ -307,11 +310,13 @@ public class Main {
 		}
 	}
 	
+	//Update molecule legends on the left panel. Called when reset.
 	public static void updateDynamicPanel(){
 		if (dynamicPanel!=null){
 			dynamicPanel.removeAll();
 			defaultSetMolecules =  new ArrayList();
-			//System.out.println(""+getSetCompounds(selectedUnit,selectedSim,selectedIndex));
+
+			//Get Compounds information in selected set from Yaml file
 			ArrayList compounds= getSetCompounds(selectedUnit,selectedSim,selectedSet);
 			if (compounds!=null){
 				for (int i=0;i<compounds.size();i++){
@@ -321,37 +326,49 @@ public class Main {
 					dynamicPanel.add(panel, "cell 0 "+i+",grow");
 					additionalPanelList.add(panel);
 					
+					//Get Compound Name 
 					String cName =  getCompoundName(selectedUnit,selectedSim,selectedSet,i);
 					defaultSetMolecules.add(cName);
 					JLabel label = new JLabel(cName);
-					
-					//System.out.println("cName: "+cName);
 					final String fixedName = cName.replace(" ", "-");
+					
+					//Repaint molecules icon
 					label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
 					panel.add(label, "cell 0 0 3 1,growx");
 					
-					
-					final JLabel label_1 = new JLabel(""+sliderValue);
+					//Repaint slider label
+					final JLabel label_1 = new JLabel(sliderLabel+sliderValue);
 					panel.add(label_1, "cell 0 1");
 				
-					
+					//Repaint slider and set up slider event listener
 					JSlider slider = new JSlider(minSliderValue,maxSliderValue,sliderValue);
 					panel.add(slider, "cell 1 1");
 					slider.addChangeListener(new ChangeListener() {
 						public void stateChanged(ChangeEvent e) {
 						int value = ((JSlider) e.getSource()).getValue(); 
-						label_1.setText(""+value);
+						label_1.setText(sliderLabel+value);
 						}
 					});
 					
-					
+					//Repaint Add buttion and set up button event listener
 					JButton button_1 = new JButton("");
 					button_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
 					panel.add(button_1, "cell 2 1,growy");
 					button_1.addMouseListener(new MouseAdapter() {
 						public void mouseClicked(MouseEvent arg0) {
-							int count = Integer.parseInt(label_1.getText());
+							int count = Integer.parseInt(label_1.getText().substring(sliderLabel.length()));
+							//Check if molecule number is going over predefined cap number
+							//If yes, add molecules no more than cap number
+							int cap = p5Canvas.getMoleculesCap(fixedName);
+							int curNum = p5Canvas.getMoleculesNum(fixedName);
+							if(cap<(count+curNum))
+							{
+								count = cap - curNum;
+								//Disable Add button
+								arg0.getComponent().setEnabled(false);
+							}
 							p5Canvas.addMolecule(fixedName,count);
+							System.out.println("Added "+count+" molecules");
 						}
 					});
 				
@@ -387,7 +404,7 @@ public class Main {
 		}
 		
 		p5Canvas.removeAllMolecules();
-		P5Canvas.count=0;
+		//P5Canvas.count=0;
 		P5Canvas.curTime=0;
 		P5Canvas.oldTime=0;
 		
@@ -417,9 +434,11 @@ public class Main {
 			for (int i=0; i<a.size();i++){
 				String s = (String) getCompoundName(selectedUnit,selectedSim,selectedSet,i);
 				int num = Integer.parseInt(getCompoundQty(selectedUnit,selectedSim,selectedSet,i).toString());
+				int cap = Integer.parseInt(getCompoundCap(selectedUnit,selectedSim,selectedSet,i).toString());
 				s =s.replace(" ","-");
 				Compound.names.add(s);
 				Compound.counts.add(num);
+				Compound.caps.add(cap);
 				p5Canvas.addMoleculeRandomly(s,num);
 			}
 			if (selectedUnit==1){
@@ -750,7 +769,7 @@ public class Main {
 			
 		
 		
-		//***************** Add elements Control panel
+		//**************************************** Add elements Control panel ************************************
 		dynamicScrollPane = new JScrollPane();
 		leftPanel.add(dynamicScrollPane, "cell 0 1,grow");
 		
@@ -933,7 +952,7 @@ public class Main {
 		waterVolume= new JLabel("0 mL");
 		dashboard.add(waterVolume, "cell 1 4");
 
-		soluteLabel = new JLabel("Volume Solute:");
+		soluteLabel = new JLabel("Volume Solution:");
 		dashboard.add(soluteLabel, "cell 0 5,alignx right");
 		soluteVolume= new JLabel("0 mL");
 		dashboard.add(soluteVolume, "cell 1 5");
@@ -991,7 +1010,7 @@ public class Main {
 		//Set up timer, start when users press PLAY button
 	       timer = new Timer(speed, new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					System.out.print(time+"  ");
+					//System.out.print(time+"  ");
 					time++;
 					canvas.repaint();
 				}
