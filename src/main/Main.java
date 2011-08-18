@@ -124,17 +124,27 @@ public class Main {
 	public static Canvas canvas = new Canvas();
 	public static TableView tableView;
 	public static TableSet tableSet;
+	//left Panel containing volume slider
+	private static JPanel clPanel;
 	public static final JLabel  volumeLabel = new JLabel(P5Canvas.currenttVolume+"mL");
 	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
+	private static JLabel canvasControlLabel_main_volume;
 	public static int defaultZoom =50;
 	public static JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
 	public static int defaultSpeed =100;
 	public static JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
 	public static int heatInit =25;
 	public static int heatMin =-10;
-	public static int heatMax =200;
-	
+	public static int heatMax =200;	
 	public static JSlider heatSlider = new JSlider(heatMin, heatMax, heatInit);
+	
+	//Pressure slider replaced Volume Slider in Unit 2
+	public static JSlider pressureSlider = new JSlider(0,10,1);
+	public static JLabel pressureLabel;
+	private static JLabel canvasControlLabel_main_pressure;
+	public static int defaultPressure = 1;
+	private static boolean isPressureShowing;
+	
 	public static boolean isVolumeblocked = false;
 	public static JLabel totalSystemEnergy;
 	public static JLabel averageSystemEnergy;
@@ -491,10 +501,61 @@ public class Main {
 		
 		//if (P5Canvas.isEnable)
 		//	playBtn.doClick();
+		//In Unit 2, we want to show pressure slider instead of volume Slider
+		//In other Units, we want to show volume Slider only
 		if (playBtn!=null && centerPanel!=null){
-			volumeSlider.requestFocus();
-			volumeSlider.lostFocus(null, null);
-			volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
+
+			if( selectedUnit ==2)
+			{
+				volumeSlider.setVisible(false);
+				volumeLabel.setVisible(false);
+				canvasControlLabel_main_volume.setVisible(false);
+				
+				if( isPressureShowing)
+				{
+					//If showing ,do nothing
+				}
+				else
+				{
+					clPanel.add(pressureLabel, "flowy,cell 0 0,alignx right");
+					clPanel.add(pressureSlider, "cell 0 1,alignx left");
+					clPanel.add(canvasControlLabel_main_pressure, "flowy,cell 0 2, alignx center");
+					isPressureShowing = true;
+				}
+				pressureSlider.setVisible(true);
+				pressureLabel.setVisible(true);
+				canvasControlLabel_main_pressure.setVisible(true);
+			
+			pressureSlider.requestFocus();
+			pressureSlider.lostFocus(null, null);
+			pressureSlider.enable(P5Canvas.yaml.getControlPressureSliderState(selectedUnit, selectedSim));
+			}
+			else
+			{
+				volumeSlider.setVisible(true);
+				volumeLabel.setVisible(true);
+				canvasControlLabel_main_volume.setVisible(true);
+				
+				//pressureLabel.setVisible(false);
+				//canvasControlLabel_main_pressure.setVisible(false);
+				
+				if( isPressureShowing)
+				{
+					//If pressure slider showing ,remove it
+					clPanel.remove(pressureSlider);
+					clPanel.remove(pressureLabel);
+					clPanel.remove(canvasControlLabel_main_pressure);
+					isPressureShowing = false;
+				}
+				else
+				{
+					//Do nothing
+				}
+
+				volumeSlider.requestFocus();
+				volumeSlider.lostFocus(null, null);
+				volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
+			}
 				
 			zoomSlider.requestFocus();
 			zoomSlider.lostFocus(null, null);
@@ -801,12 +862,13 @@ public class Main {
 		
 		
 		
-		JPanel clPanel = new JPanel();
+		clPanel = new JPanel();
 		clPanel.setLayout(new MigLayout("insets 0, gap 0", "[]", "[][210.00][][40.00][][210.00][]"));
-		volumeSlider.setEnabled(false);
 		
-		volumeSlider.setOrientation(SwingConstants.VERTICAL);
-		
+		//Set up Volume Slider
+	
+		volumeSlider.setEnabled(false);		
+		volumeSlider.setOrientation(SwingConstants.VERTICAL);		
 		volumeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				if (!isVolumeblocked){
@@ -818,13 +880,33 @@ public class Main {
 			}
 		});
 	    clPanel.add(volumeLabel, "flowy,cell 0 0,alignx right");
-		clPanel.add(volumeSlider, "cell 0 1,alignx right,growy");
-		JLabel canvasControlLabel_main_volume = new JLabel("Volume");
-		
-		
+		clPanel.add(volumeSlider, "cell 0 1,alignx right");
+		canvasControlLabel_main_volume = new JLabel("Volume");		
 		clPanel.add(canvasControlLabel_main_volume, "cell 0 2,alignx center");
 
+			
+		//Set up Pressure Slide
+		p5Canvas.setPressure(defaultPressure);
+		pressureSlider.setOrientation(SwingConstants.VERTICAL);
+		pressureLabel = new JLabel(defaultPressure+" atm");
+
+		//Pressure is doing nothing, but we need event listener to change number on pressure label
+		pressureSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+					int value = ((JSlider) e.getSource()).getValue(); 
+					p5Canvas.setPressure(value);
+					pressureLabel.setText(value+" atm");
+				
+			}
+		});
 		
+		clPanel.add(pressureLabel, "flowy,cell 0 0,alignx right");
+		clPanel.add(pressureSlider, "cell 0 1,alignx left");
+		canvasControlLabel_main_pressure = new JLabel("Pressure");
+		clPanel.add(canvasControlLabel_main_pressure, "cell 0 2, alignx center");
+		isPressureShowing = true;
+		
+		//Set up Zoom Slider
 		JLabel l2 = new JLabel(" ");
 		clPanel.add(l2, "cell 0 3,alignx center");
 		
@@ -853,7 +935,7 @@ public class Main {
 		JPanel cbPanel = new JPanel();
 		cbPanel.setLayout(new MigLayout("insets 0, gap 0", "[]", "[][210.00][][40.00][][210.00][]"));
 		
-		
+		//Set up Speed slider
 		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
 		final JLabel speedLabel = new JLabel("1x");
 		cbPanel.add(speedLabel, "cell 0 0,alignx left");
@@ -874,7 +956,7 @@ public class Main {
 		cbPanel.add(new JLabel("    "), "cell 0 3,alignx center");
 		
 		
-		
+		//Set up Heat Slider
 		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
 		final JLabel heatLabel = new JLabel(heatInit+"\u2103");
 		cbPanel.add(heatLabel, "cell 0 4,alignx left");
@@ -890,6 +972,9 @@ public class Main {
 		cbPanel.add(heatSlider, "cell 0 5,alignx left,growy");
 		cbPanel.add(canvasControlLabel_main_heat, "cell 0 6");
 		
+
+		
+		//After cbPanel has been set up, add it to CenterPanel
 		centerPanel.add(cbPanel,"cell 2 0");
 		
 		

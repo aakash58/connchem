@@ -50,6 +50,8 @@ public class P5Canvas extends PApplet{
 	public static float speedRate = 1.f;
 	//Default value of heat
 	public static float heatRate = 1.f;
+	//Default value of Pressure
+	public static float pressureRate = 1.f;
 	//Default value of scale slider
 	public static float scale = 0.77f;
 	//Default value of volume slider
@@ -713,7 +715,13 @@ public class P5Canvas extends PApplet{
 		speedRate = speed;
 	}
 	
-	//Set Speed of Molecules; values are from 0 to 100; 50 is default value 
+	//Set Pressure of Container. Value is from 0 to 10, 1 is default
+	public void setPressure(float pressure)
+	{
+		pressureRate = pressure;
+	}
+	
+	//Set Heat of Molecules; values are from 0 to 100; 50 is default value 
 	public void setHeat(int value) {
 		temp = value;
 		for (int i = 0; i < molecules.size(); i++) {

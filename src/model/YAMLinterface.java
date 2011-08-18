@@ -219,6 +219,10 @@ public class YAMLinterface {
 	private static boolean getControlVolumeSliderState() 								{ return getControlVolumeSliderState(getControls()); }
 	private static boolean getControlVolumeSliderState(int unitNumber) 				{ return getControlVolumeSliderState(getControls(unitNumber)); }
 	public static boolean getControlVolumeSliderState(int unitNumber, int simNumber) 	{ return getControlVolumeSliderState(getControls(unitNumber, simNumber)); }
+	private static boolean getControlPressureSliderState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "pressure slider"); }
+	private static boolean getControlPressureSliderState() 								{ return getControlVolumeSliderState(getControls()); }
+	private static boolean getControlPressureSliderState(int unitNumber) 				{ return getControlPressureSliderState(getControls(unitNumber)); }
+	public static boolean getControlPressureSliderState(int unitNumber, int simNumber) { return getControlPressureSliderState(getControls(unitNumber, simNumber)); }
 	
 	private static boolean getControlScaleSliderState(ArrayList<HashMap> controls) 	{ return getControlState(controls, "scale slider"); }
 	private static boolean getControlScaleSliderState() 								{ return getControlScaleSliderState(getControls()); }
