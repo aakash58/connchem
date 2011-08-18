@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 15.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="166.001px" height="61.001px" viewBox="0 0 166.001 61.001" enable-background="new 0 0 166.001 61.001"
+	 xml:space="preserve">
+<g id="object">
+	<path fill="#B1B1B1" d="M83.001,8.5c-12.131,0-22,9.869-22,22s9.869,22,22,22s22-9.869,22-22S95.132,8.5,83.001,8.5z"/>
+	<path fill="#B1B1B1" d="M135.501,0c-16.817,0-30.5,13.683-30.5,30.501c0,16.816,13.683,30.5,30.5,30.5s30.5-13.684,30.5-30.5
+		C166.001,13.683,152.318,0,135.501,0z"/>
+	<path fill="#B1B1B1" d="M30.5,0C13.683,0,0,13.683,0,30.501c0,16.816,13.682,30.5,30.5,30.5S61,47.317,61,30.501
+		C61,13.683,47.318,0,30.5,0z"/>
+	<circle fill="#FFFF00" stroke="#000000" stroke-miterlimit="10" cx="83.001" cy="30.5" r="17"/>
+	<circle fill="#5500A9" stroke="#000000" stroke-miterlimit="10" cx="135.501" cy="30.501" r="25.5"/>
+	<circle fill="#5500A9" stroke="#000000" stroke-miterlimit="10" cx="30.5" cy="30.501" r="25.5"/>
+</g>
+<g id="circles">
+	<circle id="Sulfur-Ion" fill="none" cx="83.167" cy="30.5" r="21.944"/>
+	<circle id="Lithium-Ion_1_" fill="none" cx="30.5" cy="30.501" r="30.5"/>
+	<circle id="Lithium-Ion" fill="none" cx="135.501" cy="30.501" r="30.5"/>
+</g>
+</svg>
