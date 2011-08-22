@@ -113,6 +113,7 @@ public class Main {
 	public static CustomPopupMenu scrollablePopupMenu;
 	public static String[] moleculeNames = null;
 	public static JPanel rightPanel;
+	//Dashboard on right panel showing mass and volume
 	public static JPanel dashboard;
 	
 	//Label parameter on left panel
@@ -148,8 +149,9 @@ public class Main {
 	public static boolean isVolumeblocked = false;
 	public static JLabel totalSystemEnergy;
 	public static JLabel averageSystemEnergy;
-	public static JLabel elapsedTime;
-	public static JLabel m1Mass;
+	
+	public static JLabel elapsedTime;   //"Elapsed Set Time" label
+	public static JLabel m1Mass;        
 	public static JLabel m1Disolved;
 	public static JLabel satMass;
 	public static JLabel waterVolume;
@@ -287,6 +289,7 @@ public class Main {
 		JLabel label = new JLabel(cName);
 		
 		final String fixedName = cName.replace(" ", "-");
+		
 		label.setIcon(new ImageIcon(Main.class .getResource("/resources/compoundsPng50/"+fixedName+".png")));
 		panel.add(label, "cell 0 0 3 1,growx");
 		
@@ -366,19 +369,22 @@ public class Main {
 					panel.add(button_1, "cell 2 1,growy");
 					button_1.addMouseListener(new MouseAdapter() {
 						public void mouseClicked(MouseEvent arg0) {
+							//Get number showing on slider bar
 							int count = Integer.parseInt(label_1.getText().substring(sliderLabel.length()));
 							//Check if molecule number is going over predefined cap number
 							//If yes, add molecules no more than cap number
 							int cap = p5Canvas.getMoleculesCap(fixedName);
+							//System.out.println(fixedName+"`s cap is "+cap);
 							int curNum = p5Canvas.getMoleculesNum(fixedName);
-							if(cap<(count+curNum))
+							if(cap<=(count+curNum))
 							{
 								count = cap - curNum;
 								//Disable Add button
 								arg0.getComponent().setEnabled(false);
+								//System.out.println("fixed name is "+fixedName);
 							}
 							p5Canvas.addMolecule(fixedName,count);
-							System.out.println("Added "+count+" molecules");
+							//System.out.println("Added "+count+" molecules");
 						}
 					});
 				
@@ -418,6 +424,7 @@ public class Main {
 		P5Canvas.curTime=0;
 		P5Canvas.oldTime=0;
 		
+		//Reset dashboard on right panel
 		dashboard.removeAll();
 		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
 		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
@@ -434,6 +441,9 @@ public class Main {
 			dashboard.add(waterVolume, "cell 1 4");
 			dashboard.add(solutionLabel, "cell 0 5,alignx right");
 			dashboard.add(soluteVolume, "cell 1 5");
+			
+	
+			
 		}
 			
 		Unit2.reset();
@@ -441,6 +451,7 @@ public class Main {
 		if (a!=null) {
 			Compound.names = new ArrayList<String>();
 			Compound.counts = new ArrayList<Integer>();
+			Compound.caps = new ArrayList<Integer>();
 			for (int i=0; i<a.size();i++){
 				String s = (String) getCompoundName(selectedUnit,selectedSim,selectedSet,i);
 				int num = Integer.parseInt(getCompoundQty(selectedUnit,selectedSim,selectedSet,i).toString());
@@ -498,9 +509,6 @@ public class Main {
 		//createPopupMenu();
 		
 		
-		
-		//if (P5Canvas.isEnable)
-		//	playBtn.doClick();
 		//In Unit 2, we want to show pressure slider instead of volume Slider
 		//In other Units, we want to show volume Slider only
 		if (playBtn!=null && centerPanel!=null){
@@ -513,7 +521,7 @@ public class Main {
 				
 				if( isPressureShowing)
 				{
-					//If showing ,do nothing
+					//If pressure slider is showing ,do nothing
 				}
 				else
 				{
@@ -535,9 +543,6 @@ public class Main {
 				volumeSlider.setVisible(true);
 				volumeLabel.setVisible(true);
 				canvasControlLabel_main_volume.setVisible(true);
-				
-				//pressureLabel.setVisible(false);
-				//canvasControlLabel_main_pressure.setVisible(false);
 				
 				if( isPressureShowing)
 				{
@@ -939,14 +944,14 @@ public class Main {
 		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
 		final JLabel speedLabel = new JLabel("1x");
 		cbPanel.add(speedLabel, "cell 0 0,alignx left");
-		speedSlider =  new JSlider(1,100,defaultSpeed);
+		speedSlider =  new JSlider(0,100,defaultSpeed);
 		speedSlider.setOrientation(SwingConstants.VERTICAL);
 		speedSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				int value = ((JSlider) e.getSource()).getValue(); 
-				float speedRate = (float) value/defaultSpeed;
+				float value = ((JSlider) e.getSource()).getValue(); 
+				float speedRate = value/defaultSpeed;
 				p5Canvas.setSpeed(speedRate);
-				
+				System.out.println("speedRate is "+speedRate);
 				DecimalFormat df = new DecimalFormat("#.##");
 				speedLabel.setText(df.format(speedRate)+"x");
 			}
@@ -984,6 +989,7 @@ public class Main {
 		mainFrame.getContentPane().add(rightPanel, "cell 2 2,grow");
 		rightPanel.setLayout(new MigLayout("insets 0, gap 0", "[320.00,grow,center]", "[][][350.00,grow][][grow][grow]"));
 		
+		//Set up "Output" title
 		JLabel lblOutput = new JLabel("Output");
 		lblOutput.setLabelFor(rightPanel);
 		lblOutput.setFont(new Font("Lucida Grande", Font.BOLD, 14));
@@ -993,6 +999,7 @@ public class Main {
 		lblMacroscopid.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
 		rightPanel.add(lblMacroscopid, "cell 0 1");
 
+		//Set up Graph
 		JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP);
 		lblMacroscopid.setLabelFor(graphTabs);
 		rightPanel.add(graphTabs, "cell 0 2,grow");
@@ -1017,6 +1024,7 @@ public class Main {
 		rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
 		//graphTabs.addTab("pH", null, graphSet_2, null); // this will get reactivated in Unit 8
 
+		//Set up dashboard on Right Panel
 		dashboard = new JPanel();
 		lblOutputMacroscopicLevel.setLabelFor(dashboard);
 		rightPanel.add(dashboard, "cell 0 4,grow");
@@ -1060,23 +1068,28 @@ public class Main {
 		waterVolume= new JLabel("0 mL");
 		dashboard.add(waterVolume, "cell 1 4");
 
+		//Set up Solution Volume Label
 		solutionLabel = new JLabel("Solution Volume:");
 		dashboard.add(solutionLabel, "cell 0 5,alignx right");
 		soluteVolume= new JLabel("0 mL");
 		dashboard.add(soluteVolume, "cell 1 5");
 
 		
-				
+				//Set up "Convert to Mass" Checkbox
 				cBoxConvert =  new JCheckBox("Convert Mass to Moles"); 
 				cBoxConvert.addItemListener(new ItemListener() {
 					public void itemStateChanged(ItemEvent e) {
 						if (e.getStateChange() == ItemEvent.SELECTED){
 							P5Canvas.isConvertMol =true;
+							//Change 'g' to 'mol' in Amount Added label
 							P5Canvas.convertMassMol1();
+							//Change 'g' to 'mol' in "Dissolved" label
+							P5Canvas.convertMassMol2();
 						}	
 						else if	(e.getStateChange() == ItemEvent.DESELECTED){
 							P5Canvas.isConvertMol = false;
 							P5Canvas.convertMolMass1();
+							P5Canvas.convertMolMass2();
 						}	
 					}
 				});

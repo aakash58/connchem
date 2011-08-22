@@ -47,7 +47,7 @@ public class P5Canvas extends PApplet{
 	public static float temp =25.f;
 	
 	//Default value of speed
-	public static float speedRate = 1.f;
+	public static float speedRate = 1.0f;
 	//Default value of heat
 	public static float heatRate = 1.f;
 	//Default value of Pressure
@@ -77,6 +77,7 @@ public class P5Canvas extends PApplet{
 	public boolean isHidden=false;
 	
 	//Time step property
+	private float defaultTimeStep= 1.0f/60.0f;
 	private float timeStep= 1.0f/60.0f;
 	private int velocityIterations = 6;
 	private int positionIterations =2;
@@ -183,7 +184,7 @@ public class P5Canvas extends PApplet{
 		this.scale(scale);
  		if (isEnable && !isDrag){
 			if (speedRate<1){
-				timeStep *= speedRate;
+				timeStep = speedRate* defaultTimeStep;
 			}
  			box2d.step(timeStep,velocityIterations,positionIterations);
 			//box2d.step();
@@ -448,6 +449,7 @@ public class P5Canvas extends PApplet{
 			return 1;
 	}
 	
+	//Change 'g' to 'mol' in "Amount Added" label when "ConvertMassToMol" checkbox is selected
 	public static void convertMassMol1() {
 		double mass = Unit2.num_total*Unit2.mToMass;
 		if (Compound.names.size()<=1) return;
@@ -455,6 +457,7 @@ public class P5Canvas extends PApplet{
 		DecimalFormat df = new DecimalFormat("###.##");
 		Main.m1Mass.setText(df.format(mol)+" mol");
 	}
+	//Change 'g' to 'mol' in "Dissolved" label when "ConvertMassToMol" checkbox is selected
 	public static void convertMassMol2() {
 		double dis = Unit2.massDissolved;
 		if (Compound.names.size()<=1) return;
@@ -462,14 +465,21 @@ public class P5Canvas extends PApplet{
 		DecimalFormat df = new DecimalFormat("###.##");
 		Main.m1Disolved.setText(df.format(mol2)+" mol");
 	}
-	
+	//Change 'mol' to 'g' in "Amount Added" label when "ConvertMassToMol" checkbox is deselected
 	public static void convertMolMass1() {
 		double mass = Unit2.num_total*Unit2.mToMass;
 		DecimalFormat df = new DecimalFormat("###.##");
 		Main.m1Mass.setText(df.format(mass)+" g");
 	}
+	//Change 'mol' to 'g' in "Dissolved" label when "ConvertMassToMol" checkbox is deselected
+	public static void convertMolMass2(){
+		double mass = Unit2.massDissolved;
+		if(Compound.names.size()<=1) return;
+		DecimalFormat df = new DecimalFormat("###.##");
+		Main.m1Disolved.setText(df.format(mass)+" g");
+	}
 	
-	public void computeOutput(String compoundName, int count) {
+	private void computeOutput(String compoundName, int count) {
 		if (compoundName.equals("Water")){
 			Unit2.numWater += count;
 			DecimalFormat df = new DecimalFormat("###.#");
@@ -479,7 +489,11 @@ public class P5Canvas extends PApplet{
 		if (Main.selectedUnit==2 && !compoundName.equals("Water") && count>0){
 			num_total+=count;
 			DecimalFormat df = new DecimalFormat("###.#");
-			Main.m1Label.setText(compoundName+":");
+			//In Unit 2, ALL SETS, the output monitor for the amount added should be "amount added". 
+			if(Main.selectedUnit==2 )
+				Main.m1Label.setText("Amount Added:");
+			else
+				Main.m1Label.setText(compoundName+":");
 			float total = Unit2.num_total*Unit2.mToMass;
 			Main.m1Mass.setText(df.format(total)+" g");
 			if (isConvertMol){
@@ -494,10 +508,17 @@ public class P5Canvas extends PApplet{
 			float total = Unit2.num_total*Unit2.mToMass;
 			cVolume = total/dens;
 		}
+		
 		DecimalFormat df = new DecimalFormat("###.#");
+		//If there is no water molecules added at the beginning in Unit 2, we want "Solution Volume" label show nothing
+		if(Main.selectedUnit==2 && waterVolume==0 )
+		{
+				Main.soluteVolume.setText(" ");
+		}
+		else
 		Main.soluteVolume.setText(df.format(waterVolume + cVolume)+" mL");
-	
-		Main.dashboard.updateUI();
+			Main.dashboard.updateUI();
+		
 		Canvas.satCount=0;
 	}
 	public void computeSaturation() {
@@ -559,10 +580,13 @@ public class P5Canvas extends PApplet{
 			Main.m1Disolved.setText("0 g");
 		}
 		
+		//If ConvertToMol checkbox is selected, we need to change 'g' to 'mol'
+	
 		if (isConvertMol){
 			convertMassMol2();
 		}
-		Main.dashboard.updateUI();
+		
+		//Main.dashboard.updateUI();
 		
 	}
 	public static float computeIonSeperation() {
@@ -814,7 +838,7 @@ public class P5Canvas extends PApplet{
 		
 	public void mouseClicked() {
 		addMolecule(mouseX/scale, mouseY/scale,"Water");
-		//addMolecule(mouseX/scale, mouseY/scale,"Water");
+
 	}
 	
 	
