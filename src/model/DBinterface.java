@@ -16,8 +16,8 @@ public class DBinterface {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			
-			//Connection conn = DriverManager.getConnection("jdbc:sqlite:Users/tuandang/Desktop/GA/Workspace/ConnChem3/src/model/chemdb");
-			Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+			Connection conn = DriverManager.getConnection("jdbc:sqlite:chemdb");
+			//Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
 			
 			Statement stat = conn.createStatement();
 
