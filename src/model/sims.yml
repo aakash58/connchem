@@ -1,0 +1,756 @@
+controls:
+- control: "timer"
+  state: "on"
+  unit: "seconds"
+  min: 20
+  init: 0
+  max: 30
+- control: "volume slider"
+  state: "on"
+  unit: "mL"
+- control: "scale slider"
+  state: "on"
+- control: "speed slider"
+  state: "on"
+  unit: "mps"
+- control: "heat slider"
+  state: "on"
+  unit: "celsius"
+  min: -10
+  init: 25
+  max: 200
+- control: "molecule sidebar"
+  state: "on"
+- control: "periodic table"
+  state: "off"
+units:
+- unit: 1
+  name: "Modeling Matter"
+  sims:
+  - sim: 1
+    name: "Making Scientific Observations"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 20
+  - sim: 2
+    name: "Classifying Matter"
+    controls:
+    - control: "timer"
+      state: "off"
+    - control: "volume slider"
+      state: "off"
+    - control: "scale slider"
+      state: "off"
+    - control: "speed slider"
+      state: "off"
+    - control: "heat slider"
+      state: "off"
+    - control: "molecule sidebar"
+      state: "off"
+    - control: "periodic table"
+      state: "off"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 20
+        cap: 95
+    - set: 2
+      compounds:
+      - compound: "Hydrogen Peroxide"
+        qty: 20
+    - set: 3
+      compounds:
+      - compound: "Pentane"
+        qty: 10
+    - set: 4
+      compounds:
+      - compound: "Mercury"
+        qty: 20
+    - set: 5
+      compounds:
+      - compound: "Bromine"
+        qty: 15
+    - set: 6
+      #temperature: 1500
+      #minTemperature: 1000
+      #maxTemperature: 2000
+      compounds:
+      - compound: "Phosphorus"
+        qty: 15
+  - sim: 3
+    name: "Physical Changes"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 40
+  - sim: 4
+    name: "Chemical Changes"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Hydrogen Peroxide"
+        qty: 20
+  - sim: 5
+    name: "Mixtures"
+    controls:
+    - control: "heat slider"
+      state: "off"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 30
+      - compound: "Bromine"
+        qty: 15
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 30
+      - compound: "Mercury"
+        qty: 20
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 20
+      - compound: "Hydrogen Peroxide"
+        qty: 20
+    - set: 4
+      compounds:
+      - compound: "Water"
+        qty: 30
+      - compound: "Pentane"
+        qty: 8
+    - set: 5
+      compounds:
+      - compound: "Water"
+        qty: 20
+      - compound: "Bromine"
+        qty: 20
+      - compound: "Hydrogen Peroxide"
+        qty: 20
+    - set: 6
+      compounds:
+      - compound: "Water"
+        qty: 30
+      - compound: "Bromine"
+        qty: 10
+      - compound: "Pentane"
+        qty: 8
+- unit: 2
+  name: "Solutions"
+  sims:
+  - sim: 1
+    name: "Introduction"
+    controls:
+    - control: "heat slider"
+      state: "off"
+    sets: 
+    - set: 1
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 95
+      - compound: "Sodium Chloride"
+        qty: 2
+        cap: 10
+  - sim: 2
+    name: "Solubility"
+    controls:
+    - control: "heat slider"
+      state: "off"
+    sets:      
+    - set: 1
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 95
+      - compound: "Sodium Chloride"
+        qty: 2
+        cap: 10
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 0
+        cap: 95
+      - compound: "Silicon Dioxide"
+        qty: 2
+        cap: 20
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 0
+        cap: 50
+      - compound: "Glycerol"
+        qty: 2
+        cap: 8
+    - set: 4
+      compounds:
+      - compound: "Water"
+        qty: 0
+        cap: 95
+      - compound: "Calcium-Chloride"
+        qty: 2
+        cap: 8
+    - set: 5
+      compounds:
+      - compound: "Water"
+        qty: 0
+        cap: 45
+      - compound: "Acetic Acid"
+        qty: 2 
+        cap: 13
+    - set: 6
+      compounds:
+      - compound: "Water"
+        qty: 8
+        cap: 60
+      - compound: "Pentane"
+        qty: 0
+        cap: 8
+    - set: 7
+      compounds:
+      - compound: "Water"
+        qty: 0
+        cap: 50
+      - compound: "Sodium Bicarbonate"
+        qty: 2
+        cap: 15
+  - sim: 3
+    name: "Solubility Changes"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 95
+      - compound: "Sodium Chloride"
+        qty: 0
+        cap: 10
+    - set: 2
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 95
+      - compound: "Silicon Dioxide"
+        qty: 0
+        cap: 20   
+    - set: 3
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 50
+      - compound: "Glycerol"
+        qty: 0
+        cap: 8
+    - set: 4
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 95
+      - compound: "Calcium-Chloride"
+        qty: 0
+        cap: 8
+    - set: 5
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 45
+      - compound: "Acetic Acid"
+        qty: 0
+        cap: 13  
+    - set: 6
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 40
+      - compound: "Pentane"
+        qty: 0
+        cap: 8
+    - set: 7
+      compounds: 
+      - compound: "Water"
+        qty: 0
+        cap: 50
+      - compound: "Sodium Bicarbonate"
+        qty: 0
+        cap: 15
+  - sim: 4
+    name: "Saturation"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 0
+        cap: 95
+      - compound: "Potassium Chloride"
+        qty: 2
+        cap: 10
+- unit: 3
+  name: "Reactions and Stoichiometry"
+  sims:
+  - sim: 1
+    name: "Chemical Reactions"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium"
+        qty: 10
+      - compound: "Chlorine"
+        qty: 10
+    - set: 2
+      compounds:
+      - compound: "Water"      
+        qty: 25
+      - compound: "Hydrogen"
+        qty: 10
+      - compound: "Iodine"
+        qty: 10
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Ethene"
+        qty: 10
+      - compound: "Oxygen"
+        qty: 10
+    - set: 4
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Copper"
+        qty: 10
+      - compound: "Silver Nitrate"
+        qty: 10
+    - set: 5
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Methane"
+        qty: 10
+      - compound: "Oxygen"
+        qty: 10
+    - set: 6
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Iron"
+        qty: 10
+      - compound: "Copper-II-Sulphate"
+        qty: 10
+    - set: 7
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Hydrochloric Acid"
+        qty: 10
+      - compound: "Lithium Sulfide"
+        qty: 10
+    - set: 8
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Hydrogen"
+        qty: 10
+      - compound: "Chlorine"
+        qty: 10
+    - set: 9
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Hydrogen Peroxide"
+        qty: 10
+    - set: 10
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Silver Nitrate"
+        qty: 25
+      - compound: "Sodium Chloride"
+        qty: 10
+  - sim: 2
+    name: "Limiting Reactions"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Aluminium"
+        qty: 10
+      - compound: "Chlorine"
+        qty: 10
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Butne"
+        qty: 10
+      - compound: "Oxygen"
+        qty: 10
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Manganese Dioxide"
+        qty: 10
+      - compound: "Hydrochloric Acid"
+        qty: 10
+  - sim: 3
+    name: "Precipitation"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Silver Nitrate"
+        qty: 10
+      - compound: "Potassium Bromide"
+        qty: 10
+    - set: 2
+      compounds: 
+      - compound: "Water"
+        qty: 25
+      - compound: "Lithiuhm Nitrate"
+        qty: 10
+      - compound: "Potassium Bromide"
+        qty: 10
+    - set: 3
+      compounds: 
+      - compound: "Water"
+        qty: 25
+      - compound: "Silver Nitrate"
+        qty: 10
+      - compound: "Lithium Nitrate"
+        qty: 10
+    - set: 4
+      compounds: 
+      - compound: "Water"
+        qty: 25
+      - compound: "Ammonium Chloride"
+        qty: 10
+      - compound: "Lithium Nitrate"
+        qty: 10
+    - set: 5
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Carbonate"
+        qty: 10
+      - compound: "Lithium Nitrate"
+        qty: 10                  
+    - set: 6
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Hydroxide"
+        qty: 10
+      - compound: "Lithium Nitrate"
+        qty: 10
+    - set: 7
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Ammonium Chloride"
+        qty: 10
+      - compound: "Potassium Bromide"
+        qty: 10
+    - set: 8
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Carbonate"
+        qty: 10
+      - compound: "Potassium Nitrate"
+        qty: 10    
+    - set: 9
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Hydroxide"
+        qty: 10
+      - compound: "Potassium Bromide"
+        qty: 10
+    - set: 10
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Silver Nitrate"
+        qty: 10
+      - compound: "Ammonium Chloride"
+        qty: 10
+    - set: 11
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Carbonate"
+        qty: 10
+      - compound: "Silver Nitrate"
+        qty: 10
+    - set: 12
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Ammonium Chloride"
+        qty: 10
+      - compound: "Lithium Nitrate"
+        qty: 10
+    - set: 13
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Carbonate"
+        qty: 10
+      - compound: "Ammonium Chloride"
+        qty: 10
+    - set: 14
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Hydroxide"
+        qty: 10
+      - compound: "Ammonium Chloride"
+        qty: 10
+    - set: 15
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Carbonate"
+        qty: 10
+      - compound: "Sodium Hydroxide"
+        qty: 10
+  - sim: 4
+    name: "Redox"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Magnesium"
+        qty: 10    
+      - compound: "Copper-II-Sulphate"
+        qty: 10
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Chromium-III-Oxide"
+        qty: 5
+      - compound: "Aluminium"
+        qty: 5
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Zinc"
+        qty: 5
+      - compound: "Copper-II-Sulphate"
+        qty: 5
+- unit: 4
+  name: "Pressure and Gas Laws"
+  sims:
+  - sim: 1
+    name: "Physical Properties of Air"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Helium"
+        qty: 10
+    - set: 2
+      compounds:
+      - compound: "Oxygen"
+        qty: 10
+    - set: 3
+      compounds:
+      - compound: "Oxygen"
+        qty: 10
+    - set: 4
+      compounds:
+      - compound: "Helium"
+        qty: 10
+      - compound: "Oxygen"
+        qty: 10
+      - compound: "Carbon Dioxide"
+        qty: 10
+      - compound: "Water"
+        qty: 10
+- unit: 5
+  name: "Thermodynamics"
+- unit: 6
+  name: "Kinetics"
+- unit: 7
+  name: "Chemical Equilibrium"
+- unit: 8
+  name: "Acids and Bases"
+  sims:
+  - sim: 1
+    name: "pH"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 40
+      - compound: "Hydrochloric Acid"
+        qty: 10
+      - compound: "Sodium Hydroxide"
+        qty: 10
+  - sim: 2
+    name: "Bronsted/Lowry or Lewis Selection"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 40
+      - compound: "Hydrochloric Acid"
+        qty: 10
+      - compound: "Sodium Hydroxide"
+        qty: 10
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 0
+      - compound: "Hydrochloric Acid"
+        qty: 10
+      - compound: "Ammonia"
+        qty: 10
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 0
+      - compound: "Cyanide"
+        qty: 10
+      - compound: "Hydrogen Bromide"
+        qty: 10
+    - set: 4
+      compounds:
+      - compound: "Water"
+        qty: 0
+      - compound: "Boron Trichloride"
+        qty: 10
+      - compound: "Chloride"
+        qty: 10
+  - sim: 3
+    name: "Strong and Weak Acids"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Hydrochloric Acid"
+        qty: 2
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Hydrogen Fluoride"
+        qty: 25
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Hydroxide"
+        qty: 2
+    - set: 4
+      compounds:
+      - compound: "Water"
+        qty: 10
+      - compound: "Ammonia"
+        qty: 10
+  - sim: 4
+    name: "Identifying Acids and Bases"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Acetic Acid"
+        qty: 0
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Lithium Hydroxide"
+        qty: 0
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Acetic Acid"
+        qty: 0
+    - set: 4
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Hydrochloric Acid"
+        qty: 0
+      - compound: "Sodium Hydroxide"
+        qty: 0                     
+  - sim: 5
+    name: "Neutralization Reactions"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Water"
+        qty: 0
+      - compound: "Hydrochloric Acid"
+        qty: 25
+      - compound: "Sodium Hydroxide"
+        qty: 0
+  - sim: 6
+    name: "Titration Curves"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 25
+      - compound: "Hydrochloric Acid"
+        qty: 10
+      - compound: "Sodium Hydroxide"
+        qty: 10
+    - set: 2
+      compounds: 
+      - compound: "Water"
+        qty: 25
+      - compound: "Ammonia"
+        qty: 25
+      - compound: "Hydrochloric Acid"
+        qty: 25    
+    - set: 3
+      compounds: 
+      - compound: "Water"
+        qty: 25
+      - compound: "Sodium Hydroxide"
+        qty: 25
+      - compound: "Acetic Acid"
+        qty: 25
+    - set: 4
+      compounds: 
+      - compound: "Water"
+        qty: 25
+      - compound: "Ammonia"
+        qty: 25
+      - compound: "Acetic Acid"
+        qty: 25
+  - sim: 7
+    name: "Buffers"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Water"
+        qty: 25
+      - compound: "Bicarbonate"
+        qty: 5
+      - compound: "Carbonate"
+        qty: 5
+      - compound: "Sodium Bicarbonate"
+        qty: 5
+      - compound: "Sodium-I"
+        qty: 5
+      - compound: "Indicator"
+        qty: 2
+- unit: 9
+  name: "Nuclear"
