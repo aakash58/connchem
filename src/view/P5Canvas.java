@@ -516,8 +516,9 @@ public class P5Canvas extends PApplet{
 				Main.soluteVolume.setText(" ");
 		}
 		else
-		Main.soluteVolume.setText(df.format(waterVolume + cVolume)+" mL");
-			Main.dashboard.updateUI();
+			Main.soluteVolume.setText(df.format(waterVolume + cVolume)+" mL");
+		
+		Main.dashboard.updateUI();
 		
 		Canvas.satCount=0;
 	}

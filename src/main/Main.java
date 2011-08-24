@@ -32,6 +32,7 @@ package main;
 
 import java.awt.EventQueue;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -113,23 +114,37 @@ public class Main {
 	public static CustomPopupMenu scrollablePopupMenu;
 	public static String[] moleculeNames = null;
 	public static JPanel rightPanel;
-	//Dashboard on right panel showing mass and volume
-	public static JPanel dashboard;
 	
-	//Label parameter on left panel
-	private static String sliderLabel = new String("Add ");
+	public static JPanel dashboard;     //Dashboard on right panel showing mass and volume
 	
-	public static JPanel leftPanel;
-	public static JPanel centerPanel;
-	public static JPanel welcomePanel;
+
+	private static String sliderLabel = new String("Add ");	//Label parameter on left panel
+	
+	public static JPanel leftPanel;     //"Input" panel on left of application
+	public static JPanel centerPanel;   //"Simulation" panel in the middle of application
+	public static JPanel welcomePanel;  //"Welcome" Panel showing welcome info when application is first opened up
 	public static Canvas canvas = new Canvas();
 	public static TableView tableView;
 	public static TableSet tableSet;
-	//left Panel containing volume slider
-	private static JPanel clPanel;
+	private JMenuBar menuBar;
+	
+	/*******  Left Panel parameters  *******/
+	private JLabel lblInput;
+	private static JLabel lblInputTipR;
+	private static JLabel lblInputTipL;
+	
+	
+	
+	private static JPanel clPanel;     //Center Left control Panel containing volume slider and Zoom Slider
 	public static final JLabel  volumeLabel = new JLabel(P5Canvas.currenttVolume+"mL");
 	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
 	private static JLabel canvasControlLabel_main_volume;
+	//Pressure slider used to replace Volume Slider in Unit 2
+	public static JSlider pressureSlider = new JSlider(0,10,1);
+	public static JLabel pressureLabel;
+	private static JLabel canvasControlLabel_main_pressure;
+	public static int defaultPressure = 1;
+	
 	public static int defaultZoom =50;
 	public static JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
 	public static int defaultSpeed =100;
@@ -139,12 +154,8 @@ public class Main {
 	public static int heatMax =200;	
 	public static JSlider heatSlider = new JSlider(heatMin, heatMax, heatInit);
 	
-	//Pressure slider replaced Volume Slider in Unit 2
-	public static JSlider pressureSlider = new JSlider(0,10,1);
-	public static JLabel pressureLabel;
-	private static JLabel canvasControlLabel_main_pressure;
-	public static int defaultPressure = 1;
-	private static boolean isPressureShowing;
+
+	//private static boolean isPressureShowing;
 	
 	public static boolean isVolumeblocked = false;
 	public static JLabel totalSystemEnergy;
@@ -502,34 +513,68 @@ public class Main {
 		canvas.reset();
 		TableView.setSelectedRow(-1);
 		
+		//For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
+		if( selectedUnit==2 && selectedSim==3)
+		{
+			leftPanel.add(lblInputTipL,"cell 0 1,gaptop 5,alignx left,width 40::");
+			leftPanel.add(lblInputTipR,"cell 0 1,gaptop 5,alignx right");
+		}
+		else
+		{
+			if(leftPanel.isAncestorOf(lblInputTipL))
+			{
+				leftPanel.remove(lblInputTipL);
+				leftPanel.remove(lblInputTipR);
+			}
+			
+		}
 		
-		//CustomPopupMenu.additionalList = new ArrayList();
-		//additionalPanelList = new ArrayList();
+		//Update Dynamic Panel
 		updateDynamicPanel();
-		//createPopupMenu();
+		
+		//Update components on the left panel
+		updateCenterPanel();
 		
 		
-		//In Unit 2, we want to show pressure slider instead of volume Slider
-		//In other Units, we want to show volume Slider only
+	
+		P5Canvas.isEnable =temp;
+		
+		//reset timer
+		resetTimer();
+		
+	} 
+	
+	/******************************************************************
+	* FUNCTION :     updateCenterPanel()
+	* DESCRIPTION :  Update sliders on the center panel
+	*                Only be called in reset()
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	private static void updateCenterPanel()
+	{
 		if (playBtn!=null && centerPanel!=null){
+
 
 			if( selectedUnit ==2)
 			{
-				volumeSlider.setVisible(false);
-				volumeLabel.setVisible(false);
-				canvasControlLabel_main_volume.setVisible(false);
-				
-				if( isPressureShowing)
+				//In Unit 2, we want to show pressure slider instead of volume Slider
+				//In other Units, we want to show volume Slider only
+				if(clPanel.isAncestorOf(volumeSlider))
 				{
-					//If pressure slider is showing ,do nothing
+					clPanel.remove(volumeSlider);
+					clPanel.remove(volumeLabel);
+					clPanel.remove(canvasControlLabel_main_volume);
 				}
-				else
+
+				if(!clPanel.isAncestorOf(pressureSlider))
 				{
-					clPanel.add(pressureLabel, "flowy,cell 0 0,alignx right");
-					clPanel.add(pressureSlider, "cell 0 1,alignx left");
-					clPanel.add(canvasControlLabel_main_pressure, "flowy,cell 0 2, alignx center");
-					isPressureShowing = true;
-				}
+					clPanel.add(pressureLabel, "cell 0 0,alignx right");
+					clPanel.add(pressureSlider, "cell 0 1,alignx right");
+					clPanel.add(canvasControlLabel_main_pressure, "cell 0 2, alignx center");
+				}				
+
 				pressureSlider.setVisible(true);
 				pressureLabel.setVisible(true);
 				canvasControlLabel_main_pressure.setVisible(true);
@@ -540,23 +585,24 @@ public class Main {
 			}
 			else
 			{
+				if(clPanel.isAncestorOf(pressureSlider))
+				{
+					clPanel.remove(pressureLabel);
+					clPanel.remove(pressureSlider);					
+					clPanel.remove(canvasControlLabel_main_pressure);
+				}
+								
+				if( !clPanel.isAncestorOf(volumeSlider))
+				{
+					//If pressure slider showing ,remove it
+					clPanel.add(volumeLabel, "cell 0 0,alignx right");
+					clPanel.add(volumeSlider, "cell 0 1,alignx right");					
+					clPanel.add(canvasControlLabel_main_volume, "cell 0 2, alignx center");
+				}
+
 				volumeSlider.setVisible(true);
 				volumeLabel.setVisible(true);
 				canvasControlLabel_main_volume.setVisible(true);
-				
-				if( isPressureShowing)
-				{
-					//If pressure slider showing ,remove it
-					clPanel.remove(pressureSlider);
-					clPanel.remove(pressureLabel);
-					clPanel.remove(canvasControlLabel_main_pressure);
-					isPressureShowing = false;
-				}
-				else
-				{
-					//Do nothing
-				}
-
 				volumeSlider.requestFocus();
 				volumeSlider.lostFocus(null, null);
 				volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
@@ -581,23 +627,32 @@ public class Main {
 			speedSlider.setValue(defaultSpeed);
 			
 			leftPanel.updateUI();
-			centerPanel.updateUI();		
-		}	
-		P5Canvas.isEnable =temp;
-		
-		//reset timer
-		resetTimer();
-		
-	} 
+			centerPanel.updateUI();
+		}
+	
+	}
+	
+
+	/******************************************************************
+	* FUNCTION :     resetTimer
+	* DESCRIPTION :  Rest Timer, Only be called in reset()
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
 	public static void resetTimer()
 	{
 		time = 0 ;
 	}
 		
 		
-	/**
-	 * Initialize the contents of the frame.
-	 */
+	/******************************************************************
+	* FUNCTION :     initialize()
+	* DESCRIPTION :  Initialize all swing components when program starts
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
 	private void initialize() {
 		
 		Toolkit tk = Toolkit.getDefaultToolkit();
@@ -608,116 +663,12 @@ public class Main {
 		//mainFrame.setBounds(0, 0, screenDimension.width, screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		JMenuBar menuBar = new JMenuBar();
-		mainFrame.setJMenuBar(menuBar);
+
 		p5Canvas.setBackground(Color.WHITE);
 		p5Canvas.init();
 		
-		
-		JMenu logoMenu = new JMenu("");
-		logoMenu.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconCcLogo.png")));
-		menuBar.add(logoMenu);
-
-		JMenuItem mntmAbout = new JMenuItem("About");
-		logoMenu.add(mntmAbout);
-
-		JMenuItem mntmHelp = new JMenuItem("Help");
-		logoMenu.add(mntmHelp);
-
-		/*
-		 * Simulation Menu
-		 */
-
-		simMenu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-		
-			}
-		});
-		/*simMenu.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				simMenu.doClick();
-			}
-		});*/
-		menuBar.add(simMenu);
-		simMenu.setBackground(selectedColor);
-		
-
-		// populate Units (first level of sim menu)
-		final ArrayList units = getUnits();
-		
-		JMenu[] menuArray = new JMenu[units.size()];
-		final ArrayList[] subMenuArrayList = new ArrayList[units.size()];
-		
-		for (int i = 0; i<units.size(); i++) {
-			try {
-				HashMap unit = (HashMap)units.get(i);
-				int unitNo = Integer.parseInt((String)unit.get("unit"));
-				String unitName = getUnitName(unitNo);
-
-				
-				JMenu menuItem = new JMenu("Unit "+ Integer.toString(unitNo) + ": " + unitName);
-				menuArray[i] = menuItem;
-				simMenu.add(menuArray[i]);
-
-				
-				// populate Sims (second level of sim menu)
-				try {
-					final ArrayList sims = getSims(unitNo);
-					subMenuArrayList[i] =  new ArrayList();
-					for (int j = 0; j<sims.size(); j++) {
-						HashMap sim = (HashMap)sims.get(j);
-						int simNo = Integer.parseInt((String)sim.get("sim"));
-						String simName = getSimName(unitNo, simNo);
-						JMenuItem subMenu = new JMenuItem("Sim "+ Integer.toString(simNo) + ": " + simName);
-						
-						//Add new subMenuItem
-						menuItem.add(subMenu);
-						subMenuArrayList[i].add(subMenu);
-						                 
-						subMenu.addActionListener(new ActionListener() {
-							public void actionPerformed(ActionEvent e) {
-								for (int i = 0; i<units.size(); i++) {
-									for (int j = 0; j<subMenuArrayList[i].size(); j++) {
-										if (e.getSource()==subMenuArrayList[i].get(j)){
-											if (selectedUnit>0){
-												simMenu.getItem(selectedUnit-1).setBackground(Color.WHITE);
-												((JMenuItem) (subMenuArrayList[selectedUnit-1].get(selectedSim-1))).setBackground(Color.WHITE) ;
-											}
-											selectedUnit = i+1;
-											selectedSim = j+1;
-											simMenu.setText("Unit "+selectedUnit+": "+getUnitName(selectedUnit)+
-													", Sim "+selectedSim+": "+getSimName(selectedUnit, selectedSim));
-											simMenu.getItem(i).setBackground(selectedColor);
-											((JMenuItem) (subMenuArrayList[i].get(j))).setBackground(selectedColor) ;
-										
-										}	
-									}	
-								}
-								TableSet.updataSet();
-								TableSet.setSelectedRow(0);
-							}
-						});
-					}
-				} catch (Exception e) {
-					System.out.println("No Submenu Items: " + e);
-				}
-			} catch (Exception e) {
-				System.out.println("No menu items: " + e);
-			}
-		}
-		
-		Component headHGlue = Box.createHorizontalGlue();
-		menuBar.add(headHGlue);
-		
-		
-		
-		/*
-		 * Menubar Unit/Sim/Set status area
-		 */
-	
-		Component headHStrut = Box.createHorizontalStrut(20);
-		menuBar.add(headHStrut);
+		//Set up Menu 
+		initMenu();
 
 		// Get All molecules from Folder
 		try {
@@ -753,16 +704,20 @@ public class Main {
 		//*********************************** LEFT PANEL ********************************************
 		leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 2,grow");
-		leftPanel.setLayout(new MigLayout("insets 6, gap 18", "[260]", "[]20[215,top][][]"));
+		leftPanel.setLayout(new MigLayout("insets 6, gap 0", "[260]", "[][]20[215,top]18[][]"));
 		
-		JLabel lblInput = new JLabel("Input");
-		lblInput.setFont(new Font("Lucida Grande", Font.BOLD, 14));
-		leftPanel.add(lblInput, "cell 0 0,alignx center");
-
+		//Add Input label and Initialize Input Tip label
+		AddInputLabel();
+		
+		
+		
 		JPanel timerSubpanel = new JPanel();
-		leftPanel.add(timerSubpanel, "cell 0 1,grow");
+		
+		
+		leftPanel.add(timerSubpanel, "cell 0 2,growx");
 		timerSubpanel.setLayout(new MigLayout("insets 3, gap 4", "[110px][50px]", "[180px][grow]"));
 		
+		//Add Play button to timerSubpanel
 		playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -786,8 +741,19 @@ public class Main {
 		else
 			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
 		
-		timerSubpanel.add(playBtn, "cell 1 0 1 1");
-
+		timerSubpanel.add(playBtn, "cell 1 0");
+		
+		//Add Reset button to timerSubpanel
+		JButton resetBtn = new JButton("");
+		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
+		resetBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				reset();
+			}
+		});
+		timerSubpanel.add(resetBtn, "cell 1 0");
+		
+		//Add Checkbox to checkBoxPanel
 		JPanel checkBoxPanel = new JPanel();
 		checkBoxPanel.setLayout(new BorderLayout());
 		JCheckBox cBox1 =  new JCheckBox("Enable Molecule Hiding"); 
@@ -821,19 +787,12 @@ public class Main {
 		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
 		checkBoxPanel.add(cBox2, BorderLayout.CENTER);
 		//checkBoxPanel.add(cBox3, BorderLayout.SOUTH);
-		timerSubpanel.add(checkBoxPanel, "cell 1 1 1 1");
+		timerSubpanel.add(checkBoxPanel, "cell 1 1");
 
 		
-		JButton resetBtn = new JButton("");
-		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
-		resetBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				reset();
-			}
-		});
-		timerSubpanel.add(resetBtn, "cell 1 0 1 1");
+
 		
-		
+		//Add Set Table to timerSubpanel
 		tableSet = new TableSet();
 		timerSubpanel.add(tableSet, "cell 0 0 1 2,growy");
 		
@@ -841,7 +800,7 @@ public class Main {
 		
 		//**************************************** Add elements Control panel ************************************
 		dynamicScrollPane = new JScrollPane();
-		leftPanel.add(dynamicScrollPane, "cell 0 2,grow");
+		leftPanel.add(dynamicScrollPane, "cell 0 3,grow");
 		
 		dynamicPanel = new JPanel();
 		dynamicScrollPane.setViewportView(dynamicPanel);
@@ -861,7 +820,7 @@ public class Main {
 		mainFrame.getContentPane().add(centerPanel, "cell 1 2,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
 		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[][560.00px][]", "[690px][center]"));
-
+		centerPanel.setBorder((BorderFactory.createLineBorder(Color.BLACK)));
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
 		
@@ -872,7 +831,7 @@ public class Main {
 		
 		//Set up Volume Slider
 	
-		volumeSlider.setEnabled(false);		
+		//volumeSlider.setEnabled(false);		
 		volumeSlider.setOrientation(SwingConstants.VERTICAL);		
 		volumeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -884,10 +843,10 @@ public class Main {
 				}
 			}
 		});
-	    clPanel.add(volumeLabel, "flowy,cell 0 0,alignx right");
-		clPanel.add(volumeSlider, "cell 0 1,alignx right");
+	    //clPanel.add(volumeLabel, "flowy,cell 0 0,alignx right");
+		//clPanel.add(volumeSlider, "cell 0 1,alignx right");
 		canvasControlLabel_main_volume = new JLabel("Volume");		
-		clPanel.add(canvasControlLabel_main_volume, "cell 0 2,alignx center");
+		//clPanel.add(canvasControlLabel_main_volume, "cell 0 2,alignx center");
 
 			
 		//Set up Pressure Slide
@@ -903,13 +862,11 @@ public class Main {
 					pressureLabel.setText(value+" atm");
 				
 			}
-		});
-		
-		clPanel.add(pressureLabel, "flowy,cell 0 0,alignx right");
-		clPanel.add(pressureSlider, "cell 0 1,alignx left");
+		});		
+		//clPanel.add(pressureLabel, "flowy,cell 0 0,alignx right");
+		//clPanel.add(pressureSlider, "cell 0 1,alignx left");
 		canvasControlLabel_main_pressure = new JLabel("Pressure");
-		clPanel.add(canvasControlLabel_main_pressure, "cell 0 2, alignx center");
-		isPressureShowing = true;
+		//clPanel.add(canvasControlLabel_main_pressure, "cell 0 2, alignx center");
 		
 		//Set up Zoom Slider
 		JLabel l2 = new JLabel(" ");
@@ -1148,4 +1105,146 @@ public class Main {
 
 	}
 
+	/******************************************************************
+	* FUNCTION :     AddInputLabel()
+	* DESCRIPTION :  Add Input tips label for particular simulation
+	*                Called in Initialize()
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	private void AddInputLabel()
+	{
+		lblInput = new JLabel("Input");
+		lblInput.setFont(new Font("Lucida Grande", Font.BOLD, 14));
+		leftPanel.add(lblInput, "cell 0 0,alignx center");
+		
+		//Add Input Tip label to left panel
+		lblInputTipL= new JLabel();
+		lblInputTipL.setText("<html>step 1:<p><p>step 2:<p><P>step 3:<p><p>step 4:</html>");
+		lblInputTipL.setFont(new Font("Lucida Grande", Font.PLAIN, 12));
+		
+		lblInputTipR = new JLabel();
+		lblInputTipR.setText("<html>Select the amount of desired solute, and press \"add.\"" +
+				"<p>Select the amount of desired water, and press \"add.\"" +
+				"<p>Set the temperature slider to the desired temperature." +
+				"<p> Press play.</html>");
+		lblInputTipR.setFont(new Font("Lucida Grande", Font.PLAIN, 12));
+		
+
+	}
+	
+	/******************************************************************
+	* FUNCTION :     initMenu()
+	* DESCRIPTION :  Initialize Menu Bar when application starts
+	*                Called in Initialize()
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	private void initMenu()
+	{
+		menuBar = new JMenuBar();
+		mainFrame.setJMenuBar(menuBar);
+		JMenu logoMenu = new JMenu("");
+		logoMenu.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconCcLogo.png")));
+		menuBar.add(logoMenu);
+
+		JMenuItem mntmAbout = new JMenuItem("About");
+		logoMenu.add(mntmAbout);
+
+		JMenuItem mntmHelp = new JMenuItem("Help");
+		logoMenu.add(mntmHelp);
+
+		/*
+		 * Simulation Menu
+		 */
+
+		simMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+		
+			}
+		});
+
+		menuBar.add(simMenu);
+		simMenu.setBackground(selectedColor);
+		
+
+		// populate Units (first level of sim menu)
+		final ArrayList units = getUnits();
+		
+		JMenu[] menuArray = new JMenu[units.size()];
+		final ArrayList[] subMenuArrayList = new ArrayList[units.size()];
+		
+		for (int i = 0; i<units.size(); i++) {
+			try {
+				HashMap unit = (HashMap)units.get(i);
+				int unitNo = Integer.parseInt((String)unit.get("unit"));
+				String unitName = getUnitName(unitNo);
+
+				
+				JMenu menuItem = new JMenu("Unit "+ Integer.toString(unitNo) + ": " + unitName);
+				menuArray[i] = menuItem;
+				simMenu.add(menuArray[i]);
+
+				
+				// populate Sims (second level of sim menu)
+				try {
+					final ArrayList sims = getSims(unitNo);
+					subMenuArrayList[i] =  new ArrayList();
+					for (int j = 0; j<sims.size(); j++) {
+						HashMap sim = (HashMap)sims.get(j);
+						int simNo = Integer.parseInt((String)sim.get("sim"));
+						String simName = getSimName(unitNo, simNo);
+						JMenuItem subMenu = new JMenuItem("Sim "+ Integer.toString(simNo) + ": " + simName);
+						
+						//Add new subMenuItem
+						menuItem.add(subMenu);
+						subMenuArrayList[i].add(subMenu);
+						                 
+						subMenu.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								for (int i = 0; i<units.size(); i++) {
+									for (int j = 0; j<subMenuArrayList[i].size(); j++) {
+										if (e.getSource()==subMenuArrayList[i].get(j)){
+											if (selectedUnit>0){
+												simMenu.getItem(selectedUnit-1).setBackground(Color.WHITE);
+												((JMenuItem) (subMenuArrayList[selectedUnit-1].get(selectedSim-1))).setBackground(Color.WHITE) ;
+											}
+											selectedUnit = i+1;
+											selectedSim = j+1;
+											simMenu.setText("Unit "+selectedUnit+": "+getUnitName(selectedUnit)+
+													", Sim "+selectedSim+": "+getSimName(selectedUnit, selectedSim));
+											simMenu.getItem(i).setBackground(selectedColor);
+											((JMenuItem) (subMenuArrayList[i].get(j))).setBackground(selectedColor) ;
+										
+										}	
+									}	
+								}
+								TableSet.updataSet();
+								TableSet.setSelectedRow(0);
+							}
+						});
+					}
+				} catch (Exception e) {
+					System.out.println("No Submenu Items: " + e);
+				}
+			} catch (Exception e) {
+				System.out.println("No menu items: " + e);
+			}
+		}
+		
+		Component headHGlue = Box.createHorizontalGlue();
+		menuBar.add(headHGlue);
+		
+		
+		
+		/*
+		 * Menubar Unit/Sim/Set status area
+		 */
+	
+		Component headHStrut = Box.createHorizontalStrut(20);
+		menuBar.add(headHStrut);
+		
+	}
 }
