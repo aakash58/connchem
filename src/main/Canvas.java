@@ -70,7 +70,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 	
 	public void paint(Graphics gx) {
-		//System.out.println("CountTime"+second);
+
 		Graphics2D g = (Graphics2D) gx;
 		int w = 266;
 		int h = 225;
