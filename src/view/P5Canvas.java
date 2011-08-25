@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Random;
 //import java.util.Timer;
 
 import processing.core.PApplet;
@@ -479,6 +480,13 @@ public class P5Canvas extends PApplet{
 		Main.m1Disolved.setText(df.format(mass)+" g");
 	}
 	
+	/******************************************************************
+	* FUNCTION :     computeOutput
+	* DESCRIPTION :  Compute total amount of water and other molecules
+	*
+	* INPUTS :       compoundName(String), count(int)
+	* OUTPUTS:       None
+	*******************************************************************/
 	private void computeOutput(String compoundName, int count) {
 		if (compoundName.equals("Water")){
 			Unit2.numWater += count;
@@ -528,8 +536,8 @@ public class P5Canvas extends PApplet{
 			DecimalFormat df = new DecimalFormat("###.#");
 			Main.satMass.setText(df.format(sat)+" g");
 			if (Main.selectedSet==3 || Main.selectedSet==5)
-				Main.satMass.setText("\u221e");
-			Main.dashboard.updateUI();
+				Main.satMass.setText("\u221e"); //u221e is Unicode Character "infinite"
+			//Main.dashboard.updateUI();
 		}
 
 	}
@@ -540,6 +548,7 @@ public class P5Canvas extends PApplet{
 	}
 	
 	public static void computeDisolved() {
+		//System.out.println("num_gone is"+Unit2.num_gone+", mToMass is "+Unit2.mToMass);
 		if (Main.m1Disolved==null) return;
 		DecimalFormat df = new DecimalFormat("###.#");
 		if (Unit2.num_gone<numGone_atSaturation() || numGone_atSaturation()==0){
@@ -602,7 +611,13 @@ public class P5Canvas extends PApplet{
 	}
 		
 	
-
+	/******************************************************************
+	* FUNCTION :     addMoleculeRandomly
+	* DESCRIPTION :  Initially add molecule to applet when a new set gets selected. Called when reset.
+	*
+	* INPUTS :       compoundName(String), count(int)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public void addMoleculeRandomly(String compoundName, int count) {
 		boolean tmp = isEnable;
 		isEnable = false;
@@ -636,9 +651,14 @@ public class P5Canvas extends PApplet{
 		isEnable = tmp;
 	}
 	
-	/*
-	 * Function to create compounds from outside the PApplet
-	 */
+
+	/******************************************************************
+	* FUNCTION :     addMolecule
+	* DESCRIPTION :  Function to create compounds from outside the PApplet
+	*
+	* INPUTS :       compoundName(String), count(int)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public void addMolecule(String compoundName, int count) {
 		// The tmp variable helps to fix a Box2D Bug: 2147483647  because of Multithreading
 		// at pbox2d.PBox2D.step(PBox2D.java:81)
@@ -676,9 +696,36 @@ public class P5Canvas extends PApplet{
 				creationCount++;
 										// variables are used to distribute molecules
 			int mod = creationCount%4;  // When the system is paused; Otherwise, molecules are create at the same position
-			for (int i=0;i<count;i++){
-				float x_ =x + w/2 +40+ (i-count/2.f)*(w/11) + creationCount;
-				float y_ =y + 80-Boundary.difVolume +(mod-1.5f)*20;
+			
+			float centerX = 0 ; // X Coordinate around which we are going to add molecules
+			float centerY = 0 ; // Y Coordinate around which we are going to add molecules
+			float x_ = 0;       // X Coordinate for a specific molecule
+			float y_ = 0;       // Y Coordinate for a specific molecule
+			int dimension =0;   // Decide molecule cluster is 2*2 or 3*3
+			int leftBorder = 40;// Left padding
+			int offsetX =0;     // X offset from left border to 3/4 width of canvas
+			Random rand = new Random();
+			offsetX = rand.nextInt((int)( (w/4)*3));
+			centerX = x + leftBorder + offsetX;
+			centerY = y + 80-Boundary.difVolume +(mod-1.5f)*20;
+			if(count<= (2*2) )
+				dimension =2;
+			else
+				dimension = 3;
+			
+			for (int i=0;i<count;i++){		
+
+				//System.out.println("medium is "+medium);
+				if(compoundName.equals("Water"))
+				{
+					x_ =centerX + i%dimension*(w/11) + creationCount;
+					y_ =centerY + i/dimension*(h/20);
+				}
+				else
+				{
+					x_ = centerX + (i-count/2.f)*(w/11) + creationCount;
+					y_ = centerY;
+				}
 				molecules.add(new Molecule(x_, y_,compoundName, box2d, this,0));
 			}
 		}

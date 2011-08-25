@@ -3,6 +3,7 @@ package view;
 import static model.State.molecules;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import main.Main;
 
@@ -24,23 +25,33 @@ public class Unit2 {
 	public static int mToMass =10;
 	
 	
-	
+	/******************************************************************
+	* FUNCTION :     add2Ions
+	* DESCRIPTION :  Specific function used to add particular Ions, Called by addMolecule()
+	*
+	* INPUTS :       ion1(String), ion2(String), count(int), box2d_(PBox2D),parent_(P5Canvas)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public static void add2Ions(String ion1, String ion2, int count, PBox2D box2d_, P5Canvas parent_) {
 		int numRow = (int) (Math.ceil(count/3.8)+1);
 		Vec2 size1 = Molecule.getShapeSize(ion1, parent_);
 		Vec2 size2 = Molecule.getShapeSize(ion2, parent_);
+		Random rand = new Random();                            //Random number used to generate ions in random location
+		float centerX = x + 50 + rand.nextFloat()*(w/3*2);     //X coordinate around which we are going to add Ions, 50 is border width
+		float centerY = y + 80-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
+		
 		for (int i=0;i<count;i++){
 			float x1,y1,angle1;
 			float x2,y2,angle2;
 			int r = i%numRow;
-			x1 = x + 50+ (i/numRow)*(size1.x+size2.x);
+			x1 = centerX + (i/numRow)*(size1.x+size2.x);
 			x2 = x1 + size1.x;
 			if ((r%2==1 )){
 				float tmp=x1;
 				x1=x2;
 				x2=tmp;
 			}
-			y1 =y + 80-Boundary.difVolume+(i%numRow)*size1.y;
+			y1 =centerY + (i%numRow)*size1.y;
 			y2=y1;
 			angle1 = 0;
 			angle2 = 0;
@@ -345,6 +356,7 @@ public class Unit2 {
 						    if (dif<2){
 					    		joint2Ions(index,i,mIndex,m);
 					    		num_gone--;
+					    		System.out.println("num_gone is "+num_gone);
 					    	}
 					    }
 					    
@@ -433,6 +445,7 @@ public class Unit2 {
 						    if (dif<2){
 					    		joint2Ions(index,i,mIndex,m);
 					    		num_gone--;
+					    		System.out.println("num_gone is "+num_gone);
 					    	}
 					    }
 					    
@@ -574,6 +587,7 @@ public class Unit2 {
 			if (num_gone>numGone_atSaturation() && mIndex.compoundJ<0 && m1.compoundJ<0 && m3.compoundJ<0){
 				jointCaCl(index1, index, index3, m1, mIndex,m3);
 				num_gone--;
+				System.out.println("num_gone is "+num_gone);
 			}
 		}
 	}	
@@ -813,6 +827,7 @@ public class Unit2 {
 					    	m.body.setTransform(new Vec2(x2,y2), 0);
 				    		jointNaHCO3(index,i,mIndex,m);
 				    		num_gone--;
+				    		System.out.println("num_gone is "+num_gone);
 				    	}
 				    }
 					
@@ -909,6 +924,7 @@ public class Unit2 {
 					m2.compoundJ =-1;
 					m2.compoundJoints = null;
 					num_gone++;
+					System.out.println("num_gone is "+num_gone);
 				}
 			}
 			else if (Main.selectedUnit==2 && Main.selectedSet==4){
@@ -960,6 +976,7 @@ public class Unit2 {
 					}
 					removeCaOtherJ(m);
 					num_gone++;
+					System.out.println("num_gone is "+num_gone);
 				}	
 			}
 			else if (Main.selectedUnit==2 && Main.selectedSet==7){
@@ -992,6 +1009,7 @@ public class Unit2 {
 					mCa.compoundJoints2 = null;
 						
 					num_gone++;
+					System.out.println("num_gone is "+num_gone);
 				}
 			}
 				
