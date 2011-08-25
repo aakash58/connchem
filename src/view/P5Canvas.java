@@ -270,11 +270,6 @@ public class P5Canvas extends PApplet{
 			m.display();
 		}
 		
-		//Print out framerate for testing
-		/*
-		fill(255, 255, 255);
-		text("framerate: " + (int)frameRate,12,16);
-		*/
 		
 	}
 	
@@ -546,21 +541,30 @@ public class P5Canvas extends PApplet{
 		int num = Math.round(computeSat()/ mToMass); 
 		return num;
 	}
-	
+	/******************************************************************
+	* FUNCTION :     computeDisolved
+	* DESCRIPTION :  Function to compute mass of dissolved solute
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
 	public static void computeDisolved() {
-		//System.out.println("num_gone is"+Unit2.num_gone+", mToMass is "+Unit2.mToMass);
+
 		if (Main.m1Disolved==null) return;
 		DecimalFormat df = new DecimalFormat("###.#");
 		if (Unit2.num_gone<numGone_atSaturation() || numGone_atSaturation()==0){
 			float dis = Unit2.num_gone*Unit2.mToMass;
+			if(Unit2.massDissolved<=dis)
 			Unit2.massDissolved = dis;
-			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
+			//System.out.println("Unit2.num_gone<numGone_atSaturation() || numGone_atSaturation()==0");
 		}
 		else if (Unit2.num_gone==numGone_atSaturation()) {
 			float sat = Unit2.computeSat();
-			float dis = computeIonSeperation()/(1+Canvas.satCount);
+			float dis = 0;  //Distance of Ion
+			//dis = computeIonSeperation()/(1+Canvas.satCount);
+			
 			Unit2.massDissolved = sat - dis;
-			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
+			//System.out.println("sat is "+sat+", dis is "+dis);
 		}
 		else if (Unit2.num_gone>numGone_atSaturation()) {
 			float sat = Unit2.computeSat();
@@ -568,23 +572,23 @@ public class P5Canvas extends PApplet{
 			float average = (sat+gone)/2;
 			float dis = computeIonSeperation()/(1+Canvas.satCount);
 			Unit2.massDissolved = average+dis;
-			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
 			if (Canvas.satCount>10){
 				Unit2.massDissolved = sat+dis;
-				Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
+				//System.out.println("Canvas.satCount>10");
 			}
+			//System.out.println("Unit2.num_gone>numGone_atSaturation()");
 		}
 		
 		double dis = Unit2.massDissolved;
 		double total =  Unit2.num_total*Unit2.mToMass;
 		if (dis>total){
 			Unit2.massDissolved = (float) total;
-			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
 		}
 		if (Main.selectedSet==3 || Main.selectedSet==5){
 			Unit2.massDissolved = Unit2.num_total*Unit2.mToMass;
-			Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
 		}	
+		
+		Main.m1Disolved.setText(df.format(Unit2.massDissolved)+" g");
 		if (temp<=0 || temp>=100){ 
 			Unit2.massDissolved =0;
 			Main.m1Disolved.setText("0 g");
@@ -599,6 +603,7 @@ public class P5Canvas extends PApplet{
 		//Main.dashboard.updateUI();
 		
 	}
+	
 	public static float computeIonSeperation() {
 		float dis = 0;
 		for (int i = 0; i < molecules.size(); i++) {
