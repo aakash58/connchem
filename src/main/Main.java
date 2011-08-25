@@ -163,8 +163,8 @@ public class Main {
 	
 	public static JLabel elapsedTime;   //"Elapsed Set Time" label
 	public static JLabel m1Mass;        
-	public static JLabel m1Disolved;
-	public static JLabel satMass;
+	public static JLabel m1Disolved;    //"Dissolved" label showing how much solute has dissolved
+	public static JLabel satMass;       //
 	public static JLabel waterVolume;
 	public static JLabel m1Label;
 	public static JLabel m1MassLabel;
@@ -334,7 +334,14 @@ public class Main {
 		}
 	}
 	
-	//Update molecule legends on the left panel. Called when reset.
+
+	/******************************************************************
+	* FUNCTION :     updateDynamicPanel
+	* DESCRIPTION :  Update molecule legends on the left panel. Called when reset.
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
 	public static void updateDynamicPanel(){
 		if (dynamicPanel!=null){
 			dynamicPanel.removeAll();
@@ -385,17 +392,14 @@ public class Main {
 							//Check if molecule number is going over predefined cap number
 							//If yes, add molecules no more than cap number
 							int cap = p5Canvas.getMoleculesCap(fixedName);
-							//System.out.println(fixedName+"`s cap is "+cap);
 							int curNum = p5Canvas.getMoleculesNum(fixedName);
 							if(cap<=(count+curNum))
 							{
 								count = cap - curNum;
 								//Disable Add button
 								arg0.getComponent().setEnabled(false);
-								//System.out.println("fixed name is "+fixedName);
 							}
 							p5Canvas.addMolecule(fixedName,count);
-							//System.out.println("Added "+count+" molecules");
 						}
 					});
 				
@@ -820,7 +824,7 @@ public class Main {
 		mainFrame.getContentPane().add(centerPanel, "cell 1 2,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
 		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[][560.00px][]", "[690px][center]"));
-		centerPanel.setBorder((BorderFactory.createLineBorder(Color.BLACK)));
+		//centerPanel.setBorder((BorderFactory.createLineBorder(Color.BLACK)));
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
 		
