@@ -22,6 +22,8 @@ import Util.ColorScales;
 import static model.State.*;
 import static view.Water.*;
 import static view.Compound.*;
+import static view.P5Canvas.x;
+import static view.P5Canvas.y;
 import static view.Unit2.*;
 import model.DBinterface;
 import model.YAMLinterface;
@@ -734,6 +736,7 @@ public class P5Canvas extends PApplet{
 				molecules.add(new Molecule(x_, y_,compoundName, box2d, this,0));
 			}
 		}
+		
 		isEnable = tmp;
 	}
 	public int getMoleculesNum(String compoundName)
@@ -749,13 +752,24 @@ public class P5Canvas extends PApplet{
 		return cap;
 	}
 	
+	/******************************************************************
+	* FUNCTION :     addSolid
+	* DESCRIPTION :  Specific function used to add addSolid, Called by addMolecule()
+	*
+	* INPUTS :       CompoundName(String), count(int)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public void addSolid(String compoundName, int count) {
 		int numRow = (int) (Math.ceil(count/6.)+1);
+		
+		float centerX = x + 200 ;                              //X coordinate around which we are going to add Ions, 50 is border width
+		float centerY = y + 80-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
+		
 		for (int i=0;i<count;i++){
 			float x_,y_,angle;
 			Vec2 size = Molecule.getShapeSize(compoundName, this);
-			x_ =x + 200+ (i/numRow)*2*size.x;
-			y_ =y + 80-Boundary.difVolume+(numRow-1-i%numRow)*2*size.y;
+			x_ =centerX+ (i/numRow)*2*size.x;
+			y_ =centerY+(numRow-1-i%numRow)*2*size.y;
 			if ((i%numRow)%2==0){
 				angle = 0;
 			}

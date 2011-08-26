@@ -25,21 +25,60 @@ public class Unit2 {
 	public static int mToMass =10;
 	
 	
+	private static boolean areaBodyCheck(Vec2 pos,Vec2 topLeft, Vec2 botRight)
+	{
+		boolean res = false;
+		if(pos.x>topLeft.x&&pos.x<botRight.x && pos.y>topLeft.y && pos.y<botRight.y)
+		{
+			res = true;
+			System.out.println("There are some molecules in add area");
+		}
+		return res;
+	}
 	/******************************************************************
 	* FUNCTION :     add2Ions
-	* DESCRIPTION :  Specific function used to add particular Ions, Called by addMolecule()
+	* DESCRIPTION :  Specific function used to add NaCl2, Called by addMolecule()
 	*
 	* INPUTS :       ion1(String), ion2(String), count(int), box2d_(PBox2D),parent_(P5Canvas)
 	* OUTPUTS:       None
 	*******************************************************************/
 	public static void add2Ions(String ion1, String ion2, int count, PBox2D box2d_, P5Canvas parent_) {
-		int numRow = (int) (Math.ceil(count/3.8)+1);
+		int numRow = (int) (Math.ceil(count/3.8)+1);        //number of row
 		Vec2 size1 = Molecule.getShapeSize(ion1, parent_);
 		Vec2 size2 = Molecule.getShapeSize(ion2, parent_);
+		int numCol = count/numRow+1;                        //number of column
+		
+		float increX = w/3;
 		Random rand = new Random();                            //Random number used to generate ions in random location
 		float centerX = x + 50 + rand.nextFloat()*(w/3*2);     //X coordinate around which we are going to add Ions, 50 is border width
 		float centerY = y + 80-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
+	
+		Vec2 topLeft = new Vec2(centerX, centerY);
+		Vec2 botRight = new Vec2(centerX+numCol*size1.x, centerY+numRow*size1.y);
+		boolean isClear = false;
 		
+		/*
+		//Check if there are any molecules in add area. If yes, add molecules to another area.
+		while( !isClear)
+		{
+			isClear = true;
+			for( int k=0;k<molecules.size();k++)
+			{
+				if(molecules.get(k).getName()!="Water")
+				{
+					if(areaBodyCheck(molecules.get(k).getPosition(),topLeft,botRight))
+					{
+						isClear = false;
+					}
+				}
+			}
+			if(!isClear)
+			{
+				centerX += increX;
+				if(centerX)
+			}
+		}
+		*/
 		for (int i=0;i<count;i++){
 			float x1,y1,angle1;
 			float x2,y2,angle2;
@@ -77,45 +116,68 @@ public class Unit2 {
 		m1.compoundJoints = dj;
 		m2.compoundJoints = dj;
 	}
-	
+	/******************************************************************
+	* FUNCTION :     addSiO2
+	* DESCRIPTION :  Specific function used to add addSiO2, Called by addMolecule()
+	*
+	* INPUTS :       CompoundName(String), count(int), box2d_(PBox2D),parent_(P5Canvas)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public static void addSiO2(String compoundName_, int count, PBox2D box2d_, P5Canvas parent_) {
 		int numRow = (int) (Math.ceil(count/4)+1);
 		int numCol = count/numRow;
+		
 			Vec2 size1 = Molecule.getShapeSize(compoundName_, parent_);
+			Random rand = new Random();                            //Random number used to generate ions in random location
+			float centerX = x + 260 ;                              //X coordinate around which we are going to add Ions, 260 is to make SiO2 spawn in the middle
+			float centerY = y + 80-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
+			
 		for (int i=0;i<count;i++){
 			float x1,y1,angle1;
 			int c = i%numCol;
 			int r = i/numCol;
+			
 			if (r%2==0)
-				x1 = x + 260+ c*(size1.x);
+				x1 = centerX+ c*(size1.x);
 			else
-				x1 = x + 260+ (c+0.5f)*(size1.x);
+				x1 = centerX+ (c+0.5f)*(size1.x);
 				
-			y1 =y + 80-Boundary.difVolume+r*size1.y;
+			y1 =centerY + r*size1.y;
 			
 			if (r==0 && c==0){
-				x1 = x + 260+ 3*(size1.x);
-				y1 = y + 80-Boundary.difVolume+2*size1.y;
+				x1 = centerX+ 3*(size1.x);
+				y1 = centerY+2*size1.y;
 			}
 			angle1 = 0;
 			molecules.add(new Molecule(x1, y1,compoundName_,box2d_, parent_,angle1));
 		}
 	}
 	
+	/******************************************************************
+	* FUNCTION :     addCalciumChloride
+	* DESCRIPTION :  Specific function used to add CalciumChloride, Called by addMolecule()
+	*
+	* INPUTS :       CompoundName(String), count(int), box2d_(PBox2D),parent_(P5Canvas)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public static void addCalciumChloride(String compoundName_, int count, PBox2D box2d_, P5Canvas parent_) {
 		String ion1 = "Chlorine-Ion";
 		String ion2 = "Calcium-Ion";
 		String ion3 = "Chlorine-Ion";
 		Vec2 size1 = Molecule.getShapeSize(ion1, parent_);
 		Vec2 size3 = Molecule.getShapeSize(ion3, parent_);
+		
+		float centerX = x + 200 ;                              //X coordinate around which we are going to add Ions, 50 is border width
+		float centerY = y + 100-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
+		
 		for (int i=0;i<count;i++){
 			float x1,y1,angle1;
 			float x2,y2,angle2;
 			float x3,y3,angle3;
-			x1 = x + 200 + (i%2)*(size1.x*3);
+			x1 = centerX + (i%2)*(size1.x*3);
 			x2 = x1 + size1.x;
 			x3 = x1 + size1.x + size3.x;
-			y1 =y + 100-Boundary.difVolume+(i/2)*2*size1.y;
+			y1 = centerY +(i/2)*2*size1.y;
 			y2=y1;
 			y3=y1;
 			angle1 = 0;
@@ -158,18 +220,28 @@ public class Unit2 {
 	}
 	
 	
-	
+	/******************************************************************
+	* FUNCTION :     addNaHCO3
+	* DESCRIPTION :  Specific function used to add addNaHCO3, Called by addMolecule()
+	*
+	* INPUTS :       CompoundName(String), count(int), box2d_(PBox2D),parent_(P5Canvas)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public static void addNaHCO3(String compoundName_, int count, PBox2D box2d_, P5Canvas parent_) {
 		String ion1 = "Bicarbonate";
 		String ion2 = "Sodium-Ion";
 		Vec2 size1 = Molecule.getShapeSize(ion1, parent_);
 		Vec2 size2 = Molecule.getShapeSize(ion2, parent_);
+		
+		float centerX = x + 200 ;                              //X coordinate around which we are going to add Ions, 50 is border width
+		float centerY = y + 100-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
+		
 		for (int i=0;i<count;i++){
 			float x1,y1,angle1;
 			float x2,y2,angle2;
-			x1 = x + 200 + (i%3)*(size1.x+size2.x);
+			x1 = centerX + (i%3)*(size1.x+size2.x);
 			x2 = x1 + size1.x-20;
-			y1 =y + 100-Boundary.difVolume+(i/3)*size1.y;
+			y1 =centerY+(i/3)*size1.y;
 			y2=y1;
 			angle1 = 0;
 			angle2 = 0;
@@ -356,7 +428,7 @@ public class Unit2 {
 						    if (dif<2){
 					    		joint2Ions(index,i,mIndex,m);
 					    		num_gone--;
-					    		System.out.println("num_gone is "+num_gone);
+					    		
 					    	}
 					    }
 					    
@@ -445,7 +517,7 @@ public class Unit2 {
 						    if (dif<2){
 					    		joint2Ions(index,i,mIndex,m);
 					    		num_gone--;
-					    		System.out.println("num_gone is "+num_gone);
+					    		
 					    	}
 					    }
 					    
@@ -587,7 +659,7 @@ public class Unit2 {
 			if (num_gone>numGone_atSaturation() && mIndex.compoundJ<0 && m1.compoundJ<0 && m3.compoundJ<0){
 				jointCaCl(index1, index, index3, m1, mIndex,m3);
 				num_gone--;
-				System.out.println("num_gone is "+num_gone);
+			
 			}
 		}
 	}	
@@ -827,7 +899,7 @@ public class Unit2 {
 					    	m.body.setTransform(new Vec2(x2,y2), 0);
 				    		jointNaHCO3(index,i,mIndex,m);
 				    		num_gone--;
-				    		System.out.println("num_gone is "+num_gone);
+
 				    	}
 				    }
 					
@@ -924,7 +996,6 @@ public class Unit2 {
 					m2.compoundJ =-1;
 					m2.compoundJoints = null;
 					num_gone++;
-					System.out.println("num_gone is "+num_gone);
 				}
 			}
 			else if (Main.selectedUnit==2 && Main.selectedSet==4){
@@ -976,7 +1047,7 @@ public class Unit2 {
 					}
 					removeCaOtherJ(m);
 					num_gone++;
-					System.out.println("num_gone is "+num_gone);
+
 				}	
 			}
 			else if (Main.selectedUnit==2 && Main.selectedSet==7){
@@ -1008,9 +1079,7 @@ public class Unit2 {
 					PBox2D.world.destroyJoint(dj2);
 					mCa.compoundJoints2 = null;
 						
-					num_gone++;
-					System.out.println("num_gone is "+num_gone);
-				}
+					num_gone++;				}
 			}
 				
 				
