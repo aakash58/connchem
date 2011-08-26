@@ -520,7 +520,7 @@ public class Main {
 		//For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
 		if( selectedUnit==2 && selectedSim==3)
 		{
-			leftPanel.add(lblInputTipL,"cell 0 1,gaptop 5,alignx left,width 40::");
+			leftPanel.add(lblInputTipL,"cell 0 1,gaptop 5,alignx left,width 45::");
 			leftPanel.add(lblInputTipR,"cell 0 1,gaptop 5,alignx right");
 		}
 		else
@@ -745,7 +745,7 @@ public class Main {
 		else
 			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
 		
-		timerSubpanel.add(playBtn, "cell 1 0");
+		timerSubpanel.add(playBtn, "cell 1 0, align center");
 		
 		//Add Reset button to timerSubpanel
 		JButton resetBtn = new JButton("");
@@ -755,7 +755,7 @@ public class Main {
 				reset();
 			}
 		});
-		timerSubpanel.add(resetBtn, "cell 1 0");
+		timerSubpanel.add(resetBtn, "cell 1 0, align center");
 		
 		//Add Checkbox to checkBoxPanel
 		JPanel checkBoxPanel = new JPanel();
