@@ -824,7 +824,7 @@ public class Main {
 		mainFrame.getContentPane().add(centerPanel, "cell 1 2,grow");
 		// leftPanel Width=282 		rightPanel Width =255  
 		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[][560.00px][]", "[690px][center]"));
-		//centerPanel.setBorder((BorderFactory.createLineBorder(Color.BLACK)));
+
 		// Add P5Canvas 
 		centerPanel.add(p5Canvas, "cell 1 0,grow");
 		
@@ -834,8 +834,7 @@ public class Main {
 		clPanel.setLayout(new MigLayout("insets 0, gap 0", "[]", "[][210.00][][40.00][][210.00][]"));
 		
 		//Set up Volume Slider
-	
-		//volumeSlider.setEnabled(false);		
+		
 		volumeSlider.setOrientation(SwingConstants.VERTICAL);		
 		volumeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
