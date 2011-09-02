@@ -25,7 +25,7 @@ public class Molecule {
 	// We need to keep track of a Body and a width and height
 	public Body body;
 	private PBox2D box2d;
-	private P5Canvas parent;
+	private P5Canvas p5Canvas;
 	private PShape pShape = new PShape();
 	private float pShapeW = 0f;
 	private float pShapeH = 0f;
@@ -73,17 +73,17 @@ public class Molecule {
 	// Constructor
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
 			P5Canvas parent_, float angle) {
-		parent = parent_;
+		p5Canvas = parent_;
 		box2d = box2d_;
 		name = compoundName_;
 
 		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
-		pShape = parent.loadShape(path);
+		pShape = p5Canvas.loadShape(path);
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
 		minSize = Math.min(pShapeW, pShapeH);
 		maxSize = Math.max(pShapeW, pShapeH);
-		polarity = parent.db.getCompoundPolarity(compoundName_);
+		polarity = p5Canvas.db.getCompoundPolarity(compoundName_);
 
 		circles = SVGReader.getSVG(path);
 		elementNames = SVGReader.getNames();
@@ -253,7 +253,7 @@ public class Molecule {
 		}
 		// System.out.println(name+ " get Mass "+body.getMass() +" DBmass:"+ +DBinterface.getCompoundMass(name));
 		// Give it some initial random velocity
-		body.setLinearVelocity(new Vec2(parent.random(-1, 1), parent.random(-1,
+		body.setLinearVelocity(new Vec2(p5Canvas.random(-1, 1), p5Canvas.random(-1,
 				1)));
 		body.setAngularVelocity(0);
 		body.setUserData(this);
@@ -373,33 +373,33 @@ public class Molecule {
 		
 
 		//Draw bodies
-		parent.pushMatrix();
-		parent.translate(pos.x, pos.y);
-		parent.rotate(-a);
-		parent.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH); 
+		p5Canvas.pushMatrix();
+		p5Canvas.translate(pos.x, pos.y);
+		p5Canvas.rotate(-a);
+		p5Canvas.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH); 
 		//parent.noFill();
-		parent.fill(Color.GRAY.getRGB(),240);
-		if (TableView.selectedRow>=0){
-			if (!name.equals(Canvas.getSelectedMolecule())) {
-				parent.noStroke();
+		p5Canvas.fill(Color.GRAY.getRGB(),240);
+		if (p5Canvas.getMain().getTableView().selectedRow>=0){
+			if (!name.equals(p5Canvas.getMain().getCanvas().getSelectedMolecule())) {
+				p5Canvas.noStroke();
 				for (int i=0; i<circles.length;i++){
-					parent.ellipse( circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2,circles[i][0]*2, circles[i][0]*2);
+					p5Canvas.ellipse( circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2,circles[i][0]*2, circles[i][0]*2);
 				}
 			}
 		}
 		else if (P5Canvas.isHidingEnabled && !isHidden){
-			parent.noStroke();
+			p5Canvas.noStroke();
 			for (int i=0; i<circles.length;i++){
-				parent.ellipse( circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2,circles[i][0]*2, circles[i][0]*2);
+				p5Canvas.ellipse( circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2,circles[i][0]*2, circles[i][0]*2);
 			}
 		}
 		
 		if (name.equals("Calcium-Ion")){
-			parent.stroke(Color.BLUE.getRGB());
+			p5Canvas.stroke(Color.BLUE.getRGB());
 			//parent.line(0,0,30,0);
 			//parent.ellipse( circles[0][0], 0,6, 6);
 		}
-		parent.popMatrix();
+		p5Canvas.popMatrix();
 		//End drawing
 		
 		
@@ -408,10 +408,10 @@ public class Molecule {
 			int numElement = elementNames.size();
 			for (int i=0; i<numElement;i++){
 				if (loc[i]==null) continue;
-				parent.stroke(Color.BLUE.getRGB());
-				parent.line(PBox2D.scalarWorldToPixels(loc[i].x), parent.height-PBox2D.scalarWorldToPixels(loc[i].y),
+				p5Canvas.stroke(Color.BLUE.getRGB());
+				p5Canvas.line(PBox2D.scalarWorldToPixels(loc[i].x), p5Canvas.height-PBox2D.scalarWorldToPixels(loc[i].y),
 					PBox2D.scalarWorldToPixels(loc[i].x)+PBox2D.scalarWorldToPixels(sumForceWaterX[i]+sumForceX[i]), 
-				parent.height-PBox2D.scalarWorldToPixels(loc[i].y)-PBox2D.scalarWorldToPixels(sumForceWaterY[i]+sumForceY[i]));
+					p5Canvas.height-PBox2D.scalarWorldToPixels(loc[i].y)-PBox2D.scalarWorldToPixels(sumForceWaterY[i]+sumForceY[i]));
 			}
 		}
 		
@@ -420,14 +420,14 @@ public class Molecule {
 			
 				if (compoundJ>=0) {
 					Vec2 pos2 = box2d.getBodyPixelCoord(molecules.get(compoundJ).body);
-					parent.stroke(Color.BLACK.getRGB());
-					parent.line(pos.x, pos.y,pos2.x,pos2.y);
+					p5Canvas.stroke(Color.BLACK.getRGB());
+					p5Canvas.line(pos.x, pos.y,pos2.x,pos2.y);
 				}
 			
 				if (otherJ>=0) {
 					Vec2 pos2 = box2d.getBodyPixelCoord(molecules.get(otherJ).body);
-					parent.stroke(Color.RED.getRGB());
-					parent.line(pos.x, pos.y,pos2.x,pos2.y);
+					p5Canvas.stroke(Color.RED.getRGB());
+					p5Canvas.line(pos.x, pos.y,pos2.x,pos2.y);
 				}
 		}
 		

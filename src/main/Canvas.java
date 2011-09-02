@@ -23,18 +23,20 @@ import static view.P5Canvas.*;
 import static view.Compound.*;
 
 public class Canvas extends JPanel implements ActionListener, MouseListener, MouseMotionListener{
-	public static Timer timer1;
+	public Timer timer1;
 	//public static ArrayList<String> mNames = new ArrayList<String>();
 	//public static ArrayList<Integer> mCounts = new ArrayList<Integer>();
-	public static final int MAXCOMPOUND = 50;
-	public static ArrayList[] lines = new ArrayList[MAXCOMPOUND];
+	public final int MAXCOMPOUND = 50;
+	public ArrayList[] lines = new ArrayList[MAXCOMPOUND];
 	
-	public static int maxCount =8;
-	public static int maxTime =60;
-	public static int satCount =0;
+	public int maxCount =8;
+	public int maxTime =60;
+	public int satCount =0;
+	private Main main = null;
 	
 	
-	public Canvas() {
+	public Canvas( Main parent) {
+		main = parent;
 		for (int i=0; i<MAXCOMPOUND;i++){
 			lines[i] = new ArrayList();
 		}
@@ -69,7 +71,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		}
 	}
 	
-	public void paint(Graphics gx) {
+	public void paintComponent(Graphics gx) {
 
 		Graphics2D g = (Graphics2D) gx;
 		int w = 266;
@@ -117,7 +119,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		g.drawString(""+maxCount, 2, margin-5);
 		
 		satCount+=2;
-		computeDisolved();
+		main.getP5Canvas().computeDisolved();
 		resetMoleculeCount();
 		updateTableView();
 		if (Main.time>maxTime){
@@ -141,7 +143,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
 				num1 = tmpLine.getNum2();
 			}	
-			Line l = new Line(margin, 225-margin, (int) Main.time-1, (int) Main.time,  num1, num2, h2, w2);
+			Line l = new Line(margin, 225-margin, (int) Main.time-1, (int) Main.time,  num1, num2, h2, w2, this);
 			lines[i].add(l);
 		}
 		Main.elapsedTime.setText(formatTime(Main.time));
@@ -150,10 +152,10 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		for (int i=0; i< MAXCOMPOUND;i++){
 			for (int index=0; index< lines[i].size();index++){
 				Line l = (Line) lines[i].get(index);
-				if (i==TableView.selectedRow)
-					l.paint(g,blinkingColor(TableView.colors[i]));
+				if (i==main.getTableView().selectedRow)
+					l.paint(g,blinkingColor(main.getTableView().colors[i]));
 				else
-					l.paint(g,TableView.colors[i]);
+					l.paint(g,main.getTableView().colors[i]);
 			}
 		}
 		
@@ -173,7 +175,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 	
 
-	public static void resetMoleculeCount(){
+	public void resetMoleculeCount(){
 		if (Main.selectedUnit==1 && Main.selectedSim==4){
 			int H2OIndex = names.indexOf("Water");
 			int OIndex = names.indexOf("Oxygen");
@@ -209,8 +211,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					NaClCount++;
 				}
 			}
-			counts.set(NaIndex,Unit2.num_total-NaClCount);
-			counts.set(ClIndex,Unit2.num_total-NaClCount);
+			counts.set(NaIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaClCount);
+			counts.set(ClIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaClCount);
 			counts.set(NaClIndex,NaClCount);
 			
 		}
@@ -225,8 +227,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					CaClCount++;
 				}
 			}
-			counts.set(CaIndex,Unit2.num_total-CaClCount);
-			counts.set(ClIndex,2*(Unit2.num_total-CaClCount));
+			counts.set(CaIndex,main.getP5Canvas().getUnit2().getTotalNum()-CaClCount);
+			counts.set(ClIndex,2*(main.getP5Canvas().getUnit2().getTotalNum()-CaClCount));
 			counts.set(CaClIndex,CaClCount);
 		}
 		else if (Main.selectedUnit==2 && Main.selectedSet==7){
@@ -240,8 +242,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					NaHCO3Count++;
 				}
 			}
-			counts.set(NaIndex,Unit2.num_total-NaHCO3Count);
-			counts.set(HCO3Index,Unit2.num_total-NaHCO3Count);
+			counts.set(NaIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaHCO3Count);
+			counts.set(HCO3Index,main.getP5Canvas().getUnit2().getTotalNum()-NaHCO3Count);
 			counts.set(NaHCO3Index, NaHCO3Count);
 		}
 		else if (Main.selectedUnit==2 && Main.selectedSet==1 && Main.selectedSim==4){
@@ -256,29 +258,29 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					KClCount++;
 				}
 			}
-			counts.set(KIndex, Unit2.num_total-KClCount);
-			counts.set(ClIndex,Unit2.num_total-KClCount);
+			counts.set(KIndex, main.getP5Canvas().getUnit2().getTotalNum()-KClCount);
+			counts.set(ClIndex,main.getP5Canvas().getUnit2().getTotalNum()-KClCount);
 			counts.set(KClIndex,KClCount);
 		}
 		
 		
 	}
-	public static void updateTableView(){
-		TableView.data[0] = new ArrayList();
-		TableView.data[1] = new ArrayList();
-		TableView.data[2] = new ArrayList();
+	public void updateTableView(){
+		main.getTableView().data[0] = new ArrayList();
+		main.getTableView().data[1] = new ArrayList();
+		main.getTableView().data[2] = new ArrayList();
 		for (int i=0; i<names.size();i++){
-			TableView.data[0].add(counts.get(i));
-			TableView.data[1].add(TableView.colors[i]);
-			TableView.data[2].add(names.get(i));
+			main.getTableView().data[0].add(counts.get(i));
+			main.getTableView().data[1].add(main.getTableView().colors[i]);
+			main.getTableView().data[2].add(names.get(i));
 		}
-		if (Main.tableView !=null && !Main.tableView.stopUpdating){
-			Main.tableView.table.updateUI();
+		if (main.getTableView() !=null && !main.getTableView().stopUpdating){
+			main.getTableView().table.updateUI();
 		}		
 	}
 	
-	public static String getSelectedMolecule(){
-		int index = TableView.selectedRow;
+	public String getSelectedMolecule(){
+		int index = main.getTableView().selectedRow;
 		if (index<0 || index>=names.size())
 			return "";
 		if (names.get(index)==null) return "";
@@ -354,8 +356,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				}	
 			}
 		}
-		if (select != TableView.selectedRow)
-			TableView.setSelectedRow(select);
+		if (select != main.getTableView().selectedRow)
+			main.getTableView().setSelectedRow(select);
 	}
 	
 

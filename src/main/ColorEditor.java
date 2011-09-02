@@ -7,6 +7,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import java.awt.Color;
 import java.awt.Component;
@@ -22,8 +23,10 @@ public class ColorEditor extends AbstractCellEditor
     JColorChooser colorChooser;
     JDialog dialog;
     protected static final String EDIT = "edit";
+    private JPanel tableSet;
 
-    public ColorEditor() {
+    public ColorEditor(JPanel parent) {
+    	tableSet = parent;
             colorChooser = new JColorChooser();
       dialog = JColorChooser.createDialog(null,
                                         "Pick a Color",
@@ -46,9 +49,9 @@ public class ColorEditor extends AbstractCellEditor
                                                  int row,
                                                  int column) {
     	// Can not do TableView.UpdateUI 
-    	TableView.stopUpdating =true;
-    	TableView.selectedRow =row;
-    	TableView.table.addRowSelectionInterval(row, row);
+    	getTableView().stopUpdating =true;
+    	getTableView().selectedRow =row;
+    	getTableView().table.addRowSelectionInterval(row, row);
     	dialog.setLocation(Main.mainFrame.getSize().width-430-300, 80);
     	dialog.setVisible(true);
         currentColor = (Color)value;
@@ -57,14 +60,18 @@ public class ColorEditor extends AbstractCellEditor
 
 	public void stateChanged(ChangeEvent e) {
 		currentColor = colorChooser.getColor();
-		Main.tableView.table.setValueAt(currentColor, TableView.selectedRow, 1);
+		getTableView().table.setValueAt(currentColor, getTableView().selectedRow, 1);
 	
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		// Release TableView.UpdateUI 
-		TableView.stopUpdating =false;
+		getTableView().stopUpdating =false;
 
+	}
+	private TableView getTableView()
+	{
+		return ((TableSet) tableSet).getMain().getTableView();
 	}
 }
 

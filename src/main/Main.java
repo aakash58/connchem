@@ -93,7 +93,8 @@ import java.awt.event.ComponentEvent;
 public class Main {
 	// Controllers  
 	// this is a different change. 
-	private static P5Canvas p5Canvas = new P5Canvas();
+	private P5Canvas p5Canvas;
+	//private Unit2 unit2 = new Unit2();
 	// TODO flag
 	public static JFrame mainFrame;
 	public static JMenu simMenu = new JMenu("Choose Simulation");
@@ -111,7 +112,7 @@ public class Main {
 	public static JScrollPane dynamicScrollPane; 
 	public static ArrayList additionalPanelList =  new ArrayList();
 	public static ArrayList defaultSetMolecules =  new ArrayList();
-	public static CustomPopupMenu scrollablePopupMenu;
+	private CustomPopupMenu scrollablePopupMenu;
 	public static String[] moleculeNames = null;
 	public static JPanel rightPanel;
 	
@@ -123,9 +124,9 @@ public class Main {
 	public static JPanel leftPanel;     //"Input" panel on left of application
 	public static JPanel centerPanel;   //"Simulation" panel in the middle of application
 	public static JPanel welcomePanel;  //"Welcome" Panel showing welcome info when application is first opened up
-	public static Canvas canvas = new Canvas();
-	public static TableView tableView;
-	public static TableSet tableSet;
+	private Canvas canvas ;
+	private TableView tableView;
+	private TableSet tableSet;
 	private JMenuBar menuBar;
 	
 	/*******  Left Panel parameters  *******/
@@ -136,8 +137,8 @@ public class Main {
 	
 	
 	private static JPanel clPanel;     //Center Left control Panel containing volume slider and Zoom Slider
-	public static final JLabel  volumeLabel = new JLabel(P5Canvas.currenttVolume+"mL");
-	public static JSlider volumeSlider = new JSlider(0, 100, P5Canvas.currenttVolume);
+	public final JLabel  volumeLabel = new JLabel(getP5Canvas().currenttVolume+"mL");
+	public JSlider volumeSlider = new JSlider(0, 100, getP5Canvas().currenttVolume);
 	private static JLabel canvasControlLabel_main_volume;
 	//Pressure slider used to replace Volume Slider in Unit 2
 	public static JSlider pressureSlider = new JSlider(0,10,1);
@@ -202,6 +203,12 @@ public class Main {
 	 * Create the application.
 	 */
 	public Main() {
+		setP5Canvas(new P5Canvas(this));
+		setCanvas(new Canvas(this));
+		setTableView(new TableView(this));
+
+		setTableSet(new TableSet(this));
+		scrollablePopupMenu = new CustomPopupMenu (this);
 		initialize();
 	}
 
@@ -273,7 +280,7 @@ public class Main {
 	  }
 	
 	
-	public static void removeAdditionalMolecule(int additionalIndex){
+	public void removeAdditionalMolecule(int additionalIndex){
 		int pos = defaultSetMolecules.size()+additionalIndex;
 		dynamicPanel.removeAll();
 		additionalPanelList.remove(pos);
@@ -284,19 +291,19 @@ public class Main {
 		}
 	}
 		
-	public static void addAdditionalMolecule(){
+	public void addAdditionalMolecule(){
 		//Default unit setting
 		JPanel panel = new JPanel();
-		panel.setBackground(Main.selectedColor);
+		panel.setBackground(this.selectedColor);
 		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
 		
 		//new molecule is at the end of additionalList
-		int newMolecule =  CustomPopupMenu.additionalList.size()-1; 
+		int newMolecule =  this.scrollablePopupMenu.additionalList.size()-1; 
 		int pos = defaultSetMolecules.size() + newMolecule;
 		dynamicPanel.add(panel, "cell 0 "+pos+",grow");
 		additionalPanelList.add(panel);
 		
-		String cName = (String)  CustomPopupMenu.additionalList.get(newMolecule);
+		String cName = (String)  this.scrollablePopupMenu.additionalList.get(newMolecule);
 		JLabel label = new JLabel(cName);
 		
 		final String fixedName = cName.replace(" ", "-");
@@ -325,7 +332,7 @@ public class Main {
 		button_1.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
 				int count = Integer.parseInt(label_1.getText());
-				p5Canvas.addMolecule(fixedName,count);
+				getP5Canvas().addMolecule(fixedName,count);
 			}	
 		});
 		if (dynamicPanel.getComponentCount()>6){
@@ -342,7 +349,7 @@ public class Main {
 	* INPUTS :       None
 	* OUTPUTS:       None
 	*******************************************************************/
-	public static void updateDynamicPanel(){
+	public void updateDynamicPanel(){
 		if (dynamicPanel!=null){
 			dynamicPanel.removeAll();
 			defaultSetMolecules =  new ArrayList();
@@ -387,19 +394,28 @@ public class Main {
 					panel.add(button_1, "cell 2 1,growy");
 					button_1.addMouseListener(new MouseAdapter() {
 						public void mouseClicked(MouseEvent arg0) {
-							//Get number showing on slider bar
-							int count = Integer.parseInt(label_1.getText().substring(sliderLabel.length()));
-							//Check if molecule number is going over predefined cap number
-							//If yes, add molecules no more than cap number
-							int cap = p5Canvas.getMoleculesCap(fixedName);
-							int curNum = p5Canvas.getMoleculesNum(fixedName);
-							if(cap<=(count+curNum))
+							
+							if(arg0.getComponent().isEnabled())
 							{
-								count = cap - curNum;
-								//Disable Add button
-								arg0.getComponent().setEnabled(false);
+								//Get number showing on slider bar
+								int count = Integer.parseInt(label_1.getText().substring(sliderLabel.length()));
+								//Check if molecule number is going over predefined cap number
+								//If yes, add molecules no more than cap number
+								int cap = getP5Canvas().getMoleculesCap(fixedName);
+								int curNum = getP5Canvas().getMoleculesNum(fixedName);
+								if(cap<=(count+curNum))
+								{
+									count = cap - curNum;
+									//Disable Add button
+									if(getP5Canvas().addMolecule(fixedName,count))
+										arg0.getComponent().setEnabled(false);
+								}
+								else
+								{
+									getP5Canvas().addMolecule(fixedName,count);
+								}
+									
 							}
-							p5Canvas.addMolecule(fixedName,count);
 						}
 					});
 				
@@ -409,8 +425,8 @@ public class Main {
 	}
 	
 	
-	public static void createPopupMenu(){
-		scrollablePopupMenu = new CustomPopupMenu();
+	public void createPopupMenu(){
+		
 		for (int i=0;i<moleculeNames.length;i++){
 			CustomButton xx = new CustomButton(moleculeNames[i].replace("-", " "));
 			xx.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+moleculeNames[i]+".png")));
@@ -423,9 +439,9 @@ public class Main {
 		}
 	}
 	
-	public static void reset(){
-		boolean temp = P5Canvas.isEnable;
-		P5Canvas.isEnable =false;
+	public void reset(){
+		boolean temp = getP5Canvas().isEnable;
+		getP5Canvas().isEnable =false;
 		if (isWelcomed && welcomePanel !=null){
 			mainFrame.remove(welcomePanel);
 			mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
@@ -434,10 +450,10 @@ public class Main {
 			isWelcomed = false;
 		}
 		
-		p5Canvas.removeAllMolecules();
-		//P5Canvas.count=0;
-		P5Canvas.curTime=0;
-		P5Canvas.oldTime=0;
+		getP5Canvas().removeAllMolecules();
+		
+		getP5Canvas().curTime=0;
+		getP5Canvas().oldTime=0;
 		
 		//Reset dashboard on right panel
 		dashboard.removeAll();
@@ -457,11 +473,11 @@ public class Main {
 			dashboard.add(solutionLabel, "cell 0 5,alignx right");
 			dashboard.add(soluteVolume, "cell 1 5");
 			
-	
-			
 		}
 			
-		Unit2.reset();
+		//reset Unit 2
+		this.getP5Canvas().getUnit2().reset();
+		
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
 		if (a!=null) {
 			Compound.names = new ArrayList<String>();
@@ -475,7 +491,7 @@ public class Main {
 				Compound.names.add(s);
 				Compound.counts.add(num);
 				Compound.caps.add(cap);
-				p5Canvas.addMoleculeRandomly(s,num);
+				getP5Canvas().addMoleculeRandomly(s,num);
 			}
 			if (selectedUnit==1){
 				if (selectedSim==4){
@@ -514,8 +530,8 @@ public class Main {
 			}	
 			Compound.setProperties();
 		}
-		canvas.reset();
-		TableView.setSelectedRow(-1);
+		getCanvas().reset();
+		tableView.setSelectedRow(-1);
 		
 		//For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
 		if( selectedUnit==2 && selectedSim==3)
@@ -541,7 +557,7 @@ public class Main {
 		
 		
 	
-		P5Canvas.isEnable =temp;
+		getP5Canvas().isEnable =temp;
 		
 		//reset timer
 		resetTimer();
@@ -556,7 +572,7 @@ public class Main {
 	* INPUTS :       None
 	* OUTPUTS:       None
 	*******************************************************************/
-	private static void updateCenterPanel()
+	private void updateCenterPanel()
 	{
 		if (playBtn!=null && centerPanel!=null){
 
@@ -585,7 +601,7 @@ public class Main {
 			
 			pressureSlider.requestFocus();
 			pressureSlider.lostFocus(null, null);
-			pressureSlider.enable(P5Canvas.yaml.getControlPressureSliderState(selectedUnit, selectedSim));
+			pressureSlider.enable(getP5Canvas().yaml.getControlPressureSliderState(selectedUnit, selectedSim));
 			}
 			else
 			{
@@ -609,22 +625,22 @@ public class Main {
 				canvasControlLabel_main_volume.setVisible(true);
 				volumeSlider.requestFocus();
 				volumeSlider.lostFocus(null, null);
-				volumeSlider.enable(P5Canvas.yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
+				volumeSlider.enable(getP5Canvas().yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
 			}
 				
 			zoomSlider.requestFocus();
 			zoomSlider.lostFocus(null, null);
-			zoomSlider.enable(P5Canvas.yaml.getControlScaleSliderState(selectedUnit, selectedSim));
+			zoomSlider.enable(getP5Canvas().yaml.getControlScaleSliderState(selectedUnit, selectedSim));
 			speedSlider.requestFocus();
 			speedSlider.lostFocus(null, null);
-			speedSlider.enable(P5Canvas.yaml.getControlSpeedSliderState(selectedUnit, selectedSim));
+			speedSlider.enable(getP5Canvas().yaml.getControlSpeedSliderState(selectedUnit, selectedSim));
 			heatSlider.requestFocus();
 			heatSlider.lostFocus(null,null);
-			heatSlider.enable(P5Canvas.yaml.getControlHeatSliderState(selectedUnit, selectedSim));
+			heatSlider.enable(getP5Canvas().yaml.getControlHeatSliderState(selectedUnit, selectedSim));
 				
-			float heatMin =P5Canvas.yaml.getControlHeatSliderMin(selectedUnit, selectedSim);
-			float heatMax = P5Canvas.yaml.getControlHeatSliderMax(selectedUnit, selectedSim);
-			float heatInit =P5Canvas.yaml.getControlHeatSliderInit(selectedUnit, selectedSim);
+			float heatMin =getP5Canvas().yaml.getControlHeatSliderMin(selectedUnit, selectedSim);
+			float heatMax = getP5Canvas().yaml.getControlHeatSliderMax(selectedUnit, selectedSim);
+			float heatInit =getP5Canvas().yaml.getControlHeatSliderInit(selectedUnit, selectedSim);
 			heatSlider.setMaximum((int) heatMax);
 			heatSlider.setMinimum((int) heatMin);
 			heatSlider.setValue((int) heatInit);
@@ -668,8 +684,8 @@ public class Main {
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 
-		p5Canvas.setBackground(Color.WHITE);
-		p5Canvas.init();
+		getP5Canvas().setBackground(Color.WHITE);
+		getP5Canvas().init();
 		
 		//Set up Menu 
 		initMenu();
@@ -725,22 +741,22 @@ public class Main {
 		playBtn = new JButton("");
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (P5Canvas.isEnable){ //playing, turning to PAUSE					
+				if (getP5Canvas().isEnable){ //playing, turning to PAUSE					
 					//pause timer
 					timer.stop();
-					P5Canvas.isEnable = false;
+					getP5Canvas().isEnable = false;
 					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
 					
 				}	
 				else{ //Pausing, turning to PLAY
 					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
-					P5Canvas.isEnable = true; 
+					getP5Canvas().isEnable = true; 
 					timer.start();
 				}	
 			}
 		});
 		
-		if (P5Canvas.isEnable)
+		if (getP5Canvas().isEnable)
 			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
 		else
 			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
@@ -764,18 +780,18 @@ public class Main {
 		cBox1.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
-					P5Canvas.isHidingEnabled =true;
+					getP5Canvas().isHidingEnabled =true;
 				else if	(e.getStateChange() == ItemEvent.DESELECTED)
-					P5Canvas.isHidingEnabled = false;
+					getP5Canvas().isHidingEnabled = false;
 			}
 		});
 		JCheckBox cBox2 =  new JCheckBox("Display Forces"); 
 		cBox2.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
-					P5Canvas.isDisplayForces =true;
+					getP5Canvas().isDisplayForces =true;
 				else if	(e.getStateChange() == ItemEvent.DESELECTED)
-					P5Canvas.isDisplayForces = false;
+					getP5Canvas().isDisplayForces = false;
 			}
 		});
 		
@@ -783,9 +799,9 @@ public class Main {
 		cBox3.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
-					P5Canvas.isDisplayJoints =true;
+					getP5Canvas().isDisplayJoints =true;
 				else if	(e.getStateChange() == ItemEvent.DESELECTED)
-					P5Canvas.isDisplayJoints = false;
+					getP5Canvas().isDisplayJoints = false;
 			}
 		});
 		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
@@ -796,9 +812,8 @@ public class Main {
 		
 
 		
-		//Add Set Table to timerSubpanel
-		tableSet = new TableSet();
-		timerSubpanel.add(tableSet, "cell 0 0 1 2,growy");
+		
+		timerSubpanel.add(getTableSet(), "cell 0 0 1 2,growy");
 		
 		
 		
@@ -816,8 +831,8 @@ public class Main {
 		centerPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				int volume = (int) p5Canvas.getSize().height/P5Canvas.multiplierVolume;
-				p5Canvas.updateSize(p5Canvas.getSize(), volume);
+				int volume = (int) getP5Canvas().getSize().height/getP5Canvas().multiplierVolume;
+				getP5Canvas().updateSize(getP5Canvas().getSize(), volume);
 				volumeLabel.setText(volume+" mL");
 			}
 		});
@@ -826,7 +841,7 @@ public class Main {
 		centerPanel.setLayout(new MigLayout("insets 0, gap 2", "[][560.00px][]", "[690px][center]"));
 
 		// Add P5Canvas 
-		centerPanel.add(p5Canvas, "cell 1 0,grow");
+		centerPanel.add(getP5Canvas(), "cell 1 0,grow");
 		
 		
 		
@@ -840,9 +855,9 @@ public class Main {
 			public void stateChanged(ChangeEvent e) {
 				if (!isVolumeblocked){
 					int value = ((JSlider) e.getSource()).getValue(); 
-					p5Canvas.setVolume(value);
-					int volume = (int) p5Canvas.getSize().height/P5Canvas.multiplierVolume;
-					volumeLabel.setText((volume+P5Canvas.currenttVolume-P5Canvas.defaultVolume)+" mL");
+					getP5Canvas().setVolume(value);
+					int volume = (int) getP5Canvas().getSize().height/getP5Canvas().multiplierVolume;
+					volumeLabel.setText((volume+getP5Canvas().currenttVolume-getP5Canvas().defaultVolume)+" mL");
 				}
 			}
 		});
@@ -853,7 +868,7 @@ public class Main {
 
 			
 		//Set up Pressure Slide
-		p5Canvas.setPressure(defaultPressure);
+		getP5Canvas().setPressure(defaultPressure);
 		pressureSlider.setOrientation(SwingConstants.VERTICAL);
 		pressureLabel = new JLabel(defaultPressure+" atm");
 
@@ -861,7 +876,7 @@ public class Main {
 		pressureSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 					int value = ((JSlider) e.getSource()).getValue(); 
-					p5Canvas.setPressure(value);
+					getP5Canvas().setPressure(value);
 					pressureLabel.setText(value+" atm");
 				
 			}
@@ -883,7 +898,7 @@ public class Main {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
 				scaleLabel.setText(value*2+"%");
-				p5Canvas.setScale(value,defaultZoom);
+				getP5Canvas().setScale(value,defaultZoom);
 			
 			}
 		});
@@ -910,8 +925,8 @@ public class Main {
 			public void stateChanged(ChangeEvent e) {
 				float value = ((JSlider) e.getSource()).getValue(); 
 				float speedRate = value/defaultSpeed;
-				p5Canvas.setSpeed(speedRate);
-				System.out.println("speedRate is "+speedRate);
+				getP5Canvas().setSpeed(speedRate);
+				
 				DecimalFormat df = new DecimalFormat("#.##");
 				speedLabel.setText(df.format(speedRate)+"x");
 			}
@@ -925,12 +940,12 @@ public class Main {
 		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
 		final JLabel heatLabel = new JLabel(heatInit+"\u2103");
 		cbPanel.add(heatLabel, "cell 0 4,alignx left");
-		p5Canvas.setHeat(heatInit);
+		getP5Canvas().setHeat(heatInit);
 		heatSlider.setOrientation(SwingConstants.VERTICAL);
 		heatSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue(); 
-				p5Canvas.setHeat(value);
+				getP5Canvas().setHeat(value);
 				heatLabel.setText(value+"\u2103");
 			}
 		});
@@ -967,15 +982,15 @@ public class Main {
 		JPanel graphSet_1 = new JPanel();
 		graphTabs.addTab("Compounds", null, graphSet_1, null);
 		graphSet_1.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]", "[235.00:n][grow]"));
-		graphSet_1.add(canvas, "cell 0 0,grow");
+		graphSet_1.add(getCanvas(), "cell 0 0,grow");
 
 		JButton graphPopoutBtn_1 = new JButton("");
 		graphPopoutBtn_1.setEnabled(false);
 		graphPopoutBtn_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png24x24/iconZoom.png")));
 		graphSet_1.add(graphPopoutBtn_1, "cell 1 0,aligny top");
 
-		tableView = new TableView();
-		graphSet_1.add(tableView, "cell 0 1,grow");
+		
+		graphSet_1.add(getTableView(), "cell 0 1,grow");
 		
 		JPanel graphSet_2 = new JPanel();
 		
@@ -1040,16 +1055,16 @@ public class Main {
 				cBoxConvert.addItemListener(new ItemListener() {
 					public void itemStateChanged(ItemEvent e) {
 						if (e.getStateChange() == ItemEvent.SELECTED){
-							P5Canvas.isConvertMol =true;
+							getP5Canvas().isConvertMol =true;
 							//Change 'g' to 'mol' in Amount Added label
-							P5Canvas.convertMassMol1();
+							getP5Canvas().convertMassMol1();
 							//Change 'g' to 'mol' in "Dissolved" label
-							P5Canvas.convertMassMol2();
+							getP5Canvas().convertMassMol2();
 						}	
 						else if	(e.getStateChange() == ItemEvent.DESELECTED){
-							P5Canvas.isConvertMol = false;
-							P5Canvas.convertMolMass1();
-							P5Canvas.convertMolMass2();
+							getP5Canvas().isConvertMol = false;
+							getP5Canvas().convertMolMass1();
+							getP5Canvas().convertMolMass2();
 						}	
 					}
 				});
@@ -1100,7 +1115,7 @@ public class Main {
 				public void actionPerformed(ActionEvent e) {
 					//System.out.print(time+"  ");
 					time++;
-					canvas.repaint();
+					getCanvas().repaint();
 				}
 			});
 	        timer.setInitialDelay(pause);
@@ -1224,8 +1239,8 @@ public class Main {
 										}	
 									}	
 								}
-								TableSet.updataSet();
-								TableSet.setSelectedRow(0);
+								tableSet.updataSet();
+								tableSet.setSelectedRow(0);
 							}
 						});
 					}
@@ -1249,5 +1264,61 @@ public class Main {
 		Component headHStrut = Box.createHorizontalStrut(20);
 		menuBar.add(headHStrut);
 		
+	}
+
+	/**
+	 * @return the p5Canvas
+	 */
+	public P5Canvas getP5Canvas() {
+		return p5Canvas;
+	}
+
+	/**
+	 * @param p5Canvas the p5Canvas to set
+	 */
+	public void setP5Canvas(P5Canvas p5Canvas) {
+		this.p5Canvas = p5Canvas;
+	}
+
+	/**
+	 * @return the canvas
+	 */
+	public Canvas getCanvas() {
+		return canvas;
+	}
+
+	/**
+	 * @param canvas the canvas to set
+	 */
+	public void setCanvas(Canvas canvas) {
+		this.canvas = canvas;
+	}
+
+	/**
+	 * @return the tableSet
+	 */
+	public TableSet getTableSet() {
+		return tableSet;
+	}
+
+	/**
+	 * @param tableSet the tableSet to set
+	 */
+	public void setTableSet(TableSet tableSet) {
+		this.tableSet = tableSet;
+	}
+
+	/**
+	 * @return the tableView
+	 */
+	public TableView getTableView() {
+		return tableView;
+	}
+
+	/**
+	 * @param tableView the tableView to set
+	 */
+	public void setTableView(TableView tableView) {
+		this.tableView = tableView;
 	}
 }
