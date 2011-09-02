@@ -18,13 +18,14 @@ public class Line{
   private int num2;
   private int height;
   private int width;
+  private Canvas canvas;
     
   private Color color = new Color(255,0,0);
   
   public static int size =5;
   
  
-  public Line(int marginX_, int marginY_, int time1_, int time2_, int num1_, int num2_, int height_, int width_) {
+  public Line(int marginX_, int marginY_, int time1_, int time2_, int num1_, int num2_, int height_, int width_, Canvas parent) {
 	  marginX = marginX_;
 	  marginY = marginY_;
 	  time1 = time1_;
@@ -33,6 +34,7 @@ public class Line{
 	  num2 = num2_;
 	  height = height_;
 	  width = width_;
+	  canvas = parent;
   } 
   
   
@@ -47,10 +49,10 @@ public class Line{
 		
 	  	g.setStroke(new java.awt.BasicStroke(2));
 		g.setColor(c);  
-		x1 = marginX+time1*width/Canvas.maxTime;
-		x2 = marginX+time2*width/Canvas.maxTime;
-		y1 = marginY - num1*height/Canvas.maxCount;
-		y2 = marginY - num2*height/Canvas.maxCount;
+		x1 = marginX+time1*width/canvas.maxTime;
+		x2 = marginX+time2*width/canvas.maxTime;
+		y1 = marginY - num1*height/canvas.maxCount;
+		y2 = marginY - num2*height/canvas.maxCount;
 	  	g.drawLine(x1, y1, x2, y2); 
   }
   

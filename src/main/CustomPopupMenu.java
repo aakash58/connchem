@@ -36,9 +36,11 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 	public static ArrayList panelList =  new ArrayList();
 	public static ArrayList buttonList =  new ArrayList();
 	public static ArrayList additionalList = new ArrayList();; // Contain newly added molecule to the default Set
+	private Main main;
 	
-	public CustomPopupMenu() {
+	public CustomPopupMenu(Main parent) {
 		super();
+		main = parent;
 		this.setLayout(new BorderLayout());
 		panel.setLayout(new MigLayout("insets 0, gap 0", "[200.00,grow]", "[grow][grow][grow][grow][grow]"));
 		panel.setBackground(UIManager.getColor("MenuItem.background"));
@@ -86,7 +88,7 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 			CustomButton b = (CustomButton) buttonList.get(i);
 			JPanel p = (JPanel) panelList.get(i);
 			if (isDefaultSetMolecule(b.getName())){
-				p.setBackground(Main.defaultColor);
+				p.setBackground(main.defaultColor);
 				b.setStatus(CustomButton.SIMULATION_DEFAULT);
 			}
 			else{
@@ -102,8 +104,8 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 	}
 
 	public boolean isDefaultSetMolecule(String name) {
-		for (int i =0; i<Main.defaultSetMolecules.size();i++){
-			String mName = Main.defaultSetMolecules.get(i).toString();
+		for (int i =0; i<main.defaultSetMolecules.size();i++){
+			String mName = main.defaultSetMolecules.get(i).toString();
 			if (mName.equals(name) ){
 				return true;
 			}
@@ -139,16 +141,16 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 				if (customButton.getStatus()==CustomButton.DEFAULT){
 					additionalList.add(customButton.getName());
 					customButton.setStatus(CustomButton.SELECTED);
-					customButton.getContainerPanel().setBackground(Main.selectedColor);
+					customButton.getContainerPanel().setBackground(main.selectedColor);
 					customButton.setForeground(CustomButton.MENUITEM_FG_COLOR);
-					Main.addAdditionalMolecule();
+					main.addAdditionalMolecule();
 				}
 				else if (customButton.getStatus()==CustomButton.SELECTED){
 					//additionalList.add(b.getName());
 					customButton.setStatus(CustomButton.DEFAULT);
 					customButton.getContainerPanel().setBackground(CustomButton.MENUITEM_BG_COLOR);
 					customButton.setForeground(CustomButton.MENUITEM_FG_COLOR);
-					Main.removeAdditionalMolecule(getIndex(customButton.getName()));
+					main.removeAdditionalMolecule(getIndex(customButton.getName()));
 					additionalList.remove(customButton.getName());
 				}
 			}
@@ -163,7 +165,7 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 				if (customButton.getStatus()==CustomButton.SIMULATION_DEFAULT)
 					return;
 				if (customButton.getStatus()==CustomButton.SELECTED){
-					panel_2.setBackground(Main.selectedColor);
+					panel_2.setBackground(main.selectedColor);
 					customButton.setForeground(CustomButton.MENUITEM_FG_COLOR);
 				}
 				else{
@@ -196,19 +198,19 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		if (b.getStatus()==CustomButton.DEFAULT){
 			additionalList.add(b.getName());
 			b.setStatus(CustomButton.SELECTED);
-			b.getContainerPanel().setBackground(Main.selectedColor);
+			b.getContainerPanel().setBackground(main.selectedColor);
 			b.setForeground(CustomButton.MENUITEM_FG_COLOR);
-			Main.addAdditionalMolecule();
+			main.addAdditionalMolecule();
 		}
 		else if (b.getStatus()==CustomButton.SELECTED){
 			//additionalList.add(b.getName());
 			b.setStatus(CustomButton.DEFAULT);
 			b.getContainerPanel().setBackground(CustomButton.MENUITEM_BG_COLOR);
 			b.setForeground(CustomButton.MENUITEM_FG_COLOR);
-			Main.removeAdditionalMolecule(getIndex(b.getName()));
+			main.removeAdditionalMolecule(getIndex(b.getName()));
 			additionalList.remove(b.getName());
 		}
-		Main.leftPanel.updateUI();
+		main.leftPanel.updateUI();
 	}
 
 	public Component[] getComponents() {

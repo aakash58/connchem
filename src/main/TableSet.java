@@ -22,10 +22,11 @@ public class TableSet extends JPanel {
 	public static JScrollPane scrollPane;
 	public static ArrayList set = new ArrayList();
 	public static int selectedRow=0; 
+	private Main main;
 	
-	
-	public TableSet() {
+	public TableSet(Main parent) {
 		super(new GridLayout(1, 0));
+		main = parent;
 
 		MyTableModel myTable = new MyTableModel();
 		table = new JTable(myTable);
@@ -49,7 +50,7 @@ public class TableSet extends JPanel {
 		
 		// Set up renderer and editor for the Favorite Color column.
 		table.setDefaultRenderer(Color.class, new ColorRenderer(true));
-		table.setDefaultEditor(Color.class, new ColorEditor());
+		table.setDefaultEditor(Color.class, new ColorEditor(this));
 		// Add the scroll pane to this panel.
 		add(scrollPane);
 		Color c = new Color(245,245,245);
@@ -72,20 +73,20 @@ public class TableSet extends JPanel {
 				return;
 			}
 			selectedRow = table.getSelectedRow();
-			Main.selectedSet = selectedRow +1;
-			Main.reset();
+			main.selectedSet = selectedRow +1;
+			main.reset();
 		}
 	}
 
-	public static void updataSet(){
+	public void updataSet(){
 		set = new ArrayList();
-		ArrayList sets = YAMLinterface.getSets(Main.selectedUnit, Main.selectedSim);
+		ArrayList sets = YAMLinterface.getSets(main.selectedUnit, main.selectedSim);
 		if (sets==null) return;
 		
 		for (int i=0; i<sets.size();i++){
-			TableSet.set.add(i+1);
+			this.set.add(i+1);
 		}
-		if (Main.tableSet !=null){
+		if ( main.getTableSet() !=null){
 			table.updateUI();
 		}		
 	}
@@ -129,6 +130,19 @@ public class TableSet extends JPanel {
 		}
 	}
 
+	/**
+	 * @return the main
+	 */
+	public Main getMain() {
+		return main;
+	}
+
+	/**
+	 * @param main the main to set
+	 */
+	public void setMain(Main main) {
+		this.main = main;
+	}
 
 	
 }
