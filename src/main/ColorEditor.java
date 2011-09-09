@@ -52,7 +52,7 @@ public class ColorEditor extends AbstractCellEditor
     	getTableView().stopUpdating =true;
     	getTableView().selectedRow =row;
     	getTableView().table.addRowSelectionInterval(row, row);
-    	dialog.setLocation(Main.mainFrame.getSize().width-430-300, 80);
+    	dialog.setLocation(((TableSet)tableSet).getMain().mainFrame.getSize().width-430-300, 80);
     	dialog.setVisible(true);
         currentColor = (Color)value;
         return null;

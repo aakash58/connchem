@@ -96,34 +96,34 @@ public class Main {
 	private P5Canvas p5Canvas;
 	//private Unit2 unit2 = new Unit2();
 	// TODO flag
-	public static JFrame mainFrame;
-	public static JMenu simMenu = new JMenu("Choose Simulation");
-	public static int selectedUnit=2;
-	public static int selectedSim=4;
-	public static int selectedSet=1;
-	public static boolean isWelcomed=true;
-	public static Color selectedColor = new Color(200,200,150);
-	public static Color defaultColor = Color.LIGHT_GRAY;
-	private static int sliderValue = 5;
+	public JFrame mainFrame;
+	public JMenu simMenu = new JMenu("Choose Simulation");
+	public int selectedUnit=2;
+	public int selectedSim=4;
+	public int selectedSet=1;
+	public boolean isWelcomed=true;
+	public Color selectedColor = new Color(200,200,150);
+	public Color defaultColor = Color.LIGHT_GRAY;
+	private int sliderValue = 5;
 	
-	private static int minSliderValue = 1;
-	private static int maxSliderValue = 9;
-	public static JPanel dynamicPanel;
-	public static JScrollPane dynamicScrollPane; 
-	public static ArrayList additionalPanelList =  new ArrayList();
-	public static ArrayList defaultSetMolecules =  new ArrayList();
+	private int minSliderValue = 1;
+	private int maxSliderValue = 9;
+	public JPanel dynamicPanel;
+	public JScrollPane dynamicScrollPane; 
+	public ArrayList additionalPanelList =  new ArrayList();
+	public ArrayList defaultSetMolecules =  new ArrayList();
 	private CustomPopupMenu scrollablePopupMenu;
-	public static String[] moleculeNames = null;
-	public static JPanel rightPanel;
+	public String[] moleculeNames = null;
+	public JPanel rightPanel;
 	
-	public static JPanel dashboard;     //Dashboard on right panel showing mass and volume
+	public JPanel dashboard;     //Dashboard on right panel showing mass and volume
 	
 
-	private static String sliderLabel = new String("Add ");	//Label parameter on left panel
+	private String sliderLabel = new String("Add ");	//Label parameter on left panel
 	
-	public static JPanel leftPanel;     //"Input" panel on left of application
-	public static JPanel centerPanel;   //"Simulation" panel in the middle of application
-	public static JPanel welcomePanel;  //"Welcome" Panel showing welcome info when application is first opened up
+	public JPanel leftPanel;     //"Input" panel on left of application
+	public JPanel centerPanel;   //"Simulation" panel in the middle of application
+	public JPanel welcomePanel;  //"Welcome" Panel showing welcome info when application is first opened up
 	private Canvas canvas ;
 	private TableView tableView;
 	private TableSet tableSet;
@@ -131,52 +131,53 @@ public class Main {
 	
 	/*******  Left Panel parameters  *******/
 	private JLabel lblInput;
-	private static JLabel lblInputTipR;
-	private static JLabel lblInputTipL;
+	private JLabel lblInputTipR;
+	private JLabel lblInputTipL;
 	
 	
 	
-	private static JPanel clPanel;     //Center Left control Panel containing volume slider and Zoom Slider
-	public final JLabel  volumeLabel = new JLabel(getP5Canvas().currenttVolume+"mL");
-	public JSlider volumeSlider = new JSlider(0, 100, getP5Canvas().currenttVolume);
-	private static JLabel canvasControlLabel_main_volume;
+	private JPanel clPanel;     //Center Left control Panel containing volume slider and Zoom Slider
+	public JLabel  volumeLabel  = null;
+	public JSlider volumeSlider  = null;
+	private JLabel canvasControlLabel_main_volume;
+	
 	//Pressure slider used to replace Volume Slider in Unit 2
-	public static JSlider pressureSlider = new JSlider(0,10,1);
-	public static JLabel pressureLabel;
-	private static JLabel canvasControlLabel_main_pressure;
-	public static int defaultPressure = 1;
+	public JSlider pressureSlider = new JSlider(0,10,1);
+	public JLabel pressureLabel;
+	private JLabel canvasControlLabel_main_pressure;
+	public int defaultPressure = 1;
 	
-	public static int defaultZoom =50;
-	public static JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
-	public static int defaultSpeed =100;
-	public static JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
-	public static int heatInit =25;
-	public static int heatMin =-10;
-	public static int heatMax =200;	
-	public static JSlider heatSlider = new JSlider(heatMin, heatMax, heatInit);
+	public int defaultZoom =50;
+	public JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
+	public int defaultSpeed =100;
+	public JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
+	public int heatInit =25;
+	public int heatMin =-10;
+	public int heatMax =200;	
+	public JSlider heatSlider = new JSlider(heatMin, heatMax, heatInit);
 	
 
 	//private static boolean isPressureShowing;
 	
-	public static boolean isVolumeblocked = false;
-	public static JLabel totalSystemEnergy;
-	public static JLabel averageSystemEnergy;
+	public boolean isVolumeblocked = false;
+	public JLabel totalSystemEnergy;
+	public JLabel averageSystemEnergy;
 	
-	public static JLabel elapsedTime;   //"Elapsed Set Time" label
-	public static JLabel m1Mass;        
-	public static JLabel m1Disolved;    //"Dissolved" label showing how much solute has dissolved
-	public static JLabel satMass;       //
-	public static JLabel waterVolume;
-	public static JLabel m1Label;
-	public static JLabel m1MassLabel;
-	public static JLabel solventLabel;
-	public static JLabel satLabel;
-	public static JLabel solutionLabel;
-	public static JLabel soluteVolume;
-	public static JCheckBox cBoxConvert;
+	public JLabel elapsedTime;   //"Elapsed Set Time" label
+	public JLabel m1Mass;        
+	public JLabel m1Disolved;    //"Dissolved" label showing how much solute has dissolved
+	public JLabel satMass;       //
+	public JLabel waterVolume;
+	public JLabel m1Label;
+	public JLabel m1MassLabel;
+	public JLabel solventLabel;
+	public JLabel satLabel;
+	public JLabel solutionLabel;
+	public JLabel soluteVolume;
+	public JCheckBox cBoxConvert;
 	
-	public static JButton playBtn;
-	public static boolean isFirst =true; 
+	public JButton playBtn;
+	public boolean isFirst =true; 
 	
 	public int pause = 0;   // the length of the pause at the begginning
 	public int speed = 1000;  // recur every second.
@@ -428,7 +429,7 @@ public class Main {
 	public void createPopupMenu(){
 		
 		for (int i=0;i<moleculeNames.length;i++){
-			CustomButton xx = new CustomButton(moleculeNames[i].replace("-", " "));
+			CustomButton xx = new CustomButton(this, moleculeNames[i].replace("-", " "));
 			xx.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+moleculeNames[i]+".png")));
 			xx.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent e) {
@@ -720,6 +721,7 @@ public class Main {
 		mainFrame.getContentPane().setLayout(new MigLayout("insets 0, gap 0", "[285.00][480px,grow][320px]", "[][][grow]"));
 
 		
+
 		
 		//*********************************** LEFT PANEL ********************************************
 		leftPanel = new JPanel();
@@ -806,7 +808,7 @@ public class Main {
 		});
 		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
 		checkBoxPanel.add(cBox2, BorderLayout.CENTER);
-		//checkBoxPanel.add(cBox3, BorderLayout.SOUTH);
+		checkBoxPanel.add(cBox3, BorderLayout.SOUTH);
 		timerSubpanel.add(checkBoxPanel, "cell 1 1");
 
 		
@@ -828,6 +830,8 @@ public class Main {
 		
 		//****************************************** CENTER PANEL *****************************************************
 		centerPanel = new JPanel();
+		volumeLabel = new JLabel(getP5Canvas().currenttVolume+"mL");
+		volumeSlider = new JSlider(0, 100, getP5Canvas().currenttVolume);
 		centerPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {

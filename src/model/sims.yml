@@ -297,82 +297,108 @@ units:
     sets:
     - set: 1
       compounds:
-      - compound: "Water"
-        qty: 25
       - compound: "Sodium"
-        qty: 10
+        qty: 9
+        cap: 15
       - compound: "Chlorine"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 2
       compounds:
       - compound: "Water"      
         qty: 25
+        cap: 95
       - compound: "Hydrogen"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Iodine"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 3
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Ethene"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Oxygen"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 4
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Copper"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Silver Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 5
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Methane"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Oxygen"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 6
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Iron"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Copper-II-Sulphate"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 7
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Hydrochloric Acid"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Lithium Sulfide"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 8
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Hydrogen"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Chlorine"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 9
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Hydrogen Peroxide"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 10
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Silver Nitrate"
-        qty: 25
+        qty: 5
+        cap: 25
       - compound: "Sodium Chloride"
-        qty: 10
+        qty: 5
+        cap: 15
   - sim: 2
     name: "Limiting Reactions"
     sets:
@@ -380,26 +406,35 @@ units:
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Aluminium"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Chlorine"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 2
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Butne"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Oxygen"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 3
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Manganese Dioxide"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Hydrochloric Acid"
-        qty: 10
+        qty: 5
+        cap: 15
   - sim: 3
     name: "Precipitation"
     sets:
@@ -407,122 +442,167 @@ units:
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Silver Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Potassium Bromide"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 2
       compounds: 
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Lithiuhm Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Potassium Bromide"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 3
       compounds: 
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Silver Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Lithium Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 4
       compounds: 
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Ammonium Chloride"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Lithium Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 5
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Sodium Carbonate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Lithium Nitrate"
-        qty: 10                  
+        qty: 5
+        cap: 15               
     - set: 6
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Sodium Hydroxide"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Lithium Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 7
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Ammonium Chloride"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Potassium Bromide"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 8
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Sodium Carbonate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Potassium Nitrate"
-        qty: 10    
+        qty: 5
+        cap: 15   
     - set: 9
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Sodium Hydroxide"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Potassium Bromide"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 10
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Silver Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Ammonium Chloride"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 11
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Sodium Carbonate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Silver Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 12
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Ammonium Chloride"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Lithium Nitrate"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 13
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Sodium Carbonate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Ammonium Chloride"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 14
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Sodium Hydroxide"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Ammonium Chloride"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 15
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Sodium Carbonate"
-        qty: 10
+        qty: 5
+        cap: 15
       - compound: "Sodium Hydroxide"
-        qty: 10
+        qty: 5
+        cap: 15
   - sim: 4
     name: "Redox"
     sets:
@@ -530,26 +610,35 @@ units:
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Magnesium"
-        qty: 10    
+        qty: 5
+        cap: 15   
       - compound: "Copper-II-Sulphate"
-        qty: 10
+        qty: 5
+        cap: 15
     - set: 2
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Chromium-III-Oxide"
         qty: 5
+        cap: 15
       - compound: "Aluminium"
         qty: 5
+        cap: 15
     - set: 3
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 95
       - compound: "Zinc"
         qty: 5
+        cap: 15
       - compound: "Copper-II-Sulphate"
         qty: 5
+        cap: 15
 - unit: 4
   name: "Pressure and Gas Laws"
   sims:

@@ -61,10 +61,13 @@ public class Molecule {
 	public static float clRadius = 28f;
 	public static float oRadius = 18.495f; // Oxygen Radius. This depends on SVG file
 	
-	public int compoundJ = -1;
+	public int compoundJ = -1;    //Index of molecule to which this molecule is connecting
+	                              //Only be used in Unit2
 	public int otherJ = -1;
 	public int CaOtherJ = -1;
-	public DistanceJoint compoundJoints = null;
+	
+	public ArrayList<DistanceJoint> compoundJoint = null; //Reference of joints of this molecule
+	public ArrayList<Integer> compoundJointPair = null;   //Reference of molecules to which this molecule is connecting
 	public PrismaticJoint compoundJoints2 = null; //is Used for Unit 2 set 7
 	public DistanceJoint otherJoints = null;
 	
@@ -76,6 +79,8 @@ public class Molecule {
 		p5Canvas = parent_;
 		box2d = box2d_;
 		name = compoundName_;
+		compoundJoint = new ArrayList<DistanceJoint>();
+		compoundJointPair = new ArrayList<Integer>();
 
 		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
 		pShape = p5Canvas.loadShape(path);
@@ -103,7 +108,7 @@ public class Molecule {
 		
 		//Identify specific situation
 		if ((name.equals("Sodium-Ion") || name.equals("Potassium-Ion"))
-				&& (Main.selectedUnit==2 && Main.selectedSet!=7)){
+				&& (p5Canvas.getMain().selectedUnit==2 && p5Canvas.getMain().selectedSet!=7)){
 			circles[0][0] = 28;
 		}
 		else if (name.equals("Calcium-Ion")){
@@ -127,7 +132,7 @@ public class Molecule {
 	}
 	
 	public void setPropertyByHeat(boolean isInitial) {
-		float temp = P5Canvas.temp;
+		float temp = p5Canvas.temp;
 		res = (temp - freezingTem) / (boilingTem - freezingTem);
 		if (res > 0)  	res =1f;
 		else			res = 0.2f;
@@ -263,7 +268,7 @@ public class Molecule {
 	public static Vec2 getShapeSize(String compoundName_, P5Canvas parent_) {
 		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
 		if ((compoundName_.equals("Sodium-Ion") || compoundName_.equals("Potassium-Ion")) && 
-				(main.Main.selectedUnit==2 && main.Main.selectedSet!=7)){
+				(parent_.getMain().selectedUnit==2 && parent_.getMain().selectedSet!=7)){
 			path = "resources/compoundsSvg/" + "Chlorine-Ion" + ".svg";
 		}	
 		
@@ -347,9 +352,9 @@ public class Molecule {
 		//if (P5Canvas.temp<100)
 		//	body.applyForce(new Vec2(0,-yyy), body.getPosition());
 		
-		if (P5Canvas.isDrag && P5Canvas.draggingBoundary < 0) {
-			float xx = xTmp + PBox2D.scalarPixelsToWorld(P5Canvas.xDrag);
-			float yy = yTmp - PBox2D.scalarPixelsToWorld(P5Canvas.yDrag);
+		if (p5Canvas.isDrag && p5Canvas.draggingBoundary < 0) {
+			float xx = xTmp + PBox2D.scalarPixelsToWorld(p5Canvas.xDrag);
+			float yy = yTmp - PBox2D.scalarPixelsToWorld(p5Canvas.yDrag);
 			Vec2 v = new Vec2(xx, yy);
 			body.setTransform(v, body.getAngle());
 			body.setAngularVelocity(0);
@@ -357,13 +362,37 @@ public class Molecule {
 			xTmp = body.getPosition().x;
 			yTmp = body.getPosition().y;
 		}
-	
-		if (body.getPosition().y > boundaries[2].body.getPosition().y) {
+		/*********************  Boundary Check *******************/
+		/* If molecules go out of boundary, reset their position */
+		/* Top boundary check, top boundary has max y value */
+		if (body.getPosition().y+PBox2D.scalarPixelsToWorld(this.minSize/2) > boundaries[2].body.getPosition().y) {
 			Vec2 v = new Vec2(body.getPosition().x, 
-					boundaries[2].body.getPosition().y-PBox2D.scalarPixelsToWorld(maxSize));
+					boundaries[2].body.getPosition().y-PBox2D.scalarPixelsToWorld(maxSize/2));
 			if (body != null && v != null)
 				body.setTransform(v, body.getAngle());
 		}
+		/* Bottom boundary check, bot boundary has min y value */
+		else if (body.getPosition().y-PBox2D.scalarPixelsToWorld(this.minSize/2) < boundaries[3].body.getPosition().y) {
+			Vec2 v = new Vec2(body.getPosition().x, 
+					boundaries[3].body.getPosition().y+PBox2D.scalarPixelsToWorld(maxSize/2));
+			if (body != null && v != null)
+				body.setTransform(v, body.getAngle());
+		}
+		/* Left boundary check, left boundary has min x value */
+		if (body.getPosition().x-PBox2D.scalarPixelsToWorld(this.minSize/2) < boundaries[0].body.getPosition().x) {
+			Vec2 v = new Vec2(boundaries[0].body.getPosition().x+PBox2D.scalarPixelsToWorld(maxSize/2), 
+					body.getPosition().y);
+			if (body != null && v != null)
+				body.setTransform(v, body.getAngle());
+		}
+		/* Right boundary check, right boundary has max x value */
+		else if (body.getPosition().x+PBox2D.scalarPixelsToWorld(this.minSize/2) > boundaries[1].body.getPosition().x) {
+			Vec2 v = new Vec2(boundaries[1].body.getPosition().x - PBox2D.scalarPixelsToWorld(maxSize/2), 
+					body.getPosition().y);
+			if (body != null && v != null)
+				body.setTransform(v, body.getAngle());
+		}
+		
 
 		// We look at each body and get its screen position
 		Vec2 pos = box2d.getBodyPixelCoord(body);
@@ -387,7 +416,7 @@ public class Molecule {
 				}
 			}
 		}
-		else if (P5Canvas.isHidingEnabled && !isHidden){
+		else if (p5Canvas.isHidingEnabled && !isHidden){
 			p5Canvas.noStroke();
 			for (int i=0; i<circles.length;i++){
 				p5Canvas.ellipse( circles[i][1]-pShapeW/2, circles[i][2]-pShapeH/2,circles[i][0]*2, circles[i][0]*2);
@@ -404,7 +433,7 @@ public class Molecule {
 		
 		
 		//Check if it is displaying forces
-		if (P5Canvas.isDisplayForces && !name.equals("Water")){
+		if (p5Canvas.isDisplayForces && !name.equals("Water")){
 			int numElement = elementNames.size();
 			for (int i=0; i<numElement;i++){
 				if (loc[i]==null) continue;
@@ -416,8 +445,10 @@ public class Molecule {
 		}
 		
 		//Check if it is displaying joints
-		if (P5Canvas.isDisplayJoints){
+		if (p5Canvas.isDisplayJoints){
 			
+			if(p5Canvas.getMain().selectedUnit==1 || p5Canvas.getMain().selectedUnit==2 )
+			{
 				if (compoundJ>=0) {
 					Vec2 pos2 = box2d.getBodyPixelCoord(molecules.get(compoundJ).body);
 					p5Canvas.stroke(Color.BLACK.getRGB());
@@ -429,6 +460,20 @@ public class Molecule {
 					p5Canvas.stroke(Color.RED.getRGB());
 					p5Canvas.line(pos.x, pos.y,pos2.x,pos2.y);
 				}
+			}
+			else
+			{
+				if (compoundJointPair.size()>0) {
+					Vec2 pos2 = new Vec2();
+					for( int i = 0;i<compoundJointPair.size();i++)
+					{
+					pos2.set(box2d.getBodyPixelCoord(molecules.get(compoundJointPair.get(i)).body) );
+					p5Canvas.stroke(Color.BLACK.getRGB());
+					p5Canvas.line(pos.x, pos.y,pos2.x,pos2.y);
+					}
+				}
+
+			}
 		}
 		
 	}

@@ -29,20 +29,22 @@ public class CustomButton extends JButton {
 	public static final Color	MENU_HIGHLIGHT_FG_COLOR	= UIManager.getColor("MenuItem.selectionForeground");
 	public static final Color	MENUITEM_BG_COLOR		= UIManager.getColor("MenuItem.background");
 	public static final Color	MENUITEM_FG_COLOR		= UIManager.getColor("MenuItem.foreground");
+	private Main main;
 
 	//  This property if set to false, will result in the checked Icon not being displayed when the button is selected
 	private boolean				displayCheck			= true;
 
-	public CustomButton() {
+	public CustomButton(Main parent) {
 		super();
 		init();
 
 	}
 
 	
-	public CustomButton(String text) {
+	public CustomButton(Main parent,String text) {
 		super(text);
 		name =text;
+		main = parent;
 		init();
 	}
 
@@ -89,7 +91,7 @@ public class CustomButton extends JButton {
 			return;
 		if (panel!=null){
 			if (this.getStatus()==CustomButton.SELECTED){
-				panel.setBackground(Main.selectedColor);
+				panel.setBackground(main.selectedColor);
 				this.setForeground(CustomButton.MENUITEM_FG_COLOR);
 			}
 			else{

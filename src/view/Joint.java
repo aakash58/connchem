@@ -23,7 +23,7 @@ public class Joint {
 	// We need to keep track of a Body and a width and height
 	public Body body;
 	private PBox2D box2d;
-	private P5Canvas parent;
+	private P5Canvas p5Canvas;
 	private PShape pShape = new PShape();
 	private float pShapeW = 0f;
 	private float pShapeH = 0f;
@@ -86,16 +86,16 @@ public class Joint {
 		fff[1] = new Vec2(0,0);
 		fff[2] = new Vec2(0,0);
 		
-		parent = parent_;
+		p5Canvas = parent_;
 		box2d = box2d_;
 		name = compoundName_;
 
 		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
-		pShape = parent.loadShape(path);
+		pShape = p5Canvas.loadShape(path);
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
 		minSize = Math.min(pShapeW, pShapeH);
-		polarity = parent.db.getCompoundPolarity(compoundName_);
+		polarity = p5Canvas.db.getCompoundPolarity(compoundName_);
 
 		circles = SVGReader.getSVG(path);
 		elementNames = SVGReader.getNames();
@@ -136,7 +136,7 @@ public class Joint {
 	}
 	
 	public void setPropertyByHeat(boolean isInitial) {
-		float temp = P5Canvas.temp;
+		float temp = p5Canvas.temp;
 		res = (temp - freezingTem) / (boilingTem - freezingTem);
 		if (res > 0)  	res =1f;
 		else			res = 0.2f;
@@ -241,7 +241,7 @@ public class Joint {
 		}
 		// System.out.println(name+ " get Mass "+body.getMass() +" DBmass:"+ +DBinterface.getCompoundMass(name));
 		// Give it some initial random velocity
-		body.setLinearVelocity(new Vec2(parent.random(-1, 1), parent.random(-1,
+		body.setLinearVelocity(new Vec2(p5Canvas.random(-1, 1), p5Canvas.random(-1,
 				1)));
 		body.setAngularVelocity(0);
 		body.setUserData(this);

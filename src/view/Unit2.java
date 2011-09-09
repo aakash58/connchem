@@ -27,15 +27,17 @@ public class Unit2 {
 	private float massDissolved = 0;
 	private int water100mL = 25;
 	private int mToMass = 10;
-	private P5Canvas canvas = null;
+	private P5Canvas p5Canvas = null;
 	private PBox2D box2d = null;
 	private int addWaterDelay = 8000; //Parameter specifies delay of saturation computation after we add water molecules to canvas
 	                           //In seconds
 	private ActionListener timerPerformer = null; //ActionListener of timer used to increase numWater
 
+
 	public Unit2(P5Canvas parent, PBox2D box) {
-		canvas = parent;
+		p5Canvas = parent;
 		box2d = box;
+
 
 	}
 
@@ -78,13 +80,13 @@ public class Unit2 {
 		Vec2 size1 = Molecule.getShapeSize(ion1, parent_);
 		Vec2 size2 = Molecule.getShapeSize(ion2, parent_);
 
-		float increX = w / 3;
+		float increX = p5Canvas.w / 3;
 		Random rand = new Random(); // Random number used to generate ions in
 									// random location
-		float centerX = x + 50; // X coordinate around which we are going to add
+		float centerX = p5Canvas.x + 50; // X coordinate around which we are going to add
 								// Ions, 50 is border width
 		// centerX += rand.nextFloat()*(w/3*2);
-		float centerY = y + 80 - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + 80 - Boundary.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 
@@ -123,7 +125,7 @@ public class Unit2 {
 				botRight = new Vec2(centerX + numCol * (size1.x+size2.x), centerY + numRow
 						* size1.y);
 				// If we have gone through all available areas.
-				if (centerX > (x + w)) {
+				if (centerX > (p5Canvas.x + p5Canvas.w)) {
 					isClear = true; // Ready to jump out
 					res = false; // Set output bolean flag to false
 					// TO DO: Show tooltip on Add button when we cant add more
@@ -175,8 +177,8 @@ public class Unit2 {
 		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
 		m1.compoundJ = index2;
 		m2.compoundJ = index1;
-		m1.compoundJoints = dj;
-		m2.compoundJoints = dj;
+		m1.compoundJoint.add(dj);
+		m2.compoundJoint.add(dj);
 	}
 
 	/******************************************************************
@@ -203,9 +205,9 @@ public class Unit2 {
 
 		Vec2 size1 = Molecule.getShapeSize(compoundName_, parent_);
 
-		float centerX = x + 50; // X coordinate around which we are going to add
+		float centerX = p5Canvas.x + 50; // X coordinate around which we are going to add
 								// Ions, 260 is to make SiO2 spawn in the middle
-		float centerY = y + 80 - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + 80 - Boundary.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 		Vec2 topLeft = new Vec2(centerX, centerY);
@@ -214,7 +216,7 @@ public class Unit2 {
 
 		topLeft.set(centerX, centerY);
 		botRight.set(centerX + numCol * size1.x, centerY + numRow * size1.y);
-		float increX = w / 3;
+		float increX = p5Canvas.w / 3;
 		Vec2 molePos = new Vec2(0, 0);
 		Vec2 molePosInPix = new Vec2(0, 0);
 
@@ -241,7 +243,7 @@ public class Unit2 {
 				topLeft.set(centerX, centerY);
 				botRight.set(centerX + numCol * size1.x, centerY + numRow * size1.y);
 				// If we have gone through all available areas.
-				if (centerX > (x + w)) {
+				if (centerX > (p5Canvas.x + p5Canvas.w)) {
 					isClear = true; // Ready to jump out
 					res = false; // Set output bolean flag to false
 					// TO DO: Show tooltip on Add button when we cant add more
@@ -309,13 +311,13 @@ public class Unit2 {
 		Vec2 size1 = Molecule.getShapeSize(ion1, parent_);
 		Vec2 size3 = Molecule.getShapeSize(ion3, parent_);
 
-		float centerX = x + 65; // X coordinate around which we are going to
+		float centerX = p5Canvas.x + 65; // X coordinate around which we are going to
 									// add Ions, 50 is border width
-		float centerY = y + 100 - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + 100 - Boundary.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 
-		float increX = w / 3;
+		float increX = p5Canvas.w / 3;
 		
 		
 		Vec2 topLeft = new Vec2(0, 0);
@@ -352,7 +354,7 @@ public class Unit2 {
 				// Specify new add area.
 				setCalciumChlorideArea(count,centerX,centerY,size1,size3,topLeft,botRight);
 				// If we have gone through all available areas.
-				if (botRight.x > (x + w)||topLeft.x<x) {
+				if (botRight.x > (p5Canvas.x + p5Canvas.w)||topLeft.x<p5Canvas.x) {
 					isClear = true; // Ready to jump out
 					res = false; // Set output bolean flag to false
 					// TO DO: Show tooltip on Add button when we cant add more
@@ -490,9 +492,9 @@ public class Unit2 {
 		
 		
 		
-		float centerX = x + 50; // X coordinate around which we are going to
+		float centerX = p5Canvas.x + 50; // X coordinate around which we are going to
 									// add Ions, 50 is border width
-		float centerY = y + 100 - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + 100 - Boundary.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 
@@ -500,7 +502,7 @@ public class Unit2 {
 		Vec2 botRight = new Vec2(0,0);
 		boolean isClear = false;
 
-		float increX = w / 3;
+		float increX = p5Canvas.w / 3;
 		Vec2 molePos = new Vec2(0, 0);
 		Vec2 molePosInPix = new Vec2(0, 0);
 	
@@ -526,7 +528,7 @@ public class Unit2 {
 				topLeft.set(centerX - 0.5f*size1.x, centerY-0.5f*size1.y);
 				botRight.set(centerX + numCol * (size1.x+size2.x), centerY + numRow * size1.y);
 				// If we have gone through all available areas.
-				if (botRight.x > (x + w) || topLeft.x<x ) {
+				if (botRight.x > (p5Canvas.x + p5Canvas.w) || topLeft.x<p5Canvas.x ) {
 					isClear = true; // Ready to jump out
 					res = false; // Set output bolean flag to false
 					// TO DO: Show tooltip on Add button when we cant add more
@@ -574,7 +576,7 @@ public class Unit2 {
 		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
 		m1.compoundJ = index2;
 		m2.compoundJ = index1;
-		m2.compoundJoints = dj;
+		m2.compoundJoint.add(dj);
 
 		PrismaticJointDef pjd = new PrismaticJointDef();
 		pjd.initialize(m1.body, m2.body, m1.body.getWorldCenter(), new Vec2(1,
@@ -648,7 +650,7 @@ public class Unit2 {
 					float dis = x * x + y * y;
 					forceX = (float) ((x / Math.pow(dis, 1.5)) * 0.3);
 					forceY = (float) ((y / Math.pow(dis, 1.5)) * 0.3);
-					if (temp < mIndex.freezingTem) {
+					if (p5Canvas.temp < mIndex.freezingTem) {
 						forceX *= 90;
 						forceY *= 90;
 					}
@@ -692,7 +694,7 @@ public class Unit2 {
 					int charge = m.elementCharges.get(e2);
 					int mul = charge * indexCharge;
 					if (m.getName().equals("Water")) {
-						float r = 0.002f + temp / 10000;
+						float r = 0.002f + p5Canvas.temp / 10000;
 						if (mIndex.compoundJ >= 0) {
 							forceX *= r;
 							forceY *= r;
@@ -700,7 +702,7 @@ public class Unit2 {
 							forceX *= 0.10;
 							forceY *= 0.10;
 						}
-						if (temp >= 100) {
+						if (p5Canvas.temp >= 100) {
 							forceX = 0;
 							forceY = 0;
 						}
@@ -727,11 +729,11 @@ public class Unit2 {
 						}
 
 						if ((m.compoundJ < 0 || mIndex.compoundJ < 0)
-								&& 0 < temp && temp < 100) {
+								&& 0 < p5Canvas.temp && p5Canvas.temp < 100) {
 							forceX *= 0.05f;
 							forceY *= 0.05f;
 						}
-						if (num_gone > canvas.numGone_atSaturation()
+						if (num_gone > p5Canvas.numGone_atSaturation()
 								&& m.compoundJ < 0 && mIndex.compoundJ < 0
 								&& mIndex.getName().equals("Sodium-Ion")
 								&& m.getName().equals("Chlorine-Ion")) {
@@ -740,7 +742,7 @@ public class Unit2 {
 							if (dif < 2) {
 								joint2Ions(index, i, mIndex, m);
 								num_gone--;
-							    canvas.computeDisolved();
+								p5Canvas.computeDisolved();
 
 							}
 						}
@@ -785,7 +787,7 @@ public class Unit2 {
 					int charge = m.elementCharges.get(e2);
 					int mul = charge * indexCharge;
 					if (m.getName().equals("Water")) {
-						float r = 0.002f + temp / 10000;
+						float r = 0.002f + p5Canvas.temp / 10000;
 						if (mIndex.compoundJ >= 0) {
 							forceX *= r;
 							forceY *= r;
@@ -793,7 +795,7 @@ public class Unit2 {
 							forceX *= 0.10;
 							forceY *= 0.10;
 						}
-						if (temp >= 100) {
+						if (p5Canvas.temp >= 100) {
 							forceX = 0;
 							forceY = 0;
 						}
@@ -820,11 +822,11 @@ public class Unit2 {
 						}
 
 						if ((m.compoundJ < 0 || mIndex.compoundJ < 0)
-								&& 0 < temp && temp < 100) {
+								&& 0 < p5Canvas.temp && p5Canvas.temp < 100) {
 							forceX *= 0.05f;
 							forceY *= 0.05f;
 						}
-						if (num_gone > canvas.numGone_atSaturation()
+						if (num_gone > p5Canvas.numGone_atSaturation()
 								&& m.compoundJ < 0 && mIndex.compoundJ < 0
 								&& mIndex.getName().equals("Potassium-Ion")
 								&& m.getName().equals("Chlorine-Ion")) {
@@ -833,7 +835,7 @@ public class Unit2 {
 							if (dif < 2) {
 								joint2Ions(index, i, mIndex, m);
 								num_gone--;
-								canvas.computeDisolved();
+								p5Canvas.computeDisolved();
 
 							}
 						}
@@ -863,7 +865,7 @@ public class Unit2 {
 		djd.frequencyHz = 100.0f;
 		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
 		m3.compoundJ = index1;
-		m3.compoundJoints = dj;
+		m3.compoundJoint.add(dj);
 
 		djd.bodyA = m1.body;
 		djd.bodyB = m2.body;
@@ -872,7 +874,7 @@ public class Unit2 {
 		djd.frequencyHz = 60.0f;
 		dj = (DistanceJoint) PBox2D.world.createJoint(djd);
 		m1.compoundJ = index2;
-		m1.compoundJoints = dj;
+		m1.compoundJoint.add(dj);
 
 		djd.bodyA = m2.body;
 		djd.bodyB = m3.body;
@@ -881,7 +883,7 @@ public class Unit2 {
 		djd.frequencyHz = 60.0f;
 		dj = (DistanceJoint) PBox2D.world.createJoint(djd);
 		m2.compoundJ = index3;
-		m2.compoundJoints = dj;
+		m2.compoundJoint.add(dj);
 	}
 
 	public void computeCaClPartner(int index, Molecule mIndex) { // draw
@@ -889,7 +891,7 @@ public class Unit2 {
 		int[] ClPartners = new int[2];
 		ClPartners[0] = -1;
 		ClPartners[1] = -1;
-		if (temp <= 0)
+		if (p5Canvas.temp <= 0)
 			return;
 		Vec2 locIndex = mIndex.getElementLocation(0);
 		for (int i = 0; i < molecules.size(); i++) {
@@ -986,12 +988,12 @@ public class Unit2 {
 		if (index1 >= 0 && index3 >= 0) {
 			Molecule m1 = molecules.get(index1);
 			Molecule m3 = molecules.get(index3);
-			if (num_gone > canvas.numGone_atSaturation()
+			if (num_gone > p5Canvas.numGone_atSaturation()
 					&& mIndex.compoundJ < 0 && m1.compoundJ < 0
 					&& m3.compoundJ < 0) {
 				jointCaCl(index1, index, index3, m1, mIndex, m3);
 				num_gone--;
-				canvas.computeDisolved();
+				p5Canvas.computeDisolved();
 
 			}
 		}
@@ -1075,7 +1077,7 @@ public class Unit2 {
 
 					int charge = m.elementCharges.get(e2);
 					int mul = charge * indexCharge;
-					float r = temp / 100f;
+					float r = p5Canvas.temp / 100f;
 
 					// if (m.elementNames.get(e2).equals("Oxygen")){
 					// if (mIndex.getName().equals("Sodium-Ion") &&
@@ -1093,7 +1095,7 @@ public class Unit2 {
 								* (3 + r);
 					}
 
-					if (temp >= 100) {
+					if (p5Canvas.temp >= 100) {
 						mIndex.sumForceWaterX[e] = 0;
 						mIndex.sumForceWaterY[e] = 0;
 					}
@@ -1159,8 +1161,8 @@ public class Unit2 {
 					float dis = x * x + y * y;
 					forceX = (float) ((x / Math.pow(dis, 1.5)) * 0.1);
 					forceY = (float) ((y / Math.pow(dis, 1.5)) * 0.1);
-					if ((temp <= 0)
-							|| (temp < mIndex.freezingTem && !m.getName()
+					if ((p5Canvas.temp <= 0)
+							|| (p5Canvas.temp < mIndex.freezingTem && !m.getName()
 									.equals("Water"))) {
 						forceX *= 40;
 						forceY *= 40;
@@ -1210,8 +1212,8 @@ public class Unit2 {
 					forceX = (x / dis3) * 20;
 					forceY = (y / dis3) * 20;
 
-					if ((mIndex.compoundJ < 0 || m.compoundJ < 0) && 0 < temp
-							&& temp < 100) { // Losing mIndex
+					if ((mIndex.compoundJ < 0 || m.compoundJ < 0) && 0 < p5Canvas.temp
+							&& p5Canvas.temp < 100) { // Losing mIndex
 						forceX *= 0.05f;
 						forceY *= 0.05f;
 					}
@@ -1226,7 +1228,7 @@ public class Unit2 {
 							}
 						}
 					}
-					if (num_gone > canvas.numGone_atSaturation() // Recombine
+					if (num_gone > p5Canvas.numGone_atSaturation() // Recombine
 																	// compound
 							&& m.compoundJ < 0
 							&& mIndex.compoundJ < 0
@@ -1244,7 +1246,7 @@ public class Unit2 {
 							m.body.setTransform(new Vec2(x2, y2), 0);
 							jointNaHCO3(index, i, mIndex, m);
 							num_gone--;
-							canvas.computeDisolved();
+							p5Canvas.computeDisolved();
 
 						}
 					}
@@ -1266,46 +1268,46 @@ public class Unit2 {
 
 	// Compute saturation
 	public float computeSat() {
-		if (temp > 99 || temp < 0) {
+		if (p5Canvas.temp > 99 || p5Canvas.temp < 0) {
 			return 0;
 		}
-		float r = (float) (temp / 99.);
+		float r = (float) (p5Canvas.temp / 99.);
 		float sat = 0;
-		if (Main.selectedSet == 1 && Main.selectedSim <= 3)
+		if (p5Canvas.getMain().selectedSet == 1 && p5Canvas.getMain().selectedSim <= 3)
 			sat = (35.7f + r * (39.9f - 35.7f)); // Take number of Water to
 													// account
-		else if (Main.selectedSet == 2)
+		else if (p5Canvas.getMain().selectedSet == 2)
 			sat = 0;
-		else if (Main.selectedSet == 3)
+		else if (p5Canvas.getMain().selectedSet == 3)
 			sat = 0;
-		else if (Main.selectedSet == 4) {
-			if (0 < temp && temp <= 20) {
-				r = (float) (temp / 20.);
+		else if (p5Canvas.getMain().selectedSet == 4) {
+			if (0 < p5Canvas.temp && p5Canvas.temp <= 20) {
+				r = (float) (p5Canvas.temp / 20.);
 				sat = (59.5f + r * (74.5f - 59.5f));
 			}
-			if (20 < temp && temp <= 40) {
-				r = (float) ((temp - 20) / 20.);
+			if (20 < p5Canvas.temp && p5Canvas.temp <= 40) {
+				r = (float) ((p5Canvas.temp - 20) / 20.);
 				sat = (74.5f + r * (128f - 74.5f));
 			}
-			if (40 < temp && temp <= 60) {
-				r = (float) ((temp - 40) / 20.);
+			if (40 < p5Canvas.temp && p5Canvas.temp <= 60) {
+				r = (float) ((p5Canvas.temp - 40) / 20.);
 				sat = (128f + r * (137f - 128f));
 			}
-			if (60 < temp && temp <= 80) {
-				r = (float) ((temp - 60) / 20.);
+			if (60 < p5Canvas.temp && p5Canvas.temp <= 80) {
+				r = (float) ((p5Canvas.temp - 60) / 20.);
 				sat = (137f + r * (147f - 137));
 			}
-			if (80 < temp && temp <= 100) {
-				r = (float) ((temp - 80) / 20.);
+			if (80 < p5Canvas.temp && p5Canvas.temp <= 100) {
+				r = (float) ((p5Canvas.temp - 80) / 20.);
 				sat = (147f + r * (159f - 147f));
 			}
-		} else if (Main.selectedSet == 5) {
+		} else if (p5Canvas.getMain().selectedSet == 5) {
 			sat = 0;
-		} else if (Main.selectedSet == 6) {
+		} else if (p5Canvas.getMain().selectedSet == 6) {
 			sat = 0;
-		} else if (Main.selectedSet == 7)
+		} else if (p5Canvas.getMain().selectedSet == 7)
 			sat = (6.9f + r * (19.2f - 6.9f));
-		else if (Main.selectedSet == 1 && Main.selectedSim == 4)
+		else if (p5Canvas.getMain().selectedSet == 1 && p5Canvas.getMain().selectedSim == 4)
 			sat = (28f + r * (56.3f - 28f));
 		return sat * ((float) numWater / water100mL);
 	}
@@ -1317,7 +1319,7 @@ public class Unit2 {
 			mIndex.addForce(new Vec2(mIndex.sumForceWaterX[e],
 					mIndex.sumForceWaterY[e]), e);
 
-			if (Main.selectedUnit == 2 && Main.selectedSet == 1) {
+			if (p5Canvas.getMain().selectedUnit == 2 && p5Canvas.getMain().selectedSet == 1) {
 				int num = mIndex.getNumElement();
 				float fX = 0;
 				float fY = 0;
@@ -1328,29 +1330,29 @@ public class Unit2 {
 				float s = fX * fX + fY * fY;
 				float f = (float) Math.sqrt(s);
 
-				if (num_gone < canvas.numGone_atSaturation()
+				if (num_gone < p5Canvas.numGone_atSaturation()
 						&& mIndex.compoundJ >= 0 && f > 0.02) {
-					DistanceJoint dj1 = mIndex.compoundJoints;
+					DistanceJoint dj1 = mIndex.compoundJoint.get(0);
 					PBox2D.world.destroyJoint(dj1);
 					//this.destroyJoint(dj1);
-					mIndex.compoundJoints = null;
+					mIndex.compoundJoint.remove(0);
 					Molecule m2 = molecules.get(mIndex.compoundJ);
 					mIndex.compoundJ = -1;
 					m2.compoundJ = -1;
-					m2.compoundJoints = null;
+					m2.compoundJoint.remove(0);
 					num_gone++;
-					canvas.computeDisolved();
+					p5Canvas.computeDisolved();
 				}
-			} else if (Main.selectedUnit == 2 && Main.selectedSet == 4) {
+			} else if (p5Canvas.getMain().selectedUnit == 2 && p5Canvas.getMain().selectedSet == 4) {
 				float s = mIndex.sumForceWaterX[0] * mIndex.sumForceWaterX[0]
 						+ mIndex.sumForceWaterY[0] * mIndex.sumForceWaterY[0];
 				float f = (float) Math.sqrt(s);
-				if (num_gone < canvas.numGone_atSaturation()
+				if (num_gone < p5Canvas.numGone_atSaturation()
 						&& mIndex.compoundJ >= 0 && f > 0.02f) {
-					DistanceJoint dj1 = mIndex.compoundJoints;
+					DistanceJoint dj1 = mIndex.compoundJoint.get(0);
 					PBox2D.world.destroyJoint(dj1);
 					//destroyJoint(dj1);
-					mIndex.compoundJoints = null;
+					mIndex.compoundJoint.remove(0);
 					int jIndex = mIndex.compoundJ;
 					mIndex.compoundJ = -1;
 
@@ -1364,10 +1366,10 @@ public class Unit2 {
 					removeCaOtherJ(mIndex);
 
 					Molecule m = molecules.get(jIndex);
-					dj1 = m.compoundJoints;
+					dj1 = m.compoundJoint.get(0);
 					PBox2D.world.destroyJoint(dj1);
 					//destroyJoint(dj1);
-					m.compoundJoints = null;
+					m.compoundJoint.remove(0);
 					jIndex = m.compoundJ;
 					m.compoundJ = -1;
 
@@ -1381,10 +1383,10 @@ public class Unit2 {
 					removeCaOtherJ(m);
 
 					m = molecules.get(jIndex);
-					dj1 = m.compoundJoints;
+					dj1 = m.compoundJoint.get(0);
 					PBox2D.world.destroyJoint(dj1);
 					//destroyJoint(dj1);
-					m.compoundJoints = null;
+					m.compoundJoint.remove(0);
 					m.compoundJ = -1;
 					if (m.otherJ >= 0) {
 						DistanceJoint dj2 = m.otherJoints;
@@ -1395,10 +1397,10 @@ public class Unit2 {
 					}
 					removeCaOtherJ(m);
 					num_gone++;
-					canvas.computeDisolved();
+					p5Canvas.computeDisolved();
 
 				}
-			} else if (Main.selectedUnit == 2 && Main.selectedSet == 7) {
+			} else if (p5Canvas.getMain().selectedUnit == 2 && p5Canvas.getMain().selectedSet == 7) {
 				int num = mIndex.getNumElement();
 				float fX = 0;
 				float fY = 0;
@@ -1409,7 +1411,7 @@ public class Unit2 {
 				}
 				float f = fX * fX + fY * fY;
 				
-				if (num_gone < canvas.numGone_atSaturation()
+				if (num_gone < p5Canvas.numGone_atSaturation()
 						&& mIndex.compoundJ >= 0 && f > 0.01) {
 
 					Molecule mCa = mIndex;
@@ -1417,10 +1419,10 @@ public class Unit2 {
 						mCa = molecules.get(mIndex.compoundJ);
 					}
 
-					DistanceJoint dj1 = mCa.compoundJoints;
+					DistanceJoint dj1 = mCa.compoundJoint.get(0);
 					PBox2D.world.destroyJoint(dj1);
 					//destroyJoint(dj1);
-					mCa.compoundJoints = null;
+					mCa.compoundJoint.remove(0);
 					Molecule mHCO3 = molecules.get(mCa.compoundJ);
 					mCa.compoundJ = -1;
 					mHCO3.compoundJ = -1;
@@ -1431,7 +1433,7 @@ public class Unit2 {
 					mCa.compoundJoints2 = null;
 
 					num_gone++;
-					canvas.computeDisolved();
+					p5Canvas.computeDisolved();
 				}
 			}
 
@@ -1442,16 +1444,16 @@ public class Unit2 {
 	private void destroyJoint(DistanceJoint dj)
 	{
 		PBox2D.world.destroyJoint(dj);
-		canvas.computeDisolved();
+		p5Canvas.computeDisolved();
 	}
 	public void reset() { // draw background
 		num_total = 0;
 		num_gone = 0;
 		numWater = 0;
 		this.mToMass = 10;
-		if (Main.selectedSet == 4)
+		if (p5Canvas.getMain().selectedSet == 4)
 			this.mToMass = 20;
-		canvas.computeDisolved();
+		p5Canvas.computeDisolved();
 	}
 
 	public int getTotalNum() {
@@ -1490,7 +1492,7 @@ public class Unit2 {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				numWater += count;
-				System.out.println("numWater is "+numWater);
+				//System.out.println("numWater is "+numWater);
 			}
 			
 		};

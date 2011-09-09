@@ -6,8 +6,13 @@ import main.Main;
 import org.jbox2d.common.Vec2;
 
 public class Water {
-	public static void setForceWater(int indexWater, Molecule mWater) { // draw background
-		if (temp<=0){
+	private P5Canvas p5Canvas;
+	public Water(P5Canvas parent)
+	{
+		p5Canvas = parent;
+	}
+	public void setForceWater(int indexWater, Molecule mWater) { // draw background
+		if (p5Canvas.temp<=0){
 			for (int e = 0; e < mWater.getNumElement(); e++) {
 				float sumForceX=0;
 				float sumForceY=0;
@@ -68,7 +73,7 @@ public class Water {
 			}
 		
 		}
-		else if (Main.selectedUnit==1 && Main.selectedSim!=3){
+		else if (p5Canvas.getMain().selectedUnit==1 && p5Canvas.getMain().selectedSim!=3){
 			for (int i = 0; i < molecules.size(); i++) {
 				if (i==indexWater)
 					continue;
@@ -86,16 +91,16 @@ public class Water {
 					float fTemp = mWater.freezingTem;
 					float bTemp = mWater.boilingTem;
 					float gravityX,gravityY;
-					if (temp>=bTemp){
+					if (p5Canvas.temp>=bTemp){
 						gravityX = 0;
 						gravityY = 0;
 					}
-					else if (temp<=fTemp){
-						gravityY = (bTemp-temp)/(bTemp-fTemp);
+					else if (p5Canvas.temp<=fTemp){
+						gravityY = (bTemp-p5Canvas.temp)/(bTemp-fTemp);
 						gravityX = gravityY*2f;
 					}	
 					else{
-						gravityY = (bTemp-temp)/(bTemp-fTemp);
+						gravityY = (bTemp-p5Canvas.temp)/(bTemp-fTemp);
 						gravityX = gravityY*0.6f;
 					}	
 					forceX =  (-normV.x/dis)*m.getMass()*mWater.getMass()*gravityX*3000;

@@ -8,7 +8,7 @@ import org.jbox2d.dynamics.*;
 
 public class Boundary {
 
-	private P5Canvas parent;
+	private P5Canvas p5Canvas;
 	// But we also have to make a body for box2d to know about it
 	public Body body;
 	PBox2D box2d;
@@ -28,14 +28,14 @@ public class Boundary {
 	
 	Boundary(int id_,float x_,float y_, float w_, float h_, int sliderValue_, PBox2D box2d_, P5Canvas parent_) {
 		id = id_;
-		this.parent = parent_;
+		this.p5Canvas = parent_;
 		this.box2d = box2d_;
 		x=x_;
 		y=y_;
 		w = w_;
-		h = h_;
+		setH(h_);
 		volumeSliderValue =sliderValue_;
-		volumeSliderDefaultValue =P5Canvas.defaultVolume;
+		volumeSliderDefaultValue =p5Canvas.defaultVolume;
 		// Figure out the box2d coordinates
 		box2dW = box2d.scalarPixelsToWorld(w_/2);
 		box2dH = box2d.scalarPixelsToWorld(h_/2);
@@ -79,7 +79,7 @@ public class Boundary {
 		
 	public void set(int v){
 			volumeSliderValue = v;
-			difVolume = (volumeSliderValue-volumeSliderDefaultValue)*P5Canvas.multiplierVolume;
+			difVolume = (volumeSliderValue-volumeSliderDefaultValue)*p5Canvas.multiplierVolume;
 			isTransformed =true;
 	}
 	
@@ -88,11 +88,11 @@ public class Boundary {
 		float a = body.getAngle();
 		// parent.rectMode(parent.CENTER);
 		Vec2 pos = box2d.getBodyPixelCoord(body);
-		parent.pushMatrix();
-		parent.translate(pos.x, pos.y);
-		parent.rotate(-a);
+		p5Canvas.pushMatrix();
+		p5Canvas.translate(pos.x, pos.y);
+		p5Canvas.rotate(-a);
 		float pShapeW =w;
-		float pShapeH =h;
+		float pShapeH =getH();
 	
 		if (id==2 && isTransformed){
 			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
@@ -101,14 +101,14 @@ public class Boundary {
 			isTransformed =false;
 		}	
 		if (id==3)
-			parent.fill(parent.heatRGB);
+			p5Canvas.fill(p5Canvas.heatRGB);
 		else{
-			parent.fill(Color.WHITE.getRGB());
+			p5Canvas.fill(Color.WHITE.getRGB());
 		}	
-		parent.noStroke();
-		parent.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);
+		p5Canvas.noStroke();
+		p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);
 		
-		parent.popMatrix();
+		p5Canvas.popMatrix();
 		
 		
 		//if (id==2)
@@ -121,23 +121,23 @@ public class Boundary {
 		float xx=0, yy=0;
 		if(id==0){
 			xx=x-w/2; 	
-			yy=y-h/2;
+			yy=y-getH()/2;
 		}
 		else if(id==1){
 			xx=x-w/2; 	
-			yy=y-h/2;
+			yy=y-getH()/2;
 		}
 		else if(id==2){
 			xx=x-w/2; 	
-			yy=y-h/2;
+			yy=y-getH()/2;
 		}
 		else if(id==3){
 			xx=x-w/2; 	
-			yy=y-h/2;
+			yy=y-getH()/2;
 		}
-		xx = xx*P5Canvas.scale;
-		yy = yy*P5Canvas.scale;
-		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+h){
+		xx = xx*p5Canvas.scale;
+		yy = yy*p5Canvas.scale;
+		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+getH()){
 			return id;
 		}
 		else 
@@ -147,5 +147,17 @@ public class Boundary {
 	public void killBody() {
 		box2d.destroyBody(body);
 		body.m_world =null;
+	}
+	/**
+	 * @return the h
+	 */
+	public float getH() {
+		return h;
+	}
+	/**
+	 * @param h the h to set
+	 */
+	public void setH(float h) {
+		this.h = h;
 	}
 }

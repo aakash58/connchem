@@ -51,8 +51,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		}
 		maxCount =8;
 		maxTime =60;
-		if (Main.elapsedTime !=null)
-			Main.elapsedTime.setText(formatTime(0));
+		if (main.elapsedTime !=null)
+			main.elapsedTime.setText(formatTime(0));
 	}
 	
 	public String formatTime(long count){
@@ -119,7 +119,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		g.drawString(""+maxCount, 2, margin-5);
 		
 		satCount+=2;
-		main.getP5Canvas().computeDisolved();
+		//main.getP5Canvas().computeDisolved();
 		resetMoleculeCount();
 		updateTableView();
 		if (Main.time>maxTime){
@@ -146,7 +146,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			Line l = new Line(margin, 225-margin, (int) Main.time-1, (int) Main.time,  num1, num2, h2, w2, this);
 			lines[i].add(l);
 		}
-		Main.elapsedTime.setText(formatTime(Main.time));
+		main.elapsedTime.setText(formatTime(Main.time));
 		
 		
 		for (int i=0; i< MAXCOMPOUND;i++){
@@ -176,7 +176,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	
 
 	public void resetMoleculeCount(){
-		if (Main.selectedUnit==1 && Main.selectedSim==4){
+		if (main.selectedUnit==1 && main.selectedSim==4){
 			int H2OIndex = names.indexOf("Water");
 			int OIndex = names.indexOf("Oxygen");
 			int H2O2Index = names.indexOf("Hydrogen-Peroxide");
@@ -200,7 +200,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			counts.set(H2O2Index, H2O2Count);
 			
 		}
-		if (Main.selectedUnit==2 && Main.selectedSet==1 && Main.selectedSim<4){
+		if (main.selectedUnit==2 && main.selectedSet==1 && main.selectedSim<4){
 			int NaIndex = names.indexOf("Sodium-Ion");
 			int ClIndex = names.indexOf("Chlorine-Ion");
 			int NaClIndex = names.indexOf("Sodium-Chloride");
@@ -216,7 +216,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			counts.set(NaClIndex,NaClCount);
 			
 		}
-		else if (Main.selectedUnit==2 && Main.selectedSet==4){
+		else if (main.selectedUnit==2 && main.selectedSet==4){
 			int CaIndex = names.indexOf("Calcium-Ion");
 			int ClIndex = names.indexOf("Chlorine-Ion");
 			int CaClIndex = names.indexOf("Calcium-Chloride");
@@ -231,7 +231,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			counts.set(ClIndex,2*(main.getP5Canvas().getUnit2().getTotalNum()-CaClCount));
 			counts.set(CaClIndex,CaClCount);
 		}
-		else if (Main.selectedUnit==2 && Main.selectedSet==7){
+		else if (main.selectedUnit==2 && main.selectedSet==7){
 			int NaIndex = names.indexOf("Sodium-Ion");
 			int HCO3Index = names.indexOf("Bicarbonate");
 			int NaHCO3Index = names.indexOf("Sodium-Bicarbonate");
@@ -246,7 +246,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			counts.set(HCO3Index,main.getP5Canvas().getUnit2().getTotalNum()-NaHCO3Count);
 			counts.set(NaHCO3Index, NaHCO3Count);
 		}
-		else if (Main.selectedUnit==2 && Main.selectedSet==1 && Main.selectedSim==4){
+		else if (main.selectedUnit==2 && main.selectedSet==1 && main.selectedSim==4){
 			int KIndex = names.indexOf("Potassium-Ion");
 			if (KIndex<0) return;
 			int ClIndex = names.indexOf("Chlorine-Ion");

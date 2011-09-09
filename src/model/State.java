@@ -9,6 +9,10 @@ public class State {
 	// An ArrayList of particles that will fall on the surface
 	public static ArrayList<Molecule> molecules = new ArrayList<Molecule>();
 	// A list we'll use to track fixed objects
+	/* LeftBoundary   0
+	*  RightBoundary  1
+	*  TopBoundary    2
+	*  BottomBoundary 3 */
 	public static Boundary[] boundaries = new Boundary[4];
 	
 	public State()
