@@ -71,7 +71,8 @@ public class ColorEditor extends AbstractCellEditor
 	}
 	private TableView getTableView()
 	{
-		return ((TableSet) tableSet).getMain().getTableView();
+		Main main = ((TableSet)tableSet).getMain();
+		return main.getTableView();
 	}
 }
 

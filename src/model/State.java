@@ -14,6 +14,7 @@ public class State {
 	*  TopBoundary    2
 	*  BottomBoundary 3 */
 	public static Boundary[] boundaries = new Boundary[4];
+	public static int moleculesAdded = 0;
 	
 	public State()
 	{
@@ -60,7 +61,10 @@ public class State {
 		return "Default";
 	}
 	
-	
+	public static void reset()
+	{
+		moleculesAdded = 0;
+	}
 	/*
 	 * Default settings
 	 */
