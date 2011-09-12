@@ -33,7 +33,7 @@ public class Boundary {
 		x=x_;
 		y=y_;
 		w = w_;
-		setH(h_);
+		h = h_;
 		volumeSliderValue =sliderValue_;
 		volumeSliderDefaultValue =p5Canvas.defaultVolume;
 		// Figure out the box2d coordinates
@@ -92,7 +92,7 @@ public class Boundary {
 		p5Canvas.translate(pos.x, pos.y);
 		p5Canvas.rotate(-a);
 		float pShapeW =w;
-		float pShapeH =getH();
+		float pShapeH =h;
 	
 		if (id==2 && isTransformed){
 			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
@@ -121,23 +121,23 @@ public class Boundary {
 		float xx=0, yy=0;
 		if(id==0){
 			xx=x-w/2; 	
-			yy=y-getH()/2;
+			yy=y-h/2;
 		}
 		else if(id==1){
 			xx=x-w/2; 	
-			yy=y-getH()/2;
+			yy=y-h/2;
 		}
 		else if(id==2){
 			xx=x-w/2; 	
-			yy=y-getH()/2;
+			yy=y-h/2;
 		}
 		else if(id==3){
 			xx=x-w/2; 	
-			yy=y-getH()/2;
+			yy=y-h/2;
 		}
 		xx = xx*p5Canvas.scale;
 		yy = yy*p5Canvas.scale;
-		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+getH()){
+		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+h){
 			return id;
 		}
 		else 
@@ -147,17 +147,5 @@ public class Boundary {
 	public void killBody() {
 		box2d.destroyBody(body);
 		body.m_world =null;
-	}
-	/**
-	 * @return the h
-	 */
-	public float getH() {
-		return h;
-	}
-	/**
-	 * @param h the h to set
-	 */
-	public void setH(float h) {
-		this.h = h;
 	}
 }

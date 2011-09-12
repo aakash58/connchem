@@ -47,6 +47,7 @@ import javax.swing.Timer;
 import java.awt.Component;
 import javax.swing.Box;
 
+import model.State;
 import model.YAMLinterface;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JScrollPane;
@@ -292,6 +293,14 @@ public class Main {
 		}
 	}
 		
+	/******************************************************************
+	* FUNCTION :     addAdditionalMolecule
+	* DESCRIPTION :  Molecule Add Function for customized button. 
+	*                Disable for now.
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
 	public void addAdditionalMolecule(){
 		//Default unit setting
 		JPanel panel = new JPanel();
@@ -403,17 +412,24 @@ public class Main {
 								//Check if molecule number is going over predefined cap number
 								//If yes, add molecules no more than cap number
 								int cap = getP5Canvas().getMoleculesCap(fixedName);
-								int curNum = getP5Canvas().getMoleculesNum(fixedName);
-								if(cap<=(count+curNum))
+								//int curNum = getP5Canvas().getMoleculesNum(fixedName);
+								
+								if(cap<=(count+State.moleculesAdded))
 								{
-									count = cap - curNum;
+									count = cap - State.moleculesAdded;
 									//Disable Add button
 									if(getP5Canvas().addMolecule(fixedName,count))
+									{
+										State.moleculesAdded += count;
 										arg0.getComponent().setEnabled(false);
+									}
 								}
 								else
 								{
-									getP5Canvas().addMolecule(fixedName,count);
+									if(getP5Canvas().addMolecule(fixedName,count))
+									{
+										State.moleculesAdded += count;
+									}
 								}
 									
 							}
@@ -442,7 +458,13 @@ public class Main {
 	
 	public void reset(){
 		boolean temp = getP5Canvas().isEnable;
-		getP5Canvas().isEnable =false;
+		
+		/*    Reset canvas   */
+		getP5Canvas().reset();
+		/*    Reset state parameter   */
+		State.reset();
+		
+		/*    Check if welcome menu showing    */
 		if (isWelcomed && welcomePanel !=null){
 			mainFrame.remove(welcomePanel);
 			mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
@@ -451,12 +473,9 @@ public class Main {
 			isWelcomed = false;
 		}
 		
-		getP5Canvas().removeAllMolecules();
 		
-		getP5Canvas().curTime=0;
-		getP5Canvas().oldTime=0;
 		
-		//Reset dashboard on right panel
+		/*    Reset dashboard on right panel   */
 		dashboard.removeAll();
 		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
 		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
@@ -476,8 +495,7 @@ public class Main {
 			
 		}
 			
-		//reset Unit 2
-		this.getP5Canvas().getUnit2().reset();
+
 		
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
 		if (a!=null) {
@@ -492,7 +510,10 @@ public class Main {
 				Compound.names.add(s);
 				Compound.counts.add(num);
 				Compound.caps.add(cap);
-				getP5Canvas().addMoleculeRandomly(s,num);
+				if( getP5Canvas().addMoleculeRandomly(s,num) )
+				{
+					State.moleculesAdded = num;
+				}
 			}
 			if (selectedUnit==1){
 				if (selectedSim==4){
@@ -556,12 +577,12 @@ public class Main {
 		//Update components on the left panel
 		updateCenterPanel();
 		
-		
-	
 		getP5Canvas().isEnable =temp;
 		
 		//reset timer
 		resetTimer();
+		
+
 		
 	} 
 	

@@ -94,6 +94,7 @@ units:
       compounds:
       - compound: "Hydrogen Peroxide"
         qty: 20
+        cap: 50
   - sim: 5
     name: "Mixtures"
     controls:
@@ -298,11 +299,11 @@ units:
     - set: 1
       compounds:
       - compound: "Sodium"
-        qty: 9
-        cap: 15
+        qty: 16
+        cap: 20
       - compound: "Chlorine"
         qty: 5
-        cap: 15
+        cap: 25
     - set: 2
       compounds:
       - compound: "Water"      

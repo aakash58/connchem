@@ -21,6 +21,7 @@ import org.jbox2d.dynamics.joints.PrismaticJoint;
 import Util.SVGReader;
 import static model.State.*;
 
+
 public class Molecule {
 	// We need to keep track of a Body and a width and height
 	public Body body;
@@ -73,7 +74,13 @@ public class Molecule {
 	
 	public float ionDis =0;  // Use to compute dissolve
 	
-	// Constructor
+	/******************************************************************
+	* FUNCTION :     Molecule()
+	* DESCRIPTION :  Molecule Constructor
+	*
+	* INPUTS :       x (float), y (float), compoundName_ (String), box2d_ (PBox2D), parent_ (P5Canvas), angle (float)
+	* OUTPUTS:       None
+	*******************************************************************/
 	Molecule(float x, float y, String compoundName_, PBox2D box2d_,
 			P5Canvas parent_, float angle) {
 		p5Canvas = parent_;
@@ -131,15 +138,47 @@ public class Molecule {
 		createBody(x, y,angle);
 	}
 	
+	
+	/******************************************************************
+	* FUNCTION :     switchTo()
+	* DESCRIPTION :  Switch current molecule to another one, reset property and body
+	*
+	* INPUTS :       compoundName_ (String)
+	* OUTPUTS:       None
+	*******************************************************************/
+	public void switchTo(String compoundName_)
+	{
+	
+	}
+	
+	
+	/******************************************************************
+	* FUNCTION :     SetPropertyByHeat()
+	* DESCRIPTION :  Set restitution, friction and charge rate regarding to temperature
+	*
+	* INPUTS :       isIntial (boolean)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public void setPropertyByHeat(boolean isInitial) {
 		float temp = p5Canvas.temp;
 		res = (temp - freezingTem) / (boilingTem - freezingTem);
-		if (res > 0)  	res =1f;
-		else			res = 0.2f;
-		if (temp <= freezingTem)	fric = 1;
-		else						fric = 0;
-		if (name.equals("Water") && temp < 40) 	scale = 1 + (40 - temp) / 200f;
-		else									scale = 1f;
+		if (res > 0)  	
+			res =1f;
+		else			
+			res = 0.2f;
+		
+		//Set for solid case
+		if( temp<this.freezingTem)
+			res =0.0f;  //Restituion is bounciness
+		
+		if (temp <= freezingTem)	
+			fric = 1;
+		else						
+			fric = 0;
+		if (name.equals("Water") && temp < 40) 	
+			scale = 1 + (40 - temp) / 200f;
+		else									
+			scale = 1f;
 		
 		if (name.equals("Water"))	
 			chargeRate = 0.95f;
@@ -192,32 +231,17 @@ public class Molecule {
 		}
 	}
 	
+	/******************************************************************
+	* FUNCTION :     createBody()
+	* DESCRIPTION :  Create body and shape for molecules
+	*
+	* INPUTS :       x (float), y (float), angle (float)
+	* OUTPUTS:       None
+	*******************************************************************/
 	public void createBody(float x, float y,float angle) {
-		float mul = 1;
-		if (name.equals("Pentane"))
-			mul = 0.04f;
-		else if (name.equals("Bromine"))
-			mul = 0.45f;
-		else if (name.equals("Mercury"))
-			mul = 0.3f;
-		else if (name.equals("Hydrogen-Peroxide"))
-			mul = 0.8f;
-		else if (name.equals("Sodium-Chloride"))
-			mul = 1.0f;
-		else if (name.equals("Sodium-Ion"))
-			mul = 0.011f/0.006448616f;
-		else if (name.equals("Chlorine-Ion"))
-			mul = 0.015f/0.009944542f;
-		else if (name.equals("Glycerol"))
-			mul = 2.0f;
-		else if (name.equals("Silicon-Dioxide"))
-			mul = 1.f;
-		else if (name.equals("Calcium-Ion"))
-			mul = 1.6f;
-		else if (name.equals("Bicarbonate"))
-			mul = 1.50f;
-		else if (name.equals("Potassium-Ion"))
-			mul = 1.1f;
+		
+		//Mannually set up density
+		float mul = setMul();
 		
 		// Define the body and make it from the shape
 		BodyDef bd = new BodyDef();
@@ -230,13 +254,12 @@ public class Molecule {
 		while (body == null) {
 			body = box2d.createBody(bd);
 		}
-		FixtureDef fd = new FixtureDef();
-		//System.out.println("");
-		//System.out.println("names:"+elementNames);
 		
+		FixtureDef fd = new FixtureDef();
 		for (int i = 0; i < circles.length; i++) {
 			// Define a circle
 			CircleShape circleShape = new CircleShape();
+			
 			// Offset its "local position" (relative to 0,0)
 			Vec2 offset = new Vec2(circles[i][1] - pShapeW / 2, circles[i][2]
 					- pShapeH / 2);
@@ -245,18 +268,19 @@ public class Molecule {
 			
 			float m = 1;
 			if (elementNames != null && i < elementNames.size()){
-				//System.out.println("elementNames:"+elementNames.get(i));
 				m = DBinterface.getElementMass(elementNames.get(i));
 			}	
 			float d = m / (circles[i][0] * circles[i][0] * circles[i][0]);
 			fd.shape = circleShape;
 	        fd.density = d * mul;
 			fd.friction = fric;
-			fd.restitution = res;
+			fd.restitution = res;   // Restitution is bounciness
+			if( p5Canvas.temp < this.freezingTem)
+				fd.restitution = 0.0f;
 			// Attach shapes!
 			body.createFixture(fd);
 		}
-		// System.out.println(name+ " get Mass "+body.getMass() +" DBmass:"+ +DBinterface.getCompoundMass(name));
+
 		// Give it some initial random velocity
 		body.setLinearVelocity(new Vec2(p5Canvas.random(-1, 1), p5Canvas.random(-1,
 				1)));
@@ -362,7 +386,7 @@ public class Molecule {
 			xTmp = body.getPosition().x;
 			yTmp = body.getPosition().y;
 		}
-		/*********************  Boundary Check *******************/
+		/**************************  Boundary Check **************************/
 		/* If molecules go out of boundary, reset their position */
 		/* Top boundary check, top boundary has max y value */
 		if (body.getPosition().y+PBox2D.scalarPixelsToWorld(this.minSize/2) > boundaries[2].body.getPosition().y) {
@@ -401,13 +425,16 @@ public class Molecule {
 		float a = body.getAngle();
 		
 
-		//Draw bodies
+		/*********************  Draw Bodies *******************/
 		p5Canvas.pushMatrix();
 		p5Canvas.translate(pos.x, pos.y);
+		float temp = p5Canvas.temp;
 		p5Canvas.rotate(-a);
 		p5Canvas.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH); 
 		//parent.noFill();
 		p5Canvas.fill(Color.GRAY.getRGB(),240);
+		
+		/* If molecules are selected or deselected in tableview, render or hide them */
 		if (p5Canvas.getMain().getTableView().selectedRow>=0){
 			if (!name.equals(p5Canvas.getMain().getCanvas().getSelectedMolecule())) {
 				p5Canvas.noStroke();
@@ -416,6 +443,7 @@ public class Molecule {
 				}
 			}
 		}
+		/* If hide checkbox is selected, hide them */
 		else if (p5Canvas.isHidingEnabled && !isHidden){
 			p5Canvas.noStroke();
 			for (int i=0; i<circles.length;i++){
@@ -425,14 +453,12 @@ public class Molecule {
 		
 		if (name.equals("Calcium-Ion")){
 			p5Canvas.stroke(Color.BLUE.getRGB());
-			//parent.line(0,0,30,0);
-			//parent.ellipse( circles[0][0], 0,6, 6);
 		}
 		p5Canvas.popMatrix();
 		//End drawing
 		
 		
-		//Check if it is displaying forces
+		/*  Check if it is displaying forces  */
 		if (p5Canvas.isDisplayForces && !name.equals("Water")){
 			int numElement = elementNames.size();
 			for (int i=0; i<numElement;i++){
@@ -444,9 +470,9 @@ public class Molecule {
 			}
 		}
 		
-		//Check if it is displaying joints
+		/*  Check if it is displaying joints  */
 		if (p5Canvas.isDisplayJoints){
-			
+			// For Unit 1 and Unit 2
 			if(p5Canvas.getMain().selectedUnit==1 || p5Canvas.getMain().selectedUnit==2 )
 			{
 				if (compoundJ>=0) {
@@ -484,5 +510,47 @@ public class Molecule {
 	public void killBody() {
 		box2d.destroyBody(body);
 		body.m_world = null;
+	}
+	
+	/******************************************************************
+	* FUNCTION :     setMul()
+	* DESCRIPTION :  Mannually set up density for different elements
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	
+	private float setMul()
+	{
+		float mul =1.0f;
+		if (name.equals("Pentane"))
+			mul = 0.04f;
+		else if (name.equals("Bromine"))
+			mul = 0.45f;
+		else if (name.equals("Mercury"))
+			mul = 0.3f;
+		else if (name.equals("Hydrogen-Peroxide"))
+			mul = 0.8f;
+		else if (name.equals("Sodium-Chloride"))
+			mul = 1.0f;
+		else if (name.equals("Sodium-Ion"))
+			mul = 0.011f/0.006448616f;
+		else if (name.equals("Chlorine-Ion"))
+			mul = 0.015f/0.009944542f;
+		else if (name.equals("Glycerol"))
+			mul = 2.0f;
+		else if (name.equals("Silicon-Dioxide"))
+			mul = 1.f;
+		else if (name.equals("Calcium-Ion"))
+			mul = 1.6f;
+		else if (name.equals("Bicarbonate"))
+			mul = 1.50f;
+		else if (name.equals("Potassium-Ion"))
+			mul = 1.1f;
+		else if (name.equals("Chlorine"))
+			mul =0.04f;
+		else if (name.equals("Sodium"))
+			mul =1.0f;
+		return mul;
 	}
 }

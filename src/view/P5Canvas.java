@@ -87,7 +87,7 @@ public class P5Canvas extends PApplet{
 	private int velocityIterations = 6;
 	private int positionIterations =2;
 	
-	private float FRAME_RATE =30;
+	public float FRAME_RATE =30;
 	
 
 	public P5Canvas(Main parent) {
@@ -196,20 +196,22 @@ public class P5Canvas extends PApplet{
 			m2.killBody();
 			molecules.remove(m1);
 			molecules.remove(m2);
-			products = new ArrayList<String>();
-			killingList = new ArrayList<Molecule>();
+			products.clear();
+			killingList.clear();
 		}
 		
+		
+		/*   Change Scale   */
 		this.scale(scale);
+		/*   Change Time Speed  */
  		if (isEnable && !isDrag){
 			if (speedRate<1){
 				timeStep = speedRate* defaultTimeStep;
 			}
  			box2d.step(timeStep,velocityIterations,positionIterations);
-			//box2d.step();
- 			//count++;
+
  			
- 			
+ 			/*    Compute energy   */
 			computeEnergy();
  			
 			if (main.selectedUnit==2){
@@ -224,15 +226,68 @@ public class P5Canvas extends PApplet{
 				}
 				
 			}
-			for (int i = 0; i < molecules.size(); i++) {
-				Molecule m = molecules.get(i);
-				if (m.getName().equals("Water"))
-					waterComputation.setForceWater(i,m);
-				else if (main.selectedUnit==1)
+			
+			/*   Compute Forces between different compounds  */
+			computeForces();
+			
+		}	
+ 		
+ 		/*   Show selected contour while mouse is dragging  */
+		if (isHidingEnabled && isHidden){
+			this.stroke(Color.WHITE.getRGB());
+			this.noFill();
+			this.rect(xStart/scale,yStart/scale, (mouseX/scale-xStart/scale), (mouseY/scale-yStart/scale));	
+		}
+		
+		/*   Draw boundary   */
+		for (int i = 0; i < 4; i++) {
+			boundaries[i].display();
+		}
+		
+		/*   Draw all molecules   */
+		for (int i = 0; i < molecules.size(); i++) {
+			Molecule m = molecules.get(i);
+			if (isHidingEnabled && isHidden){
+				Vec2 p = box2d.coordWorldToPixels(m.getPosition());
+				if (xStart/scale <p.x && p.x< mouseX/scale &&
+						yStart/scale <p.y && p.y< mouseY/scale )
+					m.isHidden =true;
+				else
+					m.isHidden =false;
+			}
+			m.display();
+		}
+		
+		
+	}
+	
+	/******************************************************************
+	* FUNCTION :     computeForces
+	* DESCRIPTION :  Compute forces between all kinds of molecules
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	public void computeForces()
+	{
+		for (int i = 0; i < molecules.size(); i++) {
+			Molecule m = molecules.get(i);
+			if (m.getName().equals("Water"))
+				waterComputation.setForceWater(i,m);
+			else 
+				{
+				
+				switch (main.selectedUnit)
+				{
+				case 1:
 					setForce(i,m);
-				else {
+					break;
+				case 2:
 					if(main.selectedSet==1 && main.selectedSim<4)
 						getUnit2().computeForceNaCl(i,m);
+					else if(main.selectedSet==1 && main.selectedSim==4){
+						getUnit2().computeForceKCl(i,m);
+					}
 					else if(main.selectedSet==2)
 						getUnit2().computeForceSiO2(i,m);
 					else if(main.selectedSet==3)
@@ -248,46 +303,38 @@ public class P5Canvas extends PApplet{
 						getUnit2().computeForceNaHCO3(i,m);
 						getUnit2().computeForceFromWater(i,m);	
 					}
-					else if(main.selectedSet==1 && main.selectedSim==4){
-						getUnit2().computeForceKCl(i,m);
-					}
-						
+
+					break;
+				case 3:
+					break;
+				case 4:
+					break;
+				case 5: 
+					break;
+				case 6:
+					break;
+				case 7:
+					break;
+				case 8:
+					break;
+				case 9:
+					break;
+					default:
+						break;
 				}
-			}
 			
-			for (int i = 0; i < molecules.size(); i++) {
-				Molecule m = molecules.get(i);
-				if (m!=null && !isDrag){
-					if (!m.getName().equals("Water") && main.selectedUnit==2){
-						getUnit2().applyForceUnit2(i,m);
-					}
-				}	
 			}
-		}	
-		if (isHidingEnabled && isHidden){
-			this.stroke(Color.WHITE.getRGB());
-			this.noFill();
-			this.rect(xStart/scale,yStart/scale, (mouseX/scale-xStart/scale), (mouseY/scale-yStart/scale));	
 		}
 		
-		for (int i = 0; i < 4; i++) {
-			boundaries[i].display();
-		}
-		
-		// Display all molecules
+		//Apply forces after set forces
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			if (isHidingEnabled && isHidden){
-				Vec2 p = box2d.coordWorldToPixels(m.getPosition());
-				if (xStart/scale <p.x && p.x< mouseX/scale &&
-						yStart/scale <p.y && p.y< mouseY/scale )
-					m.isHidden =true;
-				else
-					m.isHidden =false;
-			}
-			m.display();
+			if (m!=null && !isDrag){
+				if (!m.getName().equals("Water") && main.selectedUnit==2){
+					getUnit2().applyForceUnit2(i,m);
+				}
+			}	
 		}
-		
 		
 	}
 	
@@ -650,7 +697,6 @@ public class P5Canvas extends PApplet{
 		
 		computeOutput(compoundName,count);
 		
-		float PAD =60;
 		switch (main.selectedUnit)
 		{
 		case 1:
@@ -697,7 +743,7 @@ public class P5Canvas extends PApplet{
 		}
 		
 		//If we successfully added molecules, update compound number
-		if(res)
+		//if(res)
 			//Compound.counts.set(index, addCount);
 		
 		isEnable = tmp;
@@ -780,6 +826,24 @@ public class P5Canvas extends PApplet{
 	}
 	
 	/******************************************************************
+	* FUNCTION :     reset
+	* DESCRIPTION :  Reset function called by Main reset()
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	public void reset()
+	{
+		isEnable =false;
+		removeAllMolecules();
+		
+		curTime=0;
+		oldTime=0;
+		//reset Unit 2
+		getUnit2().reset();
+	}
+	
+	/******************************************************************
 	* FUNCTION :     addWaterMolecules
 	* DESCRIPTION :  Function to add water molecules to PApplet
 	*
@@ -841,16 +905,9 @@ public class P5Canvas extends PApplet{
 		//Add molecules into p5Canvas
 		for (int i=0;i<count;i++){		
 
-			if(compoundName.equals("Water"))
-			{
 				x_ =centerX + i%dimension*moleWidth + creationCount;
 				y_ =centerY + i/dimension*moleHeight;
-			}
-			else
-			{
-				x_ = centerX + (i-count/2.f)*moleWidth + creationCount;
-				y_ = centerY;
-			}
+
 			res = molecules.add(new Molecule(x_, y_,compoundName, box2d, this,0));
 		}
 		
@@ -934,7 +991,7 @@ public class P5Canvas extends PApplet{
 		temp = value;
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			m.setPropertyByHeat(false);
+			m.setPropertyByHeat(false); 
 		}
 		double v = (double) (value-main.heatMin)/200;
 		v=v+0.3;
@@ -965,7 +1022,7 @@ public class P5Canvas extends PApplet{
 	}
 	
 	
-	//********************************************************* MOUSE EVENT ******************************
+	/******************************** MOUSE EVENT ******************************/
 	public void keyPressed() {	
 		
 	}
@@ -1021,40 +1078,58 @@ public class P5Canvas extends PApplet{
 	}
 	
 	
-	
-	
-	/******************************************************************
-	* FUNCTION :     getReactionProducts
-	* DESCRIPTION :  Reture objects based on input name
-	*                Called by beginContact
-	*
-	* INPUTS :       reactants (Array<String>)
-	* OUTPUTS:       None
-	*******************************************************************/
-	private ArrayList<String> getReactionProducts(ArrayList<String> reactants) {	
-		if (reactants.get(0).equals("Hydrogen-Peroxide") &&
-			reactants.get(1).equals("Hydrogen-Peroxide")){
-			ArrayList<String> products = new ArrayList<String>();
-			products.add("Water");
-			products.add("Water");
-			products.add("Oxygen");
-			return products;
-		}
-		else{
-			return null;
-		}
-	}
+
 	
 	
 	/******************************************************************
 	* FUNCTION :     beginContact
 	* DESCRIPTION :  Molecule collision detect function
-	*                Called when ?
+	*                Called when contact happens
+	*
+	* INPUTS :       c(Contact)
+	* OUTPUTS:       None
+	*******************************************************************/
+	public void beginContact(Contact c) {
+			
+		
+		switch (main.selectedUnit)
+		{
+		case 1:
+			reactAfterContact(c);
+			break;
+		case 2:
+			break;
+		case 3:
+			unit3.beginReaction(c);
+			break;
+		case 4:
+			break;
+		case 5:
+			break;
+		case 6:
+			break;
+		case 7: 
+			break;
+		case 8:
+			break;
+		default:
+			break;
+		
+		}
+
+
+	}
+	
+	/******************************************************************
+	* FUNCTION :     reactAfterContact
+	* DESCRIPTION :  react function after collision detected
+	*                Called by beginContact()
 	*
 	* INPUTS :       c( Contact)
 	* OUTPUTS:       None
 	*******************************************************************/
-	public void beginContact(Contact c) {
+	private void reactAfterContact(Contact c)
+	{
 		// Get our objects that reference these bodies
 		Object o1 = c.m_fixtureA.m_body.getUserData();
 		Object o2 = c.m_fixtureB.m_body.getUserData();
@@ -1081,7 +1156,29 @@ public class P5Canvas extends PApplet{
 				}
 			}
 		}
-
+		
+	}
+	
+	/******************************************************************
+	* FUNCTION :     getReactionProducts
+	* DESCRIPTION :  Reture objects based on input name
+	*                Called by beginContact
+	*
+	* INPUTS :       reactants (Array<String>)
+	* OUTPUTS:       None
+	*******************************************************************/
+	private ArrayList<String> getReactionProducts(ArrayList<String> reactants) {	
+		if (reactants.get(0).equals("Hydrogen-Peroxide") &&
+			reactants.get(1).equals("Hydrogen-Peroxide")){
+			ArrayList<String> products = new ArrayList<String>();
+			products.add("Water");
+			products.add("Water");
+			products.add("Oxygen");
+			return products;
+		}
+		else{
+			return null;
+		}
 	}
 	public void endContact(Contact c) {
 	}

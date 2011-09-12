@@ -56,7 +56,6 @@ public class TableView extends JPanel {
 						selectedRow = table.getSelectedRow();
 					else
 						setSelectedRow(-1);
-					//System.out.println("table.getSelectedRow is "+table.getSelectedRow()+",count is "+table.getSelectedRowCount());
 				}
 		   }
 		});
@@ -115,36 +114,21 @@ public class TableView extends JPanel {
 	
 
 	/*
-	private class RowListener implements ListSelectionListener {
-		public void valueChanged(ListSelectionEvent event) {
-			if (!event.getValueIsAdjusting()) {
-				if(selectedRow != table.getSelectedRow())
-				selectedRow = table.getSelectedRow();
-				else
-					table.clearSelection();
-				System.out.println("table.getSelectedRow is "+table.getSelectedRow()+",count is "+table.getSelectedRowCount());
-			}
-		}
-	}*/
-	
 	private class RowListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			System.out.println("e.getSource is " +e.getSource());
 			if(e.getSource() == table)
 			{
-			System.out.println("e.getActionComand is " + e.getActionCommand());
 				if(selectedRow != table.getSelectedRow())
 					selectedRow = table.getSelectedRow();
 				else
 					table.clearSelection();
-				System.out.println("table.getSelectedRow is "+table.getSelectedRow()+",count is "+table.getSelectedRowCount());
 			}
 			
 		}
-	}
+	}*/
 
 	class MyTableModel extends AbstractTableModel {
 		private String[] columnNames = {};
