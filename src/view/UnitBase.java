@@ -14,6 +14,8 @@ import org.jbox2d.dynamics.joints.DistanceJointDef;
 
 import java.util.Random;
 
+
+
 /**
  * @author Qin Li UnitBase class is base class of all Units class. Some simple
  *         functions implemented in this class
@@ -22,12 +24,26 @@ import java.util.Random;
 public abstract class UnitBase {
 	protected P5Canvas p5Canvas;
 	protected PBox2D box2d;
+	protected final float SODIUM_JOINT_FREQUENCY = 5;
+	
+	//Enum parameter defines spawn styles for different molecules
+	protected enum SpawnStyle {
+		Gas,
+		Liquid,
+		SolidCube,
+		SolidPavement;
+		
+}
 
 	public UnitBase(P5Canvas parent, PBox2D box) {
 		p5Canvas = parent;
 		box2d = box;
 
 	}
+	
+	public abstract void setupParameters();
+	
+	protected abstract SpawnStyle getSpawnStyle(int selectedSim, int selectedSet);
 
 	/******************************************************************
 	 * FUNCTION : addMolecules DESCRIPTION : Function to add molecules to
@@ -305,7 +321,7 @@ public abstract class UnitBase {
 					index2 = i+1 + startIndex;
 					m1 = molecules.get(index1);
 					m2 = molecules.get(index2);
-					joint2Elements(index1, index2, m1, m2,jointLength);
+					joint2Elements( m1, m2,jointLength);
 				}
 				/* In vertical direction, all molecules create a joint connecting to its down next molecule */
 				if( ((i/dimension+1)!=rowNum) && ((i+dimension)<count)) /* bottom most molecules */
@@ -314,7 +330,7 @@ public abstract class UnitBase {
 					index2 = i+dimension + startIndex;
 					m1= molecules.get(index1);
 					m2 = molecules.get(index2);
-					joint2Elements(index1,index2,m1,m2,jointLength);
+					joint2Elements(m1,m2,jointLength);
 				}
 				/* In diagonal direction, all molecules create a joint connecting to its bottom right molecule */
 				if( ((i+1)%dimension !=0)&&((i+dimension+1)<count))
@@ -323,7 +339,7 @@ public abstract class UnitBase {
 					index2 = i+ dimension +1 + startIndex;
 					m1 = molecules.get(index1);
 					m2 = molecules.get(index2);
-					joint2Elements(index1,index2,m1,m2,jointLength*1.5f);
+					joint2Elements(m1,m2,jointLength*1.5f);
 				}
 				/* In diagonal direction, all molecules create a joint connecting to its top right molecule */
 				if( (i-dimension+1)>=0 && (i+1)%dimension !=0 )
@@ -332,7 +348,7 @@ public abstract class UnitBase {
 					index2 = i- dimension +1 + startIndex;
 					m1 = molecules.get(index1);
 					m2 = molecules.get(index2);
-					joint2Elements(index1,index2,m1,m2,jointLength*1.5f);
+					joint2Elements(m1,m2,jointLength*1.5f);
 				}
 			}
 		}
@@ -365,22 +381,24 @@ public abstract class UnitBase {
 	 * m2(Molecule),length(float),frequency(float) 
 	 * OUTPUTS: void
 	 *******************************************************************/
-	public void joint2Elements(int index1, int index2, Molecule m1, Molecule m2,
+	public void joint2Elements(Molecule m1, Molecule m2,
 			float length, float frequency) {
+		/*
 		DistanceJointDef djd = new DistanceJointDef();
 		djd.bodyA = m1.body;
 		djd.bodyB = m2.body;
 		djd.length = PBox2D.scalarPixelsToWorld(length);
 		djd.frequencyHz = frequency;
 		djd.dampingRatio = 1.0f;
-		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);*/
 
+		DistanceJointWrap djRef = new DistanceJointWrap( m1.body,m2.body,PBox2D.scalarPixelsToWorld(length),frequency,1.0f);
 		/* Save joint reference */
-		m1.compoundJoint.add(dj);
-		m2.compoundJoint.add(dj);
+		m1.compoundJoint.add(djRef);
+		m2.compoundJoint.add(djRef);
 		/* Save the other element`s index */
-		m1.compoundJointPair.add(index2);
-		m2.compoundJointPair.add(index1);
+		//m1.compoundJointPair.add(m2);
+		//m2.compoundJointPair.add(m1);
 	}
 
 	/******************************************************************
@@ -391,13 +409,14 @@ public abstract class UnitBase {
 	 * INPUTS : index1(int), index2(int), m1(Molecule), m2(Molecule) OUTPUTS:
 	 * void
 	 *******************************************************************/
-	public void joint2Elements(int index1, int index2, Molecule m1, Molecule m2) {
+	public void joint2Elements( Molecule m1, Molecule m2) {
 		float length = 2 * Molecule.clRadius;
-		joint2Elements(index1, index2, m1, m2, length, 5);
+		joint2Elements(m1, m2, length, 5);
 	}
-	public void joint2Elements(int index1, int index2, Molecule m1, Molecule m2, float length) {
-		joint2Elements(index1, index2, m1, m2, length, 5);
+	public void joint2Elements( Molecule m1, Molecule m2, float length) {
+		joint2Elements( m1, m2, length, 5);
 	}
+
 	
 	/******************************************************************
 	 * FUNCTION : beginReaction 

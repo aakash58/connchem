@@ -417,10 +417,13 @@ public class Main {
 								if(cap<=(count+State.moleculesAdded))
 								{
 									count = cap - State.moleculesAdded;
+									if(count<0)
+										count =0;
 									//Disable Add button
 									if(getP5Canvas().addMolecule(fixedName,count))
 									{
-										State.moleculesAdded += count;
+										if(!fixedName.equals("Water"))
+											State.moleculesAdded += count;
 										arg0.getComponent().setEnabled(false);
 									}
 								}
@@ -428,6 +431,7 @@ public class Main {
 								{
 									if(getP5Canvas().addMolecule(fixedName,count))
 									{
+										if(!fixedName.equals("Water"))
 										State.moleculesAdded += count;
 									}
 								}

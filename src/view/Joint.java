@@ -1,3 +1,4 @@
+/*
 package view;
 
 import java.awt.Color;
@@ -376,3 +377,4 @@ public class Joint {
 		body.m_world = null;
 	}
 }
+*/

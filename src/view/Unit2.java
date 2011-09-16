@@ -116,6 +116,7 @@ public class Unit2 {
 			
 					if (areaBodyCheck(molePosInPix, topLeft, botRight)) {
 						isClear = false;
+						break;
 					}
 				}
 			}
@@ -169,12 +170,14 @@ public class Unit2 {
 
 	public void joint2Ions(int index1, int index2, Molecule m1, Molecule m2) { // draw
 																				// background
-		DistanceJointDef djd = new DistanceJointDef();
-		djd.bodyA = m1.body;
-		djd.bodyB = m2.body;
-		djd.length = PBox2D.scalarPixelsToWorld(2 * Molecule.clRadius);
-		djd.frequencyHz = 10.0f;
-		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		//DistanceJointDef djd = new DistanceJointDef();
+		//djd.bodyA = m1.body;
+		//djd.bodyB = m2.body;
+		float length = PBox2D.scalarPixelsToWorld(2 * Molecule.clRadius);
+		float frequency = 10.0f;
+		float dampingRatio = 0.0f;
+		//DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		DistanceJointWrap dj = new DistanceJointWrap( m1.body,m2.body,length, frequency,dampingRatio );
 		m1.compoundJ = index2;
 		m2.compoundJ = index1;
 		m1.compoundJoint.add(dj);
@@ -235,6 +238,7 @@ public class Unit2 {
 
 					if (areaBodyCheck(molePosInPix, topLeft, botRight)) {
 						isClear = false;
+						break;
 					}
 				}
 			}
@@ -330,7 +334,7 @@ public class Unit2 {
 		Vec2 molePosInPix = new Vec2(0, 0);
 
 		// Specify new add area.
-					setCalciumChlorideArea(count,centerX,centerY,size1,size3,topLeft,botRight);
+		setCalciumChlorideArea(count,centerX,centerY,size1,size3,topLeft,botRight);
 		// Check if there are any molecules in add area. If yes, add molecules
 		// to another area.
 		while (!isClear) {
@@ -340,14 +344,15 @@ public class Unit2 {
 
 			for (int k = 0; k < molecules.size(); k++) {
 
-				if (!((String) molecules.get(k).getName()).equals("Water")) {
+				//if (!((String) molecules.get(k).getName()).equals("Water")) {
 					molePos.set(molecules.get(k).getPosition());
 					molePosInPix.set(box2d.coordWorldToPixels(molePos));
 
 					if (areaBodyCheck(molePosInPix, topLeft, botRight)) {
 						isClear = false;
+						break;
 					}
-				}
+				//}
 			}
 			if (!isClear) {
 				centerX += increX;
@@ -520,6 +525,7 @@ public class Unit2 {
 
 					if (areaBodyCheck(molePosInPix, topLeft, botRight)) {
 						isClear = false;
+						break;
 					}
 				}
 			}
@@ -568,12 +574,15 @@ public class Unit2 {
 		djd.bodyA = m1.body;
 		djd.bodyB = m2.body;
 		// djd.initialize(m1.body, m2.body, new Vec2(0,0), new Vec2(0,0));
-		djd.length = PBox2D.scalarPixelsToWorld(Molecule.oRadius + 34);
+		float length = PBox2D.scalarPixelsToWorld(Molecule.oRadius + 34);
 
 		// djd.dampingRatio = 0.5f;
 
-		djd.frequencyHz = 10.0f;
-		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		float frequency = 10.0f;
+		//DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		float dampingRatio =0.0f;
+		
+		DistanceJointWrap dj = new DistanceJointWrap(m1.body,m2.body,length,frequency,dampingRatio );
 		m1.compoundJ = index2;
 		m2.compoundJ = index1;
 		m2.compoundJoint.add(dj);
@@ -857,31 +866,34 @@ public class Unit2 {
 
 	public void jointCaCl(int index1, int index2, int index3, Molecule m1,
 			Molecule m2, Molecule m3) { // draw background
-		DistanceJointDef djd = new DistanceJointDef();
-		djd.bodyA = m3.body;
-		djd.bodyB = m1.body;
-		djd.length = PBox2D.scalarPixelsToWorld(Molecule.clRadius * 4);
-		djd.dampingRatio = 0.f;
-		djd.frequencyHz = 100.0f;
-		DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		//DistanceJointDef djd = new DistanceJointDef();
+		//djd.bodyA = m3.body;
+		//djd.bodyB = m1.body;
+		float length = PBox2D.scalarPixelsToWorld(Molecule.clRadius * 4);
+		float dampingRatio = 0.f;
+		float frequencyHz = 15.0f;
+		//DistanceJoint dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		DistanceJointWrap dj = new DistanceJointWrap(m3.body,m1.body,length,frequencyHz,dampingRatio);
 		m3.compoundJ = index1;
 		m3.compoundJoint.add(dj);
 
-		djd.bodyA = m1.body;
-		djd.bodyB = m2.body;
-		djd.length = PBox2D.scalarPixelsToWorld(Molecule.clRadius * 2);
-		djd.dampingRatio = 0.f;
-		djd.frequencyHz = 60.0f;
-		dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		//djd.bodyA = m1.body;
+		//djd.bodyB = m2.body;
+		length = PBox2D.scalarPixelsToWorld(Molecule.clRadius * 2);
+		dampingRatio = 0.f;
+		frequencyHz = 10.0f;
+		//dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		dj = new DistanceJointWrap(m1.body,m2.body,length,frequencyHz,dampingRatio);
 		m1.compoundJ = index2;
 		m1.compoundJoint.add(dj);
 
-		djd.bodyA = m2.body;
-		djd.bodyB = m3.body;
-		djd.length = PBox2D.scalarPixelsToWorld(Molecule.clRadius * 2);
-		djd.dampingRatio = 0.f;
-		djd.frequencyHz = 60.0f;
-		dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		//djd.bodyA = m2.body;
+		//djd.bodyB = m3.body;
+		length = PBox2D.scalarPixelsToWorld(Molecule.clRadius * 2);
+		dampingRatio = 0.f;
+		frequencyHz = 10.0f;
+		//dj = (DistanceJoint) PBox2D.world.createJoint(djd);
+		dj = new DistanceJointWrap(m2.body,m3.body,length,frequencyHz,dampingRatio);
 		m2.compoundJ = index3;
 		m2.compoundJoint.add(dj);
 	}
@@ -1332,8 +1344,9 @@ public class Unit2 {
 
 				if (num_gone < p5Canvas.numGone_atSaturation()
 						&& mIndex.compoundJ >= 0 && f > 0.02) {
-					DistanceJoint dj1 = mIndex.compoundJoint.get(0);
-					PBox2D.world.destroyJoint(dj1);
+					DistanceJointWrap dj1 = mIndex.compoundJoint.get(0);
+					//PBox2D.world.destroyJoint(dj1);
+					dj1.destroy();
 					//this.destroyJoint(dj1);
 					mIndex.compoundJoint.remove(0);
 					Molecule m2 = molecules.get(mIndex.compoundJ);
@@ -1349,8 +1362,9 @@ public class Unit2 {
 				float f = (float) Math.sqrt(s);
 				if (num_gone < p5Canvas.numGone_atSaturation()
 						&& mIndex.compoundJ >= 0 && f > 0.02f) {
-					DistanceJoint dj1 = mIndex.compoundJoint.get(0);
-					PBox2D.world.destroyJoint(dj1);
+					DistanceJointWrap dj1 = mIndex.compoundJoint.get(0);
+					//PBox2D.world.destroyJoint(dj1);
+					dj1.destroy();
 					//destroyJoint(dj1);
 					mIndex.compoundJoint.remove(0);
 					int jIndex = mIndex.compoundJ;
@@ -1367,7 +1381,8 @@ public class Unit2 {
 
 					Molecule m = molecules.get(jIndex);
 					dj1 = m.compoundJoint.get(0);
-					PBox2D.world.destroyJoint(dj1);
+					//PBox2D.world.destroyJoint(dj1);
+					dj1.destroy();
 					//destroyJoint(dj1);
 					m.compoundJoint.remove(0);
 					jIndex = m.compoundJ;
@@ -1384,7 +1399,8 @@ public class Unit2 {
 
 					m = molecules.get(jIndex);
 					dj1 = m.compoundJoint.get(0);
-					PBox2D.world.destroyJoint(dj1);
+					//PBox2D.world.destroyJoint(dj1);
+					dj1.destroy();
 					//destroyJoint(dj1);
 					m.compoundJoint.remove(0);
 					m.compoundJ = -1;
@@ -1419,8 +1435,9 @@ public class Unit2 {
 						mCa = molecules.get(mIndex.compoundJ);
 					}
 
-					DistanceJoint dj1 = mCa.compoundJoint.get(0);
-					PBox2D.world.destroyJoint(dj1);
+					DistanceJointWrap dj1 = mCa.compoundJoint.get(0);
+					//PBox2D.world.destroyJoint(dj1);
+					dj1.destroy();
 					//destroyJoint(dj1);
 					mCa.compoundJoint.remove(0);
 					Molecule mHCO3 = molecules.get(mCa.compoundJ);
