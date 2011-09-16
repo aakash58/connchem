@@ -9,6 +9,7 @@ import main.Canvas;
 import main.Main;
 import main.TableView;
 import model.DBinterface;
+import model.State;
 
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.CircleShape;
@@ -25,6 +26,8 @@ import static model.State.*;
 public class Molecule {
 	// We need to keep track of a Body and a width and height
 	public Body body;
+	private ArrayList<Fixture> fixtures;
+	private BodyDef bd;
 	private PBox2D box2d;
 	private P5Canvas p5Canvas;
 	private PShape pShape = new PShape();
@@ -67,8 +70,8 @@ public class Molecule {
 	public int otherJ = -1;
 	public int CaOtherJ = -1;
 	
-	public ArrayList<DistanceJoint> compoundJoint = null; //Reference of joints of this molecule
-	public ArrayList<Integer> compoundJointPair = null;   //Reference of molecules to which this molecule is connecting
+	public ArrayList<DistanceJointWrap> compoundJoint = null; //Reference of joints of this molecule
+	//public ArrayList<Molecule> compoundJointPair = null;   //Reference of molecules to which this molecule is connecting
 	public PrismaticJoint compoundJoints2 = null; //is Used for Unit 2 set 7
 	public DistanceJoint otherJoints = null;
 	
@@ -86,8 +89,9 @@ public class Molecule {
 		p5Canvas = parent_;
 		box2d = box2d_;
 		name = compoundName_;
-		compoundJoint = new ArrayList<DistanceJoint>();
-		compoundJointPair = new ArrayList<Integer>();
+		compoundJoint = new ArrayList<DistanceJointWrap>();
+		//compoundJointPair = new ArrayList<Molecule>();
+		fixtures = new ArrayList<Fixture>();
 
 		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
 		pShape = p5Canvas.loadShape(path);
@@ -143,12 +147,209 @@ public class Molecule {
 	* FUNCTION :     switchTo()
 	* DESCRIPTION :  Switch current molecule to another one, reset property and body
 	*
-	* INPUTS :       compoundName_ (String)
+	* INPUTS :       compoundName_ (String), angle (float)
 	* OUTPUTS:       None
 	*******************************************************************/
 	public void switchTo(String compoundName_)
 	{
+		name = compoundName_;
+		String path = "resources/compoundsSvg/"+ compoundName_ +".svg";
+		pShape = p5Canvas.loadShape(path);
+		pShapeW = pShape.width;
+		pShapeH = pShape.height;
+		minSize = Math.min(pShapeW, pShapeH);
+		maxSize = Math.max(pShapeW, pShapeH);
+		polarity = p5Canvas.db.getCompoundPolarity(compoundName_);
+		
+		circles = SVGReader.getSVG(path);
+		elementNames = SVGReader.getNames();
+		if(elementCharges!=null)
+			elementCharges.clear();
+		int numElement = elementNames.size();
+		int charge = 0 ;
+		for( int i =0;i<numElement;i++)
+		{
+			charge = DBinterface.getElementCharge(elementNames.get(i));
+			elementCharges.add(charge);
+		}
+		sumForceX = new float[numElement];
+		sumForceY = new float[numElement];
+		sumForceWaterX = new float[numElement];
+		sumForceWaterY = new float[numElement];
+		freezingTem = DBinterface.getCompoundFreezingPointCelsius(name);
+		boilingTem = DBinterface.getCompoundBoilingPointCelsius(name);
+		
+		
+		//Set up gap: distance from a molecule`s top left corner to its center
+		for (int i=0; i<numElement;i++){
+			float xx = circles[i][1]-pShapeW/2;
+			float yy = -(circles[i][2]-pShapeH/2);
+			gap[i] = (float) Math.sqrt(xx*xx+yy*yy);
+			gap[i] = PBox2D.scalarPixelsToWorld(gap[i]);
+			if (xx!=0)
+				a1[i] = (float) (Math.atan(yy/xx));
+			if (xx<0) a1[i]+= Math.PI;
+		}
+		
+		
+		setPropertyByHeat(true);
+		switchBody();
+		
+	}
 	
+	/******************************************************************
+	* FUNCTION :     switchBody()
+	* DESCRIPTION :  Switch current body to another one
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	private void switchBody()
+	{
+
+			
+				float mul = setMul();
+				if( fixtures != null )
+				{
+					for( int i =0;i<fixtures.size();i++)
+					{
+						body.destroyFixture(fixtures.get(i));
+					}
+					fixtures.clear();
+				}
+				
+
+				FixtureDef fd = new FixtureDef();
+				for (int i = 0; i < circles.length; i++) {
+					// Define a circle
+					CircleShape circleShape = new CircleShape();
+					
+					// Offset its "local position" (relative to 0,0)
+					Vec2 offset = new Vec2(circles[i][1] - pShapeW / 2, circles[i][2]
+							- pShapeH / 2);
+					circleShape.m_p.set(box2d.vectorPixelsToWorld(offset));
+					circleShape.m_radius = PBox2D.scalarPixelsToWorld(circles[i][0]) * scale;
+					
+					float m = 0;
+					String element=null;
+					if (elementNames != null && i < elementNames.size()){
+						if(elementNames.get(i).equals("Chloride"))
+							element = new String("Chlorine");
+						else
+							element = new String(elementNames.get(i));
+						m = DBinterface.getElementMass(element);
+					}	
+					float d = m / (circles[i][0] * circles[i][0] * circles[i][0]);
+					fd.shape = circleShape;
+			        fd.density = d * mul;
+					fd.friction = fric;
+					fd.restitution = res;   // Restitution is bounciness
+					if( p5Canvas.temp < this.freezingTem)
+						fd.restitution = 0.0f;
+					// Attach shapes!
+					
+					Fixture fixture = body.createFixture(fd);
+					fixtures.add(fixture);
+				}
+
+				// Give it some initial random velocity
+				body.setLinearVelocity(new Vec2(p5Canvas.random(-1, 1), p5Canvas.random(-1,
+						1)));
+				
+				body.setAngularVelocity(0);
+				body.setUserData(this);
+		
+		
+	}
+	
+	/******************************************************************
+	* FUNCTION :     destroy()
+	* DESCRIPTION :  Molecule Destroy function, return all other molecules to which this molecule is connecting
+	*
+	* INPUTS :       None
+	* OUTPUTS:       ArrayList<Molecule>
+	*******************************************************************/
+	public ArrayList<DistanceJointWrap> destroy()
+	{
+		ArrayList<DistanceJointWrap> res = null;
+		//if(!this.compoundJointPair.isEmpty())
+			//res = this.destoryAllJointsPair();
+		if(!this.compoundJoint.isEmpty())
+			res = this.destroyAllJoints();
+		this.killBody();
+		State.molecules.remove(this);
+		return res;
+	}
+	
+	/******************************************************************
+	* FUNCTION :     destroyAllJoints()
+	* DESCRIPTION :  Destroy all joints that are connecting to this molecule
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	public ArrayList<DistanceJointWrap> destroyAllJoints()
+	{
+
+		Molecule pair = null;
+		DistanceJointWrap dj = null;
+		
+		//Replicate references of all DistanceJoint to which this molecule is connecting to
+		ArrayList<DistanceJointWrap> djList = new ArrayList<DistanceJointWrap>();
+		for( int m =0;m<this.compoundJoint.size();m++)
+		{		
+			dj = compoundJoint.get(m);
+			
+			djList.add(new DistanceJointWrap(dj,false));		
+		}
+		
+		//Find other molecules to which this molecules is connecting to and remove the distanceJoint reference in them
+		if( this.compoundJoint!=null && compoundJoint.size()>0)
+		{
+			for( int i =0;i<compoundJoint.size();i++)
+			{
+				//Get the other molecule of this pair
+				dj = compoundJoint.get(i);
+				pair = (Molecule) dj.getBodyA().getUserData();
+				
+				if( pair == this)
+					pair = (Molecule)dj.getBodyB().getUserData();
+
+				//Delete this joint reference in other Molecule objects
+				if( pair.compoundJoint.contains(dj))
+					pair.compoundJoint.remove(dj);	
+
+			}
+
+		}
+		
+
+		//Delete this joint from world
+		for( int k =0;k<this.compoundJoint.size();k++)
+		{
+			dj = compoundJoint.get(k);
+			//PBox2D.world.destroyJoint(dj);
+			dj.destroy();
+			
+		}
+		compoundJoint.clear();
+		
+		/*
+		//Remove this body from joints in djList 
+		for( int k = 0;k<djList.size();k++)
+		{
+			
+			dj = djList.get(k);
+			if( dj.getBodyA()==this.body)
+				dj.m_bodyA =null;
+			else
+				dj.m_bodyB = null;
+			
+		}
+		*/
+		
+		return djList;
+		
 	}
 	
 	
@@ -244,7 +445,7 @@ public class Molecule {
 		float mul = setMul();
 		
 		// Define the body and make it from the shape
-		BodyDef bd = new BodyDef();
+		 bd = new BodyDef();
 		bd.type = BodyType.DYNAMIC;
         bd.position.set(box2d.coordPixelsToWorld(new Vec2(x, y)));
         bd.angle = angle;
@@ -267,8 +468,13 @@ public class Molecule {
 			circleShape.m_radius = PBox2D.scalarPixelsToWorld(circles[i][0]) * scale;
 			
 			float m = 1;
+			String element = null;
 			if (elementNames != null && i < elementNames.size()){
-				m = DBinterface.getElementMass(elementNames.get(i));
+				if(elementNames.get(i).equals("Chloride"))
+					element = new String("Chlorine");
+				else
+					element = new String(elementNames.get(i));
+				m = DBinterface.getElementMass(element);
 			}	
 			float d = m / (circles[i][0] * circles[i][0] * circles[i][0]);
 			fd.shape = circleShape;
@@ -278,7 +484,8 @@ public class Molecule {
 			if( p5Canvas.temp < this.freezingTem)
 				fd.restitution = 0.0f;
 			// Attach shapes!
-			body.createFixture(fd);
+			Fixture fixture = body.createFixture(fd);
+			fixtures.add(fixture);
 		}
 
 		// Give it some initial random velocity
@@ -489,11 +696,17 @@ public class Molecule {
 			}
 			else
 			{
-				if (compoundJointPair.size()>0) {
+				if (compoundJoint.size()!=0) {
 					Vec2 pos2 = new Vec2();
-					for( int i = 0;i<compoundJointPair.size();i++)
+					Body theOtherBody = null;
+					for( int i = 0;i<compoundJoint.size();i++)
 					{
-					pos2.set(box2d.getBodyPixelCoord(molecules.get(compoundJointPair.get(i)).body) );
+						if( compoundJoint.get(i).getBodyA().getUserData() == this)
+							theOtherBody = compoundJoint.get(i).getBodyB();
+						else
+							theOtherBody = compoundJoint.get(i).getBodyA();
+							
+					pos2.set(box2d.getBodyPixelCoord(theOtherBody) );
 					p5Canvas.stroke(Color.BLACK.getRGB());
 					p5Canvas.line(pos.x, pos.y,pos2.x,pos2.y);
 					}
@@ -511,6 +724,7 @@ public class Molecule {
 		box2d.destroyBody(body);
 		body.m_world = null;
 	}
+	
 	
 	/******************************************************************
 	* FUNCTION :     setMul()

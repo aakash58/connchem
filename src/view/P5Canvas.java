@@ -175,30 +175,8 @@ public class P5Canvas extends PApplet{
 		drawBackground();
 		// Check if there are any molecules added to killing list
 		// Kill them first
-		if (products!=null && products.size()>0){
-			Molecule m1 = (Molecule) killingList.get(0);
-			Molecule m2 = (Molecule) killingList.get(1);
-			for (int i=0;i<products.size();i++){
-				Vec2 loc =m1.getPosition();
-				float x1 = PBox2D.scalarWorldToPixels(loc.x);
-				float y1 = h*0.77f-PBox2D.scalarWorldToPixels(loc.y);
-				Vec2 newVec =new Vec2(x1,y1);
-				Molecule m = new Molecule(newVec.x, newVec.y,products.get(i), box2d, this,0);
-				molecules.add(m);
-				if (i==0)
-					m.body.setLinearVelocity(m1.body.getLinearVelocity());
-				
-				else{
-					m.body.setLinearVelocity(m2.body.getLinearVelocity());
-				}
-			}
-			m1.killBody();
-			m2.killBody();
-			molecules.remove(m1);
-			molecules.remove(m2);
-			products.clear();
-			killingList.clear();
-		}
+		updateMolecules();
+
 		
 		
 		/*   Change Scale   */
@@ -1077,8 +1055,61 @@ public class P5Canvas extends PApplet{
 		}
 	}
 	
+	/******************************************************************
+	* FUNCTION :     updateMolecules
+	* DESCRIPTION :  Kill molecules which have gone after reaction, and add new created molecules
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	private void updateMolecules()
+	{
+		if(main.selectedUnit==1)
+		{
+			reactH202();
+		}
+		else if(main.selectedUnit==3)
+		{
+			switch(main.selectedSet)
+			{
+			case 1:
+				unit3.reactNaCl();
+				break;
+			case 2:
+				break;
+				default:
+					break;
+			}
+		}
+	}
 	
-
+	private void reactH202()
+	{
+		if (products!=null && products.size()>0){
+			Molecule m1 = (Molecule) killingList.get(0);
+			Molecule m2 = (Molecule) killingList.get(1);
+			for (int i=0;i<products.size();i++){
+				Vec2 loc =m1.getPosition();
+				float x1 = PBox2D.scalarWorldToPixels(loc.x);
+				float y1 = h*0.77f-PBox2D.scalarWorldToPixels(loc.y);
+				Vec2 newVec =new Vec2(x1,y1);
+				Molecule m = new Molecule(newVec.x, newVec.y,products.get(i), box2d, this,0);
+				molecules.add(m);
+				if (i==0)
+					m.body.setLinearVelocity(m1.body.getLinearVelocity());
+				
+				else{
+					m.body.setLinearVelocity(m2.body.getLinearVelocity());
+				}
+			}
+			m1.killBody();
+			m2.killBody();
+			molecules.remove(m1);
+			molecules.remove(m2);
+			products.clear();
+			killingList.clear();
+		}
+	}
 	
 	
 	/******************************************************************
@@ -1091,7 +1122,6 @@ public class P5Canvas extends PApplet{
 	*******************************************************************/
 	public void beginContact(Contact c) {
 			
-		
 		switch (main.selectedUnit)
 		{
 		case 1:
