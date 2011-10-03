@@ -15,12 +15,12 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import view.Molecule;
-import view.Unit2;
+import simulations.Unit2;
+import simulations.models.Molecule;
 
 import model.State;
-import static view.P5Canvas.*;
-import static view.Compound.*;
+import static simulations.P5Canvas.*;
+import static simulations.models.Compound.*;
 
 public class Canvas extends JPanel implements ActionListener, MouseListener, MouseMotionListener{
 	public Timer timer1;
