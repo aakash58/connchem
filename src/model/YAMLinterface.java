@@ -249,18 +249,18 @@ public class YAMLinterface {
 		}
 		return 0.f;
 	}
-	private static Float getControlHeatSliderMin(ArrayList<HashMap> controls) 			{ return getControlHeatSliderHeat(controls, "min"); }
-	private static Float getControlHeatSliderInit(ArrayList<HashMap> controls) 		{ return getControlHeatSliderHeat(controls, "init"); }
-	private static Float getControlHeatSliderMax(ArrayList<HashMap> controls) 			{ return getControlHeatSliderHeat(controls, "max"); }
-	private static Float getControlHeatSliderMin() 									{ return getControlHeatSliderMin(getControls()); }
-	private static Float getControlHeatSliderMin(int unitNumber) 						{ return getControlHeatSliderMin(getControls(unitNumber)); }
-	public static Float getControlHeatSliderMin(int unitNumber, int simNumber) 		{ return getControlHeatSliderMin(getControls(unitNumber, simNumber)); }
-	private static Float getControlHeatSliderInit() 									{ return getControlHeatSliderInit(getControls()); }
-	private static Float getControlHeatSliderInit(int unitNumber) 						{ return getControlHeatSliderInit(getControls(unitNumber)); }
-	public static Float getControlHeatSliderInit(int unitNumber, int simNumber) 		{ return getControlHeatSliderInit(getControls(unitNumber, simNumber)); }
-	private static Float getControlHeatSliderMax() 									{ return getControlHeatSliderMax(getControls()); }
-	private static Float getControlHeatSliderMax(int unitNumber) 						{ return getControlHeatSliderMax(getControls(unitNumber)); }
-	public static Float getControlHeatSliderMax(int unitNumber, int simNumber) 		{ return getControlHeatSliderMax(getControls(unitNumber, simNumber)); }
+	private  Float getControlHeatSliderMin(ArrayList<HashMap> controls) 			{ return getControlHeatSliderHeat(controls, "min"); }
+	private  Float getControlHeatSliderInit(ArrayList<HashMap> controls) 		{ return getControlHeatSliderHeat(controls, "init"); }
+	private  Float getControlHeatSliderMax(ArrayList<HashMap> controls) 			{ return getControlHeatSliderHeat(controls, "max"); }
+	private  Float getControlHeatSliderMin() 									{ return getControlHeatSliderMin(getControls()); }
+	private  Float getControlHeatSliderMin(int unitNumber) 						{ return getControlHeatSliderMin(getControls(unitNumber)); }
+	public  Float getControlHeatSliderMin(int unitNumber, int simNumber) 		{ return getControlHeatSliderMin(getControls(unitNumber, simNumber)); }
+	private  Float getControlHeatSliderInit() 									{ return getControlHeatSliderInit(getControls()); }
+	private  Float getControlHeatSliderInit(int unitNumber) 						{ return getControlHeatSliderInit(getControls(unitNumber)); }
+	public  Float getControlHeatSliderInit(int unitNumber, int simNumber) 		{ return getControlHeatSliderInit(getControls(unitNumber, simNumber)); }
+	private  Float getControlHeatSliderMax() 									{ return getControlHeatSliderMax(getControls()); }
+	private  Float getControlHeatSliderMax(int unitNumber) 						{ return getControlHeatSliderMax(getControls(unitNumber)); }
+	public  Float getControlHeatSliderMax(int unitNumber, int simNumber) 		{ return getControlHeatSliderMax(getControls(unitNumber, simNumber)); }
 	
 	private static boolean getControlMoleculeSidebarState(ArrayList<HashMap> controls) { return getControlState(controls, "molecule sidebar"); }
 	private static boolean getControlMoleculeSidebarState() 							{ return getControlMoleculeSidebarState(getControls()); }

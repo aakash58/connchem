@@ -2,12 +2,15 @@ package model;
 import static model.YAMLinterface.*;
 
 import java.util.ArrayList;
-import view.Boundary;
-import view.Molecule;
+
+import simulations.models.Anchor;
+import simulations.models.Boundary;
+import simulations.models.Molecule;
 
 public class State {
 	// An ArrayList of particles that will fall on the surface
 	public static ArrayList<Molecule> molecules = new ArrayList<Molecule>();
+	public static ArrayList<Anchor> anchors = new ArrayList<Anchor>();
 	// A list we'll use to track fixed objects
 	/* LeftBoundary   0
 	*  RightBoundary  1

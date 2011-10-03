@@ -295,31 +295,29 @@ units:
   sims:
   - sim: 1
     name: "Chemical Reactions"
+    controls:
+    - control: "heat slider"
+      state: "off"
+      min: 0
+      init: 25
+      max: 500
     sets:
     - set: 1
       compounds:
       - compound: "Sodium"
-        qty: 16
+        qty: 14
         cap: 20
       - compound: "Chlorine"
-        qty: 5
+        qty: 0
         cap: 25
     - set: 2
       compounds:
-      - compound: "Water"      
-        qty: 25
-        cap: 95
-      - compound: "Hydrogen"
-        qty: 5
-        cap: 15
-      - compound: "Iodine"
-        qty: 5
-        cap: 15
+      - compound: "Hydrogen Iodide"
+        qty: 15
+        cap: 50
+
     - set: 3
       compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
       - compound: "Ethene"
         qty: 5
         cap: 15
@@ -328,41 +326,38 @@ units:
         cap: 15
     - set: 4
       compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
       - compound: "Copper"
         qty: 5
         cap: 15
       - compound: "Silver Nitrate"
         qty: 5
         cap: 15
+      - compound: "Water"
+        qty: 20
+        cap: 95
     - set: 5
       compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
       - compound: "Methane"
         qty: 5
         cap: 15
       - compound: "Oxygen"
-        qty: 5
+        qty: 10
         cap: 15
     - set: 6
       compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
       - compound: "Iron"
         qty: 5
         cap: 15
-      - compound: "Copper-II-Sulphate"
+      - compound: "Copper-II-Sulfate"
         qty: 5
         cap: 15
+      - compound: "Water"
+        qty: 20
+        cap: 95
     - set: 7
       compounds:
       - compound: "Water"
-        qty: 25
+        qty: 15
         cap: 95
       - compound: "Hydrochloric Acid"
         qty: 5
@@ -372,34 +367,28 @@ units:
         cap: 15
     - set: 8
       compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
       - compound: "Hydrogen"
-        qty: 5
+        qty: 6
         cap: 15
       - compound: "Chlorine"
-        qty: 5
+        qty: 6
         cap: 15
     - set: 9
       compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
       - compound: "Hydrogen Peroxide"
-        qty: 5
+        qty: 10
         cap: 15
     - set: 10
       compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Silver Nitrate"
-        qty: 5
-        cap: 25
       - compound: "Sodium Chloride"
         qty: 5
         cap: 15
+      - compound: "Silver Nitrate"
+        qty: 5
+        cap: 25
+      - compound: "Water"
+        qty: 20
+        cap: 95
   - sim: 2
     name: "Limiting Reactions"
     sets:

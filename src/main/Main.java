@@ -58,9 +58,9 @@ import java.awt.event.ActionEvent;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
-import view.P5Canvas;
-import view.Compound;
-import view.Unit2;
+import simulations.P5Canvas;
+import simulations.Unit2;
+import simulations.models.Compound;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -150,6 +150,7 @@ public class Main {
 	
 	public int defaultZoom =50;
 	public JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
+	public JLabel scaleLabel = null;
 	public int defaultSpeed =100;
 	public JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
 	public int heatInit =25;
@@ -380,6 +381,7 @@ public class Main {
 					JLabel label = new JLabel(cName);
 					final String fixedName = cName.replace(" ", "-");
 					
+					//System.out.println("Name is "+fixedName);
 					//Repaint molecules icon
 					label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
 					panel.add(label, "cell 0 0 3 1,growx");
@@ -461,11 +463,22 @@ public class Main {
 	}
 	
 	public void reset(){
-		boolean temp = getP5Canvas().isEnable;
+		//boolean temp = getP5Canvas().isEnable;
 		
-		/*    Reset canvas   */
+		//Disable p5Canvas and stop timer
+		timer.stop();
+		getP5Canvas().isEnable = false;
+		playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
+		
+		//Update Dynamic Panel
+		updateDynamicPanel();
+		
+		//Update components on the left panel
+		updateCenterPanel();
+		
+		//    Reset canvas   
 		getP5Canvas().reset();
-		/*    Reset state parameter   */
+		//    Reset state parameter   
 		State.reset();
 		
 		/*    Check if welcome menu showing    */
@@ -479,28 +492,11 @@ public class Main {
 		
 		
 		
-		/*    Reset dashboard on right panel   */
-		dashboard.removeAll();
-		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
-		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
-		dashboard.add(elapsedTime, "cell 1 0");
-		if (selectedUnit==2){
-			dashboard.add(cBoxConvert, "cell 0 1");
-			dashboard.add(m1Label, "cell 0 2,alignx right");
-			dashboard.add(m1Mass, "cell 1 2");
-			dashboard.add(m1MassLabel, "cell 0 3,alignx right");
-			dashboard.add(m1Disolved, "cell 1 3");
-			//dashboard.add(satLabel, "cell 0 3,alignx right");
-			//dashboard.add(satMass, "cell 1 3");
-			dashboard.add(solventLabel, "cell 0 4,alignx right");
-			dashboard.add(waterVolume, "cell 1 4");
-			dashboard.add(solutionLabel, "cell 0 5,alignx right");
-			dashboard.add(soluteVolume, "cell 1 5");
-			
-		}
+		//    Reset dashboard on right panel   
+		updateDashboard();
 			
 
-		
+		//Load information of new generation
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
 		if (a!=null) {
 			Compound.names = new ArrayList<String>();
@@ -557,7 +553,7 @@ public class Main {
 			Compound.setProperties();
 		}
 		getCanvas().reset();
-		tableView.setSelectedRow(-1);
+		tableView.setSelectedRow(-1);  //Deselect rows
 		
 		//For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
 		if( selectedUnit==2 && selectedSim==3)
@@ -575,20 +571,41 @@ public class Main {
 			
 		}
 		
-		//Update Dynamic Panel
-		updateDynamicPanel();
+
 		
-		//Update components on the left panel
-		updateCenterPanel();
-		
-		getP5Canvas().isEnable =temp;
+
+		//getP5Canvas().isEnable =temp;
 		
 		//reset timer
 		resetTimer();
 		
+		
 
 		
 	} 
+	
+	//Reset dashboard on right panel
+	private void updateDashboard()
+	{
+		dashboard.removeAll();
+		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
+		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
+		dashboard.add(elapsedTime, "cell 1 0");
+		if (selectedUnit==2){
+			dashboard.add(cBoxConvert, "cell 0 1");
+			dashboard.add(m1Label, "cell 0 2,alignx right");
+			dashboard.add(m1Mass, "cell 1 2");
+			dashboard.add(m1MassLabel, "cell 0 3,alignx right");
+			dashboard.add(m1Disolved, "cell 1 3");
+			//dashboard.add(satLabel, "cell 0 3,alignx right");
+			//dashboard.add(satMass, "cell 1 3");
+			dashboard.add(solventLabel, "cell 0 4,alignx right");
+			dashboard.add(waterVolume, "cell 1 4");
+			dashboard.add(solutionLabel, "cell 0 5,alignx right");
+			dashboard.add(soluteVolume, "cell 1 5");
+			
+		}
+	}
 	
 	/******************************************************************
 	* FUNCTION :     updateCenterPanel()
@@ -654,15 +671,19 @@ public class Main {
 				volumeSlider.enable(getP5Canvas().yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
 			}
 				
+			//Reset zoomSlider
 			zoomSlider.requestFocus();
-			zoomSlider.lostFocus(null, null);
-			zoomSlider.enable(getP5Canvas().yaml.getControlScaleSliderState(selectedUnit, selectedSim));
+			zoomSlider.setValue(defaultZoom);
+			scaleLabel.setText(defaultZoom*2+"%");
+			getP5Canvas().setScale(defaultZoom,defaultZoom);
+			//zoomSlider.lostFocus(null, null);
+			//zoomSlider.enable(getP5Canvas().yaml.getControlScaleSliderState(selectedUnit, selectedSim));
 			speedSlider.requestFocus();
-			speedSlider.lostFocus(null, null);
-			speedSlider.enable(getP5Canvas().yaml.getControlSpeedSliderState(selectedUnit, selectedSim));
+			//speedSlider.lostFocus(null, null);
+			//speedSlider.enable(getP5Canvas().yaml.getControlSpeedSliderState(selectedUnit, selectedSim));
 			heatSlider.requestFocus();
-			heatSlider.lostFocus(null,null);
-			heatSlider.enable(getP5Canvas().yaml.getControlHeatSliderState(selectedUnit, selectedSim));
+			//heatSlider.lostFocus(null,null);
+			//heatSlider.enable(getP5Canvas().yaml.getControlHeatSliderState(selectedUnit, selectedSim));
 				
 			float heatMin =getP5Canvas().yaml.getControlHeatSliderMin(selectedUnit, selectedSim);
 			float heatMax = getP5Canvas().yaml.getControlHeatSliderMax(selectedUnit, selectedSim);
@@ -670,7 +691,14 @@ public class Main {
 			heatSlider.setMaximum((int) heatMax);
 			heatSlider.setMinimum((int) heatMin);
 			heatSlider.setValue((int) heatInit);
+			if( this.selectedUnit ==3)
+			{
+				heatSlider.setEnabled(false);
+			}
+			//Reset animation speed
 			speedSlider.setValue(defaultSpeed);
+			float speedRate = defaultSpeed/defaultSpeed;
+			getP5Canvas().setSpeed(speedRate);
 			
 			leftPanel.updateUI();
 			centerPanel.updateUI();
@@ -919,7 +947,7 @@ public class Main {
 		JLabel l2 = new JLabel(" ");
 		clPanel.add(l2, "cell 0 3,alignx center");
 		
-		final JLabel scaleLabel = new JLabel(defaultZoom*2+"%");
+		scaleLabel = new JLabel(defaultZoom*2+"%");
 		clPanel.add(scaleLabel, "cell 0 4,alignx right");
 		zoomSlider = new JSlider(10,100,defaultZoom);
 		zoomSlider.setOrientation(SwingConstants.VERTICAL);
@@ -1238,11 +1266,14 @@ public class Main {
 				// populate Sims (second level of sim menu)
 				try {
 					final ArrayList sims = getSims(unitNo);
+					//Make sure we get sim information from yaml file
+			
 					subMenuArrayList[i] =  new ArrayList();
 					for (int j = 0; j<sims.size(); j++) {
 						HashMap sim = (HashMap)sims.get(j);
 						int simNo = Integer.parseInt((String)sim.get("sim"));
 						String simName = getSimName(unitNo, simNo);
+						
 						JMenuItem subMenu = new JMenuItem("Sim "+ Integer.toString(simNo) + ": " + simName);
 						
 						//Add new subMenuItem
@@ -1273,6 +1304,7 @@ public class Main {
 							}
 						});
 					}
+					
 				} catch (Exception e) {
 					System.out.println("No Submenu Items: " + e);
 				}
