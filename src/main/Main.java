@@ -840,8 +840,8 @@ public class Main {
 					getP5Canvas().isHidingEnabled = false;
 			}
 		});
-		JCheckBox cBox2 =  new JCheckBox("Display Forces"); 
-		cBox2.addItemListener(new ItemListener() {
+		JCheckBox forceCheckbox =  new JCheckBox("Display Forces"); 
+		forceCheckbox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
 					getP5Canvas().isDisplayForces =true;
@@ -850,8 +850,8 @@ public class Main {
 			}
 		});
 		
-		JCheckBox cBox3 =  new JCheckBox("Display Joints"); 
-		cBox3.addItemListener(new ItemListener() {
+		JCheckBox jointsCheckbox =  new JCheckBox("Display Joints"); 
+		jointsCheckbox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
 					getP5Canvas().isDisplayJoints =true;
@@ -860,8 +860,8 @@ public class Main {
 			}
 		});
 		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
-		checkBoxPanel.add(cBox2, BorderLayout.CENTER);
-		checkBoxPanel.add(cBox3, BorderLayout.SOUTH);
+		checkBoxPanel.add(forceCheckbox, BorderLayout.CENTER);
+		checkBoxPanel.add(jointsCheckbox, BorderLayout.SOUTH);
 		timerSubpanel.add(checkBoxPanel, "cell 1 1");
 
 		

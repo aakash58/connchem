@@ -356,15 +356,18 @@ units:
         cap: 95
     - set: 7
       compounds:
-      - compound: "Water"
-        qty: 15
-        cap: 95
-      - compound: "Hydrochloric Acid"
-        qty: 5
-        cap: 15
       - compound: "Lithium Sulfide"
-        qty: 5
+        qty: 6
         cap: 15
+      - compound: "Hydrogen-Ion"
+        qty: 12
+        cap: 15
+      - compound: "Chloride"
+        qty: 12
+        cap: 15
+      - compound: "Water"
+        qty: 12
+        cap: 95
     - set: 8
       compounds:
       - compound: "Hydrogen"
