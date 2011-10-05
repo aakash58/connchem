@@ -12,8 +12,8 @@
 	<circle fill="#A900FF" stroke="#000000" stroke-miterlimit="10" cx="19.5" cy="22" r="14.5"/>
 </g>
 <g id="circles">
-	<path fill="none" d="M61,0C48.869,0,39,9.869,39,22s9.869,22,22,22s22-9.869,22-22S73.131,0,61,0z"/>
-	<path fill="none" d="M102.5,2.5C91.748,2.5,83,11.248,83,22s8.748,19.5,19.5,19.5S122,32.752,122,22S113.252,2.5,102.5,2.5z"/>
-	<path fill="none" d="M19.5,2.5C8.748,2.5,0,11.248,0,22s8.748,19.5,19.5,19.5S39,32.752,39,22S30.252,2.5,19.5,2.5z"/>
+	<circle id="Lithium-Ion_1_" fill="none" cx="19.5" cy="22" r="19.402"/>
+	<circle id="Sulfur-Ion" fill="none" cx="61" cy="22" r="21.965"/>
+	<circle id="Lithium-Ion" fill="none" cx="102.5" cy="22" r="19.4"/>
 </g>
 </svg>

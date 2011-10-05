@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import simulations.Unit2;
+import simulations.models.Compound;
 import simulations.models.Molecule;
 
 import model.State;
@@ -47,10 +48,12 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	
 	public void reset(){
 		for (int i=0; i<MAXCOMPOUND;i++){
-			lines[i] = new ArrayList();
+			lines[i].clear();
 		}
 		maxCount =8;
 		maxTime =60;
+		
+		
 		if (main.elapsedTime !=null)
 			main.elapsedTime.setText(formatTime(0));
 	}
@@ -119,15 +122,16 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		g.drawString(""+maxCount, 2, margin-5);
 		
 		satCount+=2;
-		//main.getP5Canvas().computeDisolved();
-		resetMoleculeCount();
+		
+		//
+		updateMoleculeCount();
 		updateTableView();
 		if (Main.time>maxTime){
 			maxTime *=2;
 		}
-		//Rescale Y-axis
-		for (int i=0; i< names.size();i++){
-			int num2 = counts.get(i);
+		//Rescale Y-axis and draw new line segment
+		for (int i=0; i< Compound.names.size();i++){
+			int num2 = Compound.counts.get(i);
 			//Rescale X-axis
 			if (num2>=maxCount){
 				if (maxCount==8)
@@ -143,12 +147,13 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
 				num1 = tmpLine.getNum2();
 			}	
+			//Draw one line segment at the end of existing line every time rendering
 			Line l = new Line(margin, 225-margin, (int) Main.time-1, (int) Main.time,  num1, num2, h2, w2, this);
 			lines[i].add(l);
 		}
 		main.elapsedTime.setText(formatTime(Main.time));
 		
-		
+		//Highlight selected line if any of them has been selected
 		for (int i=0; i< MAXCOMPOUND;i++){
 			for (int index=0; index< lines[i].size();index++){
 				Line l = (Line) lines[i].get(index);
@@ -175,7 +180,12 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 	
 
-	public void resetMoleculeCount(){
+	public void updateMoleculeCount(){
+		
+		
+		
+		
+		//For particular cases
 		if (main.selectedUnit==1 && main.selectedSim==4){
 			int H2OIndex = names.indexOf("Water");
 			int OIndex = names.indexOf("Oxygen");

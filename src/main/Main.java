@@ -499,9 +499,9 @@ public class Main {
 		//Load information of new generation
 		ArrayList a = getSetCompounds(selectedUnit,selectedSim,selectedSet);
 		if (a!=null) {
-			Compound.names = new ArrayList<String>();
-			Compound.counts = new ArrayList<Integer>();
-			Compound.caps = new ArrayList<Integer>();
+			Compound.names.clear();
+			Compound.counts.clear();
+			Compound.caps.clear();
 			for (int i=0; i<a.size();i++){
 				String s = (String) getCompoundName(selectedUnit,selectedSim,selectedSet,i);
 				int num = Integer.parseInt(getCompoundQty(selectedUnit,selectedSim,selectedSet,i).toString());
@@ -510,9 +510,12 @@ public class Main {
 				Compound.names.add(s);
 				Compound.counts.add(num);
 				Compound.caps.add(cap);
+				//Add initial number of molecules into p5Canvas
 				if( getP5Canvas().addMoleculeRandomly(s,num) )
 				{
 					State.moleculesAdded = num;
+					//Need to add these molecules to canvas also
+					
 				}
 			}
 			if (selectedUnit==1){
