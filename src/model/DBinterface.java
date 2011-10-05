@@ -105,6 +105,12 @@ public class DBinterface {
 			return 2;
 		else if (elementName_.equals("Potassium"))
 			return 1;	
+		else if (elementName_.equals("Silver"))
+			return 1;
+		else if (elementName_.equals("Lithium"))
+			return 1;
+		else if (elementName_.equals("Sulfur"))
+			return -2;
 		return 0;  	
 	}
 		
