@@ -10,17 +10,34 @@ import java.sql.*;
 
 
 public class DBinterface {
+	
+	private Connection conn= null;
+	private static Statement stat = null;
+	
+	public DBinterface()
+	{
+		try{
+			Class.forName("org.sqlite.JDBC");
+			//Connection conn = DriverManager.getConnection("jdbc:sqlite:chemdb");
+			conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+			stat = conn.createStatement();
+		}
+		catch (Exception e) {
+			System.out.println(e);
+		}
+		
+	}
 
 	public static ArrayList dbConnect(String[] args) {
 		ArrayList output = new ArrayList();
 		try {
-			Class.forName("org.sqlite.JDBC");
+			//Class.forName("org.sqlite.JDBC");
 			
 			//Connection conn = DriverManager.getConnection("jdbc:sqlite:chemdb");
-			Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+			//Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
 
 			
-			Statement stat = conn.createStatement();
+			//Statement stat = conn.createStatement();
 
 			ResultSet rs = stat.executeQuery(args[0]);
 
@@ -28,12 +45,21 @@ public class DBinterface {
 				output.add(rs.getString(args[1]));
 			}
 			rs.close();
-			conn.close();
+			//conn.close();
 
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		return output;
+	}
+	protected void finalize() throws Throwable
+	{
+		try {
+			conn.close();
+		}
+		finally{
+			super.finalize();
+		}
 	}
 
 	public static ArrayList getAllCompoundNames(String order_) {

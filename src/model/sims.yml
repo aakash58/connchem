@@ -315,7 +315,6 @@ units:
       - compound: "Hydrogen Iodide"
         qty: 15
         cap: 50
-
     - set: 3
       compounds:
       - compound: "Ethene"
@@ -393,41 +392,31 @@ units:
         qty: 20
         cap: 95
   - sim: 2
-    name: "Limiting Reactions"
+    name: "Precipitation"
     sets:
     - set: 1
       compounds:
+      - compound: "Potassium-Bromide"
+        qty: 5
+        cap: 15
+      - compound: "Silver-Nitrate"
+        qty: 5
+        cap: 15
+      - compound: "Ammonium-Chloride"
+        qty: 5
+        cap: 15
+      - compound: "Sodium-Carbonate"
+        qty: 5
+        cap: 15
+      - compound: "Sodium-Hydroxide"
+        qty: 5
+        cap: 15
+      - compound: "Lithium-Nitrate"
+        qty: 5
+        cap: 15
       - compound: "Water"
         qty: 25
         cap: 95
-      - compound: "Aluminium"
-        qty: 5
-        cap: 15
-      - compound: "Chlorine"
-        qty: 5
-        cap: 15
-    - set: 2
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Butne"
-        qty: 5
-        cap: 15
-      - compound: "Oxygen"
-        qty: 5
-        cap: 15
-    - set: 3
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Manganese Dioxide"
-        qty: 5
-        cap: 15
-      - compound: "Hydrochloric Acid"
-        qty: 5
-        cap: 15
   - sim: 3
     name: "Precipitation"
     sets:
@@ -436,10 +425,22 @@ units:
       - compound: "Water"
         qty: 25
         cap: 95
-      - compound: "Silver Nitrate"
+      - compound: "Potassium-Bromide"
         qty: 5
         cap: 15
-      - compound: "Potassium Bromide"
+      - compound: "Silver-Nitrate"
+        qty: 5
+        cap: 15
+      - compound: "Ammonium-Chloride"
+        qty: 5
+        cap: 15
+      - compound: "Sodium-Carbonate"
+        qty: 5
+        cap: 15
+      - compound: "Sodium-Hydroxide"
+        qty: 5
+        cap: 15
+      - compound: "Lithium-Nitrate"
         qty: 5
         cap: 15
     - set: 2

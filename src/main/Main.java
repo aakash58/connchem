@@ -42,6 +42,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JButton;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.Timer;
 
 import java.awt.Component;
@@ -66,6 +67,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -365,9 +367,14 @@ public class Main {
 			dynamicPanel.removeAll();
 			defaultSetMolecules =  new ArrayList();
 
+			if(! (selectedUnit==3 &&selectedSim==2))
+			{
 			//Get Compounds information in selected set from Yaml file
 			ArrayList compounds= getSetCompounds(selectedUnit,selectedSim,selectedSet);
 			if (compounds!=null){
+	
+				dynamicPanel.setLayout(new MigLayout("insets 4", "[200.00,grow]", "[][]"));
+				dynamicScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 				for (int i=0;i<compounds.size();i++){
 					JPanel panel = new JPanel();
 					panel.setBackground(Color.LIGHT_GRAY);
@@ -381,7 +388,6 @@ public class Main {
 					JLabel label = new JLabel(cName);
 					final String fixedName = cName.replace(" ", "-");
 					
-					//System.out.println("Name is "+fixedName);
 					//Repaint molecules icon
 					label.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
 					panel.add(label, "cell 0 0 3 1,growx");
@@ -442,6 +448,37 @@ public class Main {
 						}
 					});
 				
+				}
+			}
+		}
+			else //In unit3 sim 2 case
+			{
+				//Get Compounds information in set 1 from Yaml file
+				ArrayList compounds= getSetCompounds(selectedUnit,selectedSim,selectedSet);
+				if (compounds!=null){
+					int rowNum = 4;
+					int colNum = 2;
+					dynamicPanel.setLayout(new MigLayout("insets 10,gap 0","[]10[]","[][][][][][]"));
+					dynamicScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+					for (int i=0;i<compounds.size();i++){
+
+						//Get Compound Name 
+						String cName =  getCompoundName(selectedUnit,selectedSim,selectedSet,i);
+						defaultSetMolecules.add(cName);
+						if(cName.equals("Water"))
+							continue;
+						JLabel lblMolecule = new JLabel(cName);
+						lblMolecule.setFont(new Font("Lucida Grande", Font.PLAIN, 12));
+						dynamicPanel.add(lblMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2+1) );  //cell column row
+						final String fixedName = cName.replace(" ", "-");
+						//Draw Molecule button
+						JButton btMolecule = new JButton();
+						dynamicPanel.add(btMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2));
+						btMolecule.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
+						
+					
+				
+			}
 				}
 			}
 		}
@@ -747,7 +784,7 @@ public class Main {
 		//Set up Menu 
 		initMenu();
 
-		// Get All molecules from Folder
+		// Get All molecules from Resources Folder
 		try {
 			moleculeNames =parseNames(getResourceListing(Main.class, "resources/compoundsPng50/"));
 		} catch (URISyntaxException e1) {
@@ -782,7 +819,7 @@ public class Main {
 		//*********************************** LEFT PANEL ********************************************
 		leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 2,grow");
-		leftPanel.setLayout(new MigLayout("insets 6, gap 0", "[260]", "[][]20[215,top]18[][]"));
+		leftPanel.setLayout(new MigLayout("insets 6, gap 0", "[260]", "[][]20[215,top]18[grow][110]"));
 		
 		//Add Input label and Initialize Input Tip label
 		AddInputLabel();
