@@ -375,6 +375,7 @@ public class DBinterface {
 		}
 	}
 
+	/*
 	public static Integer getReactionNumber(ArrayList<String> reactants) {
 
 		String reactant;
@@ -437,6 +438,8 @@ public class DBinterface {
 			return products;
 		}
 	}
+	
+	
 
 	public static Float getReactionProbability(ArrayList<String> reactants) {
 		Integer reaction = getReactionNumber(reactants);
@@ -449,6 +452,89 @@ public class DBinterface {
 			return defaultReactProb;
 		}
 	}
+	*/
+	public static int getReactionId(Integer unit,Integer sim,Integer set)
+	{
+		// get reaction Id
+		int id = -1;
+		ArrayList<String> result = new ArrayList<String>();
+		String[] args = new String[2];
+		args[0] = "SELECT R.id FROM reactions as R WHERE R.unit = "+unit+" and R.sim = "+sim+" and R.set_ = "+set;
+		args[1] = "id";
+		result = dbConnect(args);
+
+		// short circuit if no result
+		if (result.isEmpty()) {
+			return id;
+		}
+		else {
+			//System.out.println("getReactionId: "+result);
+			id = Integer.parseInt(result.get(0));
+			return id;
+		}
+	}
+	public static ArrayList<String> getReactionOutputs(int unit,int sim,int set)
+	{
+		ArrayList<String> products = new ArrayList<String>();
+		int id = getReactionId(unit,sim,set);
+		
+		String[] args = new String[2];
+		args[0] = "SELECT C.name FROM reactions_compounds as RC, compounds as C  WHERE RC.reaction_id ="+id+" and RC.type = \'output\' and RC.compound_id = C.id";
+		args[1] = "name";
+		products = dbConnect(args);
+		
+		if (products.isEmpty()) {
+			return null;
+		}
+		else {
+			//System.out.println("getReactionProducts: "+products);
+			return products;
+		}
+		
+	}
+	public static int getReactionCompoundsNum(int unit,int sim,int set,String compound)
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		int id = getReactionId(unit,sim,set);
+		int num = -1;
+		
+		String[] args = new String[2];
+		args[0] = "SELECT RC.compound_num FROM reactions_compounds as RC, compounds as C  WHERE RC.reaction_id ="+id+" and RC.compound_id = C.id and C.name = \""+compound+"\"";
+		args[1] = "compound_num";
+		result = dbConnect(args);
+		
+		if (result.isEmpty()) {
+			return num;
+		}
+		else {
+			//System.out.println("getReactionProducts: "+result);
+			num = Integer.parseInt(result.get(0));
+			return num;
+		}
+		
+	}
+	
+	public static ArrayList<String> getReactionInputs(int unit,int sim,int set)
+	{
+		ArrayList<String> products = new ArrayList<String>();
+		int id = getReactionId(unit,sim,set);
+		
+		String[] args = new String[2];
+		args[0] = "SELECT C.name FROM reactions_compounds as RC, compounds as C  WHERE RC.reaction_id ="+id+" and RC.type = \'input\' and RC.compound_id = C.id";
+		args[1] = "name";
+		products = dbConnect(args);
+		
+		if (products.isEmpty()) {
+			return null;
+		}
+		else {
+			//System.out.println("getReactionProducts: "+products);
+			return products;
+		}
+		
+	}
+	
+	
 
 	public static Float getReactionProbability(int reactionNumber_) {
 		Float defaultReactProb = 0.f;

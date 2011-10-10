@@ -25,8 +25,6 @@ import static simulations.models.Compound.*;
 
 public class Canvas extends JPanel implements ActionListener, MouseListener, MouseMotionListener{
 	public Timer timer1;
-	//public static ArrayList<String> mNames = new ArrayList<String>();
-	//public static ArrayList<Integer> mCounts = new ArrayList<Integer>();
 	public final int MAXCOMPOUND = 50;
 	public ArrayList[] lines = new ArrayList[MAXCOMPOUND];
 	
@@ -56,6 +54,10 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		
 		if (main.elapsedTime !=null)
 			main.elapsedTime.setText(formatTime(0));
+		
+		//Clean lines after reset
+		this.updateTableView();
+		this.updateUI();
 	}
 	
 	public String formatTime(long count){
@@ -123,16 +125,19 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		
 		satCount+=2;
 		
-		//
+		//Get molecules number from simulation before painting
 		updateMoleculeCount();
+		//Update tableView, which is presenting molecule legends below chart
 		updateTableView();
+		
+		//Expand x scale if time reaches maxTime
 		if (Main.time>maxTime){
 			maxTime *=2;
 		}
 		//Rescale Y-axis and draw new line segment
 		for (int i=0; i< Compound.names.size();i++){
 			int num2 = Compound.counts.get(i);
-			//Rescale X-axis
+			//Rescale Y-axis
 			if (num2>=maxCount){
 				if (maxCount==8)
 					maxCount=12;
@@ -142,6 +147,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					maxCount *=2;
 			}
 			
+			//####Paint lines####
 			int num1 =0;
 			if (lines[i].size()>0){
 				Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
@@ -179,12 +185,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		}
 	}
 	
-
+	//Get molecules number from simulation before painting
 	public void updateMoleculeCount(){
-		
-		
-		
-		
+	
 		//For particular cases
 		if (main.selectedUnit==1 && main.selectedSim==4){
 			int H2OIndex = names.indexOf("Water");
@@ -205,9 +208,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					H2O2Count++;
 				}
 			}
-			counts.set(H2OIndex,H2OCount);
-			counts.set(OIndex, OCount);
-			counts.set(H2O2Index, H2O2Count);
+			Compound.counts.set(H2OIndex,H2OCount);
+			Compound.counts.set(OIndex, OCount);
+			Compound.counts.set(H2O2Index, H2O2Count);
 			
 		}
 		if (main.selectedUnit==2 && main.selectedSet==1 && main.selectedSim<4){
@@ -221,9 +224,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					NaClCount++;
 				}
 			}
-			counts.set(NaIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaClCount);
-			counts.set(ClIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaClCount);
-			counts.set(NaClIndex,NaClCount);
+			Compound.counts.set(NaIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaClCount);
+			Compound.counts.set(ClIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaClCount);
+			Compound.counts.set(NaClIndex,NaClCount);
 			
 		}
 		else if (main.selectedUnit==2 && main.selectedSet==4){
@@ -237,9 +240,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					CaClCount++;
 				}
 			}
-			counts.set(CaIndex,main.getP5Canvas().getUnit2().getTotalNum()-CaClCount);
-			counts.set(ClIndex,2*(main.getP5Canvas().getUnit2().getTotalNum()-CaClCount));
-			counts.set(CaClIndex,CaClCount);
+			Compound.counts.set(CaIndex,main.getP5Canvas().getUnit2().getTotalNum()-CaClCount);
+			Compound.counts.set(ClIndex,2*(main.getP5Canvas().getUnit2().getTotalNum()-CaClCount));
+			Compound.counts.set(CaClIndex,CaClCount);
 		}
 		else if (main.selectedUnit==2 && main.selectedSet==7){
 			int NaIndex = names.indexOf("Sodium-Ion");
@@ -252,9 +255,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					NaHCO3Count++;
 				}
 			}
-			counts.set(NaIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaHCO3Count);
-			counts.set(HCO3Index,main.getP5Canvas().getUnit2().getTotalNum()-NaHCO3Count);
-			counts.set(NaHCO3Index, NaHCO3Count);
+			Compound.counts.set(NaIndex,main.getP5Canvas().getUnit2().getTotalNum()-NaHCO3Count);
+			Compound.counts.set(HCO3Index,main.getP5Canvas().getUnit2().getTotalNum()-NaHCO3Count);
+			Compound.counts.set(NaHCO3Index, NaHCO3Count);
 		}
 		else if (main.selectedUnit==2 && main.selectedSet==1 && main.selectedSim==4){
 			int KIndex = names.indexOf("Potassium-Ion");
@@ -268,33 +271,38 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					KClCount++;
 				}
 			}
-			counts.set(KIndex, main.getP5Canvas().getUnit2().getTotalNum()-KClCount);
-			counts.set(ClIndex,main.getP5Canvas().getUnit2().getTotalNum()-KClCount);
-			counts.set(KClIndex,KClCount);
+			Compound.counts.set(KIndex, main.getP5Canvas().getUnit2().getTotalNum()-KClCount);
+			Compound.counts.set(ClIndex,main.getP5Canvas().getUnit2().getTotalNum()-KClCount);
+			Compound.counts.set(KClIndex,KClCount);
 		}
 		
 		
 	}
+	
+	//Update tableView, which is presenting molecule legends below chart
 	public void updateTableView(){
-		main.getTableView().data[0] = new ArrayList();
-		main.getTableView().data[1] = new ArrayList();
-		main.getTableView().data[2] = new ArrayList();
-		for (int i=0; i<names.size();i++){
-			main.getTableView().data[0].add(counts.get(i));
+		
+		main.getTableView().data[0].clear();
+		main.getTableView().data[1].clear();
+		main.getTableView().data[2].clear();
+		
+		for (int i=0; i<Compound.names.size();i++){
+			main.getTableView().data[0].add(Compound.counts.get(i));
 			main.getTableView().data[1].add(main.getTableView().colors[i]);
-			main.getTableView().data[2].add(names.get(i));
+			main.getTableView().data[2].add(Compound.names.get(i));
 		}
 		if (main.getTableView() !=null && !main.getTableView().stopUpdating){
 			main.getTableView().table.updateUI();
 		}		
 	}
 	
+	//Return molecule name when that molecule is being selected on legends
 	public String getSelectedMolecule(){
 		int index = main.getTableView().selectedRow;
-		if (index<0 || index>=names.size())
+		if (index<0 || index>=Compound.names.size())
 			return "";
-		if (names.get(index)==null) return "";
-		return names.get(index).toString();
+		if (Compound.names.get(index)==null) return "";
+		return Compound.names.get(index).toString();
 	}
 	
 	/*public static Color getSelecttedColor(){
