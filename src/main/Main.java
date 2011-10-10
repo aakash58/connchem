@@ -48,6 +48,7 @@ import javax.swing.Timer;
 import java.awt.Component;
 import javax.swing.Box;
 
+import model.DBinterface;
 import model.State;
 import model.YAMLinterface;
 import net.miginfocom.swing.MigLayout;
@@ -56,6 +57,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JComboBox;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseListener;
+
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
@@ -64,6 +67,7 @@ import simulations.Unit2;
 import simulations.models.Compound;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
@@ -187,6 +191,9 @@ public class Main {
 	public int speed = 1000;  // recur every second.
 	public Timer timer;
 	public static int time = 0;
+	
+	private MouseListener mulBtnListener;  //mouseListener used for 6 buttons in Unit3 Sim1
+	private ArrayList<Integer> btnIds = new ArrayList<Integer>();
 	
 	/**
 	 * Launch the application.
@@ -458,7 +465,7 @@ public class Main {
 				if (compounds!=null){
 					int rowNum = 4;
 					int colNum = 2;
-					dynamicPanel.setLayout(new MigLayout("insets 10,gap 0","[]10[]","[][][][][][]"));
+					dynamicPanel.setLayout(new MigLayout("insets 10,gap 0","[50]10[50]","[][]5[][]5[][]"));
 					dynamicScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 					for (int i=0;i<compounds.size();i++){
 
@@ -469,15 +476,14 @@ public class Main {
 							continue;
 						JLabel lblMolecule = new JLabel(cName);
 						lblMolecule.setFont(new Font("Lucida Grande", Font.PLAIN, 12));
-						dynamicPanel.add(lblMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2+1) );  //cell column row
+						dynamicPanel.add(lblMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2+1)+", center" );  //cell column row
 						final String fixedName = cName.replace(" ", "-");
 						//Draw Molecule button
 						JButton btMolecule = new JButton();
-						dynamicPanel.add(btMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2));
+						dynamicPanel.add(btMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2)+", center, width 80:100:120, height 50: 55: 80");
 						btMolecule.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
-						
-					
-				
+						//btMolecule.setSize(100,50);
+						btMolecule.addMouseListener(mulBtnListener);
 			}
 				}
 			}
@@ -547,49 +553,18 @@ public class Main {
 				Compound.names.add(s);
 				Compound.counts.add(num);
 				Compound.caps.add(cap);
-				//Add initial number of molecules into p5Canvas
-				if( getP5Canvas().addMoleculeRandomly(s,num) )
+				if( num >0)
 				{
-					State.moleculesAdded = num;
-					//Need to add these molecules to canvas also
-					
+				//Add initial number of molecules into p5Canvas
+					if( getP5Canvas().addMoleculeRandomly(s,num) )
+					{
+						State.moleculesAdded = num;
+						//Need to add these molecules to canvas also
+						
+					}
 				}
 			}
-			if (selectedUnit==1){
-				if (selectedSim==4){
-					Compound.names.add("Water");
-					Compound.counts.add(0);
-					Compound.names.add("Oxygen");
-					Compound.counts.add(0);
-				}
-			}
-				
-			else if (selectedUnit==2){
-				if (selectedSet==1 && selectedSim<4){
-					Compound.names.add("Sodium-Ion");
-					Compound.counts.add(0);
-					Compound.names.add("Chlorine-Ion");
-					Compound.counts.add(0);
-				}
-				else if (selectedSet==4){
-					Compound.names.add("Calcium-Ion");
-					Compound.counts.add(0);
-					Compound.names.add("Chlorine-Ion");
-					Compound.counts.add(0);
-				}
-				else if (selectedSet==7){
-					Compound.names.add("Sodium-Ion");
-					Compound.counts.add(0);
-					Compound.names.add("Bicarbonate");
-					Compound.counts.add(0);
-				}
-				else if (selectedSet==1 && selectedSim==4){
-					Compound.names.add("Potassium-Ion");
-					Compound.counts.add(0);
-					Compound.names.add("Chlorine-Ion");
-					Compound.counts.add(0);
-				}
-			}	
+			setupReactionProducts();
 			Compound.setProperties();
 		}
 		getCanvas().reset();
@@ -610,19 +585,64 @@ public class Main {
 			}
 			
 		}
-		
-
-		
-
 		//getP5Canvas().isEnable =temp;
 		
 		//reset timer
 		resetTimer();
-		
-		
-
-		
+	
 	} 
+	
+	private void setupReactionProducts()
+	{
+		if (selectedUnit==1){
+			if (selectedSim==4){
+				Compound.names.add("Water");
+				Compound.counts.add(0);
+				Compound.names.add("Oxygen");
+				Compound.counts.add(0);
+			}
+		}
+			
+		else if (selectedUnit==2){
+			if (selectedSet==1 && selectedSim<4){
+				Compound.names.add("Sodium-Ion");
+				Compound.counts.add(0);
+				Compound.names.add("Chlorine-Ion");
+				Compound.counts.add(0);
+			}
+			else if (selectedSet==4){
+				Compound.names.add("Calcium-Ion");
+				Compound.counts.add(0);
+				Compound.names.add("Chlorine-Ion");
+				Compound.counts.add(0);
+			}
+			else if (selectedSet==7){
+				Compound.names.add("Sodium-Ion");
+				Compound.counts.add(0);
+				Compound.names.add("Bicarbonate");
+				Compound.counts.add(0);
+			}
+			else if (selectedSet==1 && selectedSim==4){
+				Compound.names.add("Potassium-Ion");
+				Compound.counts.add(0);
+				Compound.names.add("Chlorine-Ion");
+				Compound.counts.add(0);
+			}
+		}
+		else 
+		{
+			ArrayList<String> products = new ArrayList<String>();
+			products = DBinterface.getReactionOutputs(selectedUnit, selectedSim, selectedSet);
+			if( !products.isEmpty())
+			{
+				for( String s:products)
+				{
+					Compound.names.add(s);
+					Compound.counts.add(0);
+				}
+			}
+		}
+	}
 	
 	//Reset dashboard on right panel
 	private void updateDashboard()
@@ -819,7 +839,7 @@ public class Main {
 		//*********************************** LEFT PANEL ********************************************
 		leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 2,grow");
-		leftPanel.setLayout(new MigLayout("insets 6, gap 0", "[260]", "[][]20[215,top]18[grow][110]"));
+		leftPanel.setLayout(new MigLayout("insets 6, gap 0", "[260]", "[][]20[215,top]18[][]"));
 		
 		//Add Input label and Initialize Input Tip label
 		AddInputLabel();
@@ -1173,14 +1193,7 @@ public class Main {
 				
 				outputControls.add(cBoxConvert, "cell 0 0");
 
-		
-/*		JLabel totalSystemPressureLabel = new JLabel("Total System Pressure:");
-		dashboard.add(totalSystemPressureLabel, "cell 0 3,alignx right");
 
-		JLabel totalSystemPressureOutput = new JLabel("100 kPa");
-		dashboard.add(totalSystemPressureOutput, "cell 1 3");
-*/
-		
 		
 		if (isWelcomed){
 			welcomePanel = new JPanel();
@@ -1217,8 +1230,82 @@ public class Main {
 			});
 	        timer.setInitialDelay(pause);
 	        
+	        //Set up MouseListerns
+	        setupMouseListeners();
+	        
 
 	}
+	
+	//Set up MouseListerners
+	private void setupMouseListeners()
+	{
+	    mulBtnListener = new MouseListener() {
+	        public void mouseClicked(MouseEvent e) {
+	        	int index = getComponentIndex(e.getComponent());
+	        	
+	        	if(index!=-1)
+	        	{
+	        		if(!btnIds.contains(index))	//If this button has not been selected yet
+	        		{
+		        		if(btnIds.size()<2)
+			        	{
+			        		btnIds.add(index);
+			        		//Grey out this button after it gets selected
+			        		//e.getComponent().setEnabled(false);
+			        		//Set background color
+
+			        		//TODO: Use Buffered Image to add mask on loaded Icon
+			        		e.getComponent().setBackground(Color.gray);
+			        		//Set border color
+			        	}
+	        		}
+	        		else //If this button has been selected, deselect it
+	        		{
+	        			//e.getComponent().setEnabled(true);
+	        			//Set background color
+	        			e.getComponent().setBackground(null);
+	        			//Set border color
+	        			
+	        			btnIds.remove(new Integer(index));
+	        		}
+	        	
+	        	}
+	        	
+	        }
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub	
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub	
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub	
+			}
+	      };
+	}
+	
+	  public  static int getComponentIndex(Component component) {
+		    if (component != null && component.getParent() != null) {
+		      Container c = component.getParent();
+		      for (int i = 0; i < c.getComponentCount(); i++) {
+		        if (c.getComponent(i) == component)
+		          return i;
+		      }
+		    }
+
+		    return -1;
+		  }
 
 	/******************************************************************
 	* FUNCTION :     AddInputLabel()

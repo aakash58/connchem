@@ -397,25 +397,25 @@ units:
     - set: 1
       compounds:
       - compound: "Potassium-Bromide"
-        qty: 5
-        cap: 15
+        qty: 0
+        cap: 10
       - compound: "Silver-Nitrate"
-        qty: 5
-        cap: 15
+        qty: 0
+        cap: 10
       - compound: "Ammonium-Chloride"
-        qty: 5
-        cap: 15
+        qty: 0
+        cap: 10
       - compound: "Sodium-Carbonate"
-        qty: 5
-        cap: 15
+        qty: 0
+        cap: 10
       - compound: "Sodium-Hydroxide"
-        qty: 5
-        cap: 15
+        qty: 0
+        cap: 10
       - compound: "Lithium-Nitrate"
-        qty: 5
-        cap: 15
+        qty: 0
+        cap: 10
       - compound: "Water"
-        qty: 25
+        qty: 0
         cap: 95
   - sim: 3
     name: "Precipitation"
