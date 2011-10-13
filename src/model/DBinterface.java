@@ -533,6 +533,26 @@ public class DBinterface {
 		}
 		
 	}
+	/*
+	public static float getMoleculeWeight(String compound)
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		float mass=0;
+		
+		String[] args = new String[2];
+		args[0] = "SELECT C.mass FROM compounds as C  WHERE C.name = \""+compound+"\"";
+		args[1] = "mass";
+		result = dbConnect(args);
+		
+		if (result.isEmpty()) {
+			return mass;
+		}
+		else {
+			mass = Float.parseFloat(result.get(0));
+			return mass;
+		}
+		
+	}*/
 	
 	
 

@@ -2,7 +2,11 @@ package main;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+
+
 
 
 public class Line{
@@ -35,6 +39,7 @@ public class Line{
 	  height = height_;
 	  width = width_;
 	  canvas = parent;
+
   } 
   
   
@@ -56,19 +61,38 @@ public class Line{
 	  	g.drawLine(x1, y1, x2, y2); 
   }
   
-  public boolean isIn(int x, int y) {
+  public boolean isIn(float mouseX, float mouseY) {
 	  if (y1<=y2){
-		  if (x>=x1 && x<x2 && y>=y1-2 && y<=y2+2){
+		  if (mouseX>=x1 && mouseX<x2 && mouseY>=y1-2 && mouseY<=y2+2){
 			  return true;
 		  }
 	  }
 	  else{
-		  if (x>=x1 && x<x2 && y>=y2-2 && y<=y1+2){
+		  if (mouseX>=x1 && mouseX<x2 && mouseY>=y2-2 && mouseY<=y1+2){
 			  return true;
 		  }
 	  }
 	 
 	  return false;
   }
+  /*
+  public JToolTip createToolTip() {
+      JToolTip tip = super.createToolTip();
+      tip.setBackground(Color.yellow);
+      tip.setForeground(Color.green);
+      return tip;
+    }
+
+    public boolean contains(int x, int y) {
+    	System.out.println("Contain:x ="+x+" ,y = "+y);
+        this.setToolTipText("ToolTips!");
+      return super.contains(x, y);
+    }
+    
+  
+  public Point getToolTipLocation(MouseEvent e) {
+      return new Point(e.getX(),e.getY());
+    }
+    */
   
 }

@@ -10,15 +10,20 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.ToolTipManager;
+import javax.swing.plaf.ToolTipUI;
+
 
 import simulations.Unit2;
 import simulations.models.Compound;
 import simulations.models.Molecule;
 
+import model.DBinterface;
 import model.State;
 import static simulations.P5Canvas.*;
 import static simulations.models.Compound.*;
@@ -32,7 +37,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	public int maxTime =60;
 	public int satCount =0;
 	private Main main = null;
-	
+
 	
 	public Canvas( Main parent) {
 		main = parent;
@@ -42,6 +47,11 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		addMouseMotionListener(this);
 		setFocusable(true);
 		addMouseListener(this);
+		ToolTipManager.sharedInstance().setInitialDelay(0);
+		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+	
+		
+		
 	}
 	
 	public void reset(){
@@ -135,6 +145,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			maxTime *=2;
 		}
 		//Rescale Y-axis and draw new line segment
+		int linePadding = 3;
+		int marginY = h+2-Compound.names.size()*linePadding;
 		for (int i=0; i< Compound.names.size();i++){
 			int num2 = Compound.counts.get(i);
 			//Rescale Y-axis
@@ -154,8 +166,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				num1 = tmpLine.getNum2();
 			}	
 			//Draw one line segment at the end of existing line every time rendering
-			Line l = new Line(margin, 225-margin, (int) Main.time-1, (int) Main.time,  num1, num2, h2, w2, this);
+			Line l = new Line(margin, marginY+i*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
 			lines[i].add(l);
+			
 		}
 		main.elapsedTime.setText(formatTime(Main.time));
 		
@@ -163,12 +176,13 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		for (int i=0; i< MAXCOMPOUND;i++){
 			for (int index=0; index< lines[i].size();index++){
 				Line l = (Line) lines[i].get(index);
-				if (i==main.getTableView().selectedRow)
+				if (main.getTableView().selectedRowsContain(i))
 					l.paint(g,blinkingColor(main.getTableView().colors[i]));
 				else
 					l.paint(g,main.getTableView().colors[i]);
 			}
 		}
+
 		
 		//Paint time Limit on X-axis
 		g.setFont(new Font("Garamond", Font.PLAIN, 11));
@@ -183,6 +197,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			g.setColor(new Color(255,255,255,30));
 			g.drawLine(margin+w2*i/mins, margin/2, margin+w2*i/mins, margin/2+h2);
 		}
+		
 	}
 	
 	//Get molecules number from simulation before painting
@@ -297,12 +312,22 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 	
 	//Return molecule name when that molecule is being selected on legends
-	public String getSelectedMolecule(){
-		int index = main.getTableView().selectedRow;
-		if (index<0 || index>=Compound.names.size())
-			return "";
-		if (Compound.names.get(index)==null) return "";
-		return Compound.names.get(index).toString();
+	public String [] getSelectedMolecule(){
+		if(!main.getTableView().selectedRowsIsEmpty())
+		{
+			int [] selectedRows = main.getTableView().getSelectedRows();
+			String [] molecules = new String [selectedRows.length];
+			
+			for(int i = 0;i<selectedRows.length;i++)
+			{
+				if(selectedRows[i]<Compound.names.size())
+				molecules[i] = new String(Compound.names.get(selectedRows[i]));
+			}
+			
+			return molecules;
+		}
+		return null;
+		
 	}
 	
 	/*public static Color getSelecttedColor(){
@@ -363,19 +388,33 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 
 	public void mouseMoved(MouseEvent e) {
-		int x = e.getX();
-		int y = e.getY();
+		int mouseX = e.getX();
+		int mouseY = e.getY();
 		int select = -1;
+		this.setToolTipText("");
 		for (int i=0; i<names.size();i++){
 			for (int j=0; j<lines[i].size();j++){
 				Line l = (Line) lines[i].get(j);
-				if (l.isIn(x, y)){
+				if (l.isIn(mouseX, mouseY)){
 					select =i; //Pick up the last lines
-				}	
+					if(main.selectedUnit==3)
+					{
+						int index = i ;
+						String name = Compound.names.get(index);
+						float weight = Compound.moleculeWeight.get(index)* Compound.counts.get(index);
+						DecimalFormat df = new DecimalFormat("###.##");
+						String weightStr = df.format(weight);
+						String tooltipText = new String(name+": "+weightStr+" g");
+						this.setToolTipText(tooltipText);
+					}
+				}
+			
 			}
 		}
-		if (select != main.getTableView().selectedRow)
-			main.getTableView().setSelectedRow(select);
+		if (!main.getTableView().selectedRowsContain(select))
+		{
+			main.getTableView().addSelectedRow(select);
+		}
 	}
 	
 

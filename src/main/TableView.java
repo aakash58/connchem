@@ -17,6 +17,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TableView extends JPanel {
 	public JTable table = null;
@@ -25,14 +28,17 @@ public class TableView extends JPanel {
 	public ArrayList[] data = new ArrayList[3];
 	private int sat =222;
 	public Color[] colors; 
-	public int selectedRow=-1; 
+	private int[] selectedRows;
+	public int colorChangingRow;
+	//public int selectedRow=-1;
 	private Main main;
+	MyTableModel myTable;
 	
 	
 	public TableView(Main parent) {
 		super(new GridLayout(1, 0));
 		this.main = parent;
-		MyTableModel myTable = new MyTableModel();
+		 myTable = new MyTableModel();
 		
 		
 		table = new JTable(myTable);
@@ -43,22 +49,21 @@ public class TableView extends JPanel {
 
 		scrollPane.setHorizontalScrollBar(jj);
 		//table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		//table.getSelectionModel().addListSelectionListener(new RowListener());
-		table.addMouseListener(new MouseAdapter()
+		table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		table.getSelectionModel().addListSelectionListener(new RowListener());
+		/*table.addMouseListener(new MouseAdapter()
 		{
 		   public void mouseClicked(MouseEvent evt)
 		   {
 				if(evt.getSource() == table)
 				{
 				
-					if(selectedRow != table.getSelectedRow())
-						selectedRow = table.getSelectedRow();
-					else
-						setSelectedRow(-1);
+					int [] selectedRows = table.getSelectedRows();
+					evt.get
+			
 				}
 		   }
-		});
+		});*/
 		table.getColumnModel().getColumn(0).setPreferredWidth(10);
 		table.getColumnModel().getColumn(1).setPreferredWidth(50);
 		table.getColumnModel().getColumn(2).setPreferredWidth(130);
@@ -94,7 +99,16 @@ public class TableView extends JPanel {
 		
 	}
 
-	
+    private class RowListener implements ListSelectionListener {
+        public void valueChanged(ListSelectionEvent event) {
+            if (event.getValueIsAdjusting()) {
+                return;
+            }
+            int [] selectedRows = table.getSelectedRows();
+            //output.append("ROW SELECTION EVENT. ");
+            //outputSelection();
+        }
+    }
 
 	public Color getColor(int index) {
 		if (index<colors.length){
@@ -103,40 +117,127 @@ public class TableView extends JPanel {
 		return Color.BLACK;
 	}
 	
-	public void setSelectedRow(int row) {
-		selectedRow = row;
+	public void setSelectedRow(int [] rows) {
+		selectedRows = rows;
 		table.clearSelection();
-		if (selectedRow>=0){
-			table.addRowSelectionInterval(selectedRow, selectedRow);
+		if (selectedRows!=null && selectedRows.length>0){
+		for( int row:selectedRows)
+		{
+			table.addRowSelectionInterval(row, row);
 		}
 		table.updateUI();
+		}
+	}
+	public boolean addSelectedRow( int index)
+	{
+		if(selectedRowsContain(index)) //If this row has been selected
+			return false;
+		else
+		{
+			if(index>=0 && index<table.getRowCount())
+			{
+				int [] tempRows = selectedRows.clone();
+				selectedRows = new int [selectedRows.length+1];
+				int i = 0;
+				for( i = 0;i<tempRows.length;i++)
+				{
+					selectedRows[i] = tempRows[i];
+				}
+				selectedRows[i] = index;
+				return true;
+			}
+			return false;
+		}
+		
+	}
+	public void deselectRow(int [] rows)
+	{
+		if(selectedRows!=null)
+		{
+			if(selectedRows.length>0)
+			{
+				List newSelectedRows = new LinkedList<Integer>();
+				List deselectRows = new LinkedList<Integer>();
+				for(int deselectRow:rows) //Translate Rows to list
+				{
+					deselectRows.add(deselectRow);
+				}
+				
+				for(int rowIndex:selectedRows) //Remove those rows which we want to deselect
+				{
+					if(!deselectRows.contains(rowIndex))
+						newSelectedRows.add((Integer)rowIndex);
+				}
+				//Make a new int array
+				selectedRows = new int[newSelectedRows.size()];
+				for (int i = 0; i < newSelectedRows.size(); i++) {
+					selectedRows[i] = ((Integer)newSelectedRows.get(i)).intValue();
+				}
+			}
+		}
+	}
+	public boolean selectedRowsContain(int row)
+	{
+		boolean res = false;
+		if(selectedRows!=null)
+			if(selectedRows.length>0)
+				for( int r:selectedRows)
+				{
+					if(r == row)
+					{
+						res = true;
+						break;
+					}
+				}
+		return res;
+	}
+
+	public boolean selectedRowsIsEmpty()
+	{
+		if(selectedRows!=null)
+			if(selectedRows.length>0)
+				return false;
+		return true;
+	}
+	public int selectedRowsCount()
+	{
+		return selectedRows.length;
+	}
+	public int [] getSelectedRows()
+	{
+		return selectedRows.clone();
 	}
 	
+	public boolean contains(String name)
+	{
+		return (indexOf(name)==-1)?false:true;
+	}
 
-	/*
-	private class RowListener implements ActionListener {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			if(e.getSource() == table)
+	public int indexOf(String name)
+	{
+		String moleculeName = null;
+		for(int i =0;i<myTable.getRowCount();i++)
+		{
+			moleculeName = new String((String) myTable.getValueAt(i, 2)); //col is molecule name
+			if(moleculeName.equals(name))
 			{
-				if(selectedRow != table.getSelectedRow())
-					selectedRow = table.getSelectedRow();
-				else
-					table.clearSelection();
+				return i;
 			}
-			
 		}
-	}*/
-
+		return -1;
+	}
+	public void clearSelection()
+	{
+		table.clearSelection();
+	}
 	class MyTableModel extends AbstractTableModel {
 		private String[] columnNames = {};
 		
 		public MyTableModel() {
-			data[0] = new ArrayList();
-			data[1] = new ArrayList();
-			data[2] = new ArrayList();
+			data[0] = new ArrayList<Integer>();
+			data[1] = new ArrayList<Color>();
+			data[2] = new ArrayList<String>();
+
 			columnNames = new String[3];
 			columnNames[0] = "    #";
 			columnNames[1] = "Color";
@@ -176,6 +277,11 @@ public class TableView extends JPanel {
 			colors[row] = (Color) value;
 			fireTableCellUpdated(row, col);
 		}
+	}
+
+	public Main getMain() {
+		// TODO Auto-generated method stub
+		return main;
 	}
 
 }

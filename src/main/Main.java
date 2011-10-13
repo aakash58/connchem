@@ -84,6 +84,10 @@ import java.util.jar.JarFile;
 import static model.YAMLinterface.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
@@ -96,6 +100,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+
 
 public class Main {
 	// Controllers  
@@ -121,10 +126,8 @@ public class Main {
 	public ArrayList defaultSetMolecules =  new ArrayList();
 	private CustomPopupMenu scrollablePopupMenu;
 	public String[] moleculeNames = null;
-	public JPanel rightPanel;
-	
-	public JPanel dashboard;     //Dashboard on right panel showing mass and volume
-	
+
+
 
 	private String sliderLabel = new String("Add ");	//Label parameter on left panel
 	
@@ -146,6 +149,7 @@ public class Main {
 	private JPanel clPanel;     //Center Left control Panel containing volume slider and Zoom Slider
 	public JLabel  volumeLabel  = null;
 	public JSlider volumeSlider  = null;
+	public int defaultVolume = 63;
 	private JLabel canvasControlLabel_main_volume;
 	
 	//Pressure slider used to replace Volume Slider in Unit 2
@@ -166,6 +170,15 @@ public class Main {
 	
 
 	//private static boolean isPressureShowing;
+	/*********** Right Panel Parameter***********/
+	public JPanel rightPanel;  //Right panel container
+	JLabel lblOutput;          //output label
+	JLabel lblMacroscopid;
+	JLabel lblOutputMacroscopicLevel;
+	JCheckBox cBoxHideWater;
+	ItemListener cBoxHideWaterListener;
+	public JPanel dashboard;     //Dashboard on right panel showing mass and volume
+	
 	
 	public boolean isVolumeblocked = false;
 	public JLabel totalSystemEnergy;
@@ -185,7 +198,11 @@ public class Main {
 	public JCheckBox cBoxConvert;
 	
 	public JButton playBtn;
+	private ActionListener playBtnListener;
 	public boolean isFirst =true; 
+	public JButton resetBtn;
+	private ActionListener resetBtnListener;
+	
 	
 	public int pause = 0;   // the length of the pause at the begginning
 	public int speed = 1000;  // recur every second.
@@ -193,7 +210,9 @@ public class Main {
 	public static int time = 0;
 	
 	private MouseListener mulBtnListener;  //mouseListener used for 6 buttons in Unit3 Sim1
-	private ArrayList<Integer> btnIds = new ArrayList<Integer>();
+	private ArrayList<Integer> btnIds = new ArrayList<Integer>(); //Button Ids in Unit3 Sim2
+	private ArrayList<String> btnNames = new ArrayList<String>(); //Button names in Unit3 Sim2
+	private int btnStartId =-1;
 	
 	/**
 	 * Launch the application.
@@ -482,7 +501,10 @@ public class Main {
 						JButton btMolecule = new JButton();
 						dynamicPanel.add(btMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2)+", center, width 80:100:120, height 50: 55: 80");
 						btMolecule.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
-						//btMolecule.setSize(100,50);
+						//At the same time store fixed names into btnNames list
+						this.btnNames.add(fixedName);
+						if(i==0)
+							btnStartId = getComponentIndex(btMolecule);
 						btMolecule.addMouseListener(mulBtnListener);
 			}
 				}
@@ -513,7 +535,16 @@ public class Main {
 		getP5Canvas().isEnable = false;
 		playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
 		
-		//Update Dynamic Panel
+		/*    Check if welcome menu showing    */
+		if (isWelcomed && welcomePanel !=null){
+			mainFrame.remove(welcomePanel);
+			mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
+			mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
+			mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
+			isWelcomed = false;
+		}
+		
+		//Update Molecule Legends on left panel
 		updateDynamicPanel();
 		
 		//Update components on the left panel
@@ -524,19 +555,9 @@ public class Main {
 		//    Reset state parameter   
 		State.reset();
 		
-		/*    Check if welcome menu showing    */
-		if (isWelcomed && welcomePanel !=null){
-			mainFrame.remove(welcomePanel);
-			mainFrame.getContentPane().add(leftPanel, "cell 0 0,grow");
-			mainFrame.getContentPane().add(centerPanel, "cell 1 0,grow");
-			mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
-			isWelcomed = false;
-		}
 		
-		
-		
-		//    Reset dashboard on right panel   
-		updateDashboard();
+		//    Reset right panel   
+		updateRightPanel();
 			
 
 		//Load information of new generation
@@ -568,7 +589,7 @@ public class Main {
 			Compound.setProperties();
 		}
 		getCanvas().reset();
-		tableView.setSelectedRow(-1);  //Deselect rows
+		tableView.clearSelection();  //Deselect rows
 		
 		//For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
 		if( selectedUnit==2 && selectedSim==3)
@@ -633,7 +654,7 @@ public class Main {
 		{
 			ArrayList<String> products = new ArrayList<String>();
 			products = DBinterface.getReactionOutputs(selectedUnit, selectedSim, selectedSet);
-			if( !products.isEmpty())
+			if( products!=null)
 			{
 				for( String s:products)
 				{
@@ -642,6 +663,29 @@ public class Main {
 				}
 			}
 		}
+	}
+	
+	//Reset right panel
+	private void updateRightPanel()
+	{
+		if( selectedUnit ==2)
+		{
+			rightPanel.remove(lblOutput);
+			rightPanel.remove(cBoxHideWater);
+			rightPanel.add(lblOutput, "cell 0 0");
+			rightPanel.add(lblMacroscopid, "cell 0 1");
+			rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
+		}
+		else if (selectedUnit ==3)
+		{
+			//this.lblMacroscopid.setVisible(false);
+			rightPanel.remove(lblOutputMacroscopicLevel);
+			rightPanel.remove(lblOutput);
+			rightPanel.remove(lblMacroscopid);
+			rightPanel.add(lblOutput, "cell 0 1");
+			rightPanel.add(cBoxHideWater, "cell 0 3");
+		}
+		updateDashboard();  //Reset dashboard on right panel
 	}
 	
 	//Reset dashboard on right panel
@@ -663,7 +707,12 @@ public class Main {
 			dashboard.add(waterVolume, "cell 1 4");
 			dashboard.add(solutionLabel, "cell 0 5,alignx right");
 			dashboard.add(soluteVolume, "cell 1 5");
+			cBoxConvert.setVisible(true);
 			
+		}
+		else
+		{
+			cBoxConvert.setVisible(false);
 		}
 	}
 	
@@ -706,7 +755,7 @@ public class Main {
 			pressureSlider.lostFocus(null, null);
 			pressureSlider.enable(getP5Canvas().yaml.getControlPressureSliderState(selectedUnit, selectedSim));
 			}
-			else
+			else //Units setup except unit 2
 			{
 				if(clPanel.isAncestorOf(pressureSlider))
 				{
@@ -727,8 +776,7 @@ public class Main {
 				volumeLabel.setVisible(true);
 				canvasControlLabel_main_volume.setVisible(true);
 				volumeSlider.requestFocus();
-				volumeSlider.lostFocus(null, null);
-				volumeSlider.enable(getP5Canvas().yaml.getControlVolumeSliderState(selectedUnit, selectedSim));
+
 			}
 				
 			//Reset zoomSlider
@@ -736,14 +784,9 @@ public class Main {
 			zoomSlider.setValue(defaultZoom);
 			scaleLabel.setText(defaultZoom*2+"%");
 			getP5Canvas().setScale(defaultZoom,defaultZoom);
-			//zoomSlider.lostFocus(null, null);
-			//zoomSlider.enable(getP5Canvas().yaml.getControlScaleSliderState(selectedUnit, selectedSim));
 			speedSlider.requestFocus();
-			//speedSlider.lostFocus(null, null);
-			//speedSlider.enable(getP5Canvas().yaml.getControlSpeedSliderState(selectedUnit, selectedSim));
 			heatSlider.requestFocus();
-			//heatSlider.lostFocus(null,null);
-			//heatSlider.enable(getP5Canvas().yaml.getControlHeatSliderState(selectedUnit, selectedSim));
+
 				
 			float heatMin =getP5Canvas().yaml.getControlHeatSliderMin(selectedUnit, selectedSim);
 			float heatMax = getP5Canvas().yaml.getControlHeatSliderMax(selectedUnit, selectedSim);
@@ -754,6 +797,7 @@ public class Main {
 			if( this.selectedUnit ==3)
 			{
 				heatSlider.setEnabled(false);
+				volumeSlider.setEnabled(false);
 			}
 			//Reset animation speed
 			speedSlider.setValue(defaultSpeed);
@@ -803,6 +847,11 @@ public class Main {
 		
 		//Set up Menu 
 		initMenu();
+		
+        //Set up MouseListerns
+        setupMouseListeners();
+      //Set up Button Listerns
+        setupComponentListener();
 
 		// Get All molecules from Resources Folder
 		try {
@@ -854,22 +903,7 @@ public class Main {
 		
 		//Add Play button to timerSubpanel
 		playBtn = new JButton("");
-		playBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if (getP5Canvas().isEnable){ //playing, turning to PAUSE					
-					//pause timer
-					timer.stop();
-					getP5Canvas().isEnable = false;
-					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));
-					
-				}	
-				else{ //Pausing, turning to PLAY
-					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
-					getP5Canvas().isEnable = true; 
-					timer.start();
-				}	
-			}
-		});
+		playBtn.addActionListener(playBtnListener);
 		
 		if (getP5Canvas().isEnable)
 			playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
@@ -879,13 +913,9 @@ public class Main {
 		timerSubpanel.add(playBtn, "cell 1 0, align center");
 		
 		//Add Reset button to timerSubpanel
-		JButton resetBtn = new JButton("");
+		resetBtn = new JButton("");
 		resetBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconReset.png")));
-		resetBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				reset();
-			}
-		});
+		resetBtn.addActionListener(resetBtnListener);
 		timerSubpanel.add(resetBtn, "cell 1 0, align center");
 		
 		//Add Checkbox to checkBoxPanel
@@ -1079,15 +1109,15 @@ public class Main {
 		//***************************************** RIGHT PANEL *******************************************
 		rightPanel = new JPanel();
 		mainFrame.getContentPane().add(rightPanel, "cell 2 2,grow");
-		rightPanel.setLayout(new MigLayout("insets 0, gap 0", "[320.00,grow,center]", "[][][350.00,grow][][grow][grow]"));
+		rightPanel.setLayout(new MigLayout("insets 0, gap 2", "[320.00,grow,center]", "[6][][350.00,grow][][grow][grow]"));
 		
 		//Set up "Output" title
-		JLabel lblOutput = new JLabel("Output");
+		lblOutput = new JLabel("Output");
 		lblOutput.setLabelFor(rightPanel);
 		lblOutput.setFont(new Font("Lucida Grande", Font.BOLD, 14));
 		rightPanel.add(lblOutput, "cell 0 0");
 		
-		JLabel lblMacroscopid = new JLabel("Submicroscopic Level");
+		lblMacroscopid = new JLabel("Submicroscopic Level");
 		lblMacroscopid.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
 		rightPanel.add(lblMacroscopid, "cell 0 1");
 
@@ -1111,10 +1141,16 @@ public class Main {
 		
 		JPanel graphSet_2 = new JPanel();
 		
-		JLabel lblOutputMacroscopicLevel = new JLabel("Macroscopic Level");
+		//"Macrosopic Level" label
+		lblOutputMacroscopicLevel = new JLabel("Macroscopic Level");
 		lblOutputMacroscopicLevel.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
 		rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
-		//graphTabs.addTab("pH", null, graphSet_2, null); // this will get reactivated in Unit 8
+		//"Hide Water" label
+		//lblHideWater = new JLabel("Hide Water Molecules");
+		//lblHideWater.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		
+		cBoxHideWater =  new JCheckBox("Enable Molecule Hiding"); 
+		cBoxHideWater.addItemListener(cBoxHideWaterListener);
 
 		//Set up dashboard on Right Panel
 		dashboard = new JPanel();
@@ -1230,8 +1266,7 @@ public class Main {
 			});
 	        timer.setInitialDelay(pause);
 	        
-	        //Set up MouseListerns
-	        setupMouseListeners();
+
 	        
 
 	}
@@ -1250,22 +1285,14 @@ public class Main {
 		        		if(btnIds.size()<2)
 			        	{
 			        		btnIds.add(index);
-			        		//Grey out this button after it gets selected
-			        		//e.getComponent().setEnabled(false);
-			        		//Set background color
+			        		//Set selected as true this button after it gets selected
+			        	    ((JButton)e.getComponent()).setSelected(true);
 
-			        		//TODO: Use Buffered Image to add mask on loaded Icon
-			        		e.getComponent().setBackground(Color.gray);
-			        		//Set border color
 			        	}
 	        		}
 	        		else //If this button has been selected, deselect it
 	        		{
-	        			//e.getComponent().setEnabled(true);
-	        			//Set background color
-	        			e.getComponent().setBackground(null);
-	        			//Set border color
-	        			
+	        			((JButton)e.getComponent()).setSelected(false);
 	        			btnIds.remove(new Integer(index));
 	        		}
 	        	
@@ -1293,6 +1320,68 @@ public class Main {
 				// TODO Auto-generated method stub	
 			}
 	      };
+	}
+	
+	private void setupComponentListener()
+	{
+		playBtnListener = new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (getP5Canvas().isEnable){ //playing, turning to PAUSE					
+					//pause timer
+					timer.stop();
+					getP5Canvas().isEnable = false;
+					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));		
+				}	
+				else{ //Pausing, turning to PLAY
+					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
+					//Special case
+					if(selectedUnit ==3 && selectedSim==2) //Start the simulation
+					{
+						//ArrayList<String> names = new ArrayList<String>();
+						//ArrayList<Integer> counts = new ArrayList<Integer>();
+						String fixedName = null;
+						int count =5;
+						for( int i = 0;i<btnIds.size();i++)
+						{
+							//names.add(btnNames.get(btnIds.get(i)-btnStartId));
+							fixedName = new String(btnNames.get(btnIds.get(i)-btnStartId));
+							System.out.println("fixedName is "+fixedName);
+							getP5Canvas().addMolecule(fixedName,count);
+						}
+					}
+					
+					getP5Canvas().isEnable = true; 
+					timer.start();
+				
+				}	
+			}
+		};
+		
+		resetBtnListener = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				reset();
+			}
+		};
+		
+		cBoxHideWaterListener = new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED)  //Hide water
+				{
+					//Select all elements in tableview except water
+					
+				}
+				else if	(e.getStateChange() == ItemEvent.DESELECTED) //Show water
+				{
+					//Deselect water in tableview
+					if(tableView.contains("Water"))
+					{
+						int [] rows = new int [1];
+						rows[0] = tableView.indexOf("Water");
+						tableView.deselectRow(rows);
+					}
+				}
+			}
+		};
 	}
 	
 	  public  static int getComponentIndex(Component component) {

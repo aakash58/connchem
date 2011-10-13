@@ -50,7 +50,7 @@ public class TableSet extends JPanel {
 		
 		// Set up renderer and editor for the Favorite Color column.
 		table.setDefaultRenderer(Color.class, new ColorRenderer(true));
-		table.setDefaultEditor(Color.class, new ColorEditor(this));
+		//table.setDefaultEditor(Color.class, new ColorEditor(this));
 		// Add the scroll pane to this panel.
 		add(scrollPane);
 		Color c = new Color(245,245,245);

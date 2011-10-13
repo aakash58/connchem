@@ -23,10 +23,10 @@ public class ColorEditor extends AbstractCellEditor
     JColorChooser colorChooser;
     JDialog dialog;
     protected static final String EDIT = "edit";
-    private JPanel tableSet;
+    private JPanel tableView;
 
     public ColorEditor(JPanel parent) {
-    	tableSet = parent;
+    	tableView = parent;
             colorChooser = new JColorChooser();
       dialog = JColorChooser.createDialog(null,
                                         "Pick a Color",
@@ -50,9 +50,9 @@ public class ColorEditor extends AbstractCellEditor
                                                  int column) {
     	// Can not do TableView.UpdateUI 
     	getTableView().stopUpdating =true;
-    	getTableView().selectedRow =row;
+    	getTableView().colorChangingRow =row;
     	getTableView().table.addRowSelectionInterval(row, row);
-    	dialog.setLocation(((TableSet)tableSet).getMain().mainFrame.getSize().width-430-300, 80);
+    	dialog.setLocation(((TableView)tableView).getMain().mainFrame.getSize().width-430-300, 80);
     	dialog.setVisible(true);
         currentColor = (Color)value;
         return null;
@@ -60,7 +60,7 @@ public class ColorEditor extends AbstractCellEditor
 
 	public void stateChanged(ChangeEvent e) {
 		currentColor = colorChooser.getColor();
-		getTableView().table.setValueAt(currentColor, getTableView().selectedRow, 1);
+		getTableView().table.setValueAt(currentColor, getTableView().colorChangingRow, 1);
 	
 	}
 
@@ -71,8 +71,7 @@ public class ColorEditor extends AbstractCellEditor
 	}
 	private TableView getTableView()
 	{
-		Main main = ((TableSet)tableSet).getMain();
-		return main.getTableView();
+		return (TableView)tableView;
 	}
 }
 
