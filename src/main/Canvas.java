@@ -58,8 +58,20 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		for (int i=0; i<MAXCOMPOUND;i++){
 			lines[i].clear();
 		}
-		maxCount =8;
 		maxTime =60;
+		switch(main.selectedUnit)
+		{
+		case 1:
+		case 2:
+			maxCount =8;
+			
+			break;
+		case 3:
+		default:
+			maxCount = 160;
+			break;
+		}
+
 		
 		
 		if (main.elapsedTime !=null)
@@ -122,7 +134,19 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		g.rotate(-Math.PI/2.0);
 		g.setFont(new Font("Garamond", Font.PLAIN, 12));
 		g.setColor(Color.BLACK);
+		switch(main.selectedUnit)
+		{
+		case 1:
+		case 2:
 		g.drawString("# molecules", 0, 0);
+		break;
+		case 3:
+		case 4:
+			g.drawString("total mass", 0, 0);
+			break;
+		}
+		
+			
 		g.rotate(Math.PI/2.0);
 		g.translate(-12, -(h/2+30));
 		
@@ -131,7 +155,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		g.drawString("0", 6, h-margin);
 		g.setFont(new Font("Garamond", Font.PLAIN, 11));
 		g.setColor(Color.DARK_GRAY);
-		g.drawString(""+maxCount, 2, margin-5);
+		g.drawString(""+maxCount, 2, margin-8);
 		
 		satCount+=2;
 		
@@ -144,9 +168,37 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		if (Main.time>maxTime){
 			maxTime *=2;
 		}
-		//Rescale Y-axis and draw new line segment
+		
+		paintLines(g,w,h,w2,h2,margin);
+		
+		main.elapsedTime.setText(formatTime(Main.time));
+	
+
+		
+		//Paint time Limit on X-axis
+		g.setFont(new Font("Garamond", Font.PLAIN, 11));
+		g.setColor(Color.DARK_GRAY);
+		int mins = maxTime/60;
+		if (mins ==1)
+			g.drawString("1 min", w-38, h-6);
+		else 
+			g.drawString(maxTime/60+" mins", w-44, h-5);
+		//Draw X-grid
+		for (int i=1; i<mins;i++){
+			g.setColor(new Color(255,255,255,30));
+			g.drawLine(margin+w2*i/mins, margin/2, margin+w2*i/mins, margin/2+h2);
+		}
+		
+	}
+	
+	//Paint lines
+	private void paintLines(Graphics2D g,int w, int h,int w2, int h2,int margin)
+	{
 		int linePadding = 3;
-		int marginY = h+2-Compound.names.size()*linePadding;
+		//int marginY = h+2-Compound.names.size()*linePadding;
+		int marginY = h;
+		if(main.selectedUnit==1 || main.selectedUnit==2)
+		{
 		for (int i=0; i< Compound.names.size();i++){
 			int num2 = Compound.counts.get(i);
 			//Rescale Y-axis
@@ -166,38 +218,48 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				num1 = tmpLine.getNum2();
 			}	
 			//Draw one line segment at the end of existing line every time rendering
-			Line l = new Line(margin, marginY+i*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
+			Line l = new Line(margin, marginY+0*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
 			lines[i].add(l);
 			
 		}
-		main.elapsedTime.setText(formatTime(Main.time));
-		
-		//Highlight selected line if any of them has been selected
-		for (int i=0; i< MAXCOMPOUND;i++){
-			for (int index=0; index< lines[i].size();index++){
-				Line l = (Line) lines[i].get(index);
-				if (main.getTableView().selectedRowsContain(i))
-					l.paint(g,blinkingColor(main.getTableView().colors[i]));
-				else
-					l.paint(g,main.getTableView().colors[i]);
+		}
+		else if (main.selectedUnit==3)
+		{
+			for (int i=0; i< Compound.names.size();i++){
+
+					int index = i ;
+					String name = Compound.names.get(index);
+					float mass = Compound.moleculeWeight.get(index)* Compound.counts.get(index);
+				int num2 = (int) mass;
+				//Rescale Y-axis
+
+				if (num2>=maxCount){
+						maxCount *=2;
+				}
+				
+				//####Paint lines####
+				int num1 =0;
+				if (lines[i].size()>0){
+					Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
+					num1 = tmpLine.getNum2();
+				}	
+				//Draw one line segment at the end of existing line every time rendering
+				Line l = new Line(margin, marginY+0*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
+				lines[i].add(l);
+				
 			}
 		}
+		
+		//Highlight selected line if any of them has been selected
+		boolean blinkColor = false;
+		for (int i=0; i< Compound.names.size();i++){
+			blinkColor = (main.getTableView().selectedRowsContain(i))?true:false;					
+			for (int index=0; index< lines[i].size();index++){
+				Line l = (Line) lines[i].get(index);
+					l.paint(g,blinkingColor(main.getTableView().colors[i],blinkColor));
 
-		
-		//Paint time Limit on X-axis
-		g.setFont(new Font("Garamond", Font.PLAIN, 11));
-		g.setColor(Color.DARK_GRAY);
-		int mins = maxTime/60;
-		if (mins ==1)
-			g.drawString("1 min", w-38, h-6);
-		else 
-			g.drawString(maxTime/60+" mins", w-44, h-5);
-		//Draw X-grid
-		for (int i=1; i<mins;i++){
-			g.setColor(new Color(255,255,255,30));
-			g.drawLine(margin+w2*i/mins, margin/2, margin+w2*i/mins, margin/2+h2);
+			}
 		}
-		
 	}
 	
 	//Get molecules number from simulation before painting
@@ -337,9 +399,11 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		Color c1 = TableView.colors[index];
 		return c1;
 	}*/
-	public static Color blinkingColor(Color c1){
-		//int num = (int) ((count%26+1)*10);
-		int num = 30;
+	public Color blinkingColor(Color c1,boolean blinkColor){
+		
+		if(blinkColor)
+		{
+		int num = 50;
 		int r,g,b;
 		r = c1.getRed()+num;   
 		if (r>255) r = 255;
@@ -348,7 +412,11 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		b = c1.getBlue()+num;  
 		if (b>255) b = 255;
 		Color c2 = new Color(r, g,b);
+		//c2 = Color.gray;
 		return c2;
+		}
+		else
+			return c1;
 	}
 		
 	
@@ -401,20 +469,22 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					{
 						int index = i ;
 						String name = Compound.names.get(index);
-						float weight = Compound.moleculeWeight.get(index)* Compound.counts.get(index);
+						float mass = Compound.moleculeWeight.get(index)* Compound.counts.get(index);
 						DecimalFormat df = new DecimalFormat("###.##");
-						String weightStr = df.format(weight);
-						String tooltipText = new String(name+": "+weightStr+" g");
+						String massStr = df.format(mass);
+						String tooltipText = new String(name+": "+massStr+" g");
 						this.setToolTipText(tooltipText);
 					}
 				}
 			
 			}
 		}
-		if (!main.getTableView().selectedRowsContain(select))
+		/*
+		if (select!=-1 && !main.getTableView().selectedRowsContain(select))
 		{
 			main.getTableView().addSelectedRow(select);
 		}
+		*/
 	}
 	
 

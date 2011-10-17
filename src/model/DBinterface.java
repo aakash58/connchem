@@ -3,7 +3,15 @@ package model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.zip.ZipEntry;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.sql.*;
 
@@ -13,19 +21,71 @@ public class DBinterface {
 	
 	private Connection conn= null;
 	private static Statement stat = null;
+	private String dbFileName= new String("chemdb");
 	
 	public DBinterface()
 	{
+		
 		try{
 			Class.forName("org.sqlite.JDBC");
-			//Connection conn = DriverManager.getConnection("jdbc:sqlite:chemdb");
+			//ExtractFileFromJar();
+			//Connection conn = DriverManager.getConnection("jdbc:sqlite:"+dbFileName);
 			conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+		    
 			stat = conn.createStatement();
+			
 		}
 		catch (Exception e) {
 			System.out.println(e);
 		}
 		
+	}
+	
+	public void ExtractFileFromJar()
+	{
+		//Get path of DBinterface class
+		String thisDir = getClass().getResource("").getPath();
+		thisDir= thisDir.replace("file:", "");
+		String jarPath = thisDir.replace("!/model/", "");  //Get path of jar file
+		String destDir = thisDir.replace("Simulation.jar!/model/", "");  //Set destDir as the current folder in which jar file sits
+		String destFileName = new String(dbFileName);  //Set dest database file name as "chemdb"
+		
+		//System.out.println(thisDir);
+		try {
+			//Commented codes used to check output
+			
+			//FileWriter fw = new FileWriter("mylog.txt");
+			//PrintWriter out = new PrintWriter(fw);
+			//out.println("jarPath: "+jarPath);
+			//out.println("destDir: "+destDir);
+			
+			java.util.jar.JarFile jar = new java.util.jar.JarFile(jarPath);
+			//out.println("jar is :"+jar);
+			
+			ZipEntry entry = jar.getEntry("model/chemdb");
+			//out.println("entry.getName() :" + entry.getName());
+			
+			
+			File outputFile = new File(destDir, destFileName);
+			
+			//out.println("outputFile.getPath():"+outputFile.getPath());
+			//out.close();
+			
+				if (entry.isDirectory()) { // if its a directory, create it
+					outputFile.mkdir();
+				}
+				InputStream in = jar.getInputStream(entry);
+				FileOutputStream fos = new java.io.FileOutputStream(outputFile);
+				while (in.available() > 0) { // write contents of 'is' to 'fos'
+					fos.write(in.read());
+				}
+				fos.close();
+				in.close();
+
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static ArrayList dbConnect(String[] args) {

@@ -50,20 +50,34 @@ public class TableView extends JPanel {
 		scrollPane.setHorizontalScrollBar(jj);
 		//table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		table.getSelectionModel().addListSelectionListener(new RowListener());
-		/*table.addMouseListener(new MouseAdapter()
+		//table.getSelectionModel().addListSelectionListener(new RowListener());
+		table.addMouseListener(new MouseAdapter()
 		{
-		   public void mouseClicked(MouseEvent evt)
+		   public void mouseReleased(MouseEvent evt)
 		   {
-				if(evt.getSource() == table)
-				{
-				
-					int [] selectedRows = table.getSelectedRows();
-					evt.get
-			
-				}
+			   if(evt.getSource() == table)
+               {
+               
+               	int [] tempRows = table.getSelectedRows();
+               	if(tempRows.length==1) //If there is only one Selected Row, select it or deselect it
+               	{
+               		if(selectedRows==null || !selectedRowsContain(tempRows[0]))
+               		{
+               			selectedRows = tempRows;
+               		}
+               		else
+               		{
+               			selectedRows = null;
+               			table.clearSelection();
+               		}
+               	}
+               	else //If there is multiple rows get selected
+               	{
+               		selectedRows = table.getSelectedRows();
+               	}
+               	}
 		   }
-		});*/
+		});
 		table.getColumnModel().getColumn(0).setPreferredWidth(10);
 		table.getColumnModel().getColumn(1).setPreferredWidth(50);
 		table.getColumnModel().getColumn(2).setPreferredWidth(130);
@@ -99,16 +113,6 @@ public class TableView extends JPanel {
 		
 	}
 
-    private class RowListener implements ListSelectionListener {
-        public void valueChanged(ListSelectionEvent event) {
-            if (event.getValueIsAdjusting()) {
-                return;
-            }
-            int [] selectedRows = table.getSelectedRows();
-            //output.append("ROW SELECTION EVENT. ");
-            //outputSelection();
-        }
-    }
 
 	public Color getColor(int index) {
 		if (index<colors.length){
@@ -116,7 +120,7 @@ public class TableView extends JPanel {
 		}
 		return Color.BLACK;
 	}
-	
+	/*
 	public void setSelectedRow(int [] rows) {
 		selectedRows = rows;
 		table.clearSelection();
@@ -127,37 +131,52 @@ public class TableView extends JPanel {
 		}
 		table.updateUI();
 		}
-	}
-	public boolean addSelectedRow( int index)
+	}*/
+
+	public boolean addSelectedRow( int [] rows)
 	{
-		if(selectedRowsContain(index)) //If this row has been selected
+		if( rows==null || rows.length<=0)
 			return false;
 		else
 		{
-			if(index>=0 && index<table.getRowCount())
-			{
-				int [] tempRows = selectedRows.clone();
-				selectedRows = new int [selectedRows.length+1];
-				int i = 0;
-				for( i = 0;i<tempRows.length;i++)
+				if(selectedRows!=null)
 				{
-					selectedRows[i] = tempRows[i];
+					List<Integer> tempRows = new LinkedList<Integer>();
+					for(int index:selectedRows)
+						tempRows.add(index);
+					for(int addIndex:rows)
+						if(!tempRows.contains(addIndex))
+							tempRows.add(addIndex);
+					selectedRows = new int [tempRows.size()];
+					int i = 0;
+					for( i = 0;i<tempRows.size();i++)
+					{
+						selectedRows[i] = tempRows.get(i).intValue();
+					}
 				}
-				selectedRows[i] = index;
+				else //selectedRows ==null
+				{
+					selectedRows = new int [rows.length];
+					for(int i =0;i<rows.length;i++)
+						selectedRows[i] = rows[i];
+				}
+				table.clearSelection();
+				for( int selectedIndex:selectedRows)
+				table.getSelectionModel().addSelectionInterval(selectedIndex, selectedIndex);
+				
 				return true;
-			}
-			return false;
 		}
 		
 	}
-	public void deselectRow(int [] rows)
+
+	public void deselectRows(int [] rows)
 	{
 		if(selectedRows!=null)
 		{
 			if(selectedRows.length>0)
 			{
-				List newSelectedRows = new LinkedList<Integer>();
-				List deselectRows = new LinkedList<Integer>();
+				List<Integer> newSelectedRows = new LinkedList<Integer>();
+				List<Integer> deselectRows = new LinkedList<Integer>();
 				for(int deselectRow:rows) //Translate Rows to list
 				{
 					deselectRows.add(deselectRow);
@@ -172,9 +191,25 @@ public class TableView extends JPanel {
 				selectedRows = new int[newSelectedRows.size()];
 				for (int i = 0; i < newSelectedRows.size(); i++) {
 					selectedRows[i] = ((Integer)newSelectedRows.get(i)).intValue();
+					
 				}
+				
+				//Clear table selection
+				table.getSelectionModel().clearSelection();
+				//Add selected rows to table
+				for( int i = 0;i<selectedRows.length;i++)
+				{
+					//table.setRowSelectionInterval(selectedRows[i], selectedRows[i]);
+					table.getSelectionModel().addSelectionInterval(selectedRows[i], selectedRows[i]);
+				}
+				
 			}
 		}
+	}
+	public void selectAllRows()
+	{
+		table.selectAll();
+		selectedRows = table.getSelectedRows();
 	}
 	public boolean selectedRowsContain(int row)
 	{

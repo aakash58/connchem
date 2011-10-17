@@ -212,7 +212,8 @@ public class Main {
 	private MouseListener mulBtnListener;  //mouseListener used for 6 buttons in Unit3 Sim1
 	private ArrayList<Integer> btnIds = new ArrayList<Integer>(); //Button Ids in Unit3 Sim2
 	private ArrayList<String> btnNames = new ArrayList<String>(); //Button names in Unit3 Sim2
-	private int btnStartId =-1;
+	//private int btnStartId =-1;
+	private boolean started = false; //boolean flag for unit 3 sim 2
 	
 	/**
 	 * Launch the application.
@@ -392,6 +393,9 @@ public class Main {
 		if (dynamicPanel!=null){
 			dynamicPanel.removeAll();
 			defaultSetMolecules =  new ArrayList();
+			started = false;
+			btnIds.clear();
+			btnNames.clear();
 
 			if(! (selectedUnit==3 &&selectedSim==2))
 			{
@@ -503,8 +507,6 @@ public class Main {
 						btMolecule.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
 						//At the same time store fixed names into btnNames list
 						this.btnNames.add(fixedName);
-						if(i==0)
-							btnStartId = getComponentIndex(btMolecule);
 						btMolecule.addMouseListener(mulBtnListener);
 			}
 				}
@@ -683,7 +685,10 @@ public class Main {
 			rightPanel.remove(lblOutput);
 			rightPanel.remove(lblMacroscopid);
 			rightPanel.add(lblOutput, "cell 0 1");
+			if(( selectedSim==1 && (selectedSet==4||selectedSet==6||selectedSet==7||selectedSet==10))||selectedSim==2)
 			rightPanel.add(cBoxHideWater, "cell 0 3");
+			else
+				rightPanel.remove(cBoxHideWater);
 		}
 		updateDashboard();  //Reset dashboard on right panel
 	}
@@ -1149,7 +1154,7 @@ public class Main {
 		//lblHideWater = new JLabel("Hide Water Molecules");
 		//lblHideWater.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
 		
-		cBoxHideWater =  new JCheckBox("Enable Molecule Hiding"); 
+		cBoxHideWater =  new JCheckBox("Hide Water Molecules"); 
 		cBoxHideWater.addItemListener(cBoxHideWaterListener);
 
 		//Set up dashboard on Right Panel
@@ -1278,6 +1283,8 @@ public class Main {
 	        public void mouseClicked(MouseEvent e) {
 	        	int index = getComponentIndex(e.getComponent());
 	        	
+	        	if(!started) //Before simulation started user can change selections, but after simulation started they cant
+	        	{
 	        	if(index!=-1)
 	        	{
 	        		if(!btnIds.contains(index))	//If this button has not been selected yet
@@ -1296,6 +1303,7 @@ public class Main {
 	        			btnIds.remove(new Integer(index));
 	        		}
 	        	
+	        	}
 	        	}
 	        	
 	        }
@@ -1333,25 +1341,46 @@ public class Main {
 					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPlay.png")));		
 				}	
 				else{ //Pausing, turning to PLAY
-					playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
+					
 					//Special case
-					if(selectedUnit ==3 && selectedSim==2) //Start the simulation
+					if(selectedUnit ==3 && selectedSim==2)
 					{
-						//ArrayList<String> names = new ArrayList<String>();
-						//ArrayList<Integer> counts = new ArrayList<Integer>();
-						String fixedName = null;
-						int count =5;
-						for( int i = 0;i<btnIds.size();i++)
+						if(!started) //If simulation has not started yet
 						{
-							//names.add(btnNames.get(btnIds.get(i)-btnStartId));
-							fixedName = new String(btnNames.get(btnIds.get(i)-btnStartId));
-							System.out.println("fixedName is "+fixedName);
-							getP5Canvas().addMolecule(fixedName,count);
+							if(btnIds.size()==2) //If there are two molecules have been selected
+							{
+							String fixedName = null;
+							String waterName = new String("Water");
+							int count =5, waterCount = 15;
+							for( int i = 0;i<btnIds.size();i++)
+							{
+								//names.add(btnNames.get(btnIds.get(i)-btnStartId));
+								fixedName = new String(btnNames.get((btnIds.get(i)-1)/2)); //Label ids are all even number
+								getP5Canvas().addMolecule(fixedName,count);
+							}
+							getP5Canvas().addMolecule(waterName, waterCount);
+						started = true;
+						//Disable all molecule buttons on dynamic panel
+							for( Component btn:dynamicPanel.getComponents())
+								if(btn.getClass().getName().equals("javax.swing.JButton"))
+								{
+									if(!((JButton)btn).isSelected()) //We disable those non-selected button
+										btn.setEnabled(false);
+								}
+									
+									playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
+									getP5Canvas().isEnable = true; 
+									timer.start();
+						}
+						}
+						else //Simulation already started
+						{
+							playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
+							getP5Canvas().isEnable = true; 
+							timer.start();
 						}
 					}
-					
-					getP5Canvas().isEnable = true; 
-					timer.start();
+	
 				
 				}	
 			}
@@ -1365,20 +1394,30 @@ public class Main {
 		
 		cBoxHideWaterListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if(tableView.contains("Water"))
+				{
 				if (e.getStateChange() == ItemEvent.SELECTED)  //Hide water
 				{
 					//Select all elements in tableview except water
-					
+					tableView.selectAllRows();
+					int [] rows = new int [1];
+					rows[0] = tableView.indexOf("Water");
+					tableView.deselectRows(rows);
 				}
 				else if	(e.getStateChange() == ItemEvent.DESELECTED) //Show water
 				{
-					//Deselect water in tableview
-					if(tableView.contains("Water"))
+					//Show water 
+					if(!tableView.selectedRowsIsEmpty())
 					{
-						int [] rows = new int [1];
-						rows[0] = tableView.indexOf("Water");
-						tableView.deselectRow(rows);
+						int waterIndex = tableView.indexOf("Water");
+						if(!tableView.selectedRowsContain(waterIndex))
+						{
+							int [] rows = {waterIndex};
+							tableView.addSelectedRow(rows);
+						}
 					}
+					
+				}
 				}
 			}
 		};
@@ -1483,7 +1522,7 @@ public class Main {
 				try {
 					final ArrayList sims = getSims(unitNo);
 					//Make sure we get sim information from yaml file
-			
+					
 					subMenuArrayList[i] =  new ArrayList();
 					for (int j = 0; j<sims.size(); j++) {
 						HashMap sim = (HashMap)sims.get(j);
@@ -1519,8 +1558,8 @@ public class Main {
 								tableSet.setSelectedRow(0);
 							}
 						});
-					}
 					
+				}
 				} catch (Exception e) {
 					System.out.println("No Submenu Items: " + e);
 				}
