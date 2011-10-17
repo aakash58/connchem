@@ -417,222 +417,6 @@ units:
       - compound: "Water"
         qty: 0
         cap: 95
-  - sim: 3
-    name: "Precipitation"
-    sets:
-    - set: 1
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Potassium-Bromide"
-        qty: 5
-        cap: 15
-      - compound: "Silver-Nitrate"
-        qty: 5
-        cap: 15
-      - compound: "Ammonium-Chloride"
-        qty: 5
-        cap: 15
-      - compound: "Sodium-Carbonate"
-        qty: 5
-        cap: 15
-      - compound: "Sodium-Hydroxide"
-        qty: 5
-        cap: 15
-      - compound: "Lithium-Nitrate"
-        qty: 5
-        cap: 15
-    - set: 2
-      compounds: 
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Lithiuhm Nitrate"
-        qty: 5
-        cap: 15
-      - compound: "Potassium Bromide"
-        qty: 5
-        cap: 15
-    - set: 3
-      compounds: 
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Silver Nitrate"
-        qty: 5
-        cap: 15
-      - compound: "Lithium Nitrate"
-        qty: 5
-        cap: 15
-    - set: 4
-      compounds: 
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Ammonium Chloride"
-        qty: 5
-        cap: 15
-      - compound: "Lithium Nitrate"
-        qty: 5
-        cap: 15
-    - set: 5
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Sodium Carbonate"
-        qty: 5
-        cap: 15
-      - compound: "Lithium Nitrate"
-        qty: 5
-        cap: 15               
-    - set: 6
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Sodium Hydroxide"
-        qty: 5
-        cap: 15
-      - compound: "Lithium Nitrate"
-        qty: 5
-        cap: 15
-    - set: 7
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Ammonium Chloride"
-        qty: 5
-        cap: 15
-      - compound: "Potassium Bromide"
-        qty: 5
-        cap: 15
-    - set: 8
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Sodium Carbonate"
-        qty: 5
-        cap: 15
-      - compound: "Potassium Nitrate"
-        qty: 5
-        cap: 15   
-    - set: 9
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Sodium Hydroxide"
-        qty: 5
-        cap: 15
-      - compound: "Potassium Bromide"
-        qty: 5
-        cap: 15
-    - set: 10
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Silver Nitrate"
-        qty: 5
-        cap: 15
-      - compound: "Ammonium Chloride"
-        qty: 5
-        cap: 15
-    - set: 11
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Sodium Carbonate"
-        qty: 5
-        cap: 15
-      - compound: "Silver Nitrate"
-        qty: 5
-        cap: 15
-    - set: 12
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Ammonium Chloride"
-        qty: 5
-        cap: 15
-      - compound: "Lithium Nitrate"
-        qty: 5
-        cap: 15
-    - set: 13
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Sodium Carbonate"
-        qty: 5
-        cap: 15
-      - compound: "Ammonium Chloride"
-        qty: 5
-        cap: 15
-    - set: 14
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Sodium Hydroxide"
-        qty: 5
-        cap: 15
-      - compound: "Ammonium Chloride"
-        qty: 5
-        cap: 15
-    - set: 15
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Sodium Carbonate"
-        qty: 5
-        cap: 15
-      - compound: "Sodium Hydroxide"
-        qty: 5
-        cap: 15
-  - sim: 4
-    name: "Redox"
-    sets:
-    - set: 1
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Magnesium"
-        qty: 5
-        cap: 15   
-      - compound: "Copper-II-Sulphate"
-        qty: 5
-        cap: 15
-    - set: 2
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Chromium-III-Oxide"
-        qty: 5
-        cap: 15
-      - compound: "Aluminium"
-        qty: 5
-        cap: 15
-    - set: 3
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 95
-      - compound: "Zinc"
-        qty: 5
-        cap: 15
-      - compound: "Copper-II-Sulphate"
-        qty: 5
-        cap: 15
 - unit: 4
   name: "Pressure and Gas Laws"
   sims:
@@ -663,10 +447,34 @@ units:
         qty: 10
 - unit: 5
   name: "Thermodynamics"
+  sims:
+  - sim: 1
+    name: "Undefined"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 40
 - unit: 6
   name: "Kinetics"
+  sims:
+  - sim: 1
+    name: "Undefined"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 40
 - unit: 7
   name: "Chemical Equilibrium"
+  sims:
+  - sim: 1
+    name: "Undefined"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 40
 - unit: 8
   name: "Acids and Bases"
   sims:
@@ -837,3 +645,11 @@ units:
         qty: 2
 - unit: 9
   name: "Nuclear"
+  sims:
+  - sim: 1
+    name: "Undefined"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 40
