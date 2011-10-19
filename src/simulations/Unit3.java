@@ -161,6 +161,10 @@ public class Unit3 extends UnitBase {
 
 			}
 		}
+		else if (sim ==2)
+		{
+			reactionHappened = reactSolubility(simulation);
+		}
 		
 		//If reaction has taken place,update molecule counts to render correct chart
 		if(reactionHappened)
@@ -1356,6 +1360,138 @@ public class Unit3 extends UnitBase {
 		} 
 			return false;
 	}
+	
+	/******************************************************************
+	 * FUNCTION : reactSolubility 
+	 * DESCRIPTION : Reaction for Sim 2 all sets
+	 * 
+	 * INPUTS : simulation(Simulation) OUTPUTS: None
+	 *******************************************************************/
+	public boolean reactSolubility(Simulation simulation) {
+
+		
+		if (!p5Canvas.killingList.isEmpty()) {
+			// If it is dissolving process
+			if (p5Canvas.killingList.get(0).getName().equals("Potassium-Bromide")
+					|| p5Canvas.killingList.get(0).getName().equals("Silver-Nitrate") || p5Canvas.killingList.get(0).getName().equals("Ammonium-Chloride")||
+					p5Canvas.killingList.get(0).getName().equals("Sodium-Carbonate") ||	p5Canvas.killingList.get(0).getName().equals("Sodium-Hydroxide") ||
+					p5Canvas.killingList.get(0).getName().equals("Lithium-Nitrate")) {
+				if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
+
+					int numToKill = p5Canvas.killingList.size();
+					Molecule[] mOld = new Molecule[numToKill];
+					for (int i = 0; i < numToKill; i++)
+						mOld[i] = (Molecule) p5Canvas.killingList.get(i);
+
+					Molecule mNew = null;
+					Molecule mNew2 = null;
+					float offsetX = 0; // Set an offset to spawn position to
+										// make it
+										// look real
+
+					// Actually there is only one reaction going in each frame
+					for (int i = 0; i < p5Canvas.products.size(); i++) {
+						Vec2 loc = mOld[0].getPosition();
+						float x1;
+						offsetX = mOld[0].getMaxSize() / 5;
+						// Set an offset x for silver-ion
+						if (p5Canvas.products.get(i).equals("Silver-Ion") ||p5Canvas.products.get(i).equals("Potassium-Ion")||p5Canvas.products.get(i).equals("Ammonium")
+								|| p5Canvas.products.get(i)
+										.equals("Sodium-Ion")||p5Canvas.products.get(i).equals("Lithium-Ion")) 
+							x1 = PBox2D.scalarWorldToPixels(loc.x)
+									+ mOld[0].getMaxSize() / 2 - offsetX;
+						else
+							x1 = PBox2D.scalarWorldToPixels(loc.x) - offsetX;
+						float y1 = p5Canvas.h * 0.77f
+								- PBox2D.scalarWorldToPixels(loc.y);
+						Vec2 newVec = new Vec2(x1, y1);
+						mNew = new Molecule(newVec.x, newVec.y,
+								p5Canvas.products.get(i), box2d, p5Canvas,
+								(float) (Math.PI / 2));
+
+						molecules.add(mNew);
+
+						if (i == 0)
+							mNew.body.setLinearVelocity(mOld[0].body
+									.getLinearVelocity());
+
+						else {
+							mNew.body.setLinearVelocity(mOld[0].body
+									.getLinearVelocity());
+						}
+					}
+					for (int i = 0; i < numToKill; i++)
+						mOld[i].destroy();
+
+					p5Canvas.products.clear();
+					p5Canvas.killingList.clear();
+				}
+			} 
+			/*
+			else // Reaction: Silver-Ion reacts with Chlorine, generate
+					// Silver-Chloride
+			{
+				if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
+					Molecule silverIon = null;
+					Molecule chloride = null;
+					// Get Iron and copperIon reference
+					if (p5Canvas.killingList.get(0).getName()
+							.equals("Silver-Ion")) {
+						silverIon = (Molecule) p5Canvas.killingList.get(0);
+						chloride = (Molecule) p5Canvas.killingList.get(1);
+					} else {
+						chloride = (Molecule) p5Canvas.killingList.get(0);
+						silverIon = (Molecule) p5Canvas.killingList.get(1);
+					}
+
+					Molecule silverChloride = null;
+
+					Vec2 loc = null;
+
+					// Actually there is only one reaction going in each frame
+					for (int i = 0; i < p5Canvas.products.size(); i++) {
+						loc = silverIon.getPosition();
+						float x1 = PBox2D.scalarWorldToPixels(loc.x);
+						float y1 = p5Canvas.h * 0.77f
+								- PBox2D.scalarWorldToPixels(loc.y);
+						Vec2 newVec = new Vec2(x1, y1);
+
+						silverChloride = new Molecule(newVec.x, newVec.y,
+								p5Canvas.products.get(i), box2d, p5Canvas,
+								(float) (Math.PI / 2));
+						molecules.add(silverChloride);
+						silverChloride.body.setLinearVelocity(silverIon.body
+								.getLinearVelocity());
+
+					}
+
+					silverIon.destroy();
+					chloride.destroy();
+
+					// Set up anchors if they have not been set up yet.
+					if (!isAnchorSetup) {
+						Vec2 pos = null;
+						for (int i = 0; i < simulation.getAnchorNum(); i++) {
+							pos = simulation.getAnchorPos(i);
+							Anchor anchor = new Anchor(pos.x, pos.y, box2d,
+									p5Canvas);
+							State.anchors.add(anchor);
+						}
+						isAnchorSetup = true;
+
+					}
+
+					p5Canvas.products.clear();
+					p5Canvas.killingList.clear();
+					return true;
+				}
+			}
+			*/
+		}
+		return false;
+
+
+	}
 
 	/******************************************************************
 	 * FUNCTION : pickBottomOne DESCRIPTION : Pick a molecule which is under a
@@ -1631,16 +1767,48 @@ public class Unit3 extends UnitBase {
 	 *******************************************************************/
 	private ArrayList<String> getDissolutionProducts(ArrayList<String> collider) {
 		ArrayList<String> products = new ArrayList<String>();
+		//Sim 1 set 4 and sim 2 AgNO3
 		if (collider.contains("Silver-Nitrate")) {
 			products.add("Silver-Ion");
 			products.add("Nitrate");
-		} else if (collider.contains("Copper-II-Sulfate")) {
+		} 
+		//Sim 1 set 6
+		else if (collider.contains("Copper-II-Sulfate")) {
 			products.add("Copper-II");
 			products.add("Sulfate");
-		} else if (collider.contains("Sodium-Chloride")) {
+		} 
+		//Sim 1 set 10
+		else if (collider.contains("Sodium-Chloride")) {
 			products.add("Sodium-Ion");
 			products.add("Chloride");
-		} else {
+		}
+		//Sim 2 KBr
+		else if (collider.contains("Potassium-Bromide")){
+			products.add("Potassium-Ion");
+			products.add("Bromine-Ion");
+		}
+		//Sim 2 NH4Cl
+		else if (collider.contains("Ammonium-Chloride")){
+			products.add("Ammonium");
+			products.add("Chloride");
+		}
+		//Sim 2 Na2CO3
+		else if (collider.contains("Sodium-Carbonate")){
+			products.add("Sodium-Ion");
+			products.add("Sodium-Ion");
+			products.add("Carbonate");
+		}
+		//Sim 2 NaOH
+		else if (collider.contains("Sodium-Hydroxide")){
+			products.add("Sodium-Ion");
+			products.add("Hydroxide");
+		}
+		//Sim 2 LiNO3
+		else if (collider.contains("Lithium-Nitrate")){
+			products.add("Lithium-Ion");
+			products.add("Nitrate");
+		}
+		else {
 			// return null;
 		}
 		return products;
@@ -1691,6 +1859,11 @@ public class Unit3 extends UnitBase {
 				break;
 
 			}
+		}
+		else if (sim ==2)
+		{
+			clearAllMoleculeForce();
+			computeForceSolubility();
 		}
 
 	}
@@ -2208,62 +2381,6 @@ public class Unit3 extends UnitBase {
 
 
 		for (int i = 0; i < State.molecules.size(); i++) {
-			/*
-			if (molecules.get(i).getName().equals("Lithium-Sulfide")) // Compute
-			// force for
-			// copper-ion,
-			// in order
-			// to
-			// attract
-			// them to
-			// copper
-			{
-
-				thisMole = molecules.get(i);
-				for (int thisE = 0; thisE < thisMole.getNumElement(); thisE++) { // Select
-					// element
-
-					thisLoc.set(thisMole.getElementLocation(thisE));
-					thisCharge = thisMole.elementCharges.get(thisE);
-					thisMole.sumForceX[thisE] = 0;
-					thisMole.sumForceY[thisE] = 0;
-					for (int k = 0; k < molecules.size(); k++) { // Go check forces
-						// from
-						// other
-						// molecules
-						if (k == i)
-							continue;
-						otherMole = molecules.get(k);
-						if (otherMole.getName().equals("Lithium-Sulfide")) // We are
-						// looking
-						// for
-						// chloride
-						{
-							for (int otherE = 0; otherE < otherMole.getNumElement(); otherE++)
-							{
-							otherLoc.set(otherMole.getElementLocation(otherE));
-							otherCharge = otherMole.elementCharges.get(otherE);
-							if (thisLoc == null || otherLoc == null)
-								continue;
-							xValue = thisLoc.x - otherLoc.x ;
-							yValue = thisLoc.y - otherLoc.y ;
-							dis = (float) Math.sqrt(xValue * xValue + yValue
-									* yValue);
-							forceX = (float) (xValue / dis)/dis * scale;
-							forceY = (float) (yValue / dis)/dis * scale;
-
-							// Add attraction force to sodium-Ion
-							forceDirection = thisCharge * otherCharge;
-							//Repulsive force if forceDirection >0
-							//Else it is attractive force
-							thisMole.sumForceX[thisE] += forceX*forceDirection;
-							thisMole.sumForceY[thisE] += forceY*forceDirection;
-							}
-
-						}
-					}
-				}
-			}*/
 			
 			
 			// Check position of other molecules, in case they are not going too
@@ -2285,6 +2402,150 @@ public class Unit3 extends UnitBase {
 		} //End loop
 
 	}
+	
+	// Compute force for sim 2
+		private void computeForceSolubility() {
+			Molecule thisMole = null;
+			Molecule otherMole = null;
+			Vec2 thisLoc = new Vec2();
+			Vec2 otherLoc = new Vec2();
+			float xValue = 0;
+			float yValue = 0;
+			float dis = 0;
+			float forceX = 0;
+			float forceY = 0;
+			float scale = 0.15f;
+			float chlorideScale = 0.1f;
+			float anchorScale = 1.5f;
+			float forceYCompensation = 0.05f;
+			float gravityCompensation = 0.2f;
+			float topBoundary = p5Canvas.h / 2;
+			Anchor anchor = null;
+			
+			for (int i = 0; i < molecules.size(); i++) {
+				/*
+				if (molecules.get(i).getName().equals("Silver-Ion")) // Compute
+																		// force for
+																		// copper-ion,
+																		// in order
+																		// to
+																		// attract
+																		// them to
+																		// copper
+				{
+
+					thisMole = molecules.get(i);
+					for (int thisE = 0; thisE < thisMole.getNumElement(); thisE++) { // Select
+																						// element
+
+						thisLoc.set(thisMole.getElementLocation(thisE));
+						thisMole.sumForceX[thisE] = 0;
+						thisMole.sumForceY[thisE] = 0;
+						for (int k = 0; k < molecules.size(); k++) { // Go check
+																		// forces
+																		// from
+																		// other
+																		// molecules
+							if (k == i)
+								continue;
+							otherMole = molecules.get(k);
+							if (otherMole.getName().equals("Chloride")) // We are
+																		// looking
+																		// for
+																		// chloride
+							{
+								for (int otherE = 0; otherE < otherMole
+										.getNumElement(); otherE++)
+									otherLoc.set(otherMole
+											.getElementLocation(otherE));
+								if (thisLoc == null || otherLoc == null)
+									continue;
+								xValue = otherLoc.x - thisLoc.x;
+								yValue = otherLoc.y - thisLoc.y;
+								dis = (float) Math.sqrt(xValue * xValue + yValue
+										* yValue);
+								forceX = (float) (xValue / dis) * scale;
+								forceY = (float) (yValue / dis) * scale;
+
+								// Add attraction force to sodium-Ion
+								thisMole.sumForceX[thisE] += forceX;
+								thisMole.sumForceY[thisE] += forceY
+										+ forceYCompensation;
+								// At the same time add attraction force to Chloride
+								// In this case, number of both Silver and Chloride
+								// elements are 1;
+								otherMole.sumForceX[thisE] += forceX * (-1)
+										* chlorideScale;
+								otherMole.sumForceY[thisE] += (forceY + forceYCompensation)
+										* (-1) * chlorideScale;
+
+							}
+						}
+
+					}
+				}
+				// If there are some chloride have been created
+				// Pull them to anchors
+				else if (molecules.get(i).getName().equals("Silver-Chloride")) {
+					float disBoundary = 50;
+					float silverChlorideScale = 8f;
+					thisMole = molecules.get(i);
+
+
+					for (int e = 0; e < thisMole.getNumElement(); e++) {
+						int indexCharge = thisMole.elementCharges.get(e);
+						Vec2 locIndex = thisMole.getElementLocation(e);
+						thisMole.sumForceWaterX[e] = 0;
+						thisMole.sumForceWaterY[e] = 0;
+						thisMole.sumForceX[e] = 0;
+						thisMole.sumForceY[e] = 0;
+						for (int k = 0; k < molecules.size(); k++) {
+							if (k == i)
+								continue;
+							Molecule m = molecules.get(k);
+							if (m.getName().equals("Silver-Chloride")) // Find
+																		// another
+																		// silver-chloride
+							{
+								for (int e2 = 0; e2 < m.getNumElement(); e2++) {
+									Vec2 loc = m.getElementLocation(e2);
+									float x = locIndex.x - loc.x;
+									float y = locIndex.y - loc.y;
+									dis = (float) Math.sqrt(x * x + y * y);
+									forceX = (x / dis) / (float)(Math.sqrt(dis))
+											* silverChlorideScale;
+									forceY = (y / dis) / (float)(Math.sqrt(dis))
+											* silverChlorideScale;
+
+									int charge = m.elementCharges.get(e2);
+									int mul = charge * indexCharge;
+									// If mul>0 replusive force
+									// If mul<0 attractive force
+									thisMole.sumForceX[e] += mul * forceX;
+									thisMole.sumForceY[e] += mul * forceY;
+
+								}
+							}
+						}
+					}
+				}*/
+				// Check position of other molecules, in case they are not going too
+				// high
+				if (true) {
+					thisMole = molecules.get(i);
+					Vec2 pos = box2d.coordWorldToPixels(thisMole.getPosition());
+					if (pos.y < topBoundary) {
+						for (int thisE = 0; thisE < thisMole.getNumElement(); thisE++) { // Select
+																							// element
+
+							thisMole.sumForceX[thisE] += 0;
+							thisMole.sumForceY[thisE] += (gravityCompensation) * -1;
+
+						}
+					}
+				}
+			}
+		}
 
 	@Override
 	protected void applyForce(int sim, int set) {
@@ -2326,6 +2587,10 @@ public class Unit3 extends UnitBase {
 				break;
 
 			}
+		}
+		else if (sim==2)
+		{
+			super.applyForce(sim, set);
 		}
 
 		this.frameCounter++;
