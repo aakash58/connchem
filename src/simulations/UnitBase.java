@@ -642,6 +642,8 @@ public abstract class UnitBase {
 		}
 		if (res) // If there is enough space, add compounds
 		{
+			if(compoundName.equals("Sodium-Carbonate"))
+				angle =0;
 			for (int i = 0; i < count; i++) {
 				float x, y;
 

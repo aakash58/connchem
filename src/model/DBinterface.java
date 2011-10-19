@@ -21,6 +21,7 @@ public class DBinterface {
 	
 	private Connection conn= null;
 	private static Statement stat = null;
+	private String destDir = null;
 	private String dbFileName= new String("chemdb");
 	
 	public DBinterface()
@@ -28,9 +29,28 @@ public class DBinterface {
 		
 		try{
 			Class.forName("org.sqlite.JDBC");
-			//ExtractFileFromJar();
-			//Connection conn = DriverManager.getConnection("jdbc:sqlite:"+dbFileName);
-			conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+			
+			
+			//Distribution Configuration
+			ExtractFileFromJar();
+			boolean exists = (new File(destDir, dbFileName)).exists();
+			if (exists) {
+			    // DB file is in the same directory with jar file
+				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFileName);
+			} 
+			/*else {
+			    // Go deep into compressed file to look for db file
+				conn = DriverManager.getConnection("jdbc:sqlite:./model/"+dbFileName);
+			}*/
+			
+			
+			/*
+			//Debug Configuration
+			String dbPath = ClassLoader.getSystemResource("model/"+dbFileName).toString();
+			dbPath = dbPath.replace("file:", "");
+			//System.out.println("dbPath="+dbPath);
+			conn = DriverManager.getConnection("jdbc:sqlite:"+dbPath);
+			*/
 		    
 			stat = conn.createStatement();
 			
@@ -45,29 +65,30 @@ public class DBinterface {
 	{
 		//Get path of DBinterface class
 		String thisDir = getClass().getResource("").getPath();
-		thisDir= thisDir.replace("file:", "");
-		String jarPath = thisDir.replace("!/model/", "");  //Get path of jar file
-		String destDir = thisDir.replace("Simulation.jar!/model/", "");  //Set destDir as the current folder in which jar file sits
-		String destFileName = new String(dbFileName);  //Set dest database file name as "chemdb"
 		
-		//System.out.println(thisDir);
+		if(thisDir.contains("file:"))  //Mac system path
+			thisDir= thisDir.replace("file:", "");
+		else  //Windows system path "/C:/", we need to get rid of the first /
+			thisDir= thisDir.substring(1);
+		
+		System.out.println("thisDir is "+thisDir);
+		String jarPath = thisDir.replace("!/model/", "");  //Get path of jar file
+		destDir = thisDir.replace("Simulation.jar!/model/", "");  //Set destDir as the current folder in which jar file sits
+
 		try {
-			//Commented codes used to check output
 			
-			//FileWriter fw = new FileWriter("mylog.txt");
-			//PrintWriter out = new PrintWriter(fw);
-			//out.println("jarPath: "+jarPath);
-			//out.println("destDir: "+destDir);
-			
+			System.out.println("jarPath is "+jarPath);
 			java.util.jar.JarFile jar = new java.util.jar.JarFile(jarPath);
-			//out.println("jar is :"+jar);
+			
 			
 			ZipEntry entry = jar.getEntry("model/chemdb");
 			//out.println("entry.getName() :" + entry.getName());
 			
 			
-			File outputFile = new File(destDir, destFileName);
+			File outputFile = new File(destDir, dbFileName);
 			
+			System.out.println("destDir is:"+destDir);
+			System.out.println("dbFileName is:"+dbFileName);
 			//out.println("outputFile.getPath():"+outputFile.getPath());
 			//out.close();
 			

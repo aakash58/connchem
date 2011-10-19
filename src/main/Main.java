@@ -1380,6 +1380,12 @@ public class Main {
 							timer.start();
 						}
 					}
+					else //General case
+					{
+						playBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png48x48/iconPause.png")));
+						getP5Canvas().isEnable = true; 
+						timer.start();
+					}
 	
 				
 				}	
