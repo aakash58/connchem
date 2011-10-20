@@ -23,6 +23,7 @@ public class DBinterface {
 	private static Statement stat = null;
 	private String destDir = null;
 	private String dbFileName= new String("chemdb");
+	private String jarFileName = new String("Simulation.jar");
 	
 	public DBinterface()
 	{
@@ -33,14 +34,16 @@ public class DBinterface {
 			
 			//Distribution Configuration
 			ExtractFileFromJar();
-			boolean exists = (new File(destDir, dbFileName)).exists();
-			if (exists) {
+			File dbFile = new File(destDir, dbFileName);
+			//System.out.println("dbFile is :"+dbFile);
+			//System.out.println("dbFile.getPath() is :"+dbFile.getPath());
+			
+			if (dbFile.exists()) {
 			    // DB file is in the same directory with jar file
-				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFileName);
+				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
 			} 
 			/*else {
-			    // Go deep into compressed file to look for db file
-				conn = DriverManager.getConnection("jdbc:sqlite:./model/"+dbFileName);
+			   //TODO: We cant find a databse file
 			}*/
 			
 			
@@ -68,29 +71,38 @@ public class DBinterface {
 		
 		if(thisDir.contains("file:"))  //Mac system path
 			thisDir= thisDir.replace("file:", "");
-		else  //Windows system path "/C:/", we need to get rid of the first /
+		else  //Windows system path "/C:/", we need to get rid of the first '/'
 			thisDir= thisDir.substring(1);
 		
-		System.out.println("thisDir is "+thisDir);
+		//System.out.println("thisDir is "+thisDir);
 		String jarPath = thisDir.replace("!/model/", "");  //Get path of jar file
 		destDir = thisDir.replace("Simulation.jar!/model/", "");  //Set destDir as the current folder in which jar file sits
 
 		try {
 			
-			System.out.println("jarPath is "+jarPath);
+			//System.out.println("jarPath is "+jarPath);
+
+			File jarFile = new File(jarPath);
+			if (jarFile.isDirectory() || !jarFile.exists()) { //If we cant find jar File in this jarPath
+				//In windows it`s like this "C:/Users/Esheen/Desktop/ConnChem_1.1.0/Simulation/model/" 
+				File newJarfile = new File(jarPath);
+				String parent = newJarfile.getParentFile().getParent();
+				parent = parent.concat(new String("\\"+jarFileName));
+				
+				jarPath= new String(parent);
+				//System.out.println("new Jar File is :"+jarPath);
+				
+			} 
 			java.util.jar.JarFile jar = new java.util.jar.JarFile(jarPath);
 			
 			
 			ZipEntry entry = jar.getEntry("model/chemdb");
-			//out.println("entry.getName() :" + entry.getName());
 			
 			
 			File outputFile = new File(destDir, dbFileName);
 			
-			System.out.println("destDir is:"+destDir);
-			System.out.println("dbFileName is:"+dbFileName);
-			//out.println("outputFile.getPath():"+outputFile.getPath());
-			//out.close();
+			//System.out.println("destDir is:"+destDir);
+			//System.out.println("dbFileName is:"+dbFileName);
 			
 				if (entry.isDirectory()) { // if its a directory, create it
 					outputFile.mkdir();
@@ -112,13 +124,6 @@ public class DBinterface {
 	public static ArrayList dbConnect(String[] args) {
 		ArrayList output = new ArrayList();
 		try {
-			//Class.forName("org.sqlite.JDBC");
-			
-			//Connection conn = DriverManager.getConnection("jdbc:sqlite:chemdb");
-			//Connection conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
-
-			
-			//Statement stat = conn.createStatement();
 
 			ResultSet rs = stat.executeQuery(args[0]);
 
@@ -126,7 +131,6 @@ public class DBinterface {
 				output.add(rs.getString(args[1]));
 			}
 			rs.close();
-			//conn.close();
 
 		} catch (Exception e) {
 			System.out.println(e);
