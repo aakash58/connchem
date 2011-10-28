@@ -143,6 +143,7 @@ public class Main {
 	private JLabel lblInput;
 	private JLabel lblInputTipR;
 	private JLabel lblInputTipL;
+	public HashMap<String,JButton> addBtns = new HashMap<String,JButton>();  //Used to store add button for every compound
 	
 	
 	
@@ -437,10 +438,11 @@ public class Main {
 					});
 					
 					//Repaint Add buttion and set up button event listener
-					JButton button_1 = new JButton("");
-					button_1.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
-					panel.add(button_1, "cell 2 1,growy");
-					button_1.addMouseListener(new MouseAdapter() {
+					 JButton addBtn = new JButton("");
+					 addBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
+					panel.add(addBtn, "cell 2 1,growy");
+					addBtns.put(fixedName,addBtn); //Associate add button info with compound names
+					addBtn.addMouseListener(new MouseAdapter() {
 						public void mouseClicked(MouseEvent arg0) {
 							
 							if(arg0.getComponent().isEnabled())
@@ -452,16 +454,19 @@ public class Main {
 								int cap = getP5Canvas().getMoleculesCap(fixedName);
 								//int curNum = getP5Canvas().getMoleculesNum(fixedName);
 								
-								if(cap<=(count+State.moleculesAdded))
+								if(cap<=(count+State.moleculesAdded.get(fixedName)))
 								{
-									count = cap - State.moleculesAdded;
+									count = cap - State.moleculesAdded.get(fixedName);
 									if(count<0)
 										count =0;
 									//Disable Add button
 									if(getP5Canvas().addMolecule(fixedName,count))
 									{
 										if(!fixedName.equals("Water"))
-											State.moleculesAdded += count;
+										{
+											int num = State.moleculesAdded.get(fixedName);
+											State.moleculesAdded.put(fixedName,num+count);
+										}
 										arg0.getComponent().setEnabled(false);
 									}
 								}
@@ -470,7 +475,11 @@ public class Main {
 									if(getP5Canvas().addMolecule(fixedName,count))
 									{
 										if(!fixedName.equals("Water"))
-										State.moleculesAdded += count;
+										{
+											int num = State.moleculesAdded.get(fixedName);
+											State.moleculesAdded.put(fixedName,num+count);
+
+										}
 									}
 								}
 									
@@ -549,7 +558,7 @@ public class Main {
 		//Update Molecule Legends on left panel
 		updateDynamicPanel();
 		
-		//Update components on the left panel
+		//Update sliders around the center panel
 		updateCenterPanel();
 		
 		//    Reset canvas   
@@ -581,7 +590,7 @@ public class Main {
 				//Add initial number of molecules into p5Canvas
 					if( getP5Canvas().addMoleculeRandomly(s,num) )
 					{
-						State.moleculesAdded = num;
+						State.moleculesAdded.put(s, num);
 						//Need to add these molecules to canvas also
 						
 					}
@@ -1351,15 +1360,21 @@ public class Main {
 							{
 							String fixedName = null;
 							String waterName = new String("Water");
-							int count =5, waterCount = 15;
+							int count =5, waterCount = 20;
+							ArrayList<String> compoundNames = new ArrayList<String>();
 							for( int i = 0;i<btnIds.size();i++)
 							{
 								//names.add(btnNames.get(btnIds.get(i)-btnStartId));
 								fixedName = new String(btnNames.get((btnIds.get(i)-1)/2)); //Label ids are all even number
-								getP5Canvas().addMolecule(fixedName,count);
+								if(fixedName.equals("Sodium-Carbonate"))
+									getP5Canvas().addMolecule(fixedName,4);
+								else
+									getP5Canvas().addMolecule(fixedName,count);
+								compoundNames.add(fixedName);
 							}
 							getP5Canvas().addMolecule(waterName, waterCount);
-						started = true;
+							started = true;
+							p5Canvas.getUnit3().setCombination(compoundNames);
 						//Disable all molecule buttons on dynamic panel
 							for( Component btn:dynamicPanel.getComponents())
 								if(btn.getClass().getName().equals("javax.swing.JButton"))

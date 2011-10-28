@@ -6,8 +6,10 @@ package simulations;
 import static model.State.molecules;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Random;
 
+import model.DBinterface;
 import model.State;
 
 import org.jbox2d.common.Vec2;
@@ -310,111 +312,86 @@ public abstract class UnitBase {
 	}
 
 	/******************************************************************
-	 * FUNCTION : addSolidMolecule 
+	 * FUNCTION : addSolidCube 
 	 * DESCRIPTION : Function to add solid molecules to PApplet 
 	 * Do area clear check when spawn
 	 * 
 	 * INPUTS : isAppEnable(boolean), compoundName(String), count(int) OUTPUTS:
 	 * None
 	 *******************************************************************/
-	public boolean addSolidMolecule(boolean isAppEnable, String compoundName,
-			int count) {
+	public boolean addSolidCube(boolean isAppEnable, String compoundName,
+			int count, Simulation simulation) {
 		boolean res = true;
-
-		float centerX = 0; // X Coordinate around which we are going to add
-							// molecules
-		float centerY = 0; // Y Coordinate around which we are going to add
-							// molecules
-		float x_ = 0; // X Coordinate for a specific molecule
-		float y_ = 0; // Y Coordinate for a specific molecule
-		int dimension = 0; // Decide molecule cluster is 2*2 or 3*3
-		float offsetX = 0; // Offset x from left border
-		int leftBorder = 0; // left padding from left border
-		int startIndex = molecules.size(); // Start index of this group in
-											// molecules arraylist
 		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
-
 		float moleWidth = size.x;
 		float moleHeight = size.y;
-		float jointLength = size.y;
-		Vec2 topLeft = new Vec2(0, 0);
-		Vec2 botRight = new Vec2(0, 0);
-		// boolean dimensionDecided = false;
-		int k = 0;
-		for (k = 1; k < 10; k++) {
-			if (count <= (k * k)) {
-				dimension = k;
-				break;
-			}
-		}
 
-		int rowNum = count / dimension + 1;
-		int colNum = dimension;
+		
+		int numCol = 3;
+		if( count<=3)
+		{
+			numCol = count;
+		}
+		int numRow = (int) Math.ceil((float) count / numCol);
+		
+		
+		
+		float centerX = p5Canvas.x + moleWidth/2; // X coordinate around which we are going to
+									// add Ions, 50 is border width
+		float centerY = (float) (p5Canvas.y + p5Canvas.h- ((float)numRow+0.5)*moleHeight - Boundary.difVolume); // Y coordinate around
+														// which we are going to
+														// add Ions
+
+		Vec2 topLeft = new Vec2(0,0);
+		Vec2 botRight = new Vec2(0,0);
 		boolean isClear = false;
-		Vec2 molePos = new Vec2(0, 0); // Molecule position parameter
-		Vec2 molePosInPix = new Vec2(0, 0);
+
 		float increX = p5Canvas.w / 3;
-
-		offsetX = p5Canvas.w / 2 - (colNum * moleWidth) / 2;
-		centerX = p5Canvas.x + leftBorder + offsetX;
-		centerY = p5Canvas.y + p5Canvas.h - rowNum * moleHeight
-				- Boundary.difVolume;
-
-		for (int i = 0; i < count; i++) {
-			x_ = centerX + i % dimension * moleWidth;
-			y_ = centerY + i / dimension * moleHeight;
-			res = molecules.add(new Molecule(x_, y_, compoundName, box2d,
-					p5Canvas, 0));
-
-		}
-
-		/* Add joint for solid molecules */
-		if (count > 1) {
-			int index1 = 0;
-			int index2 = 0;
-			Molecule m1 = null;
-			Molecule m2 = null;
+		Vec2 molePos = new Vec2(0, 0);
+		Vec2 molePosInPix = new Vec2(0, 0);
+	
+		topLeft.set(centerX - 0.5f*size.x, centerY-0.5f*size.y);
+		botRight.set(centerX + numCol * size.x, centerY + numRow * size.y);
+		
+		while (!isClear) {
 			
-			for (int i = 0; i < count; i++) {
-				/* In horizontal direction, all molecules create a joint connecting to its right next molecule */
-				if ( (i+1)% dimension !=0 && (i!=count-1)) /* right most molecules */
-				{
-					index1 = i + startIndex;
-					index2 = i+1 + startIndex;
-					m1 = molecules.get(index1);
-					m2 = molecules.get(index2);
-					joint2Elements( m1, m2,jointLength);
+			isClear = true;
+			for (int k = 0; k < molecules.size(); k++) {
+
+				if (!((String) molecules.get(k).getName()).equals("Water")) {
+					molePos.set(molecules.get(k).getPosition());
+					molePosInPix.set(box2d.coordWorldToPixels(molePos));
+					if (areaBodyCheck(molePosInPix, topLeft, botRight)) { //Check whether this area is clear
+						isClear = false;
+						break;
+					}
 				}
-				/* In vertical direction, all molecules create a joint connecting to its down next molecule */
-				if( ((i/dimension+1)!=rowNum) && ((i+dimension)<count)) /* bottom most molecules */
-				{
-					index1 = i + startIndex;
-					index2 = i+dimension + startIndex;
-					m1= molecules.get(index1);
-					m2 = molecules.get(index2);
-					joint2Elements(m1,m2,jointLength);
-				}
-				/* In diagonal direction, all molecules create a joint connecting to its bottom right molecule */
-				if( ((i+1)%dimension !=0)&&((i+dimension+1)<count))
-				{
-					index1 = i+startIndex;
-					index2 = i+ dimension +1 + startIndex;
-					m1 = molecules.get(index1);
-					m2 = molecules.get(index2);
-					joint2Elements(m1,m2,jointLength*1.5f);
-				}
-				/* In diagonal direction, all molecules create a joint connecting to its top right molecule */
-				if( (i-dimension+1)>=0 && (i+1)%dimension !=0 )
-				{
-					index1 = i+startIndex;
-					index2 = i- dimension +1 + startIndex;
-					m1 = molecules.get(index1);
-					m2 = molecules.get(index2);
-					joint2Elements(m1,m2,jointLength*1.5f);
+			}
+			if (!isClear) {
+				centerX += increX;
+				topLeft.set(centerX - 0.5f*size.x, centerY-0.5f*size.y);
+				botRight.set(centerX + numCol * size.x, centerY + numRow * size.y);
+				// If we have gone through all available areas.
+				if (botRight.x > (p5Canvas.x + p5Canvas.w) || topLeft.x<p5Canvas.x ) {
+					isClear = true; // Ready to jump out
+					res = false; // Set output bolean flag to false
+					// TO DO: Show tooltip on Add button when we cant add more
+					// compounds
 				}
 			}
 		}
 
+		if(res)
+		{
+			for (int i = 0; i < count; i++) {
+				float x_ = centerX + (i % numCol) * size.x;
+				float y_ = centerY + (i / numCol) * size.y;
+				float angle = (float) ((i/numCol==0)?0:Math.PI);
+				molecules.add(new Molecule(x_, y_, compoundName, box2d,p5Canvas, angle));
+
+			}
+		}
+		
 		return res;
 	}
 	
@@ -430,17 +407,9 @@ public abstract class UnitBase {
 			int count) {
 		boolean res = true;
 
-		float centerX = 0; // X Coordinate around which we are going to add
-							// molecules
-		float centerY = 0; // Y Coordinate around which we are going to add
-							// molecules
 		float x_ = 0; // X Coordinate for a specific molecule
 		float y_ = 0; // Y Coordinate for a specific molecule
 		
-		float offsetX = 0; // Offset x from left border
-		int leftBorder = 0; // left padding from left border
-		int startIndex = molecules.size(); // Start index of this group in
-											// molecules arraylist
 		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
 
 		float moleWidth = size.x;
@@ -525,8 +494,8 @@ public abstract class UnitBase {
 		Vec2 botRight = new Vec2(0, 0);
 		float spacing = moleWidth/2;
 		
-		float solventTop = p5Canvas.h/4;
-		float solventHeight = p5Canvas.h/2;
+		float solventTop = p5Canvas.h/2;
+		float solventHeight = p5Canvas.h/4;
 
 		boolean isClear = false;
 
@@ -566,6 +535,7 @@ public abstract class UnitBase {
 					Molecule mole =molecules.get(molecules.size()-1);
 					float scale = 0.3f;
 					mole.setReactive(false);
+					mole.setLinearVelocity(new Vec2(0,0));
 					//Make water lighter;
 					mole.body.m_mass= (float) (mole.body.getMass()*scale);
 				}
@@ -799,12 +769,77 @@ public abstract class UnitBase {
 			}
 			for( int i=0;i<numToKill;i++)
 			mOld[i].destroy();
-			
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
+			int unit = p5Canvas.getMain().selectedUnit;
+			int set = p5Canvas.getMain().selectedSet;
+			int sim = p5Canvas.getMain().selectedSim;
+			updateCompoundNumber(unit,sim,set);
 			return true;
 		}
 		return false;
+	}
+	
+	
+	/******************************************************************
+	 * FUNCTION : updateCompoundNumber 
+	 * DESCRIPTION : Update compounds numbers for table view
+	 * 
+	 * INPUTS : unit(int), Sim(int), Set(int)
+	 * OUTPUTS: None
+	 *******************************************************************/
+	private void updateCompoundNumber(int unit,int sim,int set)
+	{
+		if (true) {
+			int decreaseNum = 0;
+			int resultNum = 0;
+			int index = -1;
+			// Get reaction input from DB
+			ArrayList<String> input = DBinterface.getReactionInputs(unit, sim,
+					set);
+			if( input!=null)
+			{
+			for (String compound : input) {
+				index = -1;
+				index = Compound.names.indexOf(compound);
+				if (index >= 0) // Decrease products count by num
+				{
+					decreaseNum = DBinterface.getReactionCompoundsNum(unit,
+							sim, set, compound);
+					if (decreaseNum != -1) {
+						resultNum = Compound.counts.get(index) - decreaseNum;
+						if (resultNum < 0)
+							resultNum = 0;
+						Compound.counts.set(index, resultNum);
+					}
+				}
+
+			}
+			}
+			// Get reaction output from DB
+			ArrayList<String> products = DBinterface.getReactionOutputs(unit,
+					sim, set);
+			int increaseNum = 0;
+			resultNum = 0;
+			index = -1;
+			if(products!=null)
+			{
+			for (String compound : products) {
+				index = -1;
+				index = Compound.names.indexOf(compound);
+				if (index >= 0) // Increase products count by num
+				{
+					increaseNum = DBinterface.getReactionCompoundsNum(unit,
+							sim, set, compound);
+					if (increaseNum != -1) {
+						resultNum = Compound.counts.get(index) + increaseNum;
+						Compound.counts.set(index, resultNum);
+					}
+				}
+
+			}
+			}
+		}
 	}
 	
 	

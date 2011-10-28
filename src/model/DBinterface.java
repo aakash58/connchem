@@ -31,29 +31,27 @@ public class DBinterface {
 		try{
 			Class.forName("org.sqlite.JDBC");
 			
-			
+			/*
 			//Distribution Configuration
 			ExtractFileFromJar();
 			File dbFile = new File(destDir, dbFileName);
-			//System.out.println("dbFile is :"+dbFile);
-			//System.out.println("dbFile.getPath() is :"+dbFile.getPath());
-			
+						
 			if (dbFile.exists()) {
 			    // DB file is in the same directory with jar file
 				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
 			} 
 			/*else {
 			   //TODO: We cant find a databse file
-			}*/
+			}
+			 */
 			
 			
-			/*
+			
 			//Debug Configuration
 			String dbPath = ClassLoader.getSystemResource("model/"+dbFileName).toString();
 			dbPath = dbPath.replace("file:", "");
-			//System.out.println("dbPath="+dbPath);
-			conn = DriverManager.getConnection("jdbc:sqlite:"+dbPath);
-			*/
+			conn = DriverManager.getConnection("jdbc:sqlite:src/model/chemdb");
+			
 		    
 			stat = conn.createStatement();
 			
@@ -78,31 +76,23 @@ public class DBinterface {
 		String jarPath = thisDir.replace("!/model/", "");  //Get path of jar file
 		destDir = thisDir.replace("Simulation.jar!/model/", "");  //Set destDir as the current folder in which jar file sits
 
+		//Find Jar file
 		try {
-			
-			//System.out.println("jarPath is "+jarPath);
-
 			File jarFile = new File(jarPath);
 			if (jarFile.isDirectory() || !jarFile.exists()) { //If we cant find jar File in this jarPath
-				//In windows it`s like this "C:/Users/Esheen/Desktop/ConnChem_1.1.0/Simulation/model/" 
+				//In windows it is like this "C:/Users/Esheen/Desktop/ConnChem_1.1.0/Simulation/model/" 
 				File newJarfile = new File(jarPath);
 				String parent = newJarfile.getParentFile().getParent();
 				parent = parent.concat(new String("\\"+jarFileName));
 				
 				jarPath= new String(parent);
-				//System.out.println("new Jar File is :"+jarPath);
 				
 			} 
 			java.util.jar.JarFile jar = new java.util.jar.JarFile(jarPath);
 			
-			
+			//Unzip database from jar file
 			ZipEntry entry = jar.getEntry("model/chemdb");
-			
-			
 			File outputFile = new File(destDir, dbFileName);
-			
-			//System.out.println("destDir is:"+destDir);
-			//System.out.println("dbFileName is:"+dbFileName);
 			
 				if (entry.isDirectory()) { // if its a directory, create it
 					outputFile.mkdir();
@@ -183,6 +173,12 @@ public class DBinterface {
 	public static Float getElementMass(String elementName_) {
 
 		//ArrayList results = new ArrayList();
+		
+		if(elementName_.equals("Carbonate"))
+			return 75f;
+		else if(elementName_.equals("Hydroxide"))
+			return 17f;
+			
 		String[] args = new String[2];
 		args[0] = "SELECT mass FROM elements WHERE name = \"" + elementName_ + "\"";
 		args[1] = "mass";
@@ -222,6 +218,15 @@ public class DBinterface {
 			return 1;
 		else if (elementName_.equals("Sulfur"))
 			return -2;
+		else if (elementName_.equals("Bromide"))
+			return -1;
+		else if (elementName_.equals("Bromine"))
+			return -1;
+		else if (elementName_.equals("Carbonate"))
+			return -2;
+		else if (elementName_.equals("Hydroxide"))
+			return -1;
+		
 		return 0;  	
 	}
 		
