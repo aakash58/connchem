@@ -675,8 +675,10 @@ public class Molecule {
 		//Draw element center for testing
 		for(int e=0;e<this.elementNames.size();e++)
 		{
-			p5Canvas.stroke(Color.BLACK.getRGB());
-			//p5Canvas.point(PBox2D.scalarWorldToPixels(loc[e].x),PBox2D.scalarWorldToPixels(loc[e].y));
+			int size = 5;
+			p5Canvas.fill(204, 102, 0);
+			Vec2 loc = new Vec2(PBox2D.vectorWorldToPixels(getElementLocation(e)));
+			p5Canvas.ellipse(loc.x,p5Canvas.h * 0.77f+loc.y,size,size);
 		}
 
 	}

@@ -1380,7 +1380,11 @@ public class Unit3 extends UnitBase {
 						//offsetX = mOld[0].getMaxSize() / 5;
 						int elementIndex = Compound.isIonOfElement(ionName, dissolveCompound);
 						if(elementIndex !=-1 )
+						{
+							if(dissolveCompound.getName().equals("Sodium-Carbonate")&&ionName.equals("Sodium-Ion")&& i==1&&elementIndex==0)
+								elementIndex =1; //Set corrent index for the second sodium-Ion in Sodium-Carbonate
 							loc.set(dissolveCompound.loc[elementIndex]);
+						}
 						// Set an offset x for silver-ion
 						/*
 						if (p5Canvas.products.get(i).equals("Silver-Ion")
