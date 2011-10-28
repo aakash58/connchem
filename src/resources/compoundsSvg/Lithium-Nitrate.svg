@@ -29,7 +29,7 @@
 	<circle id="Lithium-Ion" fill="none" cx="19.5" cy="37.127" r="19.429"/>
 	<circle id="Oxygen-Ion_2_" fill="none" cx="84.808" cy="37.156" r="18.467"/>
 	<circle id="Oxygen-Ion_4_" fill="none" cx="63.255" cy="37.156" r="17.971"/>
-	<circle id="Oxygen-Ion_1_" fill="none" cx="52.526" cy="55.781" r="18.467"/>
+	<circle id="Nitrogen-Ion" fill="none" cx="52.526" cy="55.781" r="18.467"/>
 	<circle id="Oxygen-Ion_3_" fill="none" cx="52.526" cy="18.473" r="18.467"/>
 </g>
 </svg>

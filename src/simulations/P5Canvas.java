@@ -104,7 +104,7 @@ public class P5Canvas extends PApplet{
 		setMain(parent);
 		box2d = new PBox2D(this);
 		setUnit2(new Unit2(this, box2d));
-		unit3 = new Unit3(this, box2d);
+		setUnit3(new Unit3(this, box2d));
 		waterComputation = new Water(this);
 	}
 	/*
@@ -250,7 +250,7 @@ public class P5Canvas extends PApplet{
 		}
 		
 		//Update anchors position
-		unit3.resetAnchors(xDrag,yDrag);
+		getUnit3().resetAnchors(xDrag,yDrag);
 		
 		computeDissolved();
 		
@@ -268,17 +268,20 @@ public class P5Canvas extends PApplet{
 	{
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule m = molecules.get(i);
-			if (m.getName().equals("Water"))
-				waterComputation.setForceWater(i,m);
-			else 
+
+			//else 
 				{
 				
 				switch (main.selectedUnit)
 				{
 				case 1:
+					if (m.getName().equals("Water"))
+						waterComputation.setForceWater(i,m);
 					setForce(i,m);
 					break;
 				case 2:
+					if (m.getName().equals("Water"))
+						waterComputation.setForceWater(i,m);
 					if(main.selectedSet==1 && main.selectedSim<4)
 						getUnit2().computeForceNaCl(i,m);
 					else if(main.selectedSet==1 && main.selectedSim==4){
@@ -302,7 +305,7 @@ public class P5Canvas extends PApplet{
 
 					break;
 				case 3:
-					unit3.computeForce(main.selectedSim,main.selectedSet);
+					getUnit3().computeForce(main.selectedSim,main.selectedSet);
 					break;
 				case 4:
 					break;
@@ -345,7 +348,7 @@ public class P5Canvas extends PApplet{
 			}
 			break;
 		case 3:
-			unit3.applyForce(main.selectedSim,main.selectedSet);
+			getUnit3().applyForce(main.selectedSim,main.selectedSet);
 			break;
 		case 4:
 			break;
@@ -672,6 +675,8 @@ public class P5Canvas extends PApplet{
 		isEnable = false;
 		
 		computeOutput(compoundName,count);
+		//int index = Compound.names.indexOf(compoundName);
+		//int addCount = Compound.counts.get(index)+count;
 		
 		switch (main.selectedUnit)
 		{
@@ -700,7 +705,7 @@ public class P5Canvas extends PApplet{
 			}
 			break;
 		case 3:
-			res = unit3.addMolecules(tmp,compoundName,count);
+			res = getUnit3().addMolecules(tmp,compoundName,count);
 			break;
 		case 4:
 			break;
@@ -719,8 +724,19 @@ public class P5Canvas extends PApplet{
 		}
 		
 		//If we successfully added molecules, update compound number
-		//if(res)
+		if(res)
+		{
 			//Compound.counts.set(index, addCount);
+			int index = Compound.names.indexOf(compoundName);
+			int cap = Compound.caps.get(index);
+			int countNum = Compound.counts.get(index);
+			//System.out.println("count is "+countNum+", cap is "+ cap);
+			if(countNum>=cap) //Grey out add button
+			{
+				getMain().addBtns.get(compoundName).setEnabled(false);
+			}
+				
+		}
 		
 		isEnable = tmp;
 		return res;
@@ -774,7 +790,7 @@ public class P5Canvas extends PApplet{
 			}
 			break;
 		case 3:
-			res = unit3.addMolecules(tmp,compoundName,count);
+			res = getUnit3().addMolecules(tmp,compoundName,count);
 			break;
 		case 4:
 			break;
@@ -829,7 +845,7 @@ public class P5Canvas extends PApplet{
 		getUnit2().reset(); //reset Unit 2
 		break;
 		case 3:
-		unit3.reset();
+		getUnit3().reset();
 		break;
 		}
 	}
@@ -1098,7 +1114,7 @@ public class P5Canvas extends PApplet{
 			reactH202();
 			break;
 		case 3:
-			unit3.updateMolecules(main.selectedSim, main.selectedSet);
+			getUnit3().updateMolecules(main.selectedSim, main.selectedSet);
 			break;
 		default:
 			break;
@@ -1153,7 +1169,7 @@ public class P5Canvas extends PApplet{
 		case 2:
 			break;
 		case 3:
-			unit3.beginReaction(c);
+			getUnit3().beginReaction(c);
 			break;
 		case 4:
 			break;
@@ -1266,5 +1282,19 @@ public class P5Canvas extends PApplet{
 	 */
 	public void setMain(Main main) {
 		this.main = main;
+	}
+
+	/**
+	 * @return the unit3
+	 */
+	public Unit3 getUnit3() {
+		return unit3;
+	}
+
+	/**
+	 * @param unit3 the unit3 to set
+	 */
+	public void setUnit3(Unit3 unit3) {
+		this.unit3 = unit3;
 	}
 }

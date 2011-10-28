@@ -51,6 +51,99 @@ public class Compound {
 		//System.out.println("Molecule cap is "+cap);
 		return cap;
 	}
+	public static boolean isIonOfCompound(String ion,String compoundName)
+	{
+		boolean res= false;
+		if(ion.equals("Copper-II"))
+		{
+			if(compoundName.contains("Copper-II"))
+			return true;	
+		}
+		else if(ion.equals("Sulfate"))
+		{
+				if(compoundName.contains("Sulfate"))
+					return true;
+		}
+		else if(ion.equals("Silver-Ion"))
+		{
+			if(compoundName.contains("Silver"))
+			return true;
+		}
+		else if(ion.equals("Potassium-Ion"))
+		{
+			if(compoundName.contains("Potassium"))
+			return true;
+		}
+		else if(ion.equals("Bromine-Ion"))
+		{
+			if(compoundName.contains("Bromine")||compoundName.contains("Bromide"))
+			return true;
+		}
+		else if(ion.equals("Ammonium"))
+		{
+			if(compoundName.contains("Ammonium"))
+			return true;
+		}
+		else if(ion.equals("Chloride"))
+		{
+			if(compoundName.contains("Chloride"))
+			return true;
+		}
+		else if(ion.equals("Sodium-Ion"))
+		{
+			if(compoundName.contains("Sodium"))
+			return true;
+			}
+		else if(ion.equals("Carbonate"))
+		{
+			if(compoundName.contains("Carbonate"))
+			return true;
+		}
+		else if(ion.equals("Hydroxide"))
+		{
+			if(compoundName.contains("Hydroxide"))
+			return true;
+		}
+		else if(ion.equals("Lithium-Ion"))
+		{
+			if(compoundName.contains("Lithium"))
+			return true;
+		}
+		else if(ion.equals("Nitrate"))
+		{
+			if(compoundName.contains("Nitrate"))
+			return true;
+		}
+		return res;
+	}
+	public static int isIonOfElement(String ionName, Molecule compound)
+	{
+		//String ionName = ion.getName();
+		String compoundName = compound.getName();
+		int res  = -1;
+		if (!isIonOfCompound(ionName,compoundName))
+			return res;
+		else
+			for(int e=0;e<compound.elementNames.size();e++)
+			{
+				if(ionName.equals("Ammonium")) //NH4
+				{
+					if(compound.elementNames.get(e).equals("Nitrogen")) //N is at the center of NH4
+					{
+						res = e;
+						break;
+					}
+				}
+				else if(ionName.startsWith(compound.elementNames.get(e).substring(0,3))) //If they have a same prefix having 4 letters
+				{
+					res = e;
+					break;
+				}
+			}
+			
+		return res;
+		
+	}
 	
 
 	

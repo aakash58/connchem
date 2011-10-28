@@ -114,6 +114,20 @@ public class Molecule {
 		polarity = p5Canvas.db.getCompoundPolarity(compoundName_);
 
 		circles = SVGReader.getSVG(path);
+		if(name.equals("Silver-Carbonate") )
+		{
+			elementNames = new ArrayList<String> ();
+			elementNames.add("Silver");
+			elementNames.add("Silver");
+			elementNames.add("Carbonate");
+		}
+		else if(name.equals("Silver-Hydroxide"))
+		{
+			elementNames = new ArrayList<String> ();
+			elementNames.add("Silver");
+			elementNames.add("Hydroxide");
+		}
+		else
 		elementNames = SVGReader.getNames();
 		elementCharges = new ArrayList<Integer>();
 
@@ -153,83 +167,6 @@ public class Molecule {
 		createBody(x, y, angle);
 	}
 
-	/******************************************************************
-	 * FUNCTION : switchTo() DESCRIPTION : Switch current molecule to another
-	 * one, reset property and body
-	 * 
-	 * INPUTS : compoundName_ (String), angle (float) OUTPUTS: None
-	 *******************************************************************/
-	/*
-	 * public void switchTo(String compoundName_) { name = compoundName_; String
-	 * path = "resources/compoundsSvg/"+ compoundName_ +".svg"; pShape =
-	 * p5Canvas.loadShape(path); pShapeW = pShape.width; pShapeH =
-	 * pShape.height; minSize = Math.min(pShapeW, pShapeH);
-	 * setMaxSize(Math.max(pShapeW, pShapeH)); polarity =
-	 * p5Canvas.db.getCompoundPolarity(compoundName_);
-	 * 
-	 * circles = SVGReader.getSVG(path); elementNames = SVGReader.getNames();
-	 * if(elementCharges!=null) elementCharges.clear(); int numElement =
-	 * elementNames.size(); int charge = 0 ; for( int i =0;i<numElement;i++) {
-	 * charge = DBinterface.getElementCharge(elementNames.get(i));
-	 * elementCharges.add(charge); } sumForceX = new float[numElement];
-	 * sumForceY = new float[numElement]; sumForceWaterX = new
-	 * float[numElement]; sumForceWaterY = new float[numElement]; freezingTem =
-	 * DBinterface.getCompoundFreezingPointCelsius(name); boilingTem =
-	 * DBinterface.getCompoundBoilingPointCelsius(name);
-	 * 
-	 * 
-	 * //Set up gap: distance from a molecule`s top left corner to its center
-	 * for (int i=0; i<numElement;i++){ float xx = circles[i][1]-pShapeW/2;
-	 * float yy = -(circles[i][2]-pShapeH/2); gap[i] = (float)
-	 * Math.sqrt(xx*xx+yy*yy); gap[i] = PBox2D.scalarPixelsToWorld(gap[i]); if
-	 * (xx!=0) a1[i] = (float) (Math.atan(yy/xx)); if (xx<0) a1[i]+= Math.PI; }
-	 * 
-	 * 
-	 * setPropertyByHeat(true); switchBody();
-	 * 
-	 * }
-	 */
-	/******************************************************************
-	 * FUNCTION : switchBody() DESCRIPTION : Switch current body to another one
-	 * 
-	 * INPUTS : None OUTPUTS: None
-	 *******************************************************************/
-	/*
-	 * private void switchBody() {
-	 * 
-	 * 
-	 * float mul = setMul(); if( fixtures != null ) { for( int i
-	 * =0;i<fixtures.size();i++) { body.destroyFixture(fixtures.get(i)); }
-	 * fixtures.clear(); }
-	 * 
-	 * 
-	 * FixtureDef fd = new FixtureDef(); for (int i = 0; i < circles.length;
-	 * i++) { // Define a circle CircleShape circleShape = new CircleShape();
-	 * 
-	 * // Offset its "local position" (relative to 0,0) Vec2 offset = new
-	 * Vec2(circles[i][1] - pShapeW / 2, circles[i][2] - pShapeH / 2);
-	 * circleShape.m_p.set(box2d.vectorPixelsToWorld(offset));
-	 * circleShape.m_radius = PBox2D.scalarPixelsToWorld(circles[i][0]) * scale;
-	 * 
-	 * float m = 0; String element=null; if (elementNames != null && i <
-	 * elementNames.size()){ if(elementNames.get(i).equals("Chloride")) element
-	 * = new String("Chlorine"); else element = new String(elementNames.get(i));
-	 * m = DBinterface.getElementMass(element); } float d = m / (circles[i][0] *
-	 * circles[i][0] * circles[i][0]); fd.shape = circleShape; fd.density = d *
-	 * mul; fd.friction = fric; fd.restitution = res; // Restitution is
-	 * bounciness if( p5Canvas.temp < this.freezingTem) fd.restitution = 0.0f;
-	 * // Attach shapes!
-	 * 
-	 * Fixture fixture = body.createFixture(fd); fixtures.add(fixture); }
-	 * 
-	 * // Give it some initial random velocity body.setLinearVelocity(new
-	 * Vec2(p5Canvas.random(-1, 1), p5Canvas.random(-1, 1)));
-	 * 
-	 * body.setAngularVelocity(0); body.setUserData(this);
-	 * 
-	 * 
-	 * }
-	 */
 	/******************************************************************
 	 * FUNCTION : destroy() DESCRIPTION : Molecule Destroy function, return all
 	 * other molecules to which this molecule is connecting
@@ -356,6 +293,8 @@ public class Molecule {
 		else
 			scale = 1f;
 
+		if(p5Canvas.getMain().selectedUnit==1||p5Canvas.getMain().selectedUnit==2)
+		{
 		if (name.equals("Water"))
 			chargeRate = 0.95f;
 		else if (name.equals("Sodium-Ion")) {
@@ -390,6 +329,7 @@ public class Molecule {
 			chargeRate = 0.93f;
 			fric = 1;
 			res = 0.55f;
+		}
 		}
 
 		if (!isInitial) {
@@ -462,7 +402,8 @@ public class Molecule {
 				.random(-1, 1)));
 		body.setAngularVelocity(0);
 		body.setUserData(this);
-	}
+	}	
+	
 
 	public static Vec2 getShapeSize(String compoundName_, P5Canvas parent_) {
 		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
@@ -484,7 +425,8 @@ public class Molecule {
 	}
 
 	public int getNumElement() {
-		return circles.length;
+		//return circles.length;
+		return elementNames.size();
 	}
 
 	public String getName() {
@@ -524,6 +466,8 @@ public class Molecule {
 		float a2 = body.getAngle();
 		Vec2 v = new Vec2((float) Math.cos(a1[e] + a2), (float) Math.sin(a1[e]
 				+ a2));
+		if(this.getName().equals("Silver-Carbonate")&&e>=2) //Set Ag2CO3 element location at the center of CO3
+			return pos.add(v.mul(gap[5]));
 		return pos.add(v.mul(gap[e]));
 	}
 
@@ -727,6 +671,13 @@ public class Molecule {
 
 			}
 		}
+		
+		//Draw element center for testing
+		for(int e=0;e<this.elementNames.size();e++)
+		{
+			p5Canvas.stroke(Color.BLACK.getRGB());
+			//p5Canvas.point(PBox2D.scalarWorldToPixels(loc[e].x),PBox2D.scalarWorldToPixels(loc[e].y));
+		}
 
 	}
 
@@ -767,11 +718,14 @@ public class Molecule {
 		else if (name.equals("Hydrogen-Peroxide"))
 			mul = 0.8f;
 		else if (name.equals("Sodium-Chloride"))
+			if(p5Canvas.getMain().selectedUnit==1 ||p5Canvas.getMain().selectedUnit==2)
 			mul = 1.0f;
+			else
+				mul =4.0f;
 		else if (name.equals("Sodium-Ion"))
 			mul = 0.011f / 0.006448616f;
 		else if (name.equals("Chlorine-Ion"))
-			mul = 0.015f / 0.009944542f;
+			mul = 4.0f;
 		else if (name.equals("Glycerol"))
 			mul = 2.0f;
 		else if (name.equals("Silicon-Dioxide"))
@@ -783,9 +737,24 @@ public class Molecule {
 		else if (name.equals("Potassium-Ion"))
 			mul = 1.1f;
 		else if (name.equals("Chlorine"))
+			if(p5Canvas.getMain().selectedUnit==1 ||p5Canvas.getMain().selectedUnit==2)
 			mul = 0.04f;
+			else
+				mul =0.4f;
 		else if (name.equals("Sodium"))
 			mul = 1.0f;
+		else if (name.equals("Hydrogen-Ion"))
+			mul =6.0f;
+		else if (name.equals("Lithium-Ion"))
+			mul =4f;
+		else if (name.equals("Hydrogen-Sulfide"))
+			mul =3f;
+		else if (name.equals("Hydrogen"))
+			mul = 15.0f;
+		else if (name.equals("Chloride"))
+			mul = 2.0f;
+		else if (name.equals("Ammonium"))
+			mul = 2.5f;
 		return mul;
 	}
 
@@ -819,4 +788,13 @@ public class Molecule {
 		else
 			return false;
 	}
+	public Vec2 getLinearVelocity()
+	{
+		return body.getLinearVelocity();
+	}
+	public void setLinearVelocity(Vec2 vec)
+	{
+		body.setLinearVelocity(vec);
+	}
+	
 }

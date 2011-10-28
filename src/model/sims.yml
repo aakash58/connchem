@@ -306,50 +306,50 @@ units:
       compounds:
       - compound: "Sodium"
         qty: 14
-        cap: 20
+        cap: 14
       - compound: "Chlorine"
-        qty: 0
-        cap: 25
+        qty: 10
+        cap: 10
     - set: 2
       compounds:
       - compound: "Hydrogen Iodide"
         qty: 15
-        cap: 50
+        cap: 25
     - set: 3
       compounds:
       - compound: "Ethene"
         qty: 5
-        cap: 15
+        cap: 5
       - compound: "Oxygen"
-        qty: 5
+        qty: 15
         cap: 15
     - set: 4
       compounds:
       - compound: "Copper"
         qty: 5
-        cap: 15
+        cap: 5
       - compound: "Silver Nitrate"
-        qty: 5
-        cap: 15
+        qty: 10
+        cap: 10
       - compound: "Water"
         qty: 20
-        cap: 95
+        cap: 25
     - set: 5
       compounds:
       - compound: "Methane"
         qty: 5
-        cap: 15
+        cap: 10
       - compound: "Oxygen"
         qty: 10
-        cap: 15
+        cap: 20
     - set: 6
       compounds:
       - compound: "Iron"
         qty: 5
-        cap: 15
+        cap: 5
       - compound: "Copper-II-Sulfate"
         qty: 5
-        cap: 15
+        cap: 5
       - compound: "Water"
         qty: 20
         cap: 95
@@ -357,23 +357,23 @@ units:
       compounds:
       - compound: "Lithium Sulfide"
         qty: 6
-        cap: 15
+        cap: 6
       - compound: "Hydrogen-Ion"
         qty: 12
-        cap: 15
+        cap: 12
       - compound: "Chloride"
         qty: 12
-        cap: 15
+        cap: 12
       - compound: "Water"
-        qty: 12
-        cap: 95
+        qty: 18
+        cap: 25
     - set: 8
       compounds:
       - compound: "Hydrogen"
-        qty: 6
+        qty: 10
         cap: 15
       - compound: "Chlorine"
-        qty: 6
+        qty: 10
         cap: 15
     - set: 9
       compounds:
@@ -384,13 +384,13 @@ units:
       compounds:
       - compound: "Sodium Chloride"
         qty: 5
-        cap: 15
+        cap: 5
       - compound: "Silver Nitrate"
         qty: 5
-        cap: 25
+        cap: 5
       - compound: "Water"
         qty: 20
-        cap: 95
+        cap: 25
   - sim: 2
     name: "Precipitation"
     sets:

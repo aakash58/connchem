@@ -2,6 +2,7 @@ package model;
 import static model.YAMLinterface.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import simulations.models.Anchor;
 import simulations.models.Boundary;
@@ -17,7 +18,7 @@ public class State {
 	*  TopBoundary    2
 	*  BottomBoundary 3 */
 	public static Boundary[] boundaries = new Boundary[4];
-	public static int moleculesAdded = 0;
+	public static HashMap<String,Integer> moleculesAdded = new HashMap<String,Integer>();
 	
 	public State()
 	{
@@ -66,7 +67,7 @@ public class State {
 	
 	public static void reset()
 	{
-		moleculesAdded = 0;
+		moleculesAdded.clear();
 	}
 	/*
 	 * Default settings
