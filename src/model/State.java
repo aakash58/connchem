@@ -32,10 +32,12 @@ public class State {
 	private static int currentSimNumber = 0;
 	private static int currentSetNumber = 0;
 
-	public static void setCurrentUnit(int currUnit) {}
-	public static void setCurrentSim(int currSim) {}
-	public static void setCurrentSet(int currSet) {}
-
+	//public static void setCurrentUnit(int currUnit) {}
+	//public static void setCurrentSim(int currSim) {}
+	//public static void setCurrentSet(int currSet) {}
+	
+	
+/*
 	public static int getCurrentUnitNumber() {
 		return currentUnitNumber;
 	}
@@ -44,6 +46,16 @@ public class State {
 	}
 	public static int getCurrentSetNumber() {
 		return currentSetNumber;
+	}*/
+	public static int getCompoundNum(String compoundName)
+	{
+		int count = 0;
+		for( int i = 0 ;i<molecules.size();i++)
+		{
+			if(molecules.get(i).getName().equals(compoundName))
+				count++;
+		}
+		return count;
 	}
 
 	public static String getCurrentUnitName() {

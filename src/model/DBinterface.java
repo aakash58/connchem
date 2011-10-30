@@ -40,12 +40,7 @@ public class DBinterface {
 			    // DB file is in the same directory with jar file
 				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
 			} 
-			/*else {
-			   //TODO: We cant find a databse file
-			}
-			 */
-			
-			
+			*/
 			
 			//Debug Configuration
 			String dbPath = ClassLoader.getSystemResource("model/"+dbFileName).toString();

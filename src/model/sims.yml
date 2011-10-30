@@ -321,26 +321,26 @@ units:
         qty: 5
         cap: 5
       - compound: "Oxygen"
-        qty: 15
-        cap: 15
+        qty: 18
+        cap: 18
     - set: 4
       compounds:
       - compound: "Copper"
-        qty: 5
-        cap: 5
+        qty: 4
+        cap: 4
       - compound: "Silver Nitrate"
-        qty: 10
-        cap: 10
+        qty: 8
+        cap: 8
       - compound: "Water"
         qty: 20
-        cap: 25
+        cap: 20
     - set: 5
       compounds:
       - compound: "Methane"
         qty: 5
         cap: 10
       - compound: "Oxygen"
-        qty: 10
+        qty: 14
         cap: 20
     - set: 6
       compounds:
@@ -352,7 +352,7 @@ units:
         cap: 5
       - compound: "Water"
         qty: 20
-        cap: 95
+        cap: 20
     - set: 7
       compounds:
       - compound: "Lithium Sulfide"
@@ -366,7 +366,7 @@ units:
         cap: 12
       - compound: "Water"
         qty: 18
-        cap: 25
+        cap: 38
     - set: 8
       compounds:
       - compound: "Hydrogen"

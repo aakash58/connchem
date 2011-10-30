@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -451,21 +452,30 @@ public class Main {
 								int count = Integer.parseInt(label_1.getText().substring(sliderLabel.length()));
 								//Check if molecule number is going over predefined cap number
 								//If yes, add molecules no more than cap number
+								
+								String fixedName = null;
+							    for (Entry<String , JButton> entry : addBtns.entrySet()) {
+							        if (arg0.getComponent().equals(entry.getValue())) {
+							            fixedName = entry.getKey();
+							        }
+							    }
+
 								int cap = getP5Canvas().getMoleculesCap(fixedName);
 								//int curNum = getP5Canvas().getMoleculesNum(fixedName);
 								
-								if(cap<=(count+State.moleculesAdded.get(fixedName)))
+								int currentNum = State.moleculesAdded.get(fixedName);
+								if(cap<=(count+currentNum))
 								{
-									count = cap - State.moleculesAdded.get(fixedName);
+									count = cap - currentNum;
 									if(count<0)
 										count =0;
 									//Disable Add button
 									if(getP5Canvas().addMolecule(fixedName,count))
 									{
-										if(!fixedName.equals("Water"))
+										//if(!fixedName.equals("Water"))
 										{
-											int num = State.moleculesAdded.get(fixedName);
-											State.moleculesAdded.put(fixedName,num+count);
+											//int num = State.moleculesAdded.get(fixedName);
+											State.moleculesAdded.put(fixedName,currentNum+count);
 										}
 										arg0.getComponent().setEnabled(false);
 									}
@@ -474,12 +484,12 @@ public class Main {
 								{
 									if(getP5Canvas().addMolecule(fixedName,count))
 									{
-										if(!fixedName.equals("Water"))
-										{
-											int num = State.moleculesAdded.get(fixedName);
-											State.moleculesAdded.put(fixedName,num+count);
+										//if(!fixedName.equals("Water"))
+										//{
+											//int num = State.moleculesAdded.get(fixedName);
+											State.moleculesAdded.put(fixedName,currentNum+count);
 
-										}
+										//}
 									}
 								}
 									
@@ -497,6 +507,8 @@ public class Main {
 				if (compounds!=null){
 					int rowNum = 4;
 					int colNum = 2;
+					JPanel multiButtonPanel = new JPanel();
+					multiButtonPanel.setLayout(new MigLayout("insets 10,gap 0","[50]10[50]","[][]5[][]5[][]"));
 					dynamicPanel.setLayout(new MigLayout("insets 10,gap 0","[50]10[50]","[][]5[][]5[][]"));
 					dynamicScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 					for (int i=0;i<compounds.size();i++){
@@ -1159,9 +1171,7 @@ public class Main {
 		lblOutputMacroscopicLevel = new JLabel("Macroscopic Level");
 		lblOutputMacroscopicLevel.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
 		rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
-		//"Hide Water" label
-		//lblHideWater = new JLabel("Hide Water Molecules");
-		//lblHideWater.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		
 		
 		cBoxHideWater =  new JCheckBox("Hide Water Molecules"); 
 		cBoxHideWater.addItemListener(cBoxHideWaterListener);
@@ -1366,11 +1376,20 @@ public class Main {
 							{
 								//names.add(btnNames.get(btnIds.get(i)-btnStartId));
 								fixedName = new String(btnNames.get((btnIds.get(i)-1)/2)); //Label ids are all even number
-								if(fixedName.equals("Sodium-Carbonate"))
-									getP5Canvas().addMolecule(fixedName,4);
-								else
-									getP5Canvas().addMolecule(fixedName,count);
+
 								compoundNames.add(fixedName);
+							}
+							for( int k = 0;k<compoundNames.size();k++)
+							{
+								if(compoundNames.contains("Sodium-Carbonate")&&compoundNames.contains("Silver-Nitrate"))
+								{
+								if(compoundNames.get(k).equals("Sodium-Carbonate")) //Add 4 Sodium-Carbonate
+									getP5Canvas().addMolecule(compoundNames.get(k),4);
+								else
+									getP5Canvas().addMolecule(compoundNames.get(k),8); //Add 8 Silver-Nitrate
+								}
+								else
+									getP5Canvas().addMolecule(compoundNames.get(k),count);
 							}
 							getP5Canvas().addMolecule(waterName, waterCount);
 							started = true;
