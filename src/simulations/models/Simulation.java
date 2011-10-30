@@ -83,6 +83,10 @@ public class Simulation {
 	{
 		return set;
 	}
+	public int getUnitNum()
+	{
+		return unit;
+	}
 	public SpawnStyle getSpawnStyle(String ele)
 	{
 		int index = getIndexOfElement(ele);

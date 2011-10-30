@@ -800,7 +800,7 @@ public class Unit3 extends UnitBase {
 
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			//updateCompoundNumber(unit,sim,set);
+			updateCompoundNumber(simulation.getUnitNum(),simulation.getSimNum(),simulation.getSetNum());
 			return true;
 		}
 		return false;
@@ -872,7 +872,8 @@ public class Unit3 extends UnitBase {
 			if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
 				Molecule copper = null;
 				Molecule silverIon = null;
-				if (p5Canvas.killingList.get(0).getName().equals("Copper")) {
+				
+				if (p5Canvas.killingList.get(0).getName().equals("Copper")) { //The third one will always be silver-Ion
 					copper = (Molecule) p5Canvas.killingList.get(0);
 					silverIon = (Molecule) p5Canvas.killingList.get(1);
 				} else {
@@ -881,27 +882,35 @@ public class Unit3 extends UnitBase {
 				}
 
 				Molecule newCopperII = null;
-				Molecule newSilver = null;
+				ArrayList<Molecule> newSilver = new ArrayList<Molecule>();
 
 				Vec2 loc = null;
+				int silverIndex = -1;
+				float silverSize = 2.25f; //In world coordinates
+				Vec2 newVec = null;
 
 				// Actually there is only one reaction going in each frame
 				for (int i = 0; i < p5Canvas.products.size(); i++) {
 					if (p5Canvas.products.get(i).equals("Silver"))
+					{
+						silverIndex ++; //Index of the 1st one is 0, 2nd one is 1
 						loc = copper.getPosition();
+					}
 					else
 						loc = silverIon.getPosition();
 					float x1 = PBox2D.scalarWorldToPixels(loc.x);
 					float y1 = p5Canvas.h * 0.77f
-							- PBox2D.scalarWorldToPixels(loc.y);
-					Vec2 newVec = new Vec2(x1, y1);
+							- PBox2D.scalarWorldToPixels(loc.y + silverSize*silverIndex);
+					 newVec = new Vec2(x1, y1);
 					if (p5Canvas.products.get(i).equals("Silver")) {
-						newSilver = new Molecule(newVec.x, newVec.y,
+						 Molecule mole = new Molecule(newVec.x, newVec.y,
 								p5Canvas.products.get(i), box2d, p5Canvas,
 								(float) (Math.PI / 2));
-						molecules.add(newSilver);
-						newSilver.body.setLinearVelocity(silverIon.body
+						 newSilver.add(mole);
+						molecules.add(mole);
+						mole.body.setLinearVelocity(silverIon.body
 								.getLinearVelocity());
+						
 					} else // If new molecules is copper-II
 					{
 						newCopperII = new Molecule(newVec.x, newVec.y,
@@ -915,20 +924,29 @@ public class Unit3 extends UnitBase {
 
 				}
 
+				ArrayList<DistanceJointWrap> mJoint = null;
 				// Get joints to which this molecule is connecting to
-				ArrayList<DistanceJointWrap> mJoint = copper.destroy();
-				ArrayList<DistanceJointWrap> m2Joint = silverIon.destroy();
-				Molecule molecule1 = null;
-				Molecule molecule2 = null;
+				for( int k=0;k<p5Canvas.killingList.size();k++)
+				{
+					if( p5Canvas.killingList.get(k).getName().equals("Copper") ) //Get copper joint information
+					{
+						 mJoint = p5Canvas.killingList.get(k).destroy();
+					}
+					else
+					{
+						p5Canvas.killingList.get(k).destroy();
+					}
+				}
+				
 
 				Anchor anchorTarget = null;
-				Molecule jointTarget = null;
+
 				// Get joint length and frequency
 				float length = 0;
 				float frequency = 0;
 				float damp = 0;
 
-				// copper = m2;
+				//Connect the first silver to first anchor which connected to copper previously
 				for (int m = 0; m < mJoint.size(); m++) {
 					if (mJoint.get(m).getBodyA().getUserData() instanceof Molecule)
 						anchorTarget = (Anchor) mJoint.get(m).getBodyB()
@@ -943,9 +961,32 @@ public class Unit3 extends UnitBase {
 							.getLength());
 					frequency = mJoint.get(m).getFrequency();
 					damp = mJoint.get(m).getDampingRatio();
-					joint2Elements(newSilver, anchorTarget, length, frequency,
+					joint2Elements(newSilver.get(0), anchorTarget, length, frequency,
 							damp);
 
+				}
+				//Create a anchor for 2nd silver and attach silver to it
+				for (int m = 0; m < mJoint.size(); m++) {
+					//Create anchor. newVec stores the second silver-Ion position
+					//float size = box2d.scalarPixelsToWorld(newSilver.get(1).getMaxSize());
+					Anchor anchor = new Anchor(newVec.x, newVec.y, box2d, p5Canvas);
+
+					// Create new joints between reaction created molecule and
+					// old molecules
+					length = PBox2D.scalarWorldToPixels(mJoint.get(m)
+							.getLength());
+					frequency = mJoint.get(m).getFrequency();
+					damp = mJoint.get(m).getDampingRatio();
+					joint2Elements(newSilver.get(1), anchor, length, frequency,
+							damp);
+				}
+				
+				//Adjust copper location in case it will not stuck in silvers
+				if(newCopperII.getPosition().y<newSilver.get(1).getPosition().y)
+				{
+					Vec2 pos = new Vec2(newSilver.get(1).getPosition());
+					pos.y+=silverSize;
+					newCopperII.setPosition(pos, newCopperII.getAngle());
 				}
 
 				p5Canvas.products.clear();
@@ -1594,7 +1635,7 @@ public class Unit3 extends UnitBase {
 		else if (reactants.contains("Ethene") && reactants.contains("Oxygen")
 				&& reactants.size() == 2) {
 			
-			float radius = 150;
+			float radius = 175;
 			// Compute midpoint of collision molecules
 			Vec2 v1 = box2d.coordWorldToPixels(m1.getPosition());
 			Vec2 v2 = box2d.coordWorldToPixels(m2.getPosition());
@@ -1633,12 +1674,36 @@ public class Unit3 extends UnitBase {
 		// Sim 1 set 4
 		else if (reactants.contains("Copper")
 				&& reactants.contains("Silver-Ion") && reactants.size() == 2) {
-			products.add("Copper-II");
-			products.add("Silver");
+
+			float radius = 125;
+			
+			// Compute midpoint of collision molecules
+			Vec2 v1 = box2d.coordWorldToPixels(m1.getPosition());
+			Vec2 v2 = box2d.coordWorldToPixels(m2.getPosition());
+			Vec2 midpoint = new Vec2((v1.x + v2.x) / 2, (v1.y + v2.y) / 2);
+
+			// Go through all molecules to check if there are any molecules
+			// nearby
+			for (int i = 0; i < State.molecules.size(); i++) {
+
+				if (molecules.get(i).getName().equals("Silver-Ion")
+						&& molecules.get(i) != m1 && molecules.get(i) != m2) {
+					Vec2 thirdMolecule = box2d.coordWorldToPixels(molecules
+							.get(i).getPosition());
+					if (radius > computeDistance(midpoint, thirdMolecule)) {
+						products.add("Copper-II");
+						products.add("Silver");
+						products.add("Silver");
+						// Need to kill the third molecule
+						p5Canvas.killingList.add(molecules.get(i));
+						break; // Break after we find one nearby
+					}
+				}
+			}
 		}
 		// Sim1 set 5
 		else if (reactants.contains("Methane") && reactants.contains("Oxygen")) {
-			float radius = 125;
+			float radius = 175;
 
 			// Compute midpoint of collision molecules
 			Vec2 v1 = box2d.coordWorldToPixels(m1.getPosition());
@@ -1740,6 +1805,7 @@ public class Unit3 extends UnitBase {
 				&& reactants.size() == 2) {
 			products.add("Oxygen");
 			products.add("Water");
+			products.add("Water");
 
 		}
 		// Sim 1 set 10
@@ -1762,7 +1828,7 @@ public class Unit3 extends UnitBase {
 		//Sim 2 set 1 2Ag+ + CO3 -2 = Ag2CO3(s)
 		else if (reactants.contains("Silver-Ion")
 				&& reactants.contains("Carbonate")) {
-			float radius = 75;
+			float radius = 125;
 			// Compute midpoint of collision molecules
 			Vec2 v1 = box2d.coordWorldToPixels(m1.getPosition());
 			Vec2 v2 = box2d.coordWorldToPixels(m2.getPosition());
@@ -1895,6 +1961,8 @@ public class Unit3 extends UnitBase {
 			case 2:
 				break;
 			case 3:
+				clearAllMoleculeForce();
+				computeForceEtheneOxygen();
 				break;
 			case 4:
 				clearAllMoleculeForce();
@@ -1966,15 +2034,73 @@ public class Unit3 extends UnitBase {
 		}
 
 	}
+	
+	//Force computation for Sim 1 Set 3
+	private void computeForceEtheneOxygen(){
+		float attractForce = 0.3f;
+		Molecule lastEthene = null;
+		int etheneNum = 0;
+		Molecule otherMole = null;
+		Vec2 thisLoc = null;
+		Vec2 otherLoc = null;
+		float xValue = 0;
+		float yValue =0;
+		float dis =  0;
+		float forceX =0;
+		float forceY =0;
+		
+		ArrayList<Molecule> oxygenList = new ArrayList<Molecule>();
+		for(int i = 0;i<State.molecules.size();i++)
+		{
+			if(State.molecules.get(i).getName().equals("Ethene"))
+			{
+				lastEthene= State.molecules.get(i);
+				etheneNum++;
+			}
+			else if(State.molecules.get(i).getName().equals("Oxygen"))
+			{
+				oxygenList.add(State.molecules.get(i));
+			}
+		}
+		if( etheneNum==1 ) //If there is only one ethene left, pull it with oxygen together
+		{
+			for(int thisE =0;thisE<lastEthene.getNumElement();thisE++)
+			{
+				thisLoc = new Vec2 (lastEthene.getElementLocation(thisE));
 
-	// Foce computation form sim 1 set 4
+				for (int k = 0; k < oxygenList.size(); k++) { 
+					otherMole = oxygenList.get(k);
+					for (int otherE = 0; otherE < otherMole.getNumElement(); otherE++)
+					{
+						otherMole.sumForceX[otherE] = 0;
+						otherMole.sumForceY[otherE] = 0;
+					otherLoc= new Vec2 (otherMole.getElementLocation(otherE));
+					if (thisLoc == null || otherLoc == null)
+					continue;
+					xValue = thisLoc.x - otherLoc.x;
+					yValue = thisLoc.y - otherLoc.y;
+					dis = (float) Math.sqrt(xValue * xValue + yValue
+					* yValue);
+					forceX = (float) (xValue / dis) * attractForce;
+					forceY = (float) (yValue / dis) * attractForce;
+					otherMole.sumForceX[otherE] += forceX;
+					otherMole.sumForceY[otherE] += forceY;
+					}
+					
+				}
+			}
+		}
+	}
+
+	// Foce computation for sim 1 set 4
 	private void computeForceAgCopper() {
 		Molecule mole = null;
 		float scale = 0.2f; // How strong the force is
 		float repulsiveForce = 1.5f;
-		float forceYCompensation = 0.07f;
+		float forceYCompensation = 0.20f;
 		float gravityCompensation = 0.2f;
 		float gravityScale = 0.01f;
+		float sulfateforceYCompensation =0.005f;
 
 		float xValue = 0;
 		float yValue = 0;
@@ -1984,6 +2110,8 @@ public class Unit3 extends UnitBase {
 		Vec2 thisLoc = new Vec2(0, 0);
 		Vec2 otherLoc = new Vec2(0, 0);
 		float topBoundary = p5Canvas.h/2;
+		int silverIonNum = State.getCompoundNum("Silver-Ion");
+		int silverNitrateNum = State.getCompoundNum("Silver-Nitrate");
 
 		for (int i = 0; i < molecules.size(); i++) {
 			if (molecules.get(i).getName().equals("Silver-Ion")) // Compute
@@ -2026,12 +2154,19 @@ public class Unit3 extends UnitBase {
 							mole.sumForceX[thisE] += forceX;
 							mole.sumForceY[thisE] += forceY
 									+ forceYCompensation;
+							if(silverIonNum<=2 && silverNitrateNum==0)
+							{
+								mole.sumForceX[thisE] += forceX*2;
+								mole.sumForceY[thisE] += (forceY
+										+ forceYCompensation)*2;
+							}
 
 						}
 					}
 
 				}
-			} else if (molecules.get(i).getName().equals("Copper-II")) // Compute
+			} else if (molecules.get(i).getName().equals("Copper-II")||
+					molecules.get(i).getName().equals("Nitrate")) // Compute
 																		// force
 																		// for
 																		// copper-II,
@@ -2072,8 +2207,13 @@ public class Unit3 extends UnitBase {
 							forceX = (float) ((xValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
 							forceY = (float) ((yValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
 
-							mole.sumForceX[thisE] += forceX;
+							
+							//mole.sumForceX[thisE] += forceX;
+							if(forceY<0)
+								forceY*=-1;
 							mole.sumForceY[thisE] += forceY;
+							if(m.getName().equals("Nitrate"))
+								mole.sumForceY[thisE]+=sulfateforceYCompensation; 
 
 						}
 					}
@@ -2645,6 +2785,7 @@ public class Unit3 extends UnitBase {
 			case 2:
 				break;
 			case 3:
+				super.applyForce(sim, set);
 				break;
 			case 4:
 				super.applyForce(sim, set);

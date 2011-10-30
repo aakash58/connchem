@@ -441,6 +441,14 @@ public class Molecule {
 	public Vec2 getPosition() {
 		return body.getPosition();
 	}
+	public void setPosition(Vec2 pos,float angle)
+	{
+		body.setTransform(pos, angle);
+	}
+	public float getAngle()
+	{
+		return body.getAngle();
+	}
 
 	public void setRestitution(float r) {
 		Fixture s = body.getFixtureList();
@@ -673,6 +681,7 @@ public class Molecule {
 		}
 		
 		//Draw element center for testing
+		/*
 		for(int e=0;e<this.elementNames.size();e++)
 		{
 			int size = 5;
@@ -680,6 +689,7 @@ public class Molecule {
 			Vec2 loc = new Vec2(PBox2D.vectorWorldToPixels(getElementLocation(e)));
 			p5Canvas.ellipse(loc.x,p5Canvas.h * 0.77f+loc.y,size,size);
 		}
+		*/
 
 	}
 
@@ -754,7 +764,7 @@ public class Molecule {
 		else if (name.equals("Hydrogen"))
 			mul = 15.0f;
 		else if (name.equals("Chloride"))
-			mul = 2.0f;
+			mul = 1.5f;
 		else if (name.equals("Ammonium"))
 			mul = 2.5f;
 		return mul;

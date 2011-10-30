@@ -551,23 +551,21 @@ public abstract class UnitBase {
 			int count, Simulation simulation,float angle) {
 		boolean res = true;
 		
-
-		int numCol = (int) Math.ceil((float) count / 2); // number of column
-		int numRow = (int) Math.ceil((float) count / numCol); // number of row
+		int numRow = (int) Math.ceil((float) count / 3); // number of row
+		int numCol = (int) Math.ceil((float) count / numRow); // number of column
+		
 
 		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
 
-		float increX = p5Canvas.w / 8;
-		Random rand = new Random(); // Random number used to generate ions in
-									// random location
-		float centerX = p5Canvas.x + size.x; // X coordinate around which we are going to add
+		float increX = p5Canvas.w / 16;
+		float offsetX = size.x/2+size.x/6;
+		float centerX = p5Canvas.x + offsetX; // X coordinate around which we are going to add
 								// Ions, 50 is border width
-		// centerX += rand.nextFloat()*(w/3*2);
 		float centerY = p5Canvas.y + p5Canvas.h -size.y*numRow - Boundary.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 
-		Vec2 topLeft = new Vec2(centerX-0.5f * size.x, centerY-0.5f* size.y);
+		Vec2 topLeft = new Vec2(centerX-size.x/2, centerY-size.y/2);
 		Vec2 botRight = new Vec2(centerX + numCol * (size.x), centerY + numRow
 				* size.y);
 
@@ -588,7 +586,6 @@ public abstract class UnitBase {
 				if (!((String) molecules.get(k).getName()).equals("Water")) {
 					molePos.set(molecules.get(k).getPosition());
 					molePosInPix.set(box2d.coordWorldToPixels(molePos));
-
 			
 					if (areaBodyCheck(molePosInPix, topLeft, botRight)) {
 						isClear = false;
@@ -598,11 +595,11 @@ public abstract class UnitBase {
 			}
 			if (!isClear) {
 				centerX += increX;
-				topLeft = new Vec2(centerX-0.5f*size.x, centerY-0.5f*size.y);
+				topLeft = new Vec2(centerX-size.x/2, centerY-size.y/2);
 				botRight = new Vec2(centerX + numCol * (size.x), centerY + numRow
 						* size.y);
 				// If we have gone through all available areas.
-				if (centerX > (p5Canvas.x + p5Canvas.w)) {
+				if (botRight.x > (p5Canvas.x + p5Canvas.w)) {
 					isClear = true; // Ready to jump out
 					res = false; // Set output bolean flag to false
 					// TO DO: Show tooltip on Add button when we cant add more
@@ -788,7 +785,7 @@ public abstract class UnitBase {
 	 * INPUTS : unit(int), Sim(int), Set(int)
 	 * OUTPUTS: None
 	 *******************************************************************/
-	private void updateCompoundNumber(int unit,int sim,int set)
+	protected void updateCompoundNumber(int unit,int sim,int set)
 	{
 		if (true) {
 			int decreaseNum = 0;
