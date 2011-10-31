@@ -443,6 +443,7 @@ public class Main {
 					 addBtn.setIcon(new ImageIcon(Main.class.getResource("/resources/png16x16/plus.png")));
 					panel.add(addBtn, "cell 2 1,growy");
 					addBtns.put(fixedName,addBtn); //Associate add button info with compound names
+					State.moleculesAdded.put(fixedName,0); //Initialize moleculesAdded
 					addBtn.addMouseListener(new MouseAdapter() {
 						public void mouseClicked(MouseEvent arg0) {
 							
@@ -460,10 +461,9 @@ public class Main {
 							        }
 							    }
 
-								int cap = getP5Canvas().getMoleculesCap(fixedName);
-								//int curNum = getP5Canvas().getMoleculesNum(fixedName);
-								
+								int cap = getP5Canvas().getMoleculesCap(fixedName);								
 								int currentNum = State.moleculesAdded.get(fixedName);
+								
 								if(cap<=(count+currentNum))
 								{
 									count = cap - currentNum;
@@ -507,10 +507,17 @@ public class Main {
 				if (compounds!=null){
 					int rowNum = 4;
 					int colNum = 2;
+					//Panel containing multi-buttons
 					JPanel multiButtonPanel = new JPanel();
-					multiButtonPanel.setLayout(new MigLayout("insets 10,gap 0","[50]10[50]","[][]5[][]5[][]"));
-					dynamicPanel.setLayout(new MigLayout("insets 10,gap 0","[50]10[50]","[][]5[][]5[][]"));
+					multiButtonPanel.setLayout(new MigLayout("insets 8,gap 0","[50]10[50]","[][]5[][]5[][]"));
+					//Panel rendering instruction
+					JLabel instructionPanel = new JLabel();
+					instructionPanel.setText("<html>Select two substances below" +
+							"<p> and then press play button</html>");
+					dynamicPanel.setLayout(new MigLayout("insets 0,gap 0","","[][]"));
 					dynamicScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+					dynamicPanel.add(instructionPanel,"cell 0 0, center");
+					dynamicPanel.add(multiButtonPanel, "cell 0 1, center");
 					for (int i=0;i<compounds.size();i++){
 
 						//Get Compound Name 
@@ -520,11 +527,11 @@ public class Main {
 							continue;
 						JLabel lblMolecule = new JLabel(cName);
 						lblMolecule.setFont(new Font("Lucida Grande", Font.PLAIN, 12));
-						dynamicPanel.add(lblMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2+1)+", center" );  //cell column row
+						multiButtonPanel.add(lblMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2+1)+", center" );  //cell column row
 						final String fixedName = cName.replace(" ", "-");
 						//Draw Molecule button
 						JButton btMolecule = new JButton();
-						dynamicPanel.add(btMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2)+", center, width 80:100:120, height 50: 55: 80");
+						multiButtonPanel.add(btMolecule, "cell "+i%colNum +" "+ ((i/colNum)*2)+", center, width 80:100:120, height 50: 55: 80");
 						btMolecule.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+fixedName+".png")));
 						//At the same time store fixed names into btnNames list
 						this.btnNames.add(fixedName);
@@ -566,6 +573,8 @@ public class Main {
 			mainFrame.getContentPane().add(rightPanel, "cell 2 0,grow");
 			isWelcomed = false;
 		}
+		//    Reset state parameter   
+		State.reset();
 		
 		//Update Molecule Legends on left panel
 		updateDynamicPanel();
@@ -575,8 +584,7 @@ public class Main {
 		
 		//    Reset canvas   
 		getP5Canvas().reset();
-		//    Reset state parameter   
-		State.reset();
+
 		
 		
 		//    Reset right panel   
@@ -976,8 +984,8 @@ public class Main {
 			}
 		});
 		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
-		checkBoxPanel.add(forceCheckbox, BorderLayout.CENTER);
-		checkBoxPanel.add(jointsCheckbox, BorderLayout.SOUTH);
+		//checkBoxPanel.add(forceCheckbox, BorderLayout.CENTER);
+		//checkBoxPanel.add(jointsCheckbox, BorderLayout.SOUTH);
 		timerSubpanel.add(checkBoxPanel, "cell 1 1");
 
 		

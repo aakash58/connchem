@@ -41,6 +41,7 @@ public class Molecule {
 	public float fric;
 	public float res;
 	private float scale = 1;
+	private int legendId=-1; //Legend Id used to connect molecule to graph legend
 
 	private float xTmp;   //Temporary x to save x position while dragging, in world coordinates
 	private float yTmp;   //Temporary x to save x position while dragging, in world coordinates
