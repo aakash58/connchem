@@ -988,6 +988,58 @@ public class Unit3 extends UnitBase {
 					pos.y+=silverSize;
 					newCopperII.setPosition(pos, newCopperII.getAngle());
 				}
+				/*
+				//update compound number for molecules  
+				if (true) {
+					int decreaseNum = 0;
+					int resultNum = 0;
+					int index = -1;
+					// Get reaction input from DB
+					ArrayList<String> input = DBinterface.getReactionInputs(unit, sim,
+							set);
+					if( input!=null)
+					{
+					for (String compound : input) {
+						index = -1;
+						index = Compound.names.indexOf(compound);
+						if (index >= 0) // Decrease products count by num
+						{
+							decreaseNum = DBinterface.getReactionCompoundsNum(unit,
+									sim, set, compound);
+							if (decreaseNum != -1) {
+								resultNum = Compound.counts.get(index) - decreaseNum;
+								if (resultNum < 0)
+									resultNum = 0;
+								Compound.counts.set(index, resultNum);
+							}
+						}
+
+					}
+					}
+					// Get reaction output from DB
+					ArrayList<String> products = DBinterface.getReactionOutputs(unit,
+							sim, set);
+					int increaseNum = 0;
+					resultNum = 0;
+					index = -1;
+					if(products!=null)
+					{
+					for (String compound : products) {
+						index = -1;
+						index = Compound.names.indexOf(compound);
+						if (index >= 0) // Increase products count by num
+						{
+							increaseNum = DBinterface.getReactionCompoundsNum(unit,
+									sim, set, compound);
+							if (increaseNum != -1) {
+								resultNum = Compound.counts.get(index) + increaseNum;
+								Compound.counts.set(index, resultNum);
+							}
+						}
+
+					}
+					}
+				}*/
 
 				p5Canvas.products.clear();
 				p5Canvas.killingList.clear();
