@@ -18,6 +18,7 @@ import simulations.models.Water;
 
 import main.Canvas;
 import main.Main;
+import main.TableView;
 
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.collision.Manifold;
@@ -266,8 +267,7 @@ public class P5Canvas extends PApplet{
 	*******************************************************************/
 	public void computeForces()
 	{
-		for (int i = 0; i < molecules.size(); i++) {
-			Molecule m = molecules.get(i);
+		
 
 			//else 
 				{
@@ -275,11 +275,16 @@ public class P5Canvas extends PApplet{
 				switch (main.selectedUnit)
 				{
 				case 1:
+					for (int i = 0; i < molecules.size(); i++) {
+						Molecule m = molecules.get(i);
 					if (m.getName().equals("Water"))
 						waterComputation.setForceWater(i,m);
 					setForce(i,m);
+					}
 					break;
 				case 2:
+					for (int i = 0; i < molecules.size(); i++) {
+						Molecule m = molecules.get(i);
 					if (m.getName().equals("Water"))
 						waterComputation.setForceWater(i,m);
 					if(main.selectedSet==1 && main.selectedSim<4)
@@ -301,6 +306,7 @@ public class P5Canvas extends PApplet{
 					else if(main.selectedSet==7){
 						getUnit2().computeForceNaHCO3(i,m);
 						getUnit2().computeForceFromWater(i,m);	
+					}
 					}
 
 					break;
@@ -324,7 +330,7 @@ public class P5Canvas extends PApplet{
 				}
 			
 			}
-		}
+		
 		
 		//Apply forces after set forces
 		applyForce();
@@ -580,7 +586,9 @@ public class P5Canvas extends PApplet{
 		if (compoundName.equals("Water")){
 			getUnit2().addWaterMolecules(count);
 			DecimalFormat df = new DecimalFormat("###.#");
-			main.waterVolume.setText(df.format(getUnit2().getWaterNum()/(getUnit2().getWater100Ml()/100.))+" mL");
+			float waterNum = getUnit2().getWaterNum();
+			float water100 = (float)getUnit2().getWater100Ml()/100;
+			main.waterVolume.setText(df.format(waterNum/water100)+" mL");
 			computeSaturation();
 		}
 		if (main.selectedUnit==2 && !compoundName.equals("Water") && count>0){
@@ -674,7 +682,7 @@ public class P5Canvas extends PApplet{
 		boolean tmp = isEnable;
 		isEnable = false;
 		
-		computeOutput(compoundName,count);
+		
 		//int index = Compound.names.indexOf(compoundName);
 		//int addCount = Compound.counts.get(index)+count;
 		
@@ -701,6 +709,9 @@ public class P5Canvas extends PApplet{
 			}
 			else{
 				//TO DO: Check if molecules are in gas or water
+				if(compoundName.equals("Glycerol")||compoundName.equals("Pentane"))
+					res = getUnit2().addGlycerol(compoundName, count, box2d, this);
+				else if (compoundName.equals("Water"))
 				res = addWaterMolecules(tmp,compoundName,count);
 			}
 			break;
@@ -733,8 +744,10 @@ public class P5Canvas extends PApplet{
 			//System.out.println("count is "+countNum+", cap is "+ cap);
 			if(countNum>=cap) //Grey out add button
 			{
+				if(!getMain().addBtns.isEmpty())
 				getMain().addBtns.get(compoundName).setEnabled(false);
 			}
+			computeOutput(compoundName,count);
 				
 		}
 		
@@ -752,15 +765,11 @@ public class P5Canvas extends PApplet{
 	*******************************************************************/
 	public boolean addMolecule(String compoundName, int count) {
 		// The tmp variable helps to fix a Box2D Bug: 2147483647  because of Multithreading
-		// at pbox2d.PBox2D.step(PBox2D.java:81)
-		// at pbox2d.PBox2D.step(PBox2D.java:72)
-		// at pbox2d.PBox2D.step(PBox2D.java:67)
-		// at view.P5Canvas.draw(P5Canvas.java:73)
 		boolean tmp = isEnable;
 		isEnable = false;
 		boolean res = false;
 		
-		computeOutput(compoundName,count);
+		
 		int index = Compound.names.indexOf(compoundName);
 		int addCount = Compound.counts.get(index)+count;
 		
@@ -785,6 +794,9 @@ public class P5Canvas extends PApplet{
 					addSolid(compoundName,count);
 			}
 			else{
+				if(compoundName.equals("Glycerol")||compoundName.equals("Pentane"))
+					res = getUnit2().addGlycerol(compoundName, count, box2d, this);
+				else
 				res = addWaterMolecules(tmp,compoundName,count);
 				
 			}
@@ -811,7 +823,10 @@ public class P5Canvas extends PApplet{
 		
 		//If we successfully added molecules, update compound number
 		if(res)
+		{
 			Compound.counts.set(index, addCount);
+			computeOutput(compoundName,count);
+		}
 		
 		isEnable = tmp;
 		return res;
@@ -860,6 +875,7 @@ public class P5Canvas extends PApplet{
 	public boolean addWaterMolecules(boolean isAppEnable,String compoundName, int count)
 	{
 		boolean res = false;
+		//computeOutput(compoundName,count);
 		
 		if (isAppEnable) //if Applet is enable
 			creationCount =0;
@@ -1296,5 +1312,10 @@ public class P5Canvas extends PApplet{
 	 */
 	public void setUnit3(Unit3 unit3) {
 		this.unit3 = unit3;
+	}
+	
+	public TableView getTableView()
+	{
+		return main.getTableView();
 	}
 }

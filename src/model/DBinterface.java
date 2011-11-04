@@ -39,8 +39,9 @@ public class DBinterface {
 			if (dbFile.exists()) {
 			    // DB file is in the same directory with jar file
 				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
-			} 
+			}
 			*/
+			
 			
 			//Debug Configuration
 			String dbPath = ClassLoader.getSystemResource("model/"+dbFileName).toString();

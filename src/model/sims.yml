@@ -154,7 +154,7 @@ units:
       compounds: 
       - compound: "Water"
         qty: 0
-        cap: 95
+        cap: 50
       - compound: "Sodium Chloride"
         qty: 2
         cap: 10
@@ -168,7 +168,7 @@ units:
       compounds: 
       - compound: "Water"
         qty: 0
-        cap: 95
+        cap: 50
       - compound: "Sodium Chloride"
         qty: 2
         cap: 10
@@ -176,23 +176,23 @@ units:
       compounds:
       - compound: "Water"
         qty: 0
-        cap: 95
+        cap: 50
       - compound: "Silicon Dioxide"
-        qty: 2
+        qty: 5
         cap: 20
     - set: 3
       compounds:
       - compound: "Water"
         qty: 0
-        cap: 50
+        cap: 30
       - compound: "Glycerol"
         qty: 2
-        cap: 8
+        cap: 7
     - set: 4
       compounds:
       - compound: "Water"
         qty: 0
-        cap: 95
+        cap: 50
       - compound: "Calcium-Chloride"
         qty: 2
         cap: 8
@@ -200,15 +200,15 @@ units:
       compounds:
       - compound: "Water"
         qty: 0
-        cap: 45
+        cap: 25
       - compound: "Acetic Acid"
-        qty: 2 
-        cap: 13
+        qty: 5 
+        cap: 10
     - set: 6
       compounds:
       - compound: "Water"
-        qty: 8
-        cap: 60
+        qty: 15
+        cap: 50
       - compound: "Pentane"
         qty: 0
         cap: 8
@@ -218,8 +218,8 @@ units:
         qty: 0
         cap: 50
       - compound: "Sodium Bicarbonate"
-        qty: 2
-        cap: 15
+        qty: 5
+        cap: 8
   - sim: 3
     name: "Solubility Changes"
     sets:
@@ -227,7 +227,7 @@ units:
       compounds: 
       - compound: "Water"
         qty: 0
-        cap: 95
+        cap: 50
       - compound: "Sodium Chloride"
         qty: 0
         cap: 10
@@ -235,7 +235,7 @@ units:
       compounds: 
       - compound: "Water"
         qty: 0
-        cap: 95
+        cap: 50
       - compound: "Silicon Dioxide"
         qty: 0
         cap: 20   
@@ -286,7 +286,7 @@ units:
       compounds:
       - compound: "Water"
         qty: 0
-        cap: 95
+        cap: 50
       - compound: "Potassium Chloride"
         qty: 2
         cap: 10

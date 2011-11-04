@@ -89,6 +89,7 @@ public class Molecule {
 	public float ionDis = 0; // Use to compute dissolve
 	private boolean reactive = true; // Molecule can only react if this flag is
 										// true
+	private int tableIndex = -1;
 
 	/******************************************************************
 	 * FUNCTION : Molecule() DESCRIPTION : Molecule Constructor
@@ -294,7 +295,7 @@ public class Molecule {
 		else
 			scale = 1f;
 
-		if(p5Canvas.getMain().selectedUnit==1||p5Canvas.getMain().selectedUnit==2)
+		if((p5Canvas.getMain().selectedUnit==1||p5Canvas.getMain().selectedUnit==2))
 		{
 		if (name.equals("Water"))
 			chargeRate = 0.95f;
@@ -302,6 +303,9 @@ public class Molecule {
 			chargeRate = 0.93f;
 			fric = 1;
 			res = 0.55f;
+			if(temp>150)
+				res = 0.0f;
+			
 		} else if (name.equals("Chlorine-Ion")) {
 			chargeRate = 0.93f;
 			fric = 1;
@@ -579,18 +583,38 @@ public class Molecule {
 		 * If molecules are selected or deselected in tableview, render or hide
 		 * them
 		 */
+
 		if (! p5Canvas.getMain().getTableView().selectedRowsIsEmpty()) {
-			String [] selectedMoleculesString = p5Canvas.getMain().getCanvas().getSelectedMolecule();
+
+			String [] selectedMoleculesString = p5Canvas.getTableView().getSelectedMolecule();
 			if(selectedMoleculesString!=null)
+			{
 				if(selectedMoleculesString.length>0)
 				{
+					
 					boolean contains = false;
-					for(String molecule:selectedMoleculesString)
+					if(this.tableIndex == -1 )
 					{
-						if(name.equals(molecule))
+						
+						for(String moleName:selectedMoleculesString)
 						{
-							contains = true;
-							break;
+							if(name.equals(moleName))
+							{
+								contains = true;
+								break;
+							}
+						}
+					}
+					else //If we are using tableIndex to connect molecule with table index
+					{
+						int [] selectedRows = p5Canvas.getTableView().getSelectedRows();
+						for(int index:selectedRows)
+						{
+							if(this.tableIndex==index)
+							{
+								contains = true;
+								break;
+							}
 						}
 					}
 					if(!contains) //If selected molecules names dont contain this name
@@ -601,8 +625,11 @@ public class Molecule {
 									- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);
 						}
 					}
-				}
-			
+				
+					
+			}
+			}
+
 			
 		}
 		/* If hide checkbox is selected, hide them */
@@ -809,5 +836,26 @@ public class Molecule {
 	{
 		body.setLinearVelocity(vec);
 	}
-	
+	public void setTableIndex(int index)
+	{
+		/*
+		if(tableIndex==-1)
+		{
+			this.tableIndex = index;
+			p5Canvas.getTableView().increaseRowCount(tableIndex, 1);
+		}
+		else
+		{
+			if(this.tableIndex==index)
+				return;
+			p5Canvas.getTableView().increaseRowCount(tableIndex, -1);
+			tableIndex = index;
+			p5Canvas.getTableView().increaseRowCount(tableIndex, 1);
+		}*/
+		this.tableIndex = index;
+	}
+	public int getTableIndex()
+	{
+		return this.tableIndex;
+	}
 }

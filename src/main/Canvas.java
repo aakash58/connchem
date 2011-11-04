@@ -49,8 +49,6 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		addMouseListener(this);
 		ToolTipManager.sharedInstance().setInitialDelay(0);
 		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
-	
-		
 		
 	}
 	
@@ -78,7 +76,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			main.elapsedTime.setText(formatTime(0));
 		
 		//Clean lines after reset
-		this.updateTableView();
+		main.getTableView().updateTableView();
 		this.updateUI();
 	}
 	
@@ -162,7 +160,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		//Get molecules number from simulation before painting
 		updateMoleculeCount();
 		//Update tableView, which is presenting molecule legends below chart
-		updateTableView();
+		main.getTableView().updateTableView();
 		
 		//Expand x scale if time reaches maxTime
 		if (Main.time>maxTime){
@@ -356,41 +354,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		
 	}
 	
-	//Update tableView, which is presenting molecule legends below chart
-	public void updateTableView(){
-		
-		main.getTableView().data[0].clear();
-		main.getTableView().data[1].clear();
-		main.getTableView().data[2].clear();
-		
-		for (int i=0; i<Compound.names.size();i++){
-			main.getTableView().data[0].add(Compound.counts.get(i));
-			main.getTableView().data[1].add(main.getTableView().colors[i]);
-			main.getTableView().data[2].add(Compound.names.get(i));
-		}
-		if (main.getTableView() !=null && !main.getTableView().stopUpdating){
-			main.getTableView().table.updateUI();
-		}		
-	}
+
 	
-	//Return molecule name when that molecule is being selected on legends
-	public String [] getSelectedMolecule(){
-		if(!main.getTableView().selectedRowsIsEmpty())
-		{
-			int [] selectedRows = main.getTableView().getSelectedRows();
-			String [] molecules = new String [selectedRows.length];
-			
-			for(int i = 0;i<selectedRows.length;i++)
-			{
-				if(selectedRows[i]<Compound.names.size())
-				molecules[i] = new String(Compound.names.get(selectedRows[i]));
-			}
-			
-			return molecules;
-		}
-		return null;
-		
-	}
+
 	
 	/*public static Color getSelecttedColor(){
 		int index = TableView.selectedRow;
@@ -486,6 +452,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		}
 		*/
 	}
+
 	
 
 }

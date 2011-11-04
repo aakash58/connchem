@@ -34,9 +34,9 @@ public class Unit2 {
 	private int mToMass = 10;
 	private P5Canvas p5Canvas = null;
 	private PBox2D box2d = null;
-	private int addWaterDelay = 8000; //Parameter specifies delay of saturation computation after we add water molecules to canvas
+	//private int addWaterDelay = 8000; //Parameter specifies delay of saturation computation after we add water molecules to canvas
 	                           //In seconds
-	private ActionListener timerPerformer = null; //ActionListener of timer used to increase numWater
+	//private ActionListener timerPerformer = null; //ActionListener of timer used to increase numWater
 
 
 	public Unit2(P5Canvas parent, PBox2D box) {
@@ -572,6 +572,116 @@ public class Unit2 {
 		
 		return res;
 	}
+	
+	/******************************************************************
+	 * FUNCTION : addGlycerol DESCRIPTION : Specific function used to add
+	 * addGlycerol and Pentane
+	 * 
+	 * INPUTS : CompoundName(String), count(int),
+	 * box2d_(PBox2D),parent_(P5Canvas) OUTPUTS: None
+	 *******************************************************************/
+	public boolean addGlycerol(String compoundName, int count, PBox2D box2d,
+			P5Canvas parent) {
+
+		boolean res = true;
+		int creationCount = 0;
+
+		if (parent.isEnable) // if Applet is enable
+			creationCount = 0;
+		else
+			creationCount++;
+		// variables are used to distribute molecules
+		int mod = creationCount % 4; // When the system is paused; Otherwise,
+										// molecules are create at the same
+										// position
+
+		float centerX = 0; // X Coordinate around which we are going to add
+							// molecules
+		float centerY = 0; // Y Coordinate around which we are going to add
+							// molecules
+		float x_ = 0; // X Coordinate for a specific molecule
+		float y_ = 0; // Y Coordinate for a specific molecule
+		int dimension = 0; // Decide molecule cluster is 2*2 or 3*3
+
+		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
+
+		float moleWidth = size.x;
+		float moleHeight = size.y;
+		Vec2 topLeft = new Vec2(0, 0);
+		Vec2 botRight = new Vec2(0, 0);
+		// boolean dimensionDecided = false;
+		int k = 0;
+		for (k = 1; k < 10; k++) {
+			if (count <= (k * k)) {
+				dimension = k;
+				break;
+			}
+		}
+		int rowNum = count / dimension + 1;
+		int colNum = dimension;
+		boolean isClear = false;
+		Vec2 molePos = new Vec2(0, 0); // Molecule position parameter
+		Vec2 molePosInPix = new Vec2(0, 0);
+		float increX = p5Canvas.w / 12;
+
+		// Initializing
+		centerX = p5Canvas.x + moleWidth/2;
+		centerY = p5Canvas.y + moleHeight - Boundary.difVolume;
+		topLeft = new Vec2(centerX - 0.5f * moleWidth, centerY - 0.5f * moleHeight);
+		botRight = new Vec2(centerX + colNum * moleWidth, centerY + rowNum
+				* moleHeight);
+		// Check if there are any molecules in add area. If yes, add molecules
+		// to another area.
+	
+		while (!isClear) {
+			// Specify new add area.
+
+			// Reset flag
+			isClear = true;
+
+			for (int m = 0; m < molecules.size(); m++) {
+
+				if (!((String) molecules.get(m).getName()).equals("Water")) {
+					molePos.set(molecules.get(m).getPosition());
+					molePosInPix.set(box2d.coordWorldToPixels(molePos));
+
+					if (areaBodyCheck(molePosInPix, topLeft, botRight)) {
+						isClear = false;
+					}
+				}
+			}
+			if (!isClear) {
+				centerX += increX;
+				topLeft = new Vec2(centerX - moleWidth/2, centerY - moleHeight);
+				botRight = new Vec2(centerX + colNum * moleWidth, centerY + rowNum
+						* moleHeight);
+
+				// If we have gone through all available areas.
+				if (botRight.x > (p5Canvas.x + p5Canvas.w)
+						|| topLeft.x < p5Canvas.x) {
+					isClear = true; // Ready to jump out
+					res = false; // Set output bolean flag to false
+					// TO DO: Show tooltip on Add button when we cant add more
+					// compounds
+				}
+			}
+		}
+
+		if (res) {
+			// Add molecules into p5Canvas
+			for (int i = 0; i < count; i++) {
+
+				x_ = centerX + i % dimension * moleWidth + creationCount;
+				y_ = centerY + i / dimension * moleHeight;
+
+				res = molecules.add(new Molecule(x_, y_, compoundName, box2d,
+						p5Canvas, 0));
+			}
+		}
+
+		return res;
+	}
+	
 
 	public void jointNaHCO3(int index1, int index2, Molecule m1, Molecule m2) { // draw
 																				// background
@@ -1508,6 +1618,8 @@ public class Unit2 {
 
 	public void addWaterMolecules(final int count) {
 		
+		numWater += count;
+		/*
 		timerPerformer = new ActionListener(){
 
 			@Override
@@ -1523,6 +1635,7 @@ public class Unit2 {
 		timer.setInitialDelay(this.addWaterDelay);
 		timer.setRepeats(false);  //Set the timer only go off once
 		timer.start();
+		*/
 
 		
 	}
