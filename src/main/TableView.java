@@ -10,6 +10,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
+
+import simulations.models.Compound;
+
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -111,6 +114,23 @@ public class TableView extends JPanel {
 		}
 		
 		
+	}
+	
+	//Update tableView, which is presenting molecule legends below chart
+	public void updateTableView(){
+		
+		data[0].clear();
+		data[1].clear();
+		data[2].clear();
+		
+		for (int i=0; i<Compound.names.size();i++){
+			data[0].add((Integer)Compound.counts.get(i));
+			data[1].add((Color)colors[i]);
+			data[2].add((String)Compound.names.get(i));
+		}
+		if (this!=null && !stopUpdating){
+			this.table.updateUI();
+		}		
 	}
 
 
@@ -226,6 +246,24 @@ public class TableView extends JPanel {
 				}
 		return res;
 	}
+	
+	//Return molecule name when that molecule is being selected on legends
+	public String [] getSelectedMolecule(){
+		if(!selectedRowsIsEmpty())
+		{
+			int [] selectedRows = getSelectedRows();
+			String [] molecules = new String [selectedRows.length];
+			
+			for(int i = 0;i<selectedRows.length;i++)
+			{
+				if(selectedRows[i]<Compound.names.size())
+				molecules[i] = new String(Compound.names.get(selectedRows[i]));
+			}
+			
+			return molecules;
+		}
+		return null;
+	}
 
 	public boolean selectedRowsIsEmpty()
 	{
@@ -241,6 +279,17 @@ public class TableView extends JPanel {
 	public int [] getSelectedRows()
 	{
 		return selectedRows.clone();
+	}
+	public void increaseRowCount(int index, int count)
+	{
+		
+		if(index>=0 && index<data[0].size())
+		{
+			Integer newCount = new Integer(((Integer)data[0].get(index)).intValue()+count);
+			if(newCount.intValue()<0)
+				newCount=0;
+			data[0].set(index, newCount);
+		}
 	}
 	
 	public boolean contains(String name)
@@ -264,7 +313,15 @@ public class TableView extends JPanel {
 	public void clearSelection()
 	{
 		table.clearSelection();
+		this.selectedRows = null;
 	}
+	
+	public int getIndexByName(String compoundName)
+	{
+		return data[2].indexOf(compoundName);
+	}
+	
+	
 	class MyTableModel extends AbstractTableModel {
 		private String[] columnNames = {};
 		
@@ -318,5 +375,6 @@ public class TableView extends JPanel {
 		// TODO Auto-generated method stub
 		return main;
 	}
+	
 
 }

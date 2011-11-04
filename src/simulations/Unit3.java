@@ -37,8 +37,8 @@ public class Unit3 extends UnitBase {
 	private int frameCounter = 0;
 	private int computeTriggerInterval = 30;
 	private boolean isAnchorSetup = false;
-	private int combinationIndex = -1;
-	private String [][] combination = new String[15][2];
+	public int combinationIndex = -1;
+	public String [][] combination = new String[15][2];
 
 	public Unit3(P5Canvas parent, PBox2D box) {
 		super(parent, box);
@@ -205,6 +205,20 @@ public class Unit3 extends UnitBase {
 			if (compoundName.equals("Lithium-Sulfide"))
 				res = this.addSolidLi2S(isAppEnable, compoundName, count,
 						simulation);
+		}
+		
+		if(res)
+		{
+			//Connect new created molecule to table index
+			int tIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+			//Set tableSet of Hydrogen-Ion and Chloride to Hydrogen-Chloride in Sim 1 set 7
+			//if(sim==1 &&set==7 &&(compoundName.equals("Hydrogen-Ion")||compoundName.equals("Chloride"))) 
+				//tIndex = p5Canvas.getTableView().getIndexByName("Hydrogen-Chloride");
+			int lastIndex = State.molecules.size()-1;
+			for(int i = 0;i<count;i++)
+			{
+				State.molecules.get(lastIndex-i).setTableIndex(tIndex);
+			}
 		}
 
 		return res;
@@ -847,8 +861,9 @@ public class Unit3 extends UnitBase {
 					float y1 = p5Canvas.h * 0.77f
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
+					String compoundName = new String(p5Canvas.products.get(i));
 					mNew = new Molecule(newVec.x, newVec.y,
-							p5Canvas.products.get(i), box2d, p5Canvas,
+							compoundName, box2d, p5Canvas,
 							(float) (Math.PI / 2));
 
 					molecules.add(mNew);
@@ -861,10 +876,17 @@ public class Unit3 extends UnitBase {
 						mNew.body.setLinearVelocity(mOld[0].body
 								.getLinearVelocity());
 					}
+					//Update molecule legends on right panel
+					//The index of ions will be the same with that of compound which they were before
+					int index = p5Canvas.getTableView().getIndexByName("Silver-Nitrate");
+					mNew.setTableIndex(index);
 				}
+				
+				
 				for (int i = 0; i < numToKill; i++)
 					mOld[i].destroy();
 
+				
 				p5Canvas.products.clear();
 				p5Canvas.killingList.clear();
 			}
@@ -903,25 +925,64 @@ public class Unit3 extends UnitBase {
 							- PBox2D.scalarWorldToPixels(loc.y + silverSize*silverIndex);
 					 newVec = new Vec2(x1, y1);
 					if (p5Canvas.products.get(i).equals("Silver")) {
+						String compoundName = new String(p5Canvas.products.get(i));
 						 Molecule mole = new Molecule(newVec.x, newVec.y,
-								p5Canvas.products.get(i), box2d, p5Canvas,
+								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
 						 newSilver.add(mole);
 						molecules.add(mole);
 						mole.body.setLinearVelocity(silverIon.body
 								.getLinearVelocity());
+						//Set tableIndex for Silver-Ion
+						int tableIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+						mole.setTableIndex(tableIndex);
+						//Increase Silver count by 1
+						int countIndex = Compound.names.indexOf(compoundName);
+						Compound.counts.set(countIndex,Compound.counts.get(countIndex)+1);
+						
 						
 					} else // If new molecules is copper-II
 					{
+						String compoundName = new String(p5Canvas.products.get(i));
 						newCopperII = new Molecule(newVec.x, newVec.y,
-								p5Canvas.products.get(i), box2d, p5Canvas,
+								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
 						molecules.add(newCopperII);
 						newCopperII.body.setLinearVelocity(copper.body
 								.getLinearVelocity());
-
+						//Set tableIndex for Copper-II
+						int tableIndex = p5Canvas.getTableView().getIndexByName("Copper-II-Nitrate");
+						newCopperII.setTableIndex(tableIndex);
+						//Copper-II won`t be added to Compound.counts
+						//Decrease copper count by 1
+						int countIndex = Compound.names.indexOf("Copper");
+						Compound.counts.set(countIndex, Compound.counts.get(countIndex)-1);
 					}
 
+				}
+				//We also need to change a Nitrate which belongs to Silver-Nitrate to Copper-II-Nitrate
+				int nitrateNum = 0 ;
+				for( int i = 0;i<State.molecules.size();i++)
+				{
+					if(State.molecules.get(i).getName().equals("Nitrate")&&State.molecules.get(i).getTableIndex()==p5Canvas.getTableView().getIndexByName("Silver-Nitrate"))
+					{
+						
+						int tableIndex = p5Canvas.getTableView().getIndexByName("Copper-II-Nitrate");
+						State.molecules.get(i).setTableIndex(tableIndex);
+						nitrateNum++;
+						if(nitrateNum>=2)
+						break;
+					}
+				}
+				
+				if(nitrateNum==2)
+				{
+					//Increase Copper-II-Nitrate by 1
+					int countIndex = Compound.names.indexOf("Copper-II-Nitrate");
+					Compound.counts.set(countIndex,Compound.counts.get(countIndex)+1);
+					//Decrease Silver-Nitrate by 2
+					countIndex = Compound.names.indexOf("Silver-Nitrate");
+					Compound.counts.set(countIndex, Compound.counts.get(countIndex)-2);
 				}
 
 				ArrayList<DistanceJointWrap> mJoint = null;
@@ -988,58 +1049,7 @@ public class Unit3 extends UnitBase {
 					pos.y+=silverSize;
 					newCopperII.setPosition(pos, newCopperII.getAngle());
 				}
-				/*
-				//update compound number for molecules  
-				if (true) {
-					int decreaseNum = 0;
-					int resultNum = 0;
-					int index = -1;
-					// Get reaction input from DB
-					ArrayList<String> input = DBinterface.getReactionInputs(unit, sim,
-							set);
-					if( input!=null)
-					{
-					for (String compound : input) {
-						index = -1;
-						index = Compound.names.indexOf(compound);
-						if (index >= 0) // Decrease products count by num
-						{
-							decreaseNum = DBinterface.getReactionCompoundsNum(unit,
-									sim, set, compound);
-							if (decreaseNum != -1) {
-								resultNum = Compound.counts.get(index) - decreaseNum;
-								if (resultNum < 0)
-									resultNum = 0;
-								Compound.counts.set(index, resultNum);
-							}
-						}
-
-					}
-					}
-					// Get reaction output from DB
-					ArrayList<String> products = DBinterface.getReactionOutputs(unit,
-							sim, set);
-					int increaseNum = 0;
-					resultNum = 0;
-					index = -1;
-					if(products!=null)
-					{
-					for (String compound : products) {
-						index = -1;
-						index = Compound.names.indexOf(compound);
-						if (index >= 0) // Increase products count by num
-						{
-							increaseNum = DBinterface.getReactionCompoundsNum(unit,
-									sim, set, compound);
-							if (increaseNum != -1) {
-								resultNum = Compound.counts.get(index) + increaseNum;
-								Compound.counts.set(index, resultNum);
-							}
-						}
-
-					}
-					}
-				}*/
+				
 
 				p5Canvas.products.clear();
 				p5Canvas.killingList.clear();
@@ -1051,7 +1061,7 @@ public class Unit3 extends UnitBase {
 	}
 
 	/******************************************************************
-	 * FUNCTION : reactCopperToSilver DESCRIPTION : Reaction for Sim 1 Set 4.
+	 * FUNCTION : reactIronToCopper DESCRIPTION : Reaction for Sim 1 Set 6.
 	 * Silver swap with copper
 	 * 
 	 * INPUTS : simulation(Simulation) OUTPUTS: None
@@ -1090,11 +1100,15 @@ public class Unit3 extends UnitBase {
 					float y1 = p5Canvas.h * 0.77f
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
+					String compoundName = new String(p5Canvas.products.get(i));
 					mNew = new Molecule(newVec.x, newVec.y,
-							p5Canvas.products.get(i), box2d, p5Canvas,
+							compoundName, box2d, p5Canvas,
 							(float) (Math.PI / 2));
 
 					molecules.add(mNew);
+					//Set Copper-II and Sulfate tableIndex to "Copper-II-Sulfate"
+					int tableIndex = p5Canvas.getTableView().getIndexByName("Copper-II-Sulfate");
+					mNew.setTableIndex(tableIndex);				
 
 					if (i == 0)
 						mNew.body.setLinearVelocity(mOld[0].body
@@ -1141,12 +1155,19 @@ public class Unit3 extends UnitBase {
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
 					if (p5Canvas.products.get(i).equals("Copper")) {
+						String compoundName = new String(p5Canvas.products.get(i));
 						newCopper = new Molecule(newVec.x, newVec.y,
-								p5Canvas.products.get(i), box2d, p5Canvas,
+								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
 						molecules.add(newCopper);
 						newCopper.body.setLinearVelocity(copperIon.body
 								.getLinearVelocity());
+						//Set tableIndex of newCopper to "Copper" row
+						int tableIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+						newCopper.setTableIndex(tableIndex);
+						//Increase copper count by 1
+						int countIndex = Compound.names.indexOf("Copper");
+						Compound.counts.set(countIndex, Compound.counts.get(countIndex)+1);
 					} else // If new molecules is copper-II
 					{
 						newIronII = new Molecule(newVec.x, newVec.y,
@@ -1155,10 +1176,31 @@ public class Unit3 extends UnitBase {
 						molecules.add(newIronII);
 						newIronII.body.setLinearVelocity(iron.body
 								.getLinearVelocity());
-
+						//Set tableIndex of newIronII to "Iron-II-Sulfate" row
+						int tableIndex = p5Canvas.getTableView().getIndexByName("Iron-II-Sulfate");
+						newIronII.setTableIndex(tableIndex);
+						//Decrease Iron count by 1
+						int countIndex = Compound.names.indexOf("Iron");
+						Compound.counts.set(countIndex, Compound.counts.get(countIndex)-1);
 					}
 
 				}
+				//We also need to change a Sulfate which belongs to Copper-II-Sulfate to Iron-II-Sulfate
+				for( int i = 0;i<State.molecules.size();i++)
+				{
+					if(State.molecules.get(i).getName().equals("Sulfate")&&State.molecules.get(i).getTableIndex()==p5Canvas.getTableView().getIndexByName("Copper-II-Sulfate"))
+					{
+						int tableIndex = p5Canvas.getTableView().getIndexByName("Iron-II-Sulfate");
+						State.molecules.get(i).setTableIndex(tableIndex);
+						break;
+					}
+				}		
+					//Increase Iron-II-Sulfate by 1
+					int countIndex = Compound.names.indexOf("Iron-II-Sulfate");
+					Compound.counts.set(countIndex,Compound.counts.get(countIndex)+1);
+					//Decrease Copper-II-Sulfate by 1
+					countIndex = Compound.names.indexOf("Copper-II-Sulfate");
+					Compound.counts.set(countIndex, Compound.counts.get(countIndex)-1);
 
 				// Get joints to which this molecule is connecting to
 				ArrayList<DistanceJointWrap> mJoint = iron.destroy();
@@ -1228,51 +1270,16 @@ public class Unit3 extends UnitBase {
 					}
 
 					Molecule mNew = null;
-					Molecule mNew2 = null;
-					float offsetX = 0; // Set an offset to spawn position to
-										// make it
-										// look real
 
 					// Actually there is only one reaction going in each frame
 					for (int i = 0; i < p5Canvas.products.size(); i++) {
 						Vec2 loc = dissolveCompound.getPosition();
 						String ionName = p5Canvas.products.get(i);
 						float x1;
-						//offsetX = mOld[0].getMaxSize() / 5;
-						/*if(reactedCompound.getName().equals("Sodium-Chloride"))
-							for( int e=0;e<reactedCompound.getNumElement();e++)
-							{
-								if(reactedCompound.elementNames.get(e).equals("Chloride")&&compoundName.equals("Chloride")		)
-									loc.set(reactedCompound.getElementLocation(e));
-								else if(reactedCompound.elementNames.get(e).equals("Sodium")&&compoundName.equals("Sodium-Ion")		)
-									loc.set(reactedCompound.getElementLocation(e));
-							}
-						else
-							for( int e=0;e<reactedCompound.getNumElement();e++)
-							{
-							if(reactedCompound.elementNames.get(e).equals("Silver")&&compoundName.equals("Silver-Ion"))
-								loc.set(reactedCompound.getElementLocation(e));
-							else if(reactedCompound.elementNames.get(e).equals("Nitrogen")&&compoundName.equals("Nitrate")		)
-									loc.set(reactedCompound.getElementLocation(e));
-							}*/
 						
 						int elementIndex = Compound.isIonOfElement(ionName, dissolveCompound);
 						if(elementIndex !=-1 )
 							loc.set(dissolveCompound.getElementLocation(elementIndex));
-						/*
-						if (p5Canvas.products.get(i).equals("Silver-Ion")
-								|| p5Canvas.products.get(i)
-										.equals("Sodium-Ion")) // Set
-																// an
-																// offset
-																// x
-																// for
-																// silver-ion
-							x1 = PBox2D.scalarWorldToPixels(loc.x)
-									+ mOld[0].getMaxSize() / 2 - offsetX;
-						else
-							x1 = PBox2D.scalarWorldToPixels(loc.x) - offsetX;
-							*/
 						x1 = PBox2D.scalarWorldToPixels(loc.x);
 						float y1 = p5Canvas.h * 0.77f
 								- PBox2D.scalarWorldToPixels(loc.y);
@@ -1282,6 +1289,18 @@ public class Unit3 extends UnitBase {
 								(float) (Math.PI / 2));
 						molecules.add(mNew);
 							mNew.body.setLinearVelocity(new Vec2(0,0));
+							if(ionName.equals("Sodium-Ion")||ionName.equals("Chloride"))
+							{
+							//Set Sodium-Ion and Chloride tableIndex to "Sodium-Chloride"
+							int tableIndex = p5Canvas.getTableView().getIndexByName("Sodium-Chloride");
+							mNew.setTableIndex(tableIndex);
+							}
+							else if(ionName.equals("Silver-Ion")||ionName.equals("Nitrate"))
+							{
+								//Set Silver-Ion and Silver-Ion tableIndex to "Silver-Nitrate"
+								int tableIndex = p5Canvas.getTableView().getIndexByName("Silver-Nitrate");
+								mNew.setTableIndex(tableIndex);
+							}
 						
 					}
 					for (int i = 0; i < numToKill; i++)
@@ -1318,17 +1337,52 @@ public class Unit3 extends UnitBase {
 								- PBox2D.scalarWorldToPixels(loc.y);
 						Vec2 newVec = new Vec2(x1, y1);
 
+						String compoundName = new String(p5Canvas.products.get(i)); //"Silver-Chloride"
 						silverChloride = new Molecule(newVec.x, newVec.y,
-								p5Canvas.products.get(i), box2d, p5Canvas,
+								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
 						molecules.add(silverChloride);
 						silverChloride.body.setLinearVelocity(silverIon.body
 								.getLinearVelocity());
+						//Set silverChloride tableSet to "SilverChloride"
+						int tableIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+						silverChloride.setTableIndex(tableIndex);
+						//Increase Silver-Chloride count by 1
+						int countIndex = Compound.names.indexOf(compoundName);
+						Compound.counts.set(countIndex, Compound.counts.get(countIndex)+1);
 
 					}
 
 					silverIon.destroy();
 					chloride.destroy();
+					int nitrateNum=0;
+					int sodiumNum=0;
+					for( int i = 0;i<State.molecules.size();i++)
+					{
+						//Change tableindex of Nitrate to "Sodium-Nitrate"
+						if(State.molecules.get(i).getName().equals("Nitrate")&&State.molecules.get(i).getTableIndex()==p5Canvas.getTableView().getIndexByName("Silver-Nitrate")&&nitrateNum==0)
+						{
+							int tableIndex = p5Canvas.getTableView().getIndexByName("Sodium-Nitrate");
+							State.molecules.get(i).setTableIndex(tableIndex);
+							nitrateNum++;
+						}
+						//Change tableindex of Sodium to "Sodium-Nitrate"
+						if(State.molecules.get(i).getName().equals("Sodium-Ion")&&State.molecules.get(i).getTableIndex()==p5Canvas.getTableView().getIndexByName("Sodium-Chloride")&&sodiumNum==0)
+						{
+							int tableIndex = p5Canvas.getTableView().getIndexByName("Sodium-Nitrate");
+							State.molecules.get(i).setTableIndex(tableIndex);
+							sodiumNum++;
+						}
+					}
+					//Increase Sodium-Nitrate count by 1
+					int countIndex = Compound.names.indexOf("Sodium-Nitrate");
+					Compound.counts.set(countIndex, Compound.counts.get(countIndex)+1);
+					//Decrease Sodium-Chloride count by 1
+					countIndex = Compound.names.indexOf("Sodium-Chloride");
+					Compound.counts.set(countIndex, Compound.counts.get(countIndex)-1);
+					//Decrease Silver-Nitrate count by 1
+					countIndex = Compound.names.indexOf("Silver-Nitrate");
+					Compound.counts.set(countIndex, Compound.counts.get(countIndex)-1);
 
 					// Set up anchors if they have not been set up yet.
 					if (!isAnchorSetup) {
@@ -1400,10 +1454,19 @@ public class Unit3 extends UnitBase {
 					float y1 = p5Canvas.h * 0.77f
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
+					String compoundName = new String(p5Canvas.products.get(i)); //Hydrogen-Sulfide
 					mNew = new Molecule(newVec.x, newVec.y,
-							p5Canvas.products.get(i), box2d, p5Canvas,
+							compoundName, box2d, p5Canvas,
 							(float) (Math.PI / 2));
-
+					//Set tableIndx of mNew to Hydrogen-Sulfide or Lithium-Chloride
+					if(compoundName.equals("Lithium-Ion"))
+						compoundName = new String("Lithium-Chloride");
+					int tableIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+					mNew.setTableIndex(tableIndex);
+					//Increase Hydrogen-Sulfide or Lithium-Chloride count by 1
+					int countIndex = Compound.names.indexOf(compoundName);
+					Compound.counts.set(countIndex, Compound.counts.get(countIndex)+1);
+					
 					molecules.add(mNew);
 
 					if (i == 0)
@@ -1417,6 +1480,31 @@ public class Unit3 extends UnitBase {
 				}
 				for (int i = 0; i < numToKill; i++)
 					mOld[i].destroy();
+
+				
+				int tableIndex = -1;
+				int chlorideNum=0;
+				//Change tableIndex of Chloride from Hydrogen-Chloride to Lithium-Chloride
+				for( int i = 0;i<State.molecules.size();i++)
+				{
+					
+					if(State.molecules.get(i).getName().equals("Chloride")&&State.molecules.get(i).getTableIndex()==p5Canvas.getTableView().getIndexByName("Chloride"))
+					{
+						tableIndex = p5Canvas.getTableView().getIndexByName("Lithium-Chloride");
+						State.molecules.get(i).setTableIndex(tableIndex);
+						chlorideNum++;
+						if(chlorideNum==2)
+							break;
+					}
+				}
+				//Decrease Lithium-Sulfide count by 1
+				int countIndex = Compound.names.indexOf("Lithium-Sulfide");
+				Compound.counts.set(countIndex, Compound.counts.get(countIndex)-1);
+				//Decrease Hydrogen-Ion and Chloride count by 2
+				countIndex = Compound.names.indexOf("Hydrogen-Ion");
+				Compound.counts.set(countIndex, Compound.counts.get(countIndex)-2);
+				countIndex = Compound.names.indexOf("Chloride");
+				Compound.counts.set(countIndex, Compound.counts.get(countIndex)-2);
 
 				p5Canvas.products.clear();
 				p5Canvas.killingList.clear();
@@ -1478,31 +1566,20 @@ public class Unit3 extends UnitBase {
 								elementIndex =1; //Set corrent index for the second sodium-Ion in Sodium-Carbonate
 							loc.set(dissolveCompound.loc[elementIndex]);
 						}
-						// Set an offset x for silver-ion
-						/*
-						if (p5Canvas.products.get(i).equals("Silver-Ion")
-								|| p5Canvas.products.get(i).equals(
-										"Potassium-Ion")
-								|| p5Canvas.products.get(i).equals("Ammonium")
-								|| p5Canvas.products.get(i)
-										.equals("Sodium-Ion")
-								|| p5Canvas.products.get(i).equals(
-										"Lithium-Ion"))
-							x1 = PBox2D.scalarWorldToPixels(loc.x)
-									+ mOld[0].getMaxSize() / 2 - offsetX;
-						else
-							x1 = PBox2D.scalarWorldToPixels(loc.x) - offsetX;
-							*/
 						x1 = PBox2D.scalarWorldToPixels(loc.x);
 						float y1 = p5Canvas.h * 0.77f
 								- PBox2D.scalarWorldToPixels(loc.y);
 						Vec2 newVec = new Vec2(x1, y1);
+						String compoundName = new String(p5Canvas.products.get(i));
 						mNew = new Molecule(newVec.x, newVec.y,
-								p5Canvas.products.get(i), box2d, p5Canvas,
+								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
-
 						molecules.add(mNew);
-
+						
+						//Set tableIndex of mNew to that of compound which it was
+						int tableIndex = p5Canvas.getTableView().getIndexByName(dissolveCompound.getName());
+						mNew.setTableIndex(tableIndex);
+						
 						if (i == 0)
 							mNew.body.setLinearVelocity(mOld[0].body
 									.getLinearVelocity());
@@ -1544,21 +1621,89 @@ public class Unit3 extends UnitBase {
 						float y1 = p5Canvas.h * 0.77f
 								- PBox2D.scalarWorldToPixels(loc.y);
 						Vec2 newVec = new Vec2(x1, y1);
-
+						String compoundName = new String(p5Canvas.products.get(i));
 						newCompound = new Molecule(newVec.x, newVec.y,
-								p5Canvas.products.get(i), box2d, p5Canvas,
+								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
 						molecules.add(newCompound);
 						newCompound.body.setLinearVelocity(ion1.body
 								.getLinearVelocity());
-
+						//Set tableIndex of newCompound to compoundName
+						int tableIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+						newCompound.setTableIndex(tableIndex);
+						//Increase newCompound count by 1
+						int countIndex = Compound.names.indexOf(compoundName);
+						Compound.counts.set(countIndex, Compound.counts.get(countIndex)+1);
 					}
 
 					ion1.destroy();
 					ion2.destroy();
 					if(ion3!=null)
 						ion3.destroy();
-
+					
+					if(combinationIndex == 5 ||combinationIndex == 9 ||combinationIndex == 10 || combinationIndex == 11  )
+					{
+						String restIon1 = null; //Ions that do not react
+						String restIon2 = null;
+						String restIon1Compound = null;
+						String restIon2Compound = null;
+						String agCompound = null;
+						switch(combinationIndex)
+						{
+						case 5:
+							restIon1 = new String("Potassium-Ion");
+							restIon2 = new String("Nitrate");
+							agCompound = new String("Potassium-Nitrate");
+							break;
+						case 9:
+							restIon1 = new String("Nitrate");
+							restIon2 = new String("Ammonium");
+							agCompound = new String("Ammonium-Nitrate");
+							break;
+						case 10:
+							restIon1 = new String("Nitrate");
+							restIon2 = new String("Sodium-Ion");
+							agCompound = new String("Sodium-Nitrate");
+						case 11:
+							restIon1 = new String("Nitrate");
+							restIon2 = new String("Sodium-Ion");
+							agCompound = new String("Sodium-Nitrate");
+						}
+						int restIon1Num=0,restIon2Num = 0;
+						int restIon1Max=1,restIon2Max = 1; 
+						if(combinationIndex==10) 	//Two Sodium-Ion and two Nitrate react
+							restIon1Max=restIon2Max=2;
+						for(int i = 0;i<State.molecules.size();i++)
+						{
+							if(State.molecules.get(i).getName().equals(restIon1)&&State.molecules.get(i).getTableIndex()==p5Canvas.getTableView().getIndexByName(combination[combinationIndex][0])&&restIon1Num<restIon1Max)
+							{	int tableIndex = p5Canvas.getTableView().getIndexByName(agCompound);
+									State.molecules.get(i).setTableIndex(tableIndex);
+									restIon1Num++;
+							}	
+							if(State.molecules.get(i).getName().equals(restIon2)&&State.molecules.get(i).getTableIndex()==p5Canvas.getTableView().getIndexByName(combination[combinationIndex][1])&&restIon2Num<restIon2Max)
+							{	int tableIndex = p5Canvas.getTableView().getIndexByName(agCompound);
+									State.molecules.get(i).setTableIndex(tableIndex);
+									restIon2Num++;
+							}	
+						}
+						
+						//Decrease compound1 count by 1
+						int countIndex = Compound.names.indexOf(combination[combinationIndex][0]);
+						if(combinationIndex!=10) 
+							Compound.counts.set(countIndex, Compound.counts.get(countIndex)-1);
+						else//combination[10][0] is "Silver-Nitrate"
+							Compound.counts.set(countIndex, Compound.counts.get(countIndex)-2);
+						//Decrease compound1 count by 1
+						countIndex = Compound.names.indexOf(combination[combinationIndex][1]);
+						Compound.counts.set(countIndex, Compound.counts.get(countIndex)-1);
+						//Increase agCompound count by 1
+						countIndex = Compound.names.indexOf(agCompound);
+						if(combinationIndex!=10) 
+							Compound.counts.set(countIndex, Compound.counts.get(countIndex)+1);
+						else// agCompound of combination[10] is Sodium-Nitrate
+							Compound.counts.set(countIndex, Compound.counts.get(countIndex)+2);
+					}
+					
 					p5Canvas.products.clear();
 					p5Canvas.killingList.clear();
 					return true;
@@ -2892,6 +3037,7 @@ public class Unit3 extends UnitBase {
 		// Add particular reaction into Compound global parameter
 	}
 
+	//Set Combination index for Unit3 Sim 2
 	public boolean setCombination(ArrayList<String> compoundNames) {
 		// TODO Auto-generated method stub
 		boolean res = false;
@@ -2904,9 +3050,8 @@ public class Unit3 extends UnitBase {
 				if(compoundNames.containsAll(com))
 				{
 					combinationIndex =i;
-					//System.out.println("combinationIndex is "+combinationIndex);
-					//System.out.println("combination is "+combination[combinationIndex][0]+", "+combination[combinationIndex][1]);
 					res = true;
+					break;
 				}
 			}
 		}

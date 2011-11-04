@@ -566,6 +566,8 @@ public abstract class UnitBase {
 														// add Ions
 
 		Vec2 topLeft = new Vec2(centerX-size.x/2, centerY-size.y/2);
+		if(compoundName.equals("Ammonium-Chloride"))
+		topLeft = new Vec2(centerX-size.x, centerY-size.y);
 		Vec2 botRight = new Vec2(centerX + numCol * (size.x), centerY + numRow
 				* size.y);
 
@@ -596,6 +598,8 @@ public abstract class UnitBase {
 			if (!isClear) {
 				centerX += increX;
 				topLeft = new Vec2(centerX-size.x/2, centerY-size.y/2);
+				if(compoundName.equals("Ammonium-Chloride"))
+				topLeft = new Vec2(centerX, centerY);
 				botRight = new Vec2(centerX + numCol * (size.x), centerY + numRow
 						* size.y);
 				// If we have gone through all available areas.
