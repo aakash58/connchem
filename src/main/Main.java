@@ -31,53 +31,35 @@ package main;
 
 import java.awt.EventQueue;
 
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-import javax.swing.JMenu;
-import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.Timer;
+import javax.swing.*;
 
 import java.awt.Component;
-import javax.swing.Box;
+
 
 import model.DBinterface;
 import model.State;
 import model.YAMLinterface;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JComboBox;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
 
 import simulations.P5Canvas;
-import simulations.Unit2;
 import simulations.models.Compound;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
-import java.awt.Insets;
-import java.awt.Toolkit;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -85,11 +67,10 @@ import static model.YAMLinterface.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+
+import com.jtattoo.plaf.smart.SmartLookAndFeel;
 
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
@@ -235,6 +216,38 @@ public class Main {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					/*
+		            // setup the look and feel properties
+		            Properties props = new Properties();
+		            
+		            props.put("logoString", "my company"); 
+		            props.put("licenseKey", "INSERT YOUR LICENSE KEY HERE");
+		            
+		            props.put("selectionBackgroundColor", "180 240 197"); 
+		            props.put("menuSelectionBackgroundColor", "180 240 197"); 
+		            
+		            props.put("controlColor", "218 254 230");
+		            props.put("controlColorLight", "218 254 230");
+		            props.put("controlColorDark", "180 240 197"); 
+
+		            props.put("buttonColor", "218 230 254");
+		            props.put("buttonColorLight", "255 255 255");
+		            props.put("buttonColorDark", "244 242 232");
+
+		            props.put("rolloverColor", "218 254 230"); 
+		            props.put("rolloverColorLight", "218 254 230"); 
+		            props.put("rolloverColorDark", "180 240 197"); 
+
+		            props.put("windowTitleForegroundColor", "0 0 0");
+		            props.put("windowTitleBackgroundColor", "180 240 197"); 
+		            props.put("windowTitleColorLight", "218 254 230"); 
+		            props.put("windowTitleColorDark", "180 240 197"); 
+		            props.put("windowBorderColor", "218 254 230");
+		            
+		            // set your theme
+		            SmartLookAndFeel.setCurrentTheme(props);*/
+		            com.jtattoo.plaf.graphite.GraphiteLookAndFeel.setTheme("Blue-Large-Font", "INSERT YOUR LICENSE KEY HERE", "my company");
+					//UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel");
 					Main window = new Main();
 					window.mainFrame.setVisible(true);
 				} catch (Exception e) {
@@ -714,6 +727,8 @@ public class Main {
 
 		// reset timer
 		resetTimer();
+		
+		
 
 	}
 
@@ -967,59 +982,24 @@ public class Main {
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
 	private void initialize() {
-
-		Toolkit tk = Toolkit.getDefaultToolkit();
-		Dimension screenDimension = tk.getScreenSize();
-
+		
 		mainFrame = new JFrame();
 		mainFrame.setBounds(0, 0, 1280, 700);
-		// mainFrame.setBounds(0, 0, screenDimension.width,
-		// screenDimension.height-100);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		getP5Canvas().setBackground(Color.WHITE);
 		getP5Canvas().init();
 
-		// Set up Menu
-		initMenu();
 
 		// Set up MouseListerns
 		setupMouseListeners();
 		// Set up Button Listerns
 		setupComponentListener();
+		
 
-		// Get All molecules from Resources Folder
-		try {
-			moleculeNames = parseNames(getResourceListing(Main.class,
-					"resources/compoundsPng50/"));
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		final JButton moleculeChooserBtn = new JButton("");
-		createPopupMenu();
-		moleculeChooserBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				scrollablePopupMenu.show(moleculeChooserBtn, -160, 52,
-						mainFrame.getHeight() - 39);
-			}
-		});
-		moleculeChooserBtn.setEnabled(false);
-		moleculeChooserBtn.setIcon(new ImageIcon(Main.class
-				.getResource("/resources/png24x24/iconCompound.png")));
-		menuBar.add(moleculeChooserBtn);
-
-		JButton periodicTableBtn = new JButton("\n");
-		periodicTableBtn.setEnabled(false);
-		periodicTableBtn.setIcon(new ImageIcon(Main.class
-				.getResource("/resources/png24x24/iconPeriodicTable.png")));
-		menuBar.add(periodicTableBtn);
 		mainFrame.getContentPane().setLayout(
 				new MigLayout("insets 0, gap 0", "[285.00][480px,grow][320px]",
 						"[][][grow]"));
-
 		// *********************************** LEFT PANEL
 		// ********************************************
 		leftPanel = new JPanel();
@@ -1094,8 +1074,8 @@ public class Main {
 
 		timerSubpanel.add(getTableSet(), "cell 0 0 1 2,growy");
 
-		// **************************************** Add elements Control panel
-		// ************************************
+		// **************   Add elements Control panel
+		// *******************************************
 		dynamicScrollPane = new JScrollPane();
 		leftPanel.add(dynamicScrollPane, "cell 0 3,grow");
 
@@ -1104,8 +1084,8 @@ public class Main {
 		dynamicPanel.setLayout(new MigLayout("insets 4", "[200.00,grow]",
 				"[][]"));
 
-		// ****************************************** CENTER PANEL
-		// *****************************************************
+		// ******************************* CENTER PANEL
+		// ********************************************
 		centerPanel = new JPanel();
 		volumeLabel = new JLabel(getP5Canvas().currenttVolume + "mL");
 		volumeSlider = new JSlider(0, 100, getP5Canvas().currenttVolume);
@@ -1302,19 +1282,6 @@ public class Main {
 		elapsedTime.setFont(new Font("Digital", Font.PLAIN, 28));
 		dashboard.add(elapsedTime, "cell 1 0");
 
-		/*
-		 * JLabel totalSystemEnergyLabel = new JLabel("Total System Energy:");
-		 * dashboard.add(totalSystemEnergyLabel, "cell 0 1,alignx right");
-		 * totalSystemEnergy= new JLabel("0 kJ");
-		 * dashboard.add(totalSystemEnergy, "cell 1 1");
-		 * 
-		 * JLabel averageSystemEnergyLabel = new
-		 * JLabel("Average Molecule Energy:");
-		 * dashboard.add(averageSystemEnergyLabel, "cell 0 2,alignx right");
-		 * averageSystemEnergy= new JLabel("0 kJ");
-		 * dashboard.add(averageSystemEnergy, "cell 1 2");
-		 */
-
 		m1Label = new JLabel("Compound Mass:");
 		dashboard.add(m1Label, "cell 0 1,alignx right");
 		m1Mass = new JLabel("0 g");
@@ -1364,6 +1331,7 @@ public class Main {
 
 		outputControls.add(cBoxConvert, "cell 0 0");
 
+		//Set up welcome menu
 		if (isWelcomed) {
 			welcomePanel = new JPanel();
 			welcomePanel.setLayout(new MigLayout("insets 10, gap 10", "[][]",
@@ -1392,6 +1360,43 @@ public class Main {
 			mainFrame.getContentPane().add(welcomePanel, "cell 1 0,grow");
 		}
 
+		//If you place Swing popup components in a window containing heavyweight  components and it's possible that the popup windows will intersect a  heavyweight, then invoke
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		//before the popup components are instantiated.
+		
+		// Set up Menu
+		initMenu();
+
+		// Get All molecules from Resources Folder
+		try {
+			moleculeNames = parseNames(getResourceListing(Main.class,
+					"resources/compoundsPng50/"));
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		final JButton moleculeChooserBtn = new JButton("");
+		createPopupMenu();
+		moleculeChooserBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				scrollablePopupMenu.show(moleculeChooserBtn, -160, 52,
+						mainFrame.getHeight() - 39);
+			}
+		});
+		moleculeChooserBtn.setEnabled(false);
+		moleculeChooserBtn.setIcon(new ImageIcon(Main.class
+				.getResource("/resources/png24x24/iconCompound.png")));
+		menuBar.add(moleculeChooserBtn);
+
+		JButton periodicTableBtn = new JButton("\n");
+		periodicTableBtn.setEnabled(false);
+		periodicTableBtn.setIcon(new ImageIcon(Main.class
+				.getResource("/resources/png24x24/iconPeriodicTable.png")));
+		menuBar.add(periodicTableBtn);
+
+		
 		// Set up timer, start when users press PLAY button
 		timer = new Timer(speed, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
