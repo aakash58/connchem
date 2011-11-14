@@ -25,12 +25,13 @@ import org.jbox2d.collision.Manifold;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.*;
 
+import data.DBinterface;
+import data.State;
+import data.YAMLinterface;
+
 import Util.ColorScales;
-import static model.State.*;
+import static data.State.*;
 import static simulations.models.Compound.*;
-import model.DBinterface;
-import model.State;
-import model.YAMLinterface;
 
 public class P5Canvas extends PApplet{
 	/**
@@ -57,7 +58,11 @@ public class P5Canvas extends PApplet{
 	public boolean isConvertMol = false;
 	
 	public int creationCount = 0;
+	//Properties of container
 	public float temp =25.f;
+	public float pressure = 0.0f;
+	public float mol = 0.0f;
+	public final float R = 8.314f;  //8.314 J*K-1*mol -1
 	
 	//Default value of speed
 	public float speedRate = 1.0f;
@@ -69,7 +74,7 @@ public class P5Canvas extends PApplet{
 	public float scale = 0.77f;
 	//Default value of volume slider
 	public int defaultVolume =50;
-	public int currenttVolume =defaultVolume;
+	public int currentVolume =defaultVolume;
 	public int multiplierVolume =10; // Multiplier from pixels to ml
 	public float maxH=1100;//minimum height of container
 	
@@ -182,9 +187,9 @@ public class P5Canvas extends PApplet{
 	public void draw() {
 		drawBackground();
 		
-			updateMolecules();
-
 		
+		updateMolecules();  //update molecules which are newly created
+		updateProperties(); //Update temperature and pressure etc
 		
 		/*   Change Scale   */
 		this.scale(scale);
@@ -250,7 +255,44 @@ public class P5Canvas extends PApplet{
 		
 		
 	}
-	
+	/******************************************************************
+	* FUNCTION :     updateProperties
+	* DESCRIPTION :  update pressure volume mol and temperature
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	private void updateProperties() {
+		
+		//TODO: Calculate temp
+		
+		//Known: V-currentVolume n-mol T-temp R
+		mol = State.molecules.size();
+		
+		//Unknown: Pressure
+		pressure = (mol* R* temp)/currentVolume;
+		
+		//Update bars
+		if(getMain().barPressure!=null)
+		if(getMain().barPressure.isShowing())
+		{
+			getMain().barPressure.setValue(pressure);
+			getMain().barPressure.updateUI();
+			//System.out.println("pressure is "+pressure);
+			getMain().barVolume.setValue(currentVolume);
+			getMain().barVolume.updateUI();
+			//System.out.println("currentVolume is "+currentVolume);
+			getMain().barMol.setValue(mol);
+			getMain().barMol.updateUI();
+			//System.out.println("mol is "+mol);
+			getMain().barTemp.setValue(temp);
+			getMain().barTemp.updateUI();
+			//System.out.println("temp is "+temp);
+		
+		}
+	}
+
+
 	/******************************************************************
 	* FUNCTION :     computeForces
 	* DESCRIPTION :  Compute forces between all kinds of molecules
@@ -1024,7 +1066,7 @@ public class P5Canvas extends PApplet{
 		isEnable = false;
 		boundaries[2].set(value);
 		
-		currenttVolume = value;
+		currentVolume = value;
 		isEnable = tmp;
 	}
 	

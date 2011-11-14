@@ -10,8 +10,6 @@ import simulations.PBox2D;
 import main.Canvas;
 import main.Main;
 import main.TableView;
-import model.DBinterface;
-import model.State;
 
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.CircleShape;
@@ -21,8 +19,11 @@ import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.PrismaticJoint;
 
+import data.DBinterface;
+import data.State;
+
 import Util.SVGReader;
-import static model.State.*;
+import static data.State.*;
 
 public class Molecule {
 	// We need to keep track of a Body and a width and height

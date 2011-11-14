@@ -3,7 +3,7 @@
  */
 package simulations;
 
-import static model.State.molecules;
+import static data.State.molecules;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -11,12 +11,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import model.DBinterface;
-import model.State;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.DistanceJoint;
+
+import data.DBinterface;
+import data.State;
 
 import simulations.models.Anchor;
 import simulations.models.Boundary;

@@ -2,12 +2,13 @@ package simulations.models;
 
 import java.util.ArrayList;
 
-import model.State;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+
+import data.State;
 
 import simulations.P5Canvas;
 import simulations.PBox2D;

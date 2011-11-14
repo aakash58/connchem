@@ -36,9 +36,6 @@ import javax.swing.*;
 import java.awt.Component;
 
 
-import model.DBinterface;
-import model.State;
-import model.YAMLinterface;
 import net.miginfocom.swing.MigLayout;
 
 import java.awt.event.ActionListener;
@@ -51,6 +48,7 @@ import simulations.models.Compound;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
 import java.text.DecimalFormat;
@@ -63,14 +61,22 @@ import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static model.YAMLinterface.*;
+import static data.YAMLinterface.*;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
+import Util.SimpleBar;
+
 import com.jtattoo.plaf.smart.SmartLookAndFeel;
+
+import data.DBinterface;
+import data.State;
+import data.YAMLinterface;
 
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
@@ -95,7 +101,7 @@ public class Main {
 	public int selectedSet = 1;
 	public boolean isWelcomed = true;
 	public Color selectedColor = new Color(200, 200, 150);
-	public Color defaultColor = Color.LIGHT_GRAY;
+	public Color backgroundColor = Color.LIGHT_GRAY;
 	private int sliderValue = 5;
 
 	private int minSliderValue = 1;
@@ -120,7 +126,7 @@ public class Main {
 	private TableSet tableSet;
 	private JMenuBar menuBar;
 
-	/******* Left Panel parameters *******/
+	/**************************** Left Panel parameters ****************************/
 	private JLabel lblInput;
 	private JLabel lblInputTipR;
 	private JLabel lblInputTipL;
@@ -137,8 +143,11 @@ public class Main {
 
 	private JPanel clPanel; // Center Left control Panel containing volume
 							// slider and Zoom Slider
+	private JPanel crPanel;
 	public JLabel volumeLabel = null;
 	public JSlider volumeSlider = null;
+	public int minVolume = 0;
+	public int maxVolume = 100;
 	public int defaultVolume = 63;
 	private JLabel canvasControlLabel_main_volume;
 
@@ -150,32 +159,44 @@ public class Main {
 
 	public int defaultZoom = 50;
 	public JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
-	public JLabel scaleLabel = null;
+	public JLabel canvasControlLabel_main_scale;
+	public JLabel zoomLabel = null;
 	public int defaultSpeed = 100;
+	public JLabel speedLabel;
 	public JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
+	public JLabel canvasControlLabel_main_speed;
 	public int heatInit = 25;
 	public int heatMin = -10;
 	public int heatMax = 200;
+	public JLabel heatLabel ;
+	public JLabel canvasControlLabel_main_heat;
 	public JSlider heatSlider = new JSlider(heatMin, heatMax, heatInit);
+	
+	//play, reset button and their listeners
+	public JButton playBtn;
+	private ActionListener playBtnListener;
+	public boolean isFirst = true;
+	public JButton resetBtn;
+	private ActionListener resetBtnListener;
 
-	// private static boolean isPressureShowing;
-	/*********** Right Panel Parameter ***********/
+	/***************************** Right Panel Parameter ***********************************/
 	public JPanel rightPanel; // Right panel container
 	JLabel lblOutput; // output label
-	JLabel lblMacroscopid;
+	JLabel lblSubMicroscopid;
 	JLabel lblOutputMacroscopicLevel;
 	JCheckBox cBoxHideWater;
 	ItemListener cBoxHideWaterListener;
-	public JPanel dashboard; // Dashboard on right panel showing mass and volume
+	public JPanel dashboard; // Subpanel on right side showing parameter values
 
 	public boolean isVolumeblocked = false;
 	public JLabel totalSystemEnergy;
 	public JLabel averageSystemEnergy;
 
+	public JLabel lblElapsedTimeText;
+	//Labels used in Unit 2
 	public JLabel elapsedTime; // "Elapsed Set Time" label
 	public JLabel m1Mass;
-	public JLabel m1Disolved; // "Dissolved" label showing how much solute has
-								// dissolved
+	public JLabel m1Disolved; // "Dissolved" label showing how much solute has dissovled
 	public JLabel satMass; //
 	public JLabel waterVolume;
 	public JLabel m1Label;
@@ -184,15 +205,28 @@ public class Main {
 	public JLabel satLabel;
 	public JLabel solutionLabel;
 	public JLabel soluteVolume;
-	public JCheckBox cBoxConvert;
+	public JCheckBox cBoxConvert; //Convert mass to mol
+	public JPanel outputControls;
+	//Lables used in Unit 4
+	public JLabel lblPressureText;
+	public JLabel lblPressureValue;
+	public JLabel lblVolumeText;
+	public JLabel lblVolumeValue;
+	public JLabel lblEqualText;
+	public JLabel lblMolText;
+	public JLabel lblMolValue;
+	public JLabel lblRText;
+	public JLabel lblRValue;
+	public JLabel lblTempText;
+	public JLabel lblTempValue;
+	public SimpleBar barPressure;
+	public SimpleBar barVolume;
+	public SimpleBar barMol;
+	public SimpleBar barTemp;
 
-	public JButton playBtn;
-	private ActionListener playBtnListener;
-	public boolean isFirst = true;
-	public JButton resetBtn;
-	private ActionListener resetBtnListener;
 
-	public int pause = 0; // the length of the pause at the begginning
+
+	public int pause = 0; // the length of the pause at the beginning
 	public int speed = 1000; // recur every second.
 	public Timer timer;
 	public static int time = 0;
@@ -342,7 +376,7 @@ public class Main {
 		throw new UnsupportedOperationException("Cannot list files for URL "
 				+ dirURL);
 	}
-
+	/*
 	public void removeAdditionalMolecule(int additionalIndex) {
 		int pos = defaultSetMolecules.size() + additionalIndex;
 		dynamicPanel.removeAll();
@@ -353,6 +387,7 @@ public class Main {
 
 		}
 	}
+	*/
 
 	/******************************************************************
 	 * FUNCTION : addAdditionalMolecule DESCRIPTION : Molecule Add Function for
@@ -360,6 +395,7 @@ public class Main {
 	 * 
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
+	/*
 	public void addAdditionalMolecule() {
 		// Default unit setting
 		JPanel panel = new JPanel();
@@ -410,7 +446,7 @@ public class Main {
 			dynamicScrollPane.getViewport().setViewPosition(
 					new java.awt.Point(0, h));
 		}
-	}
+	}*/
 
 	/******************************************************************
 	 * FUNCTION : updateDynamicPanel DESCRIPTION : Update molecule legends on
@@ -421,7 +457,7 @@ public class Main {
 	public void updateDynamicPanel() {
 		if (dynamicPanel != null) {
 			dynamicPanel.removeAll();
-			defaultSetMolecules = new ArrayList();
+			//defaultSetMolecules = new ArrayList();
 			started = false;
 			btnIds.clear();
 			btnNames.clear();
@@ -432,22 +468,47 @@ public class Main {
 						selectedSim, selectedSet);
 				if (compounds != null) {
 
-					dynamicPanel.setLayout(new MigLayout("insets 4",
+					dynamicPanel.setLayout(new MigLayout("insets 4, gap 0",
 							"[200.00,grow]", "[][]"));
 					dynamicScrollPane
 							.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-					for (int i = 0; i < compounds.size(); i++) {
+					int start =0;
+					if(selectedUnit==4)
+					{
+						JPanel volumePanel = new JPanel();
+						//volumePanel.setBackground(backgroundColor);
+						volumePanel.setLayout(new MigLayout("insets 0, gap 0",
+								"[78][][85]", "[50]"));
+						dynamicPanel.add(volumePanel, "cell 0 0,grow");
+						volumePanel.add(volumeLabel,"cell 2 0,align right");
+						volumeSlider.setOrientation(SwingConstants.HORIZONTAL);
+						volumeSlider.setEnabled(true);
+						volumePanel.add(volumeSlider,"cell 1 0,grow");
+						volumePanel.add(canvasControlLabel_main_volume,"cell 0 0,align left");
+						JPanel heatPanel = new JPanel();
+						heatPanel.setLayout(new MigLayout("insets 0, gap 0",
+								"[78][][85]", "[50]"));
+						dynamicPanel.add(heatPanel,"cell 0 1, grow");
+						heatPanel.add(heatLabel,"cell 2 0,align right");
+						heatSlider.setOrientation(SwingConstants.HORIZONTAL);
+						heatSlider.setEnabled(true);
+						heatPanel.add(heatSlider,"cell 1 0, grow");
+						heatPanel.add(canvasControlLabel_main_heat,"cell 0 0,align left");
+						start=2;
+					}
+					//LOOP: Add molecule legends for all the molecules
+					for (int i =0; i < compounds.size(); i++) {
 						JPanel panel = new JPanel();
-						panel.setBackground(Color.LIGHT_GRAY);
+						panel.setBackground(backgroundColor);
 						panel.setLayout(new MigLayout("insets 6, gap 0",
 								"[][][69.00]", "[][]"));
-						dynamicPanel.add(panel, "cell 0 " + i + ",grow");
-						additionalPanelList.add(panel);
+						dynamicPanel.add(panel, "cell 0 " + (i+start) + ",grow");
+						//additionalPanelList.add(panel);
 
 						// Get Compound Name
 						String cName = getCompoundName(selectedUnit,
 								selectedSim, selectedSet, i);
-						defaultSetMolecules.add(cName);
+						//defaultSetMolecules.add(cName);
 						JLabel label = new JLabel(cName);
 						final String fixedName = cName.replace(" ", "-");
 
@@ -629,6 +690,9 @@ public class Main {
 
 	public void reset() {
 		// boolean temp = getP5Canvas().isEnable;
+		
+		//Reset parameter
+		resetParameter();
 
 		// Disable p5Canvas and stop timer
 		timer.stop();
@@ -649,14 +713,12 @@ public class Main {
 
 		tableView.clearSelection(); // Deselect rows
 
-		// Update Molecule Legends on left panel
-		updateDynamicPanel();
-
 		// Update sliders around the center panel
 		updateCenterPanel();
-
 		// Reset canvas
 		getP5Canvas().reset();
+		
+		updateLeftPanel();
 
 		// Reset right panel
 		updateRightPanel();
@@ -701,28 +763,7 @@ public class Main {
 
 		getCanvas().reset();
 
-		// For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
-		if (selectedUnit == 2 && (selectedSim == 3||selectedSim==1||selectedSim==2)) {
-			leftPanel.add(lblInputTipL,
-					"cell 0 1,gaptop 5,gapleft 5,alignx left,width 45::");
-			leftPanel.add(lblInputTipR, "cell 0 1,gaptop 5,alignx right");
-			if(selectedSim==1||selectedSim==2)
-			{
-				lblInputTipL.setText(inputTipTextL[0]);
-				lblInputTipR.setText(inputTipTextR[0]);
-			}
-			else
-			{
-				lblInputTipL.setText(inputTipTextL[1]);
-				lblInputTipR.setText(inputTipTextR[1]);
-			}
-		} else {
-			if (leftPanel.isAncestorOf(lblInputTipL)) {
-				leftPanel.remove(lblInputTipL);
-				leftPanel.remove(lblInputTipR);
-			}
 
-		}
 		// getP5Canvas().isEnable =temp;
 
 		// reset timer
@@ -819,20 +860,62 @@ public class Main {
 			}
 		}
 	}
+	
+	//Reset Global Parameter
+	public void resetParameter()
+	{
+		heatMin = -10;
+		heatMax = 200;
+	}
+	
+	//Reset left panel
+	private void updateLeftPanel()
+	{
+		// For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
+		if (selectedUnit == 2 && (selectedSim == 3||selectedSim==1||selectedSim==2)) {
+			leftPanel.add(lblInputTipL,
+					"cell 0 1,gaptop 5,gapleft 5,alignx left,width 45::");
+			leftPanel.add(lblInputTipR, "cell 0 1,gaptop 5,alignx right");
+			if(selectedSim==1||selectedSim==2)
+			{
+				lblInputTipL.setText(inputTipTextL[0]);
+				lblInputTipR.setText(inputTipTextR[0]);
+			}
+			else
+			{
+				lblInputTipL.setText(inputTipTextL[1]);
+				lblInputTipR.setText(inputTipTextR[1]);
+			}
+		} else {
+			if (leftPanel.isAncestorOf(lblInputTipL)) {
+				leftPanel.remove(lblInputTipL);
+				leftPanel.remove(lblInputTipR);
+			}
+
+		}
+		
+		// Update Molecule Legends on left panel
+		updateDynamicPanel();
+		
+		leftPanel.updateUI();
+		
+	}
 
 	// Reset right panel
 	private void updateRightPanel() {
-		if (selectedUnit == 2) {
-			rightPanel.remove(lblOutput);
-			rightPanel.remove(cBoxHideWater);
-			rightPanel.add(lblOutput, "cell 0 0");
-			rightPanel.add(lblMacroscopid, "cell 0 1");
-			rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
-		} else if (selectedUnit == 3) {
-			// this.lblMacroscopid.setVisible(false);
+		switch (selectedUnit)
+		{
+		case 1:
+		case 4:
 			rightPanel.remove(lblOutputMacroscopicLevel);
 			rightPanel.remove(lblOutput);
-			rightPanel.remove(lblMacroscopid);
+			rightPanel.remove(lblSubMicroscopid);
+			rightPanel.add(lblOutput, "cell 0 1");
+			break;
+		case 3:
+			rightPanel.remove(lblOutputMacroscopicLevel);
+			rightPanel.remove(lblOutput);
+			rightPanel.remove(lblSubMicroscopid);
 			rightPanel.add(lblOutput, "cell 0 1");
 			if ((selectedSim == 1 && (selectedSet == 4 || selectedSet == 6
 					|| selectedSet == 7 || selectedSet == 10))
@@ -840,17 +923,31 @@ public class Main {
 				rightPanel.add(cBoxHideWater, "cell 0 3");
 			else
 				rightPanel.remove(cBoxHideWater);
+		break;
+		case 2: 
+			rightPanel.remove(lblOutput);
+			rightPanel.remove(cBoxHideWater);
+			rightPanel.add(lblOutput, "cell 0 0");
+			rightPanel.add(lblSubMicroscopid, "cell 0 1");
+			rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
+			break;
+
 		}
+		
 		updateDashboard(); // Reset dashboard on right panel
 	}
 
 	// Reset dashboard on right panel
 	private void updateDashboard() {
 		dashboard.removeAll();
-		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
-		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
-		dashboard.add(elapsedTime, "cell 1 0");
-		if (selectedUnit == 2) {
+		//rightPanel.remove(outputControls);
+		
+		if (selectedUnit == 2) //Unit 2, showing solution information 
+		{
+			dashboard.setLayout(new MigLayout("", "[grow,right][100]",
+					"[][][][][][]"));
+			dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+			dashboard.add(elapsedTime, "cell 1 0");
 			dashboard.add(cBoxConvert, "cell 0 1");
 			dashboard.add(m1Label, "cell 0 2,alignx right");
 			dashboard.add(m1Mass, "cell 1 2");
@@ -864,11 +961,47 @@ public class Main {
 			dashboard.add(solutionLabel, "cell 0 5,alignx right");
 			dashboard.add(soluteVolume, "cell 1 5");
 			soluteVolume.setText("");
-			cBoxConvert.setVisible(true);
+			//rightPanel.add(outputControls, "cell 0 5,grow");
 
-		} else {
-			cBoxConvert.setVisible(false);
+		} 
+		else if(selectedUnit == 4)//Gas law, showing PV=nRT
+		{
+			String alignStr = new String(", align center");
+			int barWidth = 40;
+			int barHeight = 120;
+			dashboard.setLayout(new MigLayout("","[45][45][25][45][45][45]","[][][grow][]"));
+			dashboard.add(lblElapsedTimeText, "cell 2 3 3 1, align center");
+			dashboard.add(elapsedTime, "cell 5 3 ");
+			
+			dashboard.add(lblPressureText, "cell 0 0"+alignStr);
+			dashboard.add(lblPressureValue ,"cell 0 1"+alignStr);
+			dashboard.add(lblVolumeText,"cell 1 0"+alignStr);
+			dashboard.add(lblVolumeValue,"cell 1 1"+alignStr);
+			dashboard.add(lblEqualText,"cell 2 0"+alignStr);
+			dashboard.add(lblMolText,"cell 3 0"+alignStr); 
+			dashboard.add(lblMolValue,"cell 3 1"+alignStr); 
+			dashboard.add(lblRText,"cell 4 0"+alignStr); 
+			dashboard.add(lblRValue, "cell 4 1"+alignStr); 
+			dashboard.add(lblTempText,"cell 5 0"+alignStr); 
+			dashboard.add(lblTempValue,"cell 5 1"+alignStr);
+
+			barPressure.setPreferredSize(new Dimension(barWidth,barHeight));
+			barVolume.setPreferredSize(new Dimension(barWidth,barHeight));
+			barMol.setPreferredSize(new Dimension(barWidth,barHeight));
+			barTemp.setPreferredSize(new Dimension(barWidth,barHeight));
+			dashboard.add(barPressure,"cell 0 2"+alignStr);
+			dashboard.add(barVolume,"cell 1 2"+alignStr);
+			dashboard.add(barMol,"cell 3 2"+alignStr);
+			dashboard.add(barTemp,"cell 5 2"+alignStr);
 		}
+		else {
+			dashboard.setLayout(new MigLayout("", "[grow,right][100]",
+					"[][][][][][]"));
+			dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+			dashboard.add(elapsedTime, "cell 1 0");
+			//dashboard.add(cBoxConvert, "cell 0 1");
+		}
+		dashboard.updateUI();
 	}
 
 	/******************************************************************
@@ -880,87 +1013,112 @@ public class Main {
 	private void updateCenterPanel() {
 		if (playBtn != null && centerPanel != null) {
 
-			if (selectedUnit == 2) {
-				// In Unit 2, we want to show pressure slider instead of volume
-				// Slider
-				// In other Units, we want to show volume Slider only
-				if (clPanel.isAncestorOf(volumeSlider)) {
-					clPanel.remove(volumeSlider);
-					clPanel.remove(volumeLabel);
-					clPanel.remove(canvasControlLabel_main_volume);
-				}
+			clPanel.removeAll();
+			crPanel.removeAll();
+			canvasControlLabel_main_scale.setVisible(true);
+			heatSlider.setOrientation(SwingConstants.VERTICAL);
+			volumeSlider.setOrientation(SwingConstants.VERTICAL);
 
-				if (!clPanel.isAncestorOf(pressureSlider)) {
+			switch(selectedUnit)
+			{
+			case 2:
+				
+				//Add Pressure slider
 					clPanel.add(pressureLabel, "cell 0 0,alignx right");
 					clPanel.add(pressureSlider, "cell 0 1,alignx right");
 					clPanel.add(canvasControlLabel_main_pressure,
 							"cell 0 2, alignx center");
-				}
+					canvasControlLabel_main_pressure.setVisible(true);
+				//Add Zoom slider	
+					clPanel.add(zoomLabel, "cell 0 4,alignx right");
+					clPanel.add(zoomSlider, "cell 0 5,alignx right,growy");
+					clPanel.add(canvasControlLabel_main_scale, "cell 0 6,alignx right");
+				
+					heatSlider.setEnabled(true);
+//					pressureSlider.requestFocus();
+				
+			    //Add Speed slider
+				crPanel.add(speedLabel, "cell 0 0,alignx left");
+				crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
+				crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
+				//Add Heat slider
+				crPanel.add(heatLabel, "cell 0 4,alignx left");
+				crPanel.add(heatSlider, "cell 0 5,alignx left,growy");
+				crPanel.add(canvasControlLabel_main_heat, "cell 0 6");
 
-				pressureSlider.setVisible(true);
-				pressureLabel.setVisible(true);
-				canvasControlLabel_main_pressure.setVisible(true);
-
-				pressureSlider.requestFocus();
-				pressureSlider.lostFocus(null, null);
-				pressureSlider.enable(getP5Canvas().yaml
-						.getControlPressureSliderState(selectedUnit,
-								selectedSim));
-			} else // Units setup except unit 2
-			{
-				if (clPanel.isAncestorOf(pressureSlider)) {
-					clPanel.remove(pressureLabel);
-					clPanel.remove(pressureSlider);
-					clPanel.remove(canvasControlLabel_main_pressure);
-				}
-
-				if (!clPanel.isAncestorOf(volumeSlider)) {
-					// If pressure slider showing ,remove it
+			break;
+			case 1:
+			case 3:
+				//Add Volume Slider
 					clPanel.add(volumeLabel, "cell 0 0,alignx right");
 					clPanel.add(volumeSlider, "cell 0 1,alignx right");
 					clPanel.add(canvasControlLabel_main_volume,
 							"cell 0 2, alignx center");
+				//Add Zoom Slider
+					clPanel.add(zoomLabel, "cell 0 4,alignx right");
+					clPanel.add(zoomSlider, "cell 0 5,alignx right,growy");
+					clPanel.add(canvasControlLabel_main_scale, "cell 0 6,alignx right");
+
+				//volumeSlider.requestFocus();
+
+				// Reset zoomSlider
+//				zoomSlider.requestFocus();
+				zoomSlider.setValue(defaultZoom);
+				zoomLabel.setText(defaultZoom * 2 + "%");
+				getP5Canvas().setScale(defaultZoom, defaultZoom);
+//				speedSlider.requestFocus();
+//				heatSlider.requestFocus();
+	
+				float heatMin = getP5Canvas().yaml.getControlHeatSliderMin(
+						selectedUnit, selectedSim);
+				float heatMax = getP5Canvas().yaml.getControlHeatSliderMax(
+						selectedUnit, selectedSim);
+				float heatInit = getP5Canvas().yaml.getControlHeatSliderInit(
+						selectedUnit, selectedSim);
+				heatSlider.setMaximum((int) heatMax);
+				heatSlider.setMinimum((int) heatMin);
+				heatSlider.setValue((int) heatInit);
+				if (this.selectedUnit == 3) {
+					heatSlider.setEnabled(false);
+					volumeSlider.setEnabled(false);
 				}
+				else
+				{
+					heatSlider.setEnabled(true);
+					volumeSlider.setEnabled(true);
+				}
+				// Reset animation speed
+				speedSlider.setValue(defaultSpeed);
+				float speedRate = defaultSpeed / defaultSpeed;
+				getP5Canvas().setSpeed(speedRate);
 
-				volumeSlider.setVisible(true);
-				volumeLabel.setVisible(true);
-				canvasControlLabel_main_volume.setVisible(true);
-				volumeSlider.requestFocus();
-
+				
+				//Add Speed Slider
+				crPanel.add(speedLabel, "cell 0 0,alignx left");
+				crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
+				crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
+				//Add Heat Slider
+				crPanel.add(heatLabel, "cell 0 4,alignx left");
+				crPanel.add(heatSlider, "cell 0 5,alignx left,growy");
+				crPanel.add(canvasControlLabel_main_heat, "cell 0 6");
+				break;
+			case 4:
+				//Add Speed Slider
+				crPanel.add(speedLabel, "cell 0 0,alignx left");
+				crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
+				crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
+				//Add Zoom Slider
+				crPanel.add(zoomLabel, "cell 0 4,alignx left");
+				crPanel.add(zoomSlider, "cell 0 5,alignx left,growy");
+				crPanel.add(canvasControlLabel_main_scale, "cell 0 6");
+				
+				//Place holder
+				clPanel.add(canvasControlLabel_main_scale, "cell 0 0,alignx right");
+				canvasControlLabel_main_scale.setVisible(false);
+				
+				break;
 			}
-
-			// Reset zoomSlider
-			zoomSlider.requestFocus();
-			zoomSlider.setValue(defaultZoom);
-			scaleLabel.setText(defaultZoom * 2 + "%");
-			getP5Canvas().setScale(defaultZoom, defaultZoom);
-			speedSlider.requestFocus();
-			heatSlider.requestFocus();
-
-			float heatMin = getP5Canvas().yaml.getControlHeatSliderMin(
-					selectedUnit, selectedSim);
-			float heatMax = getP5Canvas().yaml.getControlHeatSliderMax(
-					selectedUnit, selectedSim);
-			float heatInit = getP5Canvas().yaml.getControlHeatSliderInit(
-					selectedUnit, selectedSim);
-			heatSlider.setMaximum((int) heatMax);
-			heatSlider.setMinimum((int) heatMin);
-			heatSlider.setValue((int) heatInit);
-			if (this.selectedUnit == 3) {
-				heatSlider.setEnabled(false);
-				volumeSlider.setEnabled(false);
-			}
-			else
-			{
-				heatSlider.setEnabled(true);
-				volumeSlider.setEnabled(true);
-			}
-			// Reset animation speed
-			speedSlider.setValue(defaultSpeed);
-			float speedRate = defaultSpeed / defaultSpeed;
-			getP5Canvas().setSpeed(speedRate);
-
-			leftPanel.updateUI();
+			
 			centerPanel.updateUI();
 		}
 
@@ -1000,8 +1158,9 @@ public class Main {
 		mainFrame.getContentPane().setLayout(
 				new MigLayout("insets 0, gap 0", "[285.00][480px,grow][320px]",
 						"[][][grow]"));
-		// *********************************** LEFT PANEL
-		// ********************************************
+		
+		
+		/******************************** LEFT PANEL*********************************/
 		leftPanel = new JPanel();
 		mainFrame.getContentPane().add(leftPanel, "cell 0 2,grow");
 		leftPanel.setLayout(new MigLayout("insets 6, gap 0", "[260]",
@@ -1084,11 +1243,10 @@ public class Main {
 		dynamicPanel.setLayout(new MigLayout("insets 4", "[200.00,grow]",
 				"[][]"));
 
-		// ******************************* CENTER PANEL
-		// ********************************************
+		/**************************CENTER PANEL********************************/
 		centerPanel = new JPanel();
-		volumeLabel = new JLabel(getP5Canvas().currenttVolume + "mL");
-		volumeSlider = new JSlider(0, 100, getP5Canvas().currenttVolume);
+		volumeLabel = new JLabel(getP5Canvas().currentVolume + "mL");
+		volumeSlider = new JSlider(minVolume, maxVolume, getP5Canvas().currentVolume);
 		centerPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -1104,7 +1262,7 @@ public class Main {
 				"[][560.00px][]", "[690px][center]"));
 
 		// Add P5Canvas
-		centerPanel.add(getP5Canvas(), "cell 1 0,grow");
+		centerPanel.add(getP5Canvas(), "cell 1 0,align right, grow");
 
 		clPanel = new JPanel();
 		clPanel.setLayout(new MigLayout("insets 0, gap 0", "[]",
@@ -1121,16 +1279,12 @@ public class Main {
 					int volume = (int) getP5Canvas().getSize().height
 							/ getP5Canvas().multiplierVolume;
 					volumeLabel
-							.setText((volume + getP5Canvas().currenttVolume - getP5Canvas().defaultVolume)
+							.setText((volume + getP5Canvas().currentVolume - getP5Canvas().defaultVolume)
 									+ " mL");
 				}
 			}
 		});
-		// clPanel.add(volumeLabel, "flowy,cell 0 0,alignx right");
-		// clPanel.add(volumeSlider, "cell 0 1,alignx right");
 		canvasControlLabel_main_volume = new JLabel("Volume");
-		// clPanel.add(canvasControlLabel_main_volume,
-		// "cell 0 2,alignx center");
 
 		// Set up Pressure Slide
 		getP5Canvas().setPressure(defaultPressure);
@@ -1147,44 +1301,39 @@ public class Main {
 
 			}
 		});
-		// clPanel.add(pressureLabel, "flowy,cell 0 0,alignx right");
-		// clPanel.add(pressureSlider, "cell 0 1,alignx left");
 		canvasControlLabel_main_pressure = new JLabel("Pressure");
-		// clPanel.add(canvasControlLabel_main_pressure,
-		// "cell 0 2, alignx center");
+
+//		//Blank label
+//		JLabel l2 = new JLabel(" ");
+//		clPanel.add(l2, "cell 0 3,alignx center");
 
 		// Set up Zoom Slider
-		JLabel l2 = new JLabel(" ");
-		clPanel.add(l2, "cell 0 3,alignx center");
-
-		scaleLabel = new JLabel(defaultZoom * 2 + "%");
-		clPanel.add(scaleLabel, "cell 0 4,alignx right");
+		zoomLabel = new JLabel(defaultZoom * 2 + "%");
+		
 		zoomSlider = new JSlider(10, 100, defaultZoom);
 		zoomSlider.setOrientation(SwingConstants.VERTICAL);
 		zoomSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue();
-				scaleLabel.setText(value * 2 + "%");
+				zoomLabel.setText(value * 2 + "%");
 				getP5Canvas().setScale(value, defaultZoom);
 
 			}
 		});
-		clPanel.add(zoomSlider, "cell 0 5,alignx right,growy");
-		JLabel canvasControlLabel_main_scale = new JLabel("Zoom");
-		clPanel.add(canvasControlLabel_main_scale, "cell 0 6,alignx right");
-
+		canvasControlLabel_main_scale = new JLabel("Zoom");
+		
 		centerPanel.add(clPanel, "cell 0 0");
 
 		// Center bottom
 
-		JPanel cbPanel = new JPanel();
-		cbPanel.setLayout(new MigLayout("insets 0, gap 0", "[]",
+		 crPanel = new JPanel();
+		 crPanel.setLayout(new MigLayout("insets 0, gap 0", "[]",
 				"[][210.00][][40.00][][210.00][]"));
 
 		// Set up Speed slider
-		JLabel canvasControlLabel_main_speed = new JLabel("Speed");
-		final JLabel speedLabel = new JLabel("1x");
-		cbPanel.add(speedLabel, "cell 0 0,alignx left");
+		
+		speedLabel = new JLabel("1x");
+		canvasControlLabel_main_speed = new JLabel("Speed");
 		speedSlider = new JSlider(0, 100, defaultSpeed);
 		speedSlider.setOrientation(SwingConstants.VERTICAL);
 		speedSlider.addChangeListener(new ChangeListener() {
@@ -1197,14 +1346,11 @@ public class Main {
 				speedLabel.setText(df.format(speedRate) + "x");
 			}
 		});
-		cbPanel.add(speedSlider, "cell 0 1,alignx left,growy");
-		cbPanel.add(canvasControlLabel_main_speed, "cell 0 2");
-		cbPanel.add(new JLabel("    "), "cell 0 3,alignx center");
+		//crPanel.add(new JLabel("    "), "cell 0 3,alignx center");
 
 		// Set up Heat Slider
-		JLabel canvasControlLabel_main_heat = new JLabel("Heat");
-		final JLabel heatLabel = new JLabel(heatInit + "\u2103");
-		cbPanel.add(heatLabel, "cell 0 4,alignx left");
+		heatLabel = new JLabel(heatInit + "\u2103");
+		canvasControlLabel_main_heat = new JLabel("Heat");
 		getP5Canvas().setHeat(heatInit);
 		heatSlider.setOrientation(SwingConstants.VERTICAL);
 		heatSlider.addChangeListener(new ChangeListener() {
@@ -1214,14 +1360,12 @@ public class Main {
 				heatLabel.setText(value + "\u2103");
 			}
 		});
-		cbPanel.add(heatSlider, "cell 0 5,alignx left,growy");
-		cbPanel.add(canvasControlLabel_main_heat, "cell 0 6");
+	
 
 		// After cbPanel has been set up, add it to CenterPanel
-		centerPanel.add(cbPanel, "cell 2 0");
+		centerPanel.add(crPanel, "cell 2 0");
 
-		// ***************************************** RIGHT PANEL
-		// *******************************************
+		/******************************* RIGHT PANEL*******************************/
 		rightPanel = new JPanel();
 		mainFrame.getContentPane().add(rightPanel, "cell 2 2,grow");
 		rightPanel.setLayout(new MigLayout("insets 0, gap 2",
@@ -1233,13 +1377,13 @@ public class Main {
 		lblOutput.setFont(new Font("Lucida Grande", Font.BOLD, 14));
 		rightPanel.add(lblOutput, "cell 0 0");
 
-		lblMacroscopid = new JLabel("Submicroscopic Level");
-		lblMacroscopid.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
-		rightPanel.add(lblMacroscopid, "cell 0 1");
+		lblSubMicroscopid = new JLabel("Submicroscopic Level");
+		lblSubMicroscopid.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		rightPanel.add(lblSubMicroscopid, "cell 0 1");
 
 		// Set up Graph
 		JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP);
-		lblMacroscopid.setLabelFor(graphTabs);
+		lblSubMicroscopid.setLabelFor(graphTabs);
 		rightPanel.add(graphTabs, "cell 0 2,grow");
 
 		JPanel graphSet_1 = new JPanel();
@@ -1270,42 +1414,28 @@ public class Main {
 		// Set up dashboard on Right Panel
 		dashboard = new JPanel();
 		lblOutputMacroscopicLevel.setLabelFor(dashboard);
-		rightPanel.add(dashboard, "cell 0 4,grow");
+		rightPanel.add(dashboard, "cell 0 4,growy");
 		dashboard.setLayout(new MigLayout("", "[grow,right][100]",
 				"[][][][][][]"));
 
-		JLabel elapsedTimeLabel = new JLabel("Elapsed Set Time:");
-		dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
+		lblElapsedTimeText = new JLabel("Elapsed Set Time:");
+		//dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
 
+		//Initialzie labels for Unit 2
 		elapsedTime = new JLabel("00");
 		elapsedTime.setForeground(new Color(0, 128, 0));
 		elapsedTime.setFont(new Font("Digital", Font.PLAIN, 28));
-		dashboard.add(elapsedTime, "cell 1 0");
-
 		m1Label = new JLabel("Compound Mass:");
-		dashboard.add(m1Label, "cell 0 1,alignx right");
 		m1Mass = new JLabel("0 g");
-		dashboard.add(m1Mass, "cell 1 1");
 		m1MassLabel = new JLabel("Dissolved:");
-		dashboard.add(m1MassLabel, "cell 0 2,alignx right");
+		//dashboard.add(m1MassLabel, "cell 0 2,alignx right");
 		m1Disolved = new JLabel("0 g");
-		dashboard.add(m1Disolved, "cell 1 2");
 		satLabel = new JLabel("Saturation:");
-		dashboard.add(satLabel, "cell 0 3,alignx right");
 		satMass = new JLabel("0 g");
-		dashboard.add(satMass, "cell 1 3");
-
 		solventLabel = new JLabel("Solvent Volume:");
-		dashboard.add(solventLabel, "cell 0 4,alignx right");
 		waterVolume = new JLabel("0 mL");
-		dashboard.add(waterVolume, "cell 1 4");
-
-		// Set up Solution Volume Label
 		solutionLabel = new JLabel("Solution Volume:");
-		dashboard.add(solutionLabel, "cell 0 5,alignx right");
 		soluteVolume = new JLabel("0 mL");
-		dashboard.add(soluteVolume, "cell 1 5");
-
 		// Set up "Convert to Mass" Checkbox
 		cBoxConvert = new JCheckBox("Convert Mass to Moles");
 		cBoxConvert.addItemListener(new ItemListener() {
@@ -1323,13 +1453,27 @@ public class Main {
 				}
 			}
 		});
-		// dashboard.add(cBoxConvert, "cell 1 6");
-
-		JPanel outputControls = new JPanel();
-		rightPanel.add(outputControls, "cell 0 5,grow");
-		outputControls.setLayout(new MigLayout("", "[]", "[]"));
-
-		outputControls.add(cBoxConvert, "cell 0 0");
+		//outputControls = new JPanel();
+		//outputControls.setLayout(new MigLayout("", "[]", "[]"));
+		//outputControls.add(cBoxConvert, "cell 0 0");
+		//rightPanel.add(outputControls, "cell 0 5,grow");
+		
+		//Intialize labels for unit 4
+		lblPressureText = new JLabel ("P (atm)");
+		lblPressureValue = new JLabel("");
+		lblVolumeText = new JLabel("V (L)");
+		lblVolumeValue = new JLabel ("");
+		lblEqualText = new JLabel("=");
+		lblMolText = new JLabel ("n (mol)");
+		lblMolValue = new JLabel ("");
+		lblRText = new JLabel ("R");
+		lblRValue = new JLabel ();
+		lblTempText = new JLabel("T (K)");
+		lblTempValue = new JLabel ("");
+		barPressure = new SimpleBar(0,100,30);
+		barVolume = new SimpleBar(minVolume,maxVolume,40);
+		barMol = new SimpleBar(0,100,60);
+		barTemp  = new SimpleBar(heatMin,heatMax,heatInit);
 
 		//Set up welcome menu
 		if (isWelcomed) {
@@ -1366,8 +1510,6 @@ public class Main {
 		
 		// Set up Menu
 		initMenu();
-
-		// Get All molecules from Resources Folder
 		try {
 			moleculeNames = parseNames(getResourceListing(Main.class,
 					"resources/compoundsPng50/"));

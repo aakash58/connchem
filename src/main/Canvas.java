@@ -18,13 +18,14 @@ import javax.swing.Timer;
 import javax.swing.ToolTipManager;
 import javax.swing.plaf.ToolTipUI;
 
+import data.DBinterface;
+import data.State;
+
 
 import simulations.Unit2;
 import simulations.models.Compound;
 import simulations.models.Molecule;
 
-import model.DBinterface;
-import model.State;
 import static simulations.P5Canvas.*;
 import static simulations.models.Compound.*;
 
