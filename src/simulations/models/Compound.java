@@ -3,9 +3,10 @@ package simulations.models;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import data.DBinterface;
+
 import Util.SVGReader;
 
-import model.DBinterface;
 
 // This class maintains all information about all compounds in a Simulation
 public class Compound {

@@ -11,7 +11,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
 
-import model.YAMLinterface;
+import data.YAMLinterface;
+
 
 import java.awt.Color;
 import java.awt.GridLayout;

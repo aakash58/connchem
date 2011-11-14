@@ -3,19 +3,20 @@
  */
 package simulations;
 
-import static model.State.molecules;
+import static data.State.molecules;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
-import model.DBinterface;
-import model.State;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
+
+import data.DBinterface;
+import data.State;
 
 import simulations.models.*;
 import simulations.models.Simulation.SpawnStyle;

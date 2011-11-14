@@ -89,7 +89,7 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 			CustomButton b = (CustomButton) buttonList.get(i);
 			JPanel p = (JPanel) panelList.get(i);
 			if (isDefaultSetMolecule(b.getName())){
-				p.setBackground(main.defaultColor);
+				p.setBackground(main.backgroundColor);
 				b.setStatus(CustomButton.SIMULATION_DEFAULT);
 			}
 			else{
@@ -125,7 +125,7 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		return -100;
 	}
 
-	
+	/*
 	public void add(final CustomButton customButton, int id) {
 		//		menuItem.setMargin(new Insets(0, 20, 0 , 0));
 		if (customButton == null) {
@@ -187,10 +187,10 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		
 		panelList.add(panel_2);
 		buttonList.add(customButton);
-	}
+	}*/
 	
 		
-
+	/*
 	public void actionPerformed(ActionEvent e) {
 		//this.hidemenu();
 		CustomButton b = (CustomButton) e.getSource();
@@ -213,9 +213,15 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 		}
 		main.leftPanel.updateUI();
 	}
-
+*/
 	public Component[] getComponents() {
 		return panel.getComponents();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

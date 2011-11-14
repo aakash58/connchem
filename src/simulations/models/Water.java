@@ -1,6 +1,6 @@
 package simulations.models;
 
-import static model.State.molecules;
+import static data.State.molecules;
 import static simulations.P5Canvas.*;
 import main.Main;
 import org.jbox2d.common.Vec2;
