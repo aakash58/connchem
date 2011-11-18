@@ -50,6 +50,7 @@ public class P5Canvas extends PApplet{
 	private PBox2D box2d;
 	private Unit2 unit2;   //Unit2 object containing all the functions used in Unit2
 	private Unit3 unit3;
+	private Unit4 unit4;
 	private Water waterComputation;
 	public boolean isEnable = false; 
 	public boolean isHidingEnabled = false;
@@ -111,6 +112,7 @@ public class P5Canvas extends PApplet{
 		box2d = new PBox2D(this);
 		setUnit2(new Unit2(this, box2d));
 		setUnit3(new Unit3(this, box2d));
+		setUnit4(new Unit4(this,box2d));
 		waterComputation = new Water(this);
 	}
 	
@@ -392,6 +394,7 @@ public class P5Canvas extends PApplet{
 			getUnit3().applyForce(main.selectedSim,main.selectedSet);
 			break;
 		case 4:
+			getUnit4().applyForce(main.selectedSim, main.selectedSet);
 			break;
 		case 5: 
 			break;
@@ -732,6 +735,7 @@ public class P5Canvas extends PApplet{
 			res = getUnit3().addMolecules(tmp,compoundName,count);
 			break;
 		case 4:
+			res = getUnit4().addMolecules(tmp, compoundName, count);
 			break;
 		case 5:
 			break;
@@ -818,6 +822,7 @@ public class P5Canvas extends PApplet{
 			res = getUnit3().addMolecules(tmp,compoundName,count);
 			break;
 		case 4:
+			res = getUnit4().addMolecules(tmp, compoundName, count);
 			break;
 		case 5:
 			break;
@@ -875,6 +880,9 @@ public class P5Canvas extends PApplet{
 		case 3:
 		getUnit3().reset();
 		break;
+		case 4:
+			getUnit4().reset();
+			break;
 		}
 	}
 	
@@ -1145,6 +1153,8 @@ public class P5Canvas extends PApplet{
 		case 3:
 			getUnit3().updateMolecules(main.selectedSim, main.selectedSet);
 			break;
+		case 4:
+			break;
 		default:
 			break;
 		}
@@ -1319,12 +1329,18 @@ public class P5Canvas extends PApplet{
 	public Unit3 getUnit3() {
 		return unit3;
 	}
-
 	/**
 	 * @param unit3 the unit3 to set
 	 */
 	public void setUnit3(Unit3 unit3) {
 		this.unit3 = unit3;
+	}
+	public Unit4 getUnit4() 
+	{
+		return unit4;
+	}
+	public void setUnit4(Unit4 unit4) {
+		this.unit4 = unit4;
 	}
 	
 	public TableView getTableView()

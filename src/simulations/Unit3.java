@@ -44,7 +44,7 @@ public class Unit3 extends UnitBase {
 	public Unit3(P5Canvas parent, PBox2D box) {
 		super(parent, box);
 		// TODO Auto-generated constructor stub
-		simulations = new Simulation[SIMULATION_NUMBER];
+		//simulations = new Simulation[SIMULATION_NUMBER];
 		unitNum = 3;
 		setupSimulations();
 		setupCombination();
@@ -122,11 +122,7 @@ public class Unit3 extends UnitBase {
 
 	}
 
-	@Override
-	protected SpawnStyle getSpawnStyle(int selectedSim, int selectedSet) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public void updateMolecules(int sim, int set) {

@@ -165,12 +165,13 @@ public class Main {
 	public JLabel speedLabel;
 	public JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
 	public JLabel canvasControlLabel_main_speed;
-	public int heatInit = 25;
+	public int defaultHeat = 25;
 	public int heatMin = -10;
 	public int heatMax = 200;
 	public JLabel heatLabel ;
 	public JLabel canvasControlLabel_main_heat;
-	public JSlider heatSlider = new JSlider(heatMin, heatMax, heatInit);
+	public JSlider heatSlider = new JSlider(heatMin, heatMax, defaultHeat);
+	public JLabel lblPlaceHolder;
 	
 	//play, reset button and their listeners
 	public JButton playBtn;
@@ -182,6 +183,7 @@ public class Main {
 	/***************************** Right Panel Parameter ***********************************/
 	public JPanel rightPanel; // Right panel container
 	JLabel lblOutput; // output label
+	JTabbedPane graphTabs;
 	JLabel lblSubMicroscopid;
 	JLabel lblOutputMacroscopicLevel;
 	JCheckBox cBoxHideWater;
@@ -468,7 +470,7 @@ public class Main {
 						selectedSim, selectedSet);
 				if (compounds != null) {
 
-					dynamicPanel.setLayout(new MigLayout("insets 4, gap 0",
+					dynamicPanel.setLayout(new MigLayout("insets 6",
 							"[200.00,grow]", "[][]"));
 					dynamicScrollPane
 							.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -866,6 +868,12 @@ public class Main {
 	{
 		heatMin = -10;
 		heatMax = 200;
+		//volumeSlider.setValue(defaultVolume);
+		pressureSlider.setValue(defaultPressure);
+		zoomSlider.setValue(defaultZoom);
+		speedSlider.setValue(defaultSpeed);
+		heatSlider.setValue(defaultHeat);
+		
 	}
 	
 	//Reset left panel
@@ -903,33 +911,35 @@ public class Main {
 
 	// Reset right panel
 	private void updateRightPanel() {
+		
+		rightPanel.removeAll();
 		switch (selectedUnit)
 		{
 		case 1:
 		case 4:
-			rightPanel.remove(lblOutputMacroscopicLevel);
-			rightPanel.remove(lblOutput);
-			rightPanel.remove(lblSubMicroscopid);
 			rightPanel.add(lblOutput, "cell 0 1");
+			rightPanel.add(graphTabs, "cell 0 2,grow");
+			rightPanel.add(dashboard, "cell 0 4,growy");
+
 			break;
 		case 3:
-			rightPanel.remove(lblOutputMacroscopicLevel);
-			rightPanel.remove(lblOutput);
-			rightPanel.remove(lblSubMicroscopid);
 			rightPanel.add(lblOutput, "cell 0 1");
+			rightPanel.add(graphTabs, "cell 0 2,grow");
+			rightPanel.add(dashboard, "cell 0 4,growy");
+
 			if ((selectedSim == 1 && (selectedSet == 4 || selectedSet == 6
 					|| selectedSet == 7 || selectedSet == 10))
 					|| selectedSim == 2)
 				rightPanel.add(cBoxHideWater, "cell 0 3");
-			else
-				rightPanel.remove(cBoxHideWater);
+
 		break;
 		case 2: 
-			rightPanel.remove(lblOutput);
-			rightPanel.remove(cBoxHideWater);
 			rightPanel.add(lblOutput, "cell 0 0");
 			rightPanel.add(lblSubMicroscopid, "cell 0 1");
+			rightPanel.add(graphTabs, "cell 0 2,grow");
 			rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
+			rightPanel.add(dashboard, "cell 0 4,growy");
+
 			break;
 
 		}
@@ -1015,7 +1025,7 @@ public class Main {
 
 			clPanel.removeAll();
 			crPanel.removeAll();
-			canvasControlLabel_main_scale.setVisible(true);
+			
 			heatSlider.setOrientation(SwingConstants.VERTICAL);
 			volumeSlider.setOrientation(SwingConstants.VERTICAL);
 
@@ -1113,8 +1123,8 @@ public class Main {
 				crPanel.add(canvasControlLabel_main_scale, "cell 0 6");
 				
 				//Place holder
-				clPanel.add(canvasControlLabel_main_scale, "cell 0 0,alignx right");
-				canvasControlLabel_main_scale.setVisible(false);
+				clPanel.add(lblPlaceHolder, "cell 0 0,alignx right");
+				lblPlaceHolder.setVisible(false);
 				
 				break;
 			}
@@ -1227,8 +1237,8 @@ public class Main {
 			}
 		});
 		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
-		//checkBoxPanel.add(forceCheckbox, BorderLayout.CENTER);
-		//checkBoxPanel.add(jointsCheckbox, BorderLayout.SOUTH);
+		checkBoxPanel.add(forceCheckbox, BorderLayout.CENTER);
+		checkBoxPanel.add(jointsCheckbox, BorderLayout.SOUTH);
 		timerSubpanel.add(checkBoxPanel, "cell 1 1");
 
 		timerSubpanel.add(getTableSet(), "cell 0 0 1 2,growy");
@@ -1321,6 +1331,7 @@ public class Main {
 			}
 		});
 		canvasControlLabel_main_scale = new JLabel("Zoom");
+		lblPlaceHolder = new JLabel("Zoom");
 		
 		centerPanel.add(clPanel, "cell 0 0");
 
@@ -1349,9 +1360,9 @@ public class Main {
 		//crPanel.add(new JLabel("    "), "cell 0 3,alignx center");
 
 		// Set up Heat Slider
-		heatLabel = new JLabel(heatInit + "\u2103");
+		heatLabel = new JLabel(defaultHeat + "\u2103");
 		canvasControlLabel_main_heat = new JLabel("Heat");
-		getP5Canvas().setHeat(heatInit);
+		getP5Canvas().setHeat(defaultHeat);
 		heatSlider.setOrientation(SwingConstants.VERTICAL);
 		heatSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -1375,16 +1386,13 @@ public class Main {
 		lblOutput = new JLabel("Output");
 		lblOutput.setLabelFor(rightPanel);
 		lblOutput.setFont(new Font("Lucida Grande", Font.BOLD, 14));
-		rightPanel.add(lblOutput, "cell 0 0");
 
 		lblSubMicroscopid = new JLabel("Submicroscopic Level");
 		lblSubMicroscopid.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
-		rightPanel.add(lblSubMicroscopid, "cell 0 1");
 
 		// Set up Graph
-		JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP);
+		 graphTabs = new JTabbedPane(JTabbedPane.TOP);
 		lblSubMicroscopid.setLabelFor(graphTabs);
-		rightPanel.add(graphTabs, "cell 0 2,grow");
 
 		JPanel graphSet_1 = new JPanel();
 		graphTabs.addTab("Compounds", null, graphSet_1, null);
@@ -1406,7 +1414,6 @@ public class Main {
 		lblOutputMacroscopicLevel = new JLabel("Macroscopic Level");
 		lblOutputMacroscopicLevel.setFont(new Font("Lucida Grande", Font.PLAIN,
 				10));
-		rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
 
 		cBoxHideWater = new JCheckBox("Hide Water Molecules");
 		cBoxHideWater.addItemListener(cBoxHideWaterListener);
@@ -1414,7 +1421,6 @@ public class Main {
 		// Set up dashboard on Right Panel
 		dashboard = new JPanel();
 		lblOutputMacroscopicLevel.setLabelFor(dashboard);
-		rightPanel.add(dashboard, "cell 0 4,growy");
 		dashboard.setLayout(new MigLayout("", "[grow,right][100]",
 				"[][][][][][]"));
 
@@ -1473,7 +1479,7 @@ public class Main {
 		barPressure = new SimpleBar(0,100,30);
 		barVolume = new SimpleBar(minVolume,maxVolume,40);
 		barMol = new SimpleBar(0,100,60);
-		barTemp  = new SimpleBar(heatMin,heatMax,heatInit);
+		barTemp  = new SimpleBar(heatMin,heatMax,defaultHeat);
 
 		//Set up welcome menu
 		if (isWelcomed) {

@@ -796,6 +796,8 @@ public class Molecule {
 			mul = 1.5f;
 		else if (name.equals("Ammonium"))
 			mul = 2.5f;
+		else if (name.equals("Helium"))
+			mul = 4.0f;
 		return mul;
 	}
 

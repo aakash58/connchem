@@ -108,7 +108,9 @@ public abstract class UnitBase {
 
 	}
 	
-	protected abstract SpawnStyle getSpawnStyle(int selectedSim, int selectedSet);
+	protected SpawnStyle getSpawnStyle(int selectedSim, int selectedSet) {
+		return null;
+	}
 
 	/******************************************************************
 	 * FUNCTION : addMolecules DESCRIPTION : Function to add molecules to
