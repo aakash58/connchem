@@ -427,7 +427,7 @@ units:
       compounds: 
       - compound: "Helium"
         qty: 10
-        cap: 15
+        cap: 50
     - set: 2
       compounds:
       - compound: "Oxygen"

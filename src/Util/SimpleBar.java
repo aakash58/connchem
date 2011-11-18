@@ -2,9 +2,12 @@ package Util;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.text.DecimalFormat;
 
 import javax.swing.JPanel;
 
@@ -14,6 +17,7 @@ public class SimpleBar extends JPanel {
 	private float value;
 	private Color foreColor = new Color(16, 20, 132);
 	private Color bgColor = new Color(16, 20, 132,128);
+	private Color fontColor = new Color(255,255,255);
 	private Color borderColor = new Color(max, max, max);
 	
 	
@@ -43,15 +47,32 @@ public class SimpleBar extends JPanel {
 		int y = getInsets().top;
 		int cornerRadius = panelWidth/6;
 		
-		
+		Font valueFont = new Font("Helvetica", Font.PLAIN, 10);
+
 		int barHeight = (int) (((value-min)/(max-min))*panelHeight);
 		//Draw background
 		g2D.setColor(bgColor);
-		  drawCustomBar(g2D,x,y,panelWidth,panelHeight,cornerRadius);
+		drawCustomBar(g2D,x,y,panelWidth,panelHeight,cornerRadius);
+		
 		//Draw bar
 		g2D.setColor(foreColor);
 		drawCustomBar(g2D,x, y+panelHeight-barHeight, panelWidth, barHeight,cornerRadius);
-		//Draw border
+		g2D.setColor(fontColor);
+		g2D.setFont(valueFont);
+		FontMetrics fm = g2D.getFontMetrics();
+
+		DecimalFormat formatter = new DecimalFormat("0.00");
+		String txtValue = formatter.format(value);
+		int stringWidth = fm.stringWidth(txtValue);
+		float txtX = x+ (panelWidth-stringWidth)/2;
+		float txtY = y+panelHeight-barHeight+fm.getHeight();
+		int descent = fm.getDescent();
+		//System.out.println("Descent is "+descent);
+		if( txtY> y+panelHeight)
+			txtY = y+panelHeight-descent;
+		g2D.drawString(txtValue, txtX,txtY);
+		
+		//TODO: Draw border
 	 }
 	 
 	 public void drawCustomBar(Graphics2D graphics,int x,int y,int w,int h,int radius)
@@ -64,7 +85,12 @@ public class SimpleBar extends JPanel {
 	 
 	 public void setValue(float v)
 	 {
-		 value = v;
+		 if( v > max)
+		 value = max;
+		 else if ( v<min)
+			 value = min;
+		 else
+			 value = v;
 	 }
 
 }
