@@ -104,7 +104,8 @@ public class P5Canvas extends PApplet{
 	public  YAMLinterface yaml = new YAMLinterface();
 	
 	public float FRAME_RATE =30;
-	public float averageVelocity = 0;
+	//public float averageVelocity = 0;
+	public float totalKineticEnergy = 0;
 	
 
 	public P5Canvas(Main parent) {
@@ -267,12 +268,19 @@ public class P5Canvas extends PApplet{
 	*******************************************************************/
 	private void updateProperties() {
 		
-		//TODO: Calculate temp by checking average velocity of all the molecules
+		//TODO: Calculate temp by checking kinematic energy of all the molecules
+		//Equation: 1/2 mv2 = 3/2 KT , K= 1.38 * 10-23 JK-1;
+		//Note: 1 mole = 6.022* 10 23;
+		float K = 1.38f;
+		float mole = 6.022f;
+		totalKineticEnergy = 0;
+		
 		for( int i = 0;i<State.molecules.size();i++)
 		{
-			
+			totalKineticEnergy += State.molecules.get(i).getKineticEnergy();
 		}
-		//System.out.println("averageVelocity is "+averageVelocity);
+		temp = (totalKineticEnergy *2) /(3*K*mole);
+		System.out.println("totalKineticEnergy is "+totalKineticEnergy);
 		
 		//Known: V-currentVolume n-mol T-temp R
 		mol = State.molecules.size();
@@ -442,7 +450,7 @@ public class P5Canvas extends PApplet{
 					float energy = 0f;
 					if (vec!=null){
 						float v = vec.x*vec.x + vec.y*vec.y;
-						energy = v*m.getMass();
+						energy = v*m.getBodyMass();
 					}
 					//System.out.println("mName:"+mName+"  expectedAverage:"+expectedAverage+" "+energy);
 					if (energy>expectedAverage*2)
@@ -498,13 +506,13 @@ public class P5Canvas extends PApplet{
 					gravityY = (bTemp-temp)/(bTemp-fTemp);
 					gravityX = gravityY*0.6f;
 				}	
-				forceX =  (-normV.x/dis)*m.getMass()*mIndex.getMass()*gravityX*3000;
-				forceY =  (-normV.y/dis)*m.getMass()*mIndex.getMass()*gravityY*3000;
+				forceX =  (-normV.x/dis)*m.getBodyMass()*mIndex.getBodyMass()*gravityX*3000;
+				forceY =  (-normV.y/dis)*m.getBodyMass()*mIndex.getBodyMass()*gravityY*3000;
 			}	
 			else{
 				float num = m.getNumElement();
-				forceX =  (normV.x/dis)*m.getMass()*mIndex.getMass()*300*num;
-				forceY =  (normV.y/dis)*m.getMass()*mIndex.getMass()*300*num;
+				forceX =  (normV.x/dis)*m.getBodyMass()*mIndex.getBodyMass()*300*num;
+				forceY =  (normV.y/dis)*m.getBodyMass()*mIndex.getBodyMass()*300*num;
 			}
 			mIndex.addForce(new Vec2(forceX,forceY));
 		}
