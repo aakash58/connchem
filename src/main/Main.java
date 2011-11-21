@@ -1239,7 +1239,7 @@ public class Main {
 		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
 		checkBoxPanel.add(forceCheckbox, BorderLayout.CENTER);
 		checkBoxPanel.add(jointsCheckbox, BorderLayout.SOUTH);
-		timerSubpanel.add(checkBoxPanel, "cell 1 1");
+		timerSubpanel.add(checkBoxPanel, "cell 1 1, align center");
 
 		timerSubpanel.add(getTableSet(), "cell 0 0 1 2,growy");
 
