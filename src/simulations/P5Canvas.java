@@ -104,6 +104,7 @@ public class P5Canvas extends PApplet{
 	public  YAMLinterface yaml = new YAMLinterface();
 	
 	public float FRAME_RATE =30;
+	public float averageVelocity = 0;
 	
 
 	public P5Canvas(Main parent) {
@@ -266,7 +267,12 @@ public class P5Canvas extends PApplet{
 	*******************************************************************/
 	private void updateProperties() {
 		
-		//TODO: Calculate temp
+		//TODO: Calculate temp by checking average velocity of all the molecules
+		for( int i = 0;i<State.molecules.size();i++)
+		{
+			
+		}
+		//System.out.println("averageVelocity is "+averageVelocity);
 		
 		//Known: V-currentVolume n-mol T-temp R
 		mol = State.molecules.size();
@@ -1200,6 +1206,7 @@ public class P5Canvas extends PApplet{
 	*******************************************************************/
 	public void beginContact(Contact c) {
 			
+		//collisionCount++;
 		switch (main.selectedUnit)
 		{
 		case 1:
@@ -1222,7 +1229,6 @@ public class P5Canvas extends PApplet{
 			break;
 		default:
 			break;
-		
 		}
 
 

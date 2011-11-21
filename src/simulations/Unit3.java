@@ -2770,6 +2770,7 @@ public class Unit3 extends UnitBase {
 		float gravityCompensation = 0.2f;
 		float topBoundary = p5Canvas.h / 2;
 		float forceYCompensation = 0.05f;
+		float forceSodiumYCompensation = 0.085f;
 		String [] targetNames = setupForceTargets();
 		
 
@@ -2829,47 +2830,6 @@ public class Unit3 extends UnitBase {
 
 				}
 			}
-			/*
-			//Repulsive force
-			//Push Potassium ion away from AgBr
-			if(molecules.get(i).getName().equals("Potassium-Ion")||molecules.get(i).getName().equals("Sodium-Ion"))
-			{
-				float repulsiveFoceScale = 0.1f;
-				thisMole = molecules.get(i);
-				for (int e = 0; e < thisMole.getNumElement(); e++) {
-					thisMole.sumForceWaterX[e] = 0;
-					thisMole.sumForceWaterY[e] = 0;
-					thisMole.sumForceX[e] = 0;
-					thisMole.sumForceY[e] = 0;
-					Vec2 locIndex = thisMole.getElementLocation(e);
-
-					for (int k = 0; k < molecules.size(); k++) {
-						if (k == i)
-							continue;
-						otherMole = molecules.get(k);
-						if (otherMole.getName().equals("Silver-Bromide")||otherMole.getName().equals("Silver-Chloride")||
-								otherMole.getName().equals("Silver-Carbonate")||otherMole.getName().equals("Silver-Hydroxide")) // Find
-																	// another
-																	// silver-chloride
-						{
-							for (int e2 = 0; e2 < otherMole.getNumElement(); e2++) {
-
-								Vec2 loc = otherMole.getElementLocation(e2);
-								float x = locIndex.x - loc.x;
-								float y = locIndex.y - loc.y;
-								dis = (float) Math.sqrt(x * x + y * y);
-								forceX = (x / dis) / (float) (Math.sqrt(dis))
-										* repulsiveFoceScale;
-								forceY = (y / dis) / (float) (Math.sqrt(dis))
-										* repulsiveFoceScale;
-								thisMole.sumForceX[e] += forceX;
-								thisMole.sumForceY[e] += forceY;
-
-							}
-						}
-					}
-				}
-			}*/
 			//Atract force 
 			// Pull solid molecules together
 			if ( molecules.get(i).getName().equals("Silver-Bromide")
@@ -2916,7 +2876,14 @@ public class Unit3 extends UnitBase {
 					}
 				}
 			}
-			// high
+			if(molecules.get(i).getName().equals("Sodium-Ion")) //Add some y force to Sodium-Ion to make it floating
+			{
+				thisMole = molecules.get(i);
+				for (int thisE = 0; thisE < thisMole.getNumElement(); thisE++) {
+					thisMole.sumForceY[thisE] += forceSodiumYCompensation;
+					}
+			}
+			// high boundary check
 			if (true) {
 				thisMole = molecules.get(i);
 				Vec2 pos = box2d.coordWorldToPixels(thisMole.getPosition());

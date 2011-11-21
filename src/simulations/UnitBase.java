@@ -108,9 +108,7 @@ public abstract class UnitBase {
 
 	}
 	
-	protected SpawnStyle getSpawnStyle(int selectedSim, int selectedSet) {
-		return null;
-	}
+	//protected SpawnStyle getSpawnStyle(int selectedSim, int selectedSet);
 
 	/******************************************************************
 	 * FUNCTION : addMolecules DESCRIPTION : Function to add molecules to
@@ -569,7 +567,7 @@ public abstract class UnitBase {
 														// add Ions
 
 		Vec2 topLeft = new Vec2(centerX-size.x/2, centerY-size.y/2);
-		if(compoundName.equals("Ammonium-Chloride"))
+		if(compoundName.equals("Ammonium-Chloride")||compoundName.equals("Sodium-Carbonate"))
 		topLeft = new Vec2(centerX-size.x, centerY-size.y);
 		Vec2 botRight = new Vec2(centerX + numCol * (size.x), centerY + numRow
 				* size.y);
@@ -601,7 +599,7 @@ public abstract class UnitBase {
 			if (!isClear) {
 				centerX += increX;
 				topLeft = new Vec2(centerX-size.x/2, centerY-size.y/2);
-				if(compoundName.equals("Ammonium-Chloride"))
+				if(compoundName.equals("Ammonium-Chloride")||compoundName.equals("Sodium-Carbonate"))
 				topLeft = new Vec2(centerX, centerY);
 				botRight = new Vec2(centerX + numCol * (size.x), centerY + numRow
 						* size.y);
