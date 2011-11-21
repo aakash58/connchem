@@ -105,13 +105,13 @@ public class Water {
 						gravityY = (bTemp-p5Canvas.temp)/(bTemp-fTemp);
 						gravityX = gravityY*0.6f;
 					}	
-					forceX =  (-normV.x/dis)*m.getMass()*mWater.getMass()*gravityX*3000;
-					forceY =  (-normV.y/dis)*m.getMass()*mWater.getMass()*gravityY*3000;
+					forceX =  (-normV.x/dis)*m.getBodyMass()*mWater.getBodyMass()*gravityX*3000;
+					forceY =  (-normV.y/dis)*m.getBodyMass()*mWater.getBodyMass()*gravityY*3000;
 				}	
 				else{
 					float num = m.getNumElement();
-					forceX =  (normV.x/dis)*m.getMass()*mWater.getMass()*300*num;
-					forceY =  (normV.y/dis)*m.getMass()*mWater.getMass()*300*num;
+					forceX =  (normV.x/dis)*m.getBodyMass()*mWater.getBodyMass()*300*num;
+					forceY =  (normV.y/dis)*m.getBodyMass()*mWater.getBodyMass()*300*num;
 				}
 				mWater.addForce(new Vec2(forceX,forceY));
 			}

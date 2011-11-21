@@ -52,6 +52,7 @@ public class Molecule {
 	public boolean isHidden = false;
 	public float freezingTem;
 	public float boilingTem;
+	public float mass = 0;
 
 	public Vec2 force = new Vec2(0, 0);
 	public Vec2[] loc = new Vec2[20];
@@ -138,6 +139,7 @@ public class Molecule {
 		for (int i = 0; i < numElement; i++) {
 			int charge = DBinterface.getElementCharge(elementNames.get(i));
 			elementCharges.add(charge);
+			mass+= DBinterface.getElementMass(elementNames.get(i));
 		}
 		sumForceX = new float[numElement];
 		sumForceY = new float[numElement];
@@ -439,10 +441,13 @@ public class Molecule {
 		return name;
 	}
 
-	public float getMass() {
+	public float getBodyMass() {
 		return body.getMass();
 	}
-
+	public float getMoleculeMass()
+	{
+		return mass;
+	}
 	//Get position in world coordinates
 	public Vec2 getPosition() {
 		return body.getPosition();
@@ -834,6 +839,18 @@ public class Molecule {
 	public Vec2 getLinearVelocity()
 	{
 		return body.getLinearVelocity();
+	}
+	public float getLinearVelocityScalar()
+	{
+		float scalar = 0;
+		Vec2 vector = body.getLinearVelocity();
+		scalar = vector.x*vector.x + vector.y*vector.y;
+		scalar = (float) Math.sqrt(scalar);
+		return scalar;
+	}
+	public float getKineticEnergy()
+	{
+		return (0.5f*mass*getLinearVelocityScalar()*getLinearVelocityScalar());
 	}
 	public void setLinearVelocity(Vec2 vec)
 	{
