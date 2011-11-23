@@ -3076,4 +3076,64 @@ public class Unit3 extends UnitBase {
 
 	}
 
+	@Override
+	public void setupReactionProducts(int sim, int set) {
+		// TODO Auto-generated method stub
+		 
+				ArrayList<String> products = new ArrayList<String>();
+				if (!(sim == 2)) {
+					products = DBinterface.getReactionOutputs(this.unitNum,
+							sim, set);
+					if (products != null) {
+						for (String s : products) {
+							if (!Compound.names.contains(s)) {
+								Compound.names.add(s);
+								Compound.counts.add(0);
+								Compound.caps.add(95);
+							}
+						}
+					}
+				}
+				else //Set raction outcome for Unit3 sim 2
+				{	
+					switch(this.combinationIndex)
+					{
+					case 5:
+						Compound.names.add("Silver-Bromide");
+						Compound.counts.add(0);
+						Compound.caps.add(95);
+						Compound.names.add("Potassium-Nitrate");
+						Compound.counts.add(0);
+						Compound.caps.add(95);
+						break;
+					case 9:
+						Compound.names.add("Silver-Chloride");
+						Compound.counts.add(0);
+						Compound.caps.add(95);
+						Compound.names.add("Ammonium-Nitrate");
+						Compound.counts.add(0);
+						Compound.caps.add(95);
+						break;
+					case 10:
+						Compound.names.add("Silver-Carbonate");
+						Compound.counts.add(0);
+						Compound.caps.add(95);
+						Compound.names.add("Sodium-Nitrate");
+						Compound.counts.add(0);
+						Compound.caps.add(95);
+						break;
+					case 11:
+						Compound.names.add("Silver-Hydroxide");
+						Compound.counts.add(0);
+						Compound.caps.add(95);
+						Compound.names.add("Sodium-Nitrate");
+						Compound.counts.add(0);
+						Compound.caps.add(95);
+						break;
+					}
+				}
+			
+		
+	}
+
 }

@@ -13,54 +13,45 @@ import javax.swing.Timer;
 import main.Main;
 
 import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.JointType;
 import org.jbox2d.dynamics.joints.PrismaticJoint;
 import org.jbox2d.dynamics.joints.PrismaticJointDef;
 
+import data.DBinterface;
+
 import simulations.models.Boundary;
+import simulations.models.Compound;
 import simulations.models.DistanceJointWrap;
 import simulations.models.Molecule;
+import simulations.models.Water;
 
 import static simulations.P5Canvas.*;
 
-public class Unit2 {
+public class Unit2 extends UnitBase{
 	private int num_total = 0;
 	private int num_gone = 0; // Number of molecules that has dissolved
 	private int numWater = 0; // Number of water added to container
 	private float massDissolved = 0;
 	private int water100mL = 25;
 	private int mToMass = 10;
-	private P5Canvas p5Canvas = null;
-	private PBox2D box2d = null;
+
+	private Water waterComputation;
 	//private int addWaterDelay = 8000; //Parameter specifies delay of saturation computation after we add water molecules to canvas
 	                           //In seconds
 	//private ActionListener timerPerformer = null; //ActionListener of timer used to increase numWater
 
 
 	public Unit2(P5Canvas parent, PBox2D box) {
-		p5Canvas = parent;
-		box2d = box;
-
+		super(parent, box);
+		unitNum = 2;
+		waterComputation = new Water(p5Canvas);
 
 	}
 
-	/******************************************************************
-	 * FUNCTION : areaBodyCheck DESCRIPTION : Check whether pos is in area
-	 * (topLeft,botRight), return true if yes
-	 * 
-	 * INPUTS : pos(Vec2), topLeft(Vec2), botRight(Vec2) OUTPUTS: boolean
-	 *******************************************************************/
-	private boolean areaBodyCheck(Vec2 pos, Vec2 topLeft, Vec2 botRight) {
-		boolean res = false;
-		if (pos.x > topLeft.x && pos.x < botRight.x && pos.y > topLeft.y
-				&& pos.y < botRight.y) {
-			res = true;
 
-		}
-		return res;
-	}
 
 	/******************************************************************
 	 * FUNCTION : add2Ions DESCRIPTION : Specific function used to add NaCl2,
@@ -1230,6 +1221,10 @@ public class Unit2 {
 			}
 		}
 	}
+	public Vec2 normalizeForce(Vec2 v){
+		float dis = (float) Math.sqrt(v.x*v.x + v.y*v.y);
+		return new Vec2(v.x/dis,v.y/dis);
+	}
 
 	public void removeCaOtherJ(Molecule mCl) {
 		if (mCl.CaOtherJ < 0)
@@ -1571,13 +1566,58 @@ public class Unit2 {
 
 		}
 	}
-
 	
+	
+	public void updateMolecules(int sim, int set)
+	{
+
+			if (set==1 || set==4 || set==7){
+				for (int i = 0; i < molecules.size(); i++) {
+					Molecule m = molecules.get(i);
+					m.ionDis =0;
+					if (set==4 && m.getName().equals("Calcium-Ion"))
+							computeCaClPartner(i,m);
+				}
+				
+			}
+			
+		
+	}
+	
+	
+	public void setupReactionProducts(int sim, int set) {
+		// TODO Auto-generated method stub
+		
+			if (set == 1 && sim < 4) {
+				Compound.names.add("Sodium-Ion");
+				Compound.counts.add(0);
+				Compound.names.add("Chlorine-Ion");
+				Compound.counts.add(0);
+			} else if (set == 4) {
+				Compound.names.add("Calcium-Ion");
+				Compound.counts.add(0);
+				Compound.names.add("Chlorine-Ion");
+				Compound.counts.add(0);
+			} else if (set == 7) {
+				Compound.names.add("Sodium-Ion");
+				Compound.counts.add(0);
+				Compound.names.add("Bicarbonate");
+				Compound.counts.add(0);
+			} else if (set == 1 && sim == 4) {
+				Compound.names.add("Potassium-Ion");
+				Compound.counts.add(0);
+				Compound.names.add("Chlorine-Ion");
+				Compound.counts.add(0);
+			}
+		
+	}
+	/*
 	private void destroyJoint(DistanceJoint dj)
 	{
 		PBox2D.world.destroyJoint(dj);
 		//p5Canvas.computeDisolved();
 	}
+	*/
 	public void reset() { // draw background
 		num_total = 0;
 		num_gone = 0;
@@ -1710,4 +1750,125 @@ public class Unit2 {
 		int num = Math.round(computeSat()/ getMolToMass()); 
 		return num;
 	}
+
+		@Override
+		public void setupSimulations() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		protected void computeForce(int sim, int set) {
+			// TODO Auto-generated method stub
+			for (int i = 0; i < molecules.size(); i++) {
+				Molecule m = molecules.get(i);
+			if (m.getName().equals("Water"))
+				waterComputation.setForceWater(i,m);
+			if(set==1 && sim<4)
+				computeForceNaCl(i,m);
+			else if(set==1 && sim==4){
+				computeForceKCl(i,m);
+			}
+			else if(set==2)
+				computeForceSiO2(i,m);
+			else if(set==3)
+				computeForceGlycerol(i,m);
+			else if(set==4){
+				computeForceCaCl(i,m);	
+				computeForceFromWater(i,m);	
+				checkSpeed(i,m);
+			}
+			else if(set==5)
+				computeForceAceticAcid(i,m);
+			else if(set==7){
+				computeForceNaHCO3(i,m);
+				computeForceFromWater(i,m);	
+			}
+			}
+			
+		}
+		
+		//Apply force function for Unit
+		public void applyForce(int sim, int set)
+		{
+			for (int i = 0; i < molecules.size(); i++) {
+				Molecule m = molecules.get(i);
+				if (m!=null && !p5Canvas.isDrag){
+					if (!m.getName().equals("Water") ){
+						applyForceUnit2(i,m);
+					}
+				}	
+			}
+		}
+
+		@Override
+		public boolean addMolecules(boolean isAppEnable, String compoundName,
+				int count) {
+			boolean res = false;
+			/* Compounds status check */
+			float freezingTem = DBinterface.getCompoundFreezingPointCelsius(compoundName);
+			if (p5Canvas.temp<=freezingTem){
+				if (compoundName.equals("Sodium-Chloride"))
+					res = add2Ions("Sodium-Ion","Chlorine-Ion",count, box2d, p5Canvas);
+				else if (compoundName.equals("Silicon-Dioxide"))
+					res = addSiO2(compoundName,count, box2d, p5Canvas); 
+				else if (compoundName.equals("Calcium-Chloride"))
+					res = addCalciumChloride(compoundName,count, box2d, p5Canvas); 
+				else if (compoundName.equals("Sodium-Bicarbonate"))
+					res = addNaHCO3(compoundName,count, box2d, p5Canvas); 
+				else if (compoundName.equals("Potassium-Chloride"))
+					res = add2Ions("Potassium-Ion","Chlorine-Ion",count, box2d, p5Canvas); 
+				else	
+					res = addSolid(compoundName,count);
+			}
+			else{
+				if(compoundName.equals("Glycerol")||compoundName.equals("Pentane"))
+					res = addGlycerol(compoundName, count, box2d, p5Canvas);
+				else
+				res = addWaterMolecules(isAppEnable,compoundName,count);
+				
+			}
+			// TODO Auto-generated method stub
+			return res;
+		}
+		
+		/******************************************************************
+		* FUNCTION :     addSolid
+		* DESCRIPTION :  Specific function used to add addSolid, Called by addMolecule()
+		*
+		* INPUTS :       CompoundName(String), count(int)
+		* OUTPUTS:       None
+		*******************************************************************/
+		public boolean addSolid(String compoundName, int count) {
+			boolean res = false;
+			int numRow = (int) (Math.ceil(count/6.)+1);
+			
+			float centerX = p5Canvas.x + 200 ;                              //X coordinate around which we are going to add Ions, 50 is border width
+			float centerY = p5Canvas.y + 80-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
+			
+			for (int i=0;i<count;i++){
+				float x_,y_,angle;
+				Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
+				x_ =centerX+ (i/numRow)*2*size.x;
+				y_ =centerY+(numRow-1-i%numRow)*2*size.y;
+				if ((i%numRow)%2==0){
+					angle = 0;
+				}
+				else{
+					angle = (float) Math.PI;
+				}
+				molecules.add(new Molecule(x_, y_,compoundName, 
+						box2d, p5Canvas,angle));
+				res = true;
+			}
+			return res;
+		}
+
+
+
+		@Override
+		public void beginReaction(Contact c) {
+			// TODO Auto-generated method stub
+			
+		}
 }

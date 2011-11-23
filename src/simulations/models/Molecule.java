@@ -139,6 +139,10 @@ public class Molecule {
 		for (int i = 0; i < numElement; i++) {
 			int charge = DBinterface.getElementCharge(elementNames.get(i));
 			elementCharges.add(charge);
+			if (elementNames.get(i).equals("Chloride"))
+				elementNames.set(i, new String("Chlorine")) ;
+			else if(elementNames.get(i).equals("Bromide"))
+				elementNames.set(i, new String("Bromine")) ;
 			mass+= DBinterface.getElementMass(elementNames.get(i));
 		}
 		sumForceX = new float[numElement];
