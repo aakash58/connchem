@@ -265,7 +265,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	public void updateMoleculeCount(){
 	
 		//For particular cases
-		if (main.selectedUnit==1 && main.selectedSim==4){
+		if (main.selectedUnit==1 && (main.selectedSim==4||(main.selectedSim==2&&main.selectedSet==2))){
 			int H2OIndex = names.indexOf("Water");
 			int OIndex = names.indexOf("Oxygen");
 			int H2O2Index = names.indexOf("Hydrogen-Peroxide");

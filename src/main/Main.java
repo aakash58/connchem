@@ -754,7 +754,7 @@ public class Main {
 						}
 					}
 				}
-				setupReactionProducts();
+				p5Canvas.setupReactionProducts();
 				Compound.setProperties();
 			}
 		} else {
@@ -775,93 +775,7 @@ public class Main {
 
 	}
 
-	private void setupReactionProducts() {
-		if (selectedUnit == 1) {
-			if (selectedSim == 4) {
-				Compound.names.add("Water");
-				Compound.counts.add(0);
-				Compound.names.add("Oxygen");
-				Compound.counts.add(0);
-			}
-		}
 
-		else if (selectedUnit == 2) {
-			if (selectedSet == 1 && selectedSim < 4) {
-				Compound.names.add("Sodium-Ion");
-				Compound.counts.add(0);
-				Compound.names.add("Chlorine-Ion");
-				Compound.counts.add(0);
-			} else if (selectedSet == 4) {
-				Compound.names.add("Calcium-Ion");
-				Compound.counts.add(0);
-				Compound.names.add("Chlorine-Ion");
-				Compound.counts.add(0);
-			} else if (selectedSet == 7) {
-				Compound.names.add("Sodium-Ion");
-				Compound.counts.add(0);
-				Compound.names.add("Bicarbonate");
-				Compound.counts.add(0);
-			} else if (selectedSet == 1 && selectedSim == 4) {
-				Compound.names.add("Potassium-Ion");
-				Compound.counts.add(0);
-				Compound.names.add("Chlorine-Ion");
-				Compound.counts.add(0);
-			}
-		} else {
-			ArrayList<String> products = new ArrayList<String>();
-			if (!(selectedUnit == 3 && selectedSim == 2)) {
-				products = DBinterface.getReactionOutputs(selectedUnit,
-						selectedSim, selectedSet);
-				if (products != null) {
-					for (String s : products) {
-						if (!Compound.names.contains(s)) {
-							Compound.names.add(s);
-							Compound.counts.add(0);
-							Compound.caps.add(95);
-						}
-					}
-				}
-			}
-			else //Set raction outcome for Unit3 sim 2
-			{	
-				switch(p5Canvas.getUnit3().combinationIndex)
-				{
-				case 5:
-					Compound.names.add("Silver-Bromide");
-					Compound.counts.add(0);
-					Compound.caps.add(95);
-					Compound.names.add("Potassium-Nitrate");
-					Compound.counts.add(0);
-					Compound.caps.add(95);
-					break;
-				case 9:
-					Compound.names.add("Silver-Chloride");
-					Compound.counts.add(0);
-					Compound.caps.add(95);
-					Compound.names.add("Ammonium-Nitrate");
-					Compound.counts.add(0);
-					Compound.caps.add(95);
-					break;
-				case 10:
-					Compound.names.add("Silver-Carbonate");
-					Compound.counts.add(0);
-					Compound.caps.add(95);
-					Compound.names.add("Sodium-Nitrate");
-					Compound.counts.add(0);
-					Compound.caps.add(95);
-					break;
-				case 11:
-					Compound.names.add("Silver-Hydroxide");
-					Compound.counts.add(0);
-					Compound.caps.add(95);
-					Compound.names.add("Sodium-Nitrate");
-					Compound.counts.add(0);
-					Compound.caps.add(95);
-					break;
-				}
-			}
-		}
-	}
 	
 	//Reset Global Parameter
 	public void resetParameter()
@@ -1256,7 +1170,7 @@ public class Main {
 		/**************************CENTER PANEL********************************/
 		centerPanel = new JPanel();
 		volumeLabel = new JLabel(getP5Canvas().currentVolume + "mL");
-		volumeSlider = new JSlider(minVolume, maxVolume, getP5Canvas().currentVolume);
+		volumeSlider = new JSlider(minVolume, maxVolume, defaultVolume);
 		centerPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -1699,7 +1613,7 @@ public class Main {
 											
 										}
 									}
-									setupReactionProducts();
+									p5Canvas.setupReactionProducts();
 									Compound.setProperties();
 								}
 								started = true;

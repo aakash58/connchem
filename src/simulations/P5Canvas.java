@@ -48,10 +48,11 @@ public class P5Canvas extends PApplet{
 	
 	// A reference to our box2d world
 	private PBox2D box2d;
+	private Unit1 unit1;
 	private Unit2 unit2;   //Unit2 object containing all the functions used in Unit2
 	private Unit3 unit3;
 	private Unit4 unit4;
-	private Water waterComputation;
+	//public Water waterComputation;
 	public boolean isEnable = false; 
 	public boolean isHidingEnabled = false;
 	public boolean isDisplayForces = false;
@@ -104,18 +105,23 @@ public class P5Canvas extends PApplet{
 	public  YAMLinterface yaml = new YAMLinterface();
 	
 	public float FRAME_RATE =30;
-	//public float averageVelocity = 0;
 	public float totalKineticEnergy = 0;
+	public ArrayList<UnitBase> unitList = new ArrayList<UnitBase>();
 	
 
 	public P5Canvas(Main parent) {
-		// TODO Auto-generated constructor stub
+
 		setMain(parent);
 		box2d = new PBox2D(this);
+		setUnit1(new Unit1(this,box2d));
 		setUnit2(new Unit2(this, box2d));
 		setUnit3(new Unit3(this, box2d));
 		setUnit4(new Unit4(this,box2d));
-		waterComputation = new Water(this);
+		//waterComputation = new Water(this);
+		unitList.add(unit1);
+		unitList.add(unit2);
+		unitList.add(unit3);
+		unitList.add(unit4);
 	}
 	
 	
@@ -136,12 +142,10 @@ public class P5Canvas extends PApplet{
 		frameRate(FRAME_RATE);
 		
 		// Initialize box2d physics and create the world
-		
 		box2d.createWorld();
 		box2d.setGravity(0f,-10f);
 		
-		// Turn on collision listening!
-		// TODO turn on collisions by un-commenting below
+		// Turn on collision detection
 		box2d.listenForCollisions();
 		defaultW = 560/0.77f;
 		defaultH = 635/0.77f;
@@ -203,27 +207,12 @@ public class P5Canvas extends PApplet{
 				timeStep = speedRate* defaultTimeStep;
 			}
  			box2d.step(timeStep,velocityIterations,positionIterations);
-
  			
  			/*    Compute energy   */
-			computeEnergy();
- 			
-			if (main.selectedUnit==2){
-				if (main.selectedSet==1 || main.selectedSet==4 || main.selectedSet==7){
-					for (int i = 0; i < molecules.size(); i++) {
-						Molecule m = molecules.get(i);
-						m.ionDis =0;
-						if (main.selectedSet==4 && m.getName().equals("Calcium-Ion"))
-								getUnit2().computeCaClPartner(i,m);
-					}
-					
-				}
-				
-			}
+			//computeEnergy();
 			
 			/*   Compute Forces between different compounds  */
 			computeForces();
-			
 		}	
  		
  		/*   Show selected contour while user create rectangle by dragging mouse  */
@@ -274,13 +263,12 @@ public class P5Canvas extends PApplet{
 		float K = 1.38f;
 		float mole = 6.022f;
 		totalKineticEnergy = 0;
-		
 		for( int i = 0;i<State.molecules.size();i++)
 		{
 			totalKineticEnergy += State.molecules.get(i).getKineticEnergy();
 		}
-		temp = (totalKineticEnergy *2) /(3*K*mole);
-		System.out.println("totalKineticEnergy is "+totalKineticEnergy);
+		//temp = (float) ((totalKineticEnergy *2) /(3*K*mole) -273.15);
+		//System.out.println("totalKineticEnergy is "+totalKineticEnergy);
 		
 		//Known: V-currentVolume n-mol T-temp R
 		mol = State.molecules.size();
@@ -311,118 +299,22 @@ public class P5Canvas extends PApplet{
 
 	/******************************************************************
 	* FUNCTION :     computeForces
-	* DESCRIPTION :  Compute forces between all kinds of molecules
+	* DESCRIPTION :  Compute forces at the beginning of every frame
 	*
 	* INPUTS :       None
 	* OUTPUTS:       None
 	*******************************************************************/
 	public void computeForces()
 	{
-		
-
-			//else 
-				{
-				
-				switch (main.selectedUnit)
-				{
-				case 1:
-					for (int i = 0; i < molecules.size(); i++) {
-						Molecule m = molecules.get(i);
-					if (m.getName().equals("Water"))
-						waterComputation.setForceWater(i,m);
-					setForce(i,m);
-					}
-					break;
-				case 2:
-					for (int i = 0; i < molecules.size(); i++) {
-						Molecule m = molecules.get(i);
-					if (m.getName().equals("Water"))
-						waterComputation.setForceWater(i,m);
-					if(main.selectedSet==1 && main.selectedSim<4)
-						getUnit2().computeForceNaCl(i,m);
-					else if(main.selectedSet==1 && main.selectedSim==4){
-						getUnit2().computeForceKCl(i,m);
-					}
-					else if(main.selectedSet==2)
-						getUnit2().computeForceSiO2(i,m);
-					else if(main.selectedSet==3)
-						getUnit2().computeForceGlycerol(i,m);
-					else if(main.selectedSet==4){
-						getUnit2().computeForceCaCl(i,m);	
-						getUnit2().computeForceFromWater(i,m);	
-						checkSpeed(i,m);
-					}
-					else if(main.selectedSet==5)
-						getUnit2().computeForceAceticAcid(i,m);
-					else if(main.selectedSet==7){
-						getUnit2().computeForceNaHCO3(i,m);
-						getUnit2().computeForceFromWater(i,m);	
-					}
-					}
-
-					break;
-				case 3:
-					getUnit3().computeForce(main.selectedSim,main.selectedSet);
-					break;
-				case 4:
-					break;
-				case 5: 
-					break;
-				case 6:
-					break;
-				case 7:
-					break;
-				case 8:
-					break;
-				case 9:
-					break;
-					default:
-						break;
-				}
-			
-			}
-		
-		
+		unitList.get(main.selectedUnit-1).computeForce(main.selectedSim, main.selectedSet);
 		//Apply forces after set forces
 		applyForce();
 		
 	}
+	//Apply force at the begginning of every frame
 	public void applyForce()
 	{
-		switch (main.selectedUnit)
-		{
-		case 1:
-			
-			break;
-		case 2:
-			for (int i = 0; i < molecules.size(); i++) {
-				Molecule m = molecules.get(i);
-				if (m!=null && !isDrag){
-					if (!m.getName().equals("Water") ){
-						getUnit2().applyForceUnit2(i,m);
-					}
-				}	
-			}
-			break;
-		case 3:
-			getUnit3().applyForce(main.selectedSim,main.selectedSet);
-			break;
-		case 4:
-			getUnit4().applyForce(main.selectedSim, main.selectedSet);
-			break;
-		case 5: 
-			break;
-		case 6:
-			break;
-		case 7:
-			break;
-		case 8:
-			break;
-		case 9:
-			break;
-			default:
-				break;
-		}
+		unitList.get(main.selectedUnit-1).applyForce(main.selectedSim, main.selectedSet);
 	}
 	
 	public void computeEnergy(){
@@ -476,53 +368,9 @@ public class P5Canvas extends PApplet{
 			m.body.setLinearVelocity(vec.mul(0.9f) );
 	}	
 	
-	private void setForce(int index, Molecule mIndex) { // draw background
-		for (int i = 0; i < molecules.size(); i++) {
-			if (i==index)
-				continue;
-			Molecule m = molecules.get(i);
-			Vec2 loc = m.getPosition();
-			Vec2 locIndex = mIndex.getPosition();
-			if(loc==null || locIndex==null) continue;
-			float x = locIndex.x-loc.x;
-			float y = locIndex.y-loc.y;
-		   float dis = x*x +y*y;
-			Vec2 normV = normalizeForce(new Vec2(x,y));
-			float forceX;
-			float forceY;
-			if (mIndex.polarity==m.polarity){
-				float fTemp = mIndex.freezingTem;
-				float bTemp = mIndex.boilingTem;
-				float gravityX,gravityY;
-				if (temp>=bTemp){
-					gravityX = 0;
-					gravityY = 0;
-				}
-				else if (temp<=fTemp){
-					gravityY = (bTemp-temp)/(bTemp-fTemp);
-					gravityX = gravityY*2f;
-				}	
-				else{
-					gravityY = (bTemp-temp)/(bTemp-fTemp);
-					gravityX = gravityY*0.6f;
-				}	
-				forceX =  (-normV.x/dis)*m.getBodyMass()*mIndex.getBodyMass()*gravityX*3000;
-				forceY =  (-normV.y/dis)*m.getBodyMass()*mIndex.getBodyMass()*gravityY*3000;
-			}	
-			else{
-				float num = m.getNumElement();
-				forceX =  (normV.x/dis)*m.getBodyMass()*mIndex.getBodyMass()*300*num;
-				forceY =  (normV.y/dis)*m.getBodyMass()*mIndex.getBodyMass()*300*num;
-			}
-			mIndex.addForce(new Vec2(forceX,forceY));
-		}
-	}
+
 		
-	public static Vec2 normalizeForce(Vec2 v){
-		float dis = (float) Math.sqrt(v.x*v.x + v.y*v.y);
-		return new Vec2(v.x/dis,v.y/dis);
-		
-	}
+
 	
 	/*
 	 * Background methods
@@ -711,59 +559,8 @@ public class P5Canvas extends PApplet{
 		boolean res = false;
 		boolean tmp = isEnable;
 		isEnable = false;
-		
-		
-		//int index = Compound.names.indexOf(compoundName);
-		//int addCount = Compound.counts.get(index)+count;
-		
-		switch (main.selectedUnit)
-		{
-		case 1:
-		case 2:
-			/* Compounds status check */
-			float freezingTem = DBinterface.getCompoundFreezingPointCelsius(compoundName);
-			if (temp<=freezingTem){
-				if (compoundName.equals("Sodium-Chloride"))
-					res = getUnit2().add2Ions("Sodium-Ion","Chlorine-Ion",count, box2d, this);
-				else if (compoundName.equals("Silicon-Dioxide"))
-					res = getUnit2().addSiO2(compoundName,count, box2d, this); 
-				else if (compoundName.equals("Calcium-Chloride"))
-					res = getUnit2().addCalciumChloride(compoundName,count, box2d, this); 
-				else if (compoundName.equals("Sodium-Bicarbonate"))
-					res = getUnit2().addNaHCO3(compoundName,count, box2d, this); 
-				else if (compoundName.equals("Potassium-Chloride"))
-					res = getUnit2().add2Ions("Potassium-Ion","Chlorine-Ion",count, box2d, this); 
-				else	
-					addSolid(compoundName,count);
-			
-			}
-			else{
-				//TO DO: Check if molecules are in gas or water
-				if(compoundName.equals("Glycerol")||compoundName.equals("Pentane"))
-					res = getUnit2().addGlycerol(compoundName, count, box2d, this);
-				else if (compoundName.equals("Water"))
-				res = addWaterMolecules(tmp,compoundName,count);
-			}
-			break;
-		case 3:
-			res = getUnit3().addMolecules(tmp,compoundName,count);
-			break;
-		case 4:
-			res = getUnit4().addMolecules(tmp, compoundName, count);
-			break;
-		case 5:
-			break;
-		case 6:
-			break;
-		case 7:
-			break;
-		case 8:
-			break;
-		case 9 :
-			break;
-			default:
-				break;
-		}
+
+		res= unitList.get(main.selectedUnit-1).addMolecules(tmp, compoundName, count);
 		
 		//If we successfully added molecules, update compound number
 		if(res)
@@ -800,59 +597,11 @@ public class P5Canvas extends PApplet{
 		isEnable = false;
 		boolean res = false;
 		
-		
 		int index = Compound.names.indexOf(compoundName);
 		int addCount = Compound.counts.get(index)+count;
-		
-		switch (main.selectedUnit)
-		{
-		case 1:
-		case 2:
-			/* Compounds status check */
-			float freezingTem = DBinterface.getCompoundFreezingPointCelsius(compoundName);
-			if (temp<=freezingTem){
-				if (compoundName.equals("Sodium-Chloride"))
-					res = getUnit2().add2Ions("Sodium-Ion","Chlorine-Ion",count, box2d, this);
-				else if (compoundName.equals("Silicon-Dioxide"))
-					res = getUnit2().addSiO2(compoundName,count, box2d, this); 
-				else if (compoundName.equals("Calcium-Chloride"))
-					res = getUnit2().addCalciumChloride(compoundName,count, box2d, this); 
-				else if (compoundName.equals("Sodium-Bicarbonate"))
-					res = getUnit2().addNaHCO3(compoundName,count, box2d, this); 
-				else if (compoundName.equals("Potassium-Chloride"))
-					res = getUnit2().add2Ions("Potassium-Ion","Chlorine-Ion",count, box2d, this); 
-				else	
-					addSolid(compoundName,count);
-			}
-			else{
-				if(compoundName.equals("Glycerol")||compoundName.equals("Pentane"))
-					res = getUnit2().addGlycerol(compoundName, count, box2d, this);
-				else
-				res = addWaterMolecules(tmp,compoundName,count);
+
+		res= unitList.get(main.selectedUnit-1).addMolecules(tmp, compoundName, count);
 				
-			}
-			break;
-		case 3:
-			res = getUnit3().addMolecules(tmp,compoundName,count);
-			break;
-		case 4:
-			res = getUnit4().addMolecules(tmp, compoundName, count);
-			break;
-		case 5:
-			break;
-		case 6:
-			break;
-		case 7:
-			break;
-		case 8:
-			break;
-		case 9 :
-			break;
-			default:
-				break;
-		}
-		
-		
 		//If we successfully added molecules, update compound number
 		if(res)
 		{
@@ -884,142 +633,30 @@ public class P5Canvas extends PApplet{
 		oldTime=0;
 		//Reset Gravity
 		box2d.setGravity(0f,-10f);
-		
-		int unit = getMain().selectedUnit;
-		switch (unit)
-		{
-		case 2:
-		getUnit2().reset(); //reset Unit 2
-		break;
-		case 3:
-		getUnit3().reset();
-		break;
-		case 4:
-			getUnit4().reset();
-			break;
-		}
+
+		unitList.get(main.selectedUnit-1).reset();
 	}
 	
-	/******************************************************************
-	* FUNCTION :     addWaterMolecules
-	* DESCRIPTION :  Function to add water molecules to PApplet
-	*
-	* INPUTS :       isAppEnable(boolean), compoundName(String), count(int)
-	* OUTPUTS:       None
-	*******************************************************************/
-	public boolean addWaterMolecules(boolean isAppEnable,String compoundName, int count)
-	{
-		boolean res = false;
-		//computeOutput(compoundName,count);
-		
-		if (isAppEnable) //if Applet is enable
-			creationCount =0;
-		else
-			creationCount++;
-									// variables are used to distribute molecules
-		int mod = creationCount%4;  // When the system is paused; Otherwise, molecules are create at the same position
-		
-		float centerX = 0 ; // X Coordinate around which we are going to add molecules
-		float centerY = 0 ; // Y Coordinate around which we are going to add molecules
-		float x_ = 0;       // X Coordinate for a specific molecule
-		float y_ = 0;       // Y Coordinate for a specific molecule
-		int dimension =0;   // Decide molecule cluster is 2*2 or 3*3
-		int leftBorder = 40;// Left padding
-		int offsetX =0;     // X offset from left border to 3/4 width of canvas
-		Random rand = null;
-
-		float moleWidth = w/11;
-		float moleHeight = h/20;
-		boolean isFit = false;
-		Vec2 topLeft = new Vec2(0,0);
-		Vec2 botRight = new Vec2(0,0);
-		//boolean dimensionDecided = false;
-		int k = 0;
-		for( k = 1;k<10;k++)
-		{
-			if(count<= (k*k) )
-			{
-				dimension =k;
-				break;
-			}
-		}
-		int rowNum = count/dimension + 1;
-		int colNum = dimension;
-		
-		//Check if there are enough space for water spawn, 
-		//in case that water molecules will not going out of screen
-		while(!isFit)
-		{
-			rand = new Random();
-			offsetX = rand.nextInt((int)( (w/5)*4));
-			centerX = x + leftBorder + offsetX;
-			centerY = y + 80-Boundary.difVolume +(mod-1.5f)*20;
-			topLeft.set(centerX,centerY);
-			botRight.set(centerX+colNum*moleWidth, centerY + rowNum*moleHeight);
-			if(topLeft.x>x && botRight.x<x+w && topLeft.y>y && botRight.y < y+h)
-				isFit = true;
-		}
-		
-		//Add molecules into p5Canvas
-		for (int i=0;i<count;i++){		
-
-				x_ =centerX + i%dimension*moleWidth + creationCount;
-				y_ =centerY + i/dimension*moleHeight;
-
-			res = molecules.add(new Molecule(x_, y_,compoundName, box2d, this,0));
-		}
-		
-		return res;
-	}
+	//Get current number of a certain molecule
 	public int getMoleculesNum(String compoundName)
 	{
 		int index = Compound.names.indexOf(compoundName);
 		int num= Compound.getMoleculeNum(index);	
 		return num;
 	}
+	//Get max allowed number of molecules
 	public int getMoleculesCap(String compoundName)
 	{
 		int index = Compound.names.indexOf(compoundName);
 		int cap= Compound.getMoleculeCap(index);	
 		return cap;
 	}
-	
-	/******************************************************************
-	* FUNCTION :     addSolid
-	* DESCRIPTION :  Specific function used to add addSolid, Called by addMolecule()
-	*
-	* INPUTS :       CompoundName(String), count(int)
-	* OUTPUTS:       None
-	*******************************************************************/
-	public void addSolid(String compoundName, int count) {
-		int numRow = (int) (Math.ceil(count/6.)+1);
-		
-		float centerX = x + 200 ;                              //X coordinate around which we are going to add Ions, 50 is border width
-		float centerY = y + 80-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
-		
-		for (int i=0;i<count;i++){
-			float x_,y_,angle;
-			Vec2 size = Molecule.getShapeSize(compoundName, this);
-			x_ =centerX+ (i/numRow)*2*size.x;
-			y_ =centerY+(numRow-1-i%numRow)*2*size.y;
-			if ((i%numRow)%2==0){
-				angle = 0;
-			}
-			else{
-				angle = (float) Math.PI;
-			}
-			molecules.add(new Molecule(x_, y_,compoundName, 
-					box2d, this,angle));
-		}
-	}
+
 		
 	
 	
-	public void addMolecule(float x_, float y_, String compoundName) {
-		Molecule m = new Molecule(x_, y_,compoundName, box2d, this,0);
-		molecules.add(m);
- 	}
-	
+
+	//Remove all existing molecules, called by reset()
 	public void removeAllMolecules() {
 		boolean tmp = isEnable;
 		isEnable = false;
@@ -1033,6 +670,7 @@ public class P5Canvas extends PApplet{
 		isEnable = tmp;
 	}
 	
+	//Remove existing anchors, called by reset()
 	public void removeAllAnchors(){
 		boolean tmp = isEnable;
 		isEnable = false;
@@ -1056,6 +694,7 @@ public class P5Canvas extends PApplet{
 	{
 		pressureRate = pressure;
 	}
+	
 	
 	//Set Heat of Molecules; values are from 0 to 100; 50 is default value 
 	public void setHeat(int value) {
@@ -1092,6 +731,39 @@ public class P5Canvas extends PApplet{
 		isEnable = tmp;
 	}
 	
+	/******************************************************************
+	* FUNCTION :     updateMolecules
+	* DESCRIPTION :  Kill molecules which have gone after reaction, and add new created molecules
+	*
+	* INPUTS :       None
+	* OUTPUTS:       None
+	*******************************************************************/
+	private void updateMolecules()
+	{
+		unitList.get(main.selectedUnit-1).updateMolecules(main.selectedSim, main.selectedSet);
+		
+	}
+	
+
+	
+	
+	/******************************************************************
+	* FUNCTION :     beginContact
+	* DESCRIPTION :  Molecule collision detect function
+	*                Called when contact happens
+	*
+	* INPUTS :       c(Contact)
+	* OUTPUTS:       None
+	*******************************************************************/
+	public void beginContact(Contact c) {		
+		unitList.get(main.selectedUnit-1).beginReaction(c);
+
+	}
+	
+	//Set up reaction products while initializing for graph rendering 
+	public void setupReactionProducts() {
+		unitList.get(main.selectedUnit-1).setupReactionProducts(main.selectedSim, main.selectedSet);
+	}
 	
 	/******************************** MOUSE EVENT ******************************/
 	public void keyPressed() {	
@@ -1149,159 +821,11 @@ public class P5Canvas extends PApplet{
 			}
 		}
 	}
-	
-	/******************************************************************
-	* FUNCTION :     updateMolecules
-	* DESCRIPTION :  Kill molecules which have gone after reaction, and add new created molecules
-	*
-	* INPUTS :       None
-	* OUTPUTS:       None
-	*******************************************************************/
-	private void updateMolecules()
-	{
-		switch (main.selectedUnit)
-		{
-		case 1: 
-			reactH202();
-			break;
-		case 3:
-			getUnit3().updateMolecules(main.selectedSim, main.selectedSet);
-			break;
-		case 4:
-			break;
-		default:
-			break;
-		}
-		
-	}
-	
-	private void reactH202()
-	{
-		if (products!=null && products.size()>0){
-			Molecule m1 = (Molecule) killingList.get(0);
-			Molecule m2 = (Molecule) killingList.get(1);
-			for (int i=0;i<products.size();i++){
-				Vec2 loc =m1.getPosition();
-				float x1 = PBox2D.scalarWorldToPixels(loc.x);
-				float y1 = h*0.77f-PBox2D.scalarWorldToPixels(loc.y);
-				Vec2 newVec =new Vec2(x1,y1);
-				Molecule m = new Molecule(newVec.x, newVec.y,products.get(i), box2d, this,0);
-				molecules.add(m);
-				if (i==0)
-					m.body.setLinearVelocity(m1.body.getLinearVelocity());
-				
-				else{
-					m.body.setLinearVelocity(m2.body.getLinearVelocity());
-				}
-			}
-			m1.killBody();
-			m2.killBody();
-			molecules.remove(m1);
-			molecules.remove(m2);
-			products.clear();
-			killingList.clear();
-		}
-	}
-	
-	
-	/******************************************************************
-	* FUNCTION :     beginContact
-	* DESCRIPTION :  Molecule collision detect function
-	*                Called when contact happens
-	*
-	* INPUTS :       c(Contact)
-	* OUTPUTS:       None
-	*******************************************************************/
-	public void beginContact(Contact c) {
-			
-		//collisionCount++;
-		switch (main.selectedUnit)
-		{
-		case 1:
-			reactAfterContact(c);
-			break;
-		case 2:
-			break;
-		case 3:
-			getUnit3().beginReaction(c);
-			break;
-		case 4:
-			break;
-		case 5:
-			break;
-		case 6:
-			break;
-		case 7: 
-			break;
-		case 8:
-			break;
-		default:
-			break;
-		}
 
 
-	}
 	
-	/******************************************************************
-	* FUNCTION :     reactAfterContact
-	* DESCRIPTION :  react function after collision detected
-	*                Called by beginContact()
-	*
-	* INPUTS :       c( Contact)
-	* OUTPUTS:       None
-	*******************************************************************/
-	private void reactAfterContact(Contact c)
-	{
-		// Get our objects that reference these bodies
-		Object o1 = c.m_fixtureA.m_body.getUserData();
-		Object o2 = c.m_fixtureB.m_body.getUserData();
-		
-		if (o1 ==null || o2==null)
-			return;
-		// What class are they?  Box or Particle?
-		String c1 = o1.getClass().getName();
-		String c2 = o2.getClass().getName();
-		if (c1.contains("Molecule") && c2.contains("Molecule")){
-			Molecule m1 = (Molecule) o1;
-			Molecule m2 = (Molecule) o2;
-			ArrayList<String> reactants = new ArrayList<String>();
-			reactants.add(m1.getName());
-			reactants.add(m2.getName());
-			if (temp>=110){
-				float random = this.random(110, 210);
-				if (random<temp){
-					products = getReactionProducts(reactants);
-					if (products!=null && products.size()>0){
-						killingList.add(m1);
-						killingList.add(m2);
-					}
-				}
-			}
-		}
-		
-	}
-	
-	/******************************************************************
-	* FUNCTION :     getReactionProducts
-	* DESCRIPTION :  Reture objects based on input name
-	*                Called by beginContact
-	*
-	* INPUTS :       reactants (Array<String>)
-	* OUTPUTS:       None
-	*******************************************************************/
-	private ArrayList<String> getReactionProducts(ArrayList<String> reactants) {	
-		if (reactants.get(0).equals("Hydrogen-Peroxide") &&
-			reactants.get(1).equals("Hydrogen-Peroxide")){
-			ArrayList<String> products = new ArrayList<String>();
-			products.add("Water");
-			products.add("Water");
-			products.add("Oxygen");
-			return products;
-		}
-		else{
-			return null;
-		}
-	}
+
+
 	public void endContact(Contact c) {
 	}
 	public void postSolve(Contact c, ContactImpulse i) {
@@ -1356,7 +880,13 @@ public class P5Canvas extends PApplet{
 	public void setUnit4(Unit4 unit4) {
 		this.unit4 = unit4;
 	}
-	
+	public Unit1 getUnit1() 
+	{
+		return unit1;
+	}
+	public void setUnit1(Unit1 unit1) {
+		this.unit1 = unit1;
+	}
 	public TableView getTableView()
 	{
 		return main.getTableView();

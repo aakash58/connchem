@@ -1,5 +1,7 @@
 package simulations;
 
+import org.jbox2d.dynamics.contacts.Contact;
+
 import simulations.models.Simulation;
 import simulations.models.Simulation.SpawnStyle;
 
@@ -63,6 +65,18 @@ public class Unit4 extends UnitBase {
 				res = this.addGasMolecule(isAppEnable, compoundName, count);
 			}
 		return res;
+	}
+
+	@Override
+	public void setupReactionProducts(int sim, int set) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void beginReaction(Contact c) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

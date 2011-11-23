@@ -57,6 +57,9 @@ public abstract class UnitBase {
 	//Setup parameters for all simulations in this unit
 	public abstract void setupSimulations();
 	
+	//Set up reaction products for graph showing
+	public abstract void setupReactionProducts(int sim,int set);
+	
 	//Used to check in every frame if there is new molecule spawned and old ones need to be killed
 	public abstract void updateMolecules(int sim, int set);
 	
@@ -649,7 +652,7 @@ public abstract class UnitBase {
 	 * 
 	 * INPUTS : pos(Vec2), topLeft(Vec2), botRight(Vec2) OUTPUTS: boolean
 	 *******************************************************************/
-	private boolean areaBodyCheck(Vec2 pos, Vec2 topLeft, Vec2 botRight) {
+	public boolean areaBodyCheck(Vec2 pos, Vec2 topLeft, Vec2 botRight) {
 		boolean res = false;
 		if (pos.x > topLeft.x && pos.x < botRight.x && pos.y > topLeft.y
 				&& pos.y < botRight.y) {
@@ -717,10 +720,7 @@ public abstract class UnitBase {
 	 * INPUTS : c ( Contact)
 	 * OUTPUTS: None
 	 *******************************************************************/
-	public void beginReaction(Contact c)
-	{
-		
-	}
+	public abstract void beginReaction(Contact c);
 	
 	
 	/******************************************************************
