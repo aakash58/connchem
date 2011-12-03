@@ -61,18 +61,22 @@ units:
       compounds:
       - compound: "Hydrogen Peroxide"
         qty: 20
+        cap: 40
     - set: 3
       compounds:
       - compound: "Pentane"
         qty: 10
+        cap: 30
     - set: 4
       compounds:
       - compound: "Mercury"
         qty: 20
+        cap: 50
     - set: 5
       compounds:
       - compound: "Bromine"
         qty: 15
+        cap: 50
     - set: 6
       #temperature: 1500
       #minTemperature: 1000
@@ -80,6 +84,7 @@ units:
       compounds:
       - compound: "Phosphorus"
         qty: 15
+        cap: 50
   - sim: 3
     name: "Physical Changes"
     sets:
@@ -87,6 +92,7 @@ units:
       compounds:
       - compound: "Water"
         qty: 40
+        cap: 90
   - sim: 4
     name: "Chemical Changes"
     sets:
@@ -105,8 +111,10 @@ units:
       compounds:
       - compound: "Water"
         qty: 30
+        cap: 50
       - compound: "Bromine"
         qty: 15
+        cap: 50
     - set: 2
       compounds:
       - compound: "Water"
@@ -118,7 +126,7 @@ units:
       - compound: "Water"
         qty: 20
       - compound: "Hydrogen Peroxide"
-        qty: 20
+        qty: 15
     - set: 4
       compounds:
       - compound: "Water"
@@ -130,15 +138,15 @@ units:
       - compound: "Water"
         qty: 20
       - compound: "Bromine"
-        qty: 20
+        qty: 15
       - compound: "Hydrogen Peroxide"
-        qty: 20
+        qty: 15
     - set: 6
       compounds:
       - compound: "Water"
         qty: 30
       - compound: "Bromine"
-        qty: 10
+        qty: 9
       - compound: "Pentane"
         qty: 8
 - unit: 2
@@ -225,60 +233,60 @@ units:
     sets:
     - set: 1
       compounds: 
-      - compound: "Water"
-        qty: 0
-        cap: 50
       - compound: "Sodium Chloride"
         qty: 0
         cap: 10
-    - set: 2
-      compounds: 
       - compound: "Water"
         qty: 0
         cap: 50
+    - set: 2
+      compounds: 
       - compound: "Silicon Dioxide"
         qty: 0
         cap: 20   
-    - set: 3
-      compounds: 
       - compound: "Water"
         qty: 0
         cap: 50
+    - set: 3
+      compounds: 
       - compound: "Glycerol"
         qty: 0
         cap: 8
-    - set: 4
-      compounds: 
-      - compound: "Water"
-        qty: 0
-        cap: 95
-      - compound: "Calcium-Chloride"
-        qty: 0
-        cap: 8
-    - set: 5
-      compounds: 
-      - compound: "Water"
-        qty: 0
-        cap: 45
-      - compound: "Acetic Acid"
-        qty: 0
-        cap: 13  
-    - set: 6
-      compounds: 
-      - compound: "Water"
-        qty: 0
-        cap: 40
-      - compound: "Pentane"
-        qty: 0
-        cap: 8
-    - set: 7
-      compounds: 
       - compound: "Water"
         qty: 0
         cap: 50
+    - set: 4
+      compounds: 
+      - compound: "Calcium-Chloride"
+        qty: 0
+        cap: 8
+      - compound: "Water"
+        qty: 0
+        cap: 95
+    - set: 5
+      compounds: 
+      - compound: "Acetic Acid"
+        qty: 0
+        cap: 13 
+      - compound: "Water"
+        qty: 0
+        cap: 45 
+    - set: 6
+      compounds: 
+      - compound: "Pentane"
+        qty: 0
+        cap: 8
+      - compound: "Water"
+        qty: 0
+        cap: 40
+    - set: 7
+      compounds: 
       - compound: "Sodium Bicarbonate"
         qty: 0
         cap: 15
+      - compound: "Water"
+        qty: 0
+        cap: 50
   - sim: 4
     name: "Saturation"
     sets:
@@ -429,29 +437,37 @@ units:
         qty: 10
         cap: 50
     - set: 2
-      compounds:
+      compounds: 
+      - compound: "Chlorine"
+        qty: 10
+        cap: 50
       - compound: "Oxygen"
         qty: 10
         cap: 15
-    - set: 3
-      compounds:
-      - compound: "Oxygen"
+  - sim: 2
+    name: "KMT"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Bromine"
         qty: 10
-        cap: 15
-    - set: 4
-      compounds:
+        cap: 50
+  - sim: 3
+    name: "Undefined"
+    sets:
+    - set: 1
+      compounds: 
       - compound: "Helium"
         qty: 10
-        cap: 15
-      - compound: "Oxygen"
+        cap: 50
+  - sim: 4
+    name: "Boyles Law"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Helium"
         qty: 10
-        cap: 15
-      - compound: "Carbon Dioxide"
-        qty: 10
-        cap: 15
-      - compound: "Water"
-        qty: 10
-        cap: 15
+        cap: 50
 - unit: 5
   name: "Thermodynamics"
   sims:

@@ -684,7 +684,7 @@ public class Unit3 extends UnitBase {
 			for (int i = 0; i < p5Canvas.products.size(); i++) {
 				Vec2 loc = m1.getPosition();
 				float x1 = PBox2D.scalarWorldToPixels(loc.x);
-				float y1 = p5Canvas.h * 0.77f
+				float y1 = p5Canvas.h * p5Canvas.canvasScale
 						- PBox2D.scalarWorldToPixels(loc.y);
 				Vec2 newVec = new Vec2(x1, y1);
 				mNew = new Molecule(newVec.x, newVec.y,
@@ -774,7 +774,7 @@ public class Unit3 extends UnitBase {
 				// Create a new Sodium-Chloride
 				Vec2 loc = secondSodium.getPosition();
 				float x1 = PBox2D.scalarWorldToPixels(loc.x);
-				float y1 = p5Canvas.h * 0.77f
+				float y1 = p5Canvas.h * p5Canvas.canvasScale
 						- PBox2D.scalarWorldToPixels(loc.y);
 				Vec2 newVec = new Vec2(x1, y1);
 				mNew2 = new Molecule(newVec.x, newVec.y, mNew.getName(), box2d,
@@ -855,7 +855,7 @@ public class Unit3 extends UnitBase {
 								+ mOld[0].getMaxSize() / 2 - offsetX;
 					else
 						x1 = PBox2D.scalarWorldToPixels(loc.x) - offsetX;
-					float y1 = p5Canvas.h * 0.77f
+					float y1 = p5Canvas.h * p5Canvas.canvasScale
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
 					String compoundName = new String(p5Canvas.products.get(i));
@@ -918,7 +918,7 @@ public class Unit3 extends UnitBase {
 					else
 						loc = silverIon.getPosition();
 					float x1 = PBox2D.scalarWorldToPixels(loc.x);
-					float y1 = p5Canvas.h * 0.77f
+					float y1 = p5Canvas.h * p5Canvas.canvasScale
 							- PBox2D.scalarWorldToPixels(loc.y + silverSize*silverIndex);
 					 newVec = new Vec2(x1, y1);
 					if (p5Canvas.products.get(i).equals("Silver")) {
@@ -1094,7 +1094,7 @@ public class Unit3 extends UnitBase {
 								+ mOld[0].getMaxSize() / 2 - offsetX;
 					else
 						x1 = PBox2D.scalarWorldToPixels(loc.x) - offsetX;
-					float y1 = p5Canvas.h * 0.77f
+					float y1 = p5Canvas.h * p5Canvas.canvasScale
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
 					String compoundName = new String(p5Canvas.products.get(i));
@@ -1148,7 +1148,7 @@ public class Unit3 extends UnitBase {
 					else
 						loc = copperIon.getPosition();
 					float x1 = PBox2D.scalarWorldToPixels(loc.x);
-					float y1 = p5Canvas.h * 0.77f
+					float y1 = p5Canvas.h * p5Canvas.canvasScale
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
 					if (p5Canvas.products.get(i).equals("Copper")) {
@@ -1278,7 +1278,7 @@ public class Unit3 extends UnitBase {
 						if(elementIndex !=-1 )
 							loc.set(dissolveCompound.getElementLocation(elementIndex));
 						x1 = PBox2D.scalarWorldToPixels(loc.x);
-						float y1 = p5Canvas.h * 0.77f
+						float y1 = p5Canvas.h * p5Canvas.canvasScale
 								- PBox2D.scalarWorldToPixels(loc.y);
 						Vec2 newVec = new Vec2(x1, y1);
 						mNew = new Molecule(newVec.x, newVec.y,
@@ -1330,7 +1330,7 @@ public class Unit3 extends UnitBase {
 					for (int i = 0; i < p5Canvas.products.size(); i++) {
 						loc = silverIon.getPosition();
 						float x1 = PBox2D.scalarWorldToPixels(loc.x);
-						float y1 = p5Canvas.h * 0.77f
+						float y1 = p5Canvas.h * p5Canvas.canvasScale
 								- PBox2D.scalarWorldToPixels(loc.y);
 						Vec2 newVec = new Vec2(x1, y1);
 
@@ -1448,7 +1448,7 @@ public class Unit3 extends UnitBase {
 						}
 					} else
 						x1 = PBox2D.scalarWorldToPixels(loc.x); // H2S
-					float y1 = p5Canvas.h * 0.77f
+					float y1 = p5Canvas.h * p5Canvas.canvasScale
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
 					String compoundName = new String(p5Canvas.products.get(i)); //Hydrogen-Sulfide
@@ -1564,7 +1564,7 @@ public class Unit3 extends UnitBase {
 							loc.set(dissolveCompound.loc[elementIndex]);
 						}
 						x1 = PBox2D.scalarWorldToPixels(loc.x);
-						float y1 = p5Canvas.h * 0.77f
+						float y1 = p5Canvas.h * p5Canvas.canvasScale
 								- PBox2D.scalarWorldToPixels(loc.y);
 						Vec2 newVec = new Vec2(x1, y1);
 						String compoundName = new String(p5Canvas.products.get(i));
@@ -1615,7 +1615,7 @@ public class Unit3 extends UnitBase {
 					for (int i = 0; i < p5Canvas.products.size(); i++) {
 						loc = ion1.getPosition();
 						float x1 = PBox2D.scalarWorldToPixels(loc.x);
-						float y1 = p5Canvas.h * 0.77f
+						float y1 = p5Canvas.h * p5Canvas.canvasScale
 								- PBox2D.scalarWorldToPixels(loc.y);
 						Vec2 newVec = new Vec2(x1, y1);
 						String compoundName = new String(p5Canvas.products.get(i));
@@ -1803,7 +1803,7 @@ public class Unit3 extends UnitBase {
 
 	/******************************************************************
 	 * FUNCTION : getReactionProducts DESCRIPTION : Reture objects based on
-	 * input name Called by beginContact
+	 * input name Called by beginReaction
 	 * 
 	 * INPUTS : reactants (Array<String>) OUTPUTS: None
 	 *******************************************************************/

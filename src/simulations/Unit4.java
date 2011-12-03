@@ -20,12 +20,31 @@ public class Unit4 extends UnitBase {
 		simulations = new Simulation[SIMULATION_NUMBER];
 
 		simulations[0] = new Simulation(unitNum, 1, 1);
-		String[] elements0 = { "Helium"};
+		String[] elements0 = {"Helium"};
 		SpawnStyle[] spawnStyles0 = { SpawnStyle.Gas };
 		simulations[0].setupElements(elements0, spawnStyles0);
-
-
-
+		
+		simulations[1] = new Simulation(unitNum, 1, 2);
+		String[] elements1 = { "Chlorine","Oxygen"};
+		SpawnStyle[] spawnStyles1 = { SpawnStyle.Gas,SpawnStyle.Gas };
+		simulations[1].setupElements(elements1, spawnStyles1);
+		
+		simulations[2] = new Simulation(unitNum, 2, 1);
+		String[] elements2 = {"Bromine"};
+		SpawnStyle[] spawnStyles2 = { SpawnStyle.Gas };
+		simulations[2].setupElements(elements2, spawnStyles2);
+		
+		simulations[3] = new Simulation(unitNum, 3, 1);
+		String[] elements3 = {"Helium"};
+		SpawnStyle[] spawnStyles3 = { SpawnStyle.Gas };
+		simulations[3].setupElements(elements3, spawnStyles3);
+		
+		simulations[4] = new Simulation(unitNum, 4, 1);
+		String[] elements4 = {"Helium"};
+		SpawnStyle[] spawnStyles4 = { SpawnStyle.Gas };
+		simulations[4].setupElements(elements4, spawnStyles4);
+		
+		
 	}
 
 	@Override
@@ -40,7 +59,7 @@ public class Unit4 extends UnitBase {
 		// TODO Auto-generated method stub
 		setupSimulations();
 		
-		box2d.setGravity(0f, 0f);
+		//box2d.setGravity(0f, 0f);
 	}
 
 	@Override

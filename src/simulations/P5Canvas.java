@@ -7,6 +7,9 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 //import java.util.Timer;
 
@@ -14,6 +17,7 @@ import processing.core.PApplet;
 import simulations.models.Boundary;
 import simulations.models.Compound;
 import simulations.models.Molecule;
+import simulations.models.Simulation;
 import simulations.models.Water;
 
 import main.Canvas;
@@ -62,6 +66,7 @@ public class P5Canvas extends PApplet{
 	public int creationCount = 0;
 	//Properties of container
 	public float temp =25.f;
+	public float heat = 0;
 	public float pressure = 0.0f;
 	public float mol = 0.0f;
 	public final float R = 8.314f;  //8.314 J*K-1*mol -1
@@ -73,14 +78,20 @@ public class P5Canvas extends PApplet{
 	//Default value of Pressure
 	public float pressureRate = 1.f;
 	//Default value of scale slider
-	public float scale = 0.77f;
-	//Default value of volume slider
-	public int defaultVolume =50;
-	public int currentVolume =defaultVolume;
+	public float canvasScale = 0.77f;
+
+	public int currentVolume ;
 	public int multiplierVolume =10; // Multiplier from pixels to ml
 	public float maxH=1100;//minimum height of container
 	
 	public int heatRGB = 0;
+	
+
+	public Boundary[] boundaries = new Boundary[4];
+	/* LeftBoundary   0
+	*  RightBoundary  1
+	*  TopBoundary    2
+	*  BottomBoundary 3 */
 	
 	//public static long count = 0;
 	public long curTime = 0;
@@ -105,7 +116,9 @@ public class P5Canvas extends PApplet{
 	public  YAMLinterface yaml = new YAMLinterface();
 	
 	public float FRAME_RATE =30;
-	public float totalKineticEnergy = 0;
+	public float averageKineticEnergy = 0;
+	public Queue<Float> energyQueue = new LinkedList<Float>(); 
+	public int energyQueueSize = 30;
 	public ArrayList<UnitBase> unitList = new ArrayList<UnitBase>();
 	
 
@@ -132,7 +145,7 @@ public class P5Canvas extends PApplet{
 		//setBoundary(0,0,d.width,d.height);
 		width = d.width;
 		height = d.height;
-		maxH = (volume + defaultVolume)*multiplierVolume;
+		maxH = (volume + getMain().defaultVolume)*multiplierVolume;
 		
 		isEnable = tmp;
 	}
@@ -146,9 +159,9 @@ public class P5Canvas extends PApplet{
 		box2d.setGravity(0f,-10f);
 		
 		// Turn on collision detection
-		box2d.listenForCollisions();
-		defaultW = 560/0.77f;
-		defaultH = 635/0.77f;
+		//box2d.listenForCollisions();
+		defaultW = 560/canvasScale;
+		defaultH = 635/canvasScale;
 		setBoundary(0,0,defaultW,defaultH);			
 		
 	}
@@ -170,7 +183,7 @@ public class P5Canvas extends PApplet{
 		if(main.volumeSlider!= null)
 			sliderValue = getMain().volumeSlider.getValue();
 		else
-			sliderValue = this.defaultVolume;
+			sliderValue = getMain().defaultVolume;
 		Boundary lBound = new Boundary(0,x 	,  y , bW, 2*h , sliderValue, box2d, this);
 		Boundary rBound = new Boundary(1,x+w , y , bW, 2*h, sliderValue, box2d, this);
 		Boundary tBound = new Boundary(2,x+w/2, y,     w +bW , bW, sliderValue, box2d, this);
@@ -200,7 +213,7 @@ public class P5Canvas extends PApplet{
 		updateProperties(); //Update temperature and pressure etc
 		
 		/*   Change Scale   */
-		this.scale(scale);
+		this.scale(canvasScale*(getMain().currentZoom/100));
 		/*   Change Time Speed  */
  		if (isEnable && !isDrag){
 			if (speedRate<=1){
@@ -219,7 +232,7 @@ public class P5Canvas extends PApplet{
 		if (isHidingEnabled && isHidden){
 			this.stroke(Color.WHITE.getRGB());
 			this.noFill();
-			this.rect(xStart/scale,yStart/scale, (mouseX/scale-xStart/scale), (mouseY/scale-yStart/scale));	
+			this.rect(xStart/canvasScale,yStart/canvasScale, (mouseX/canvasScale-xStart/canvasScale), (mouseY/canvasScale-yStart/canvasScale));	
 		}
 		
 		//   Draw boundary   
@@ -232,8 +245,8 @@ public class P5Canvas extends PApplet{
 			Molecule m = molecules.get(i);
 			if (isHidingEnabled && isHidden){
 				Vec2 p = box2d.coordWorldToPixels(m.getPosition());
-				if (xStart/scale <p.x && p.x< mouseX/scale &&
-						yStart/scale <p.y && p.y< mouseY/scale )
+				if (xStart/canvasScale <p.x && p.x< mouseX/canvasScale &&
+						yStart/canvasScale <p.y && p.y< mouseY/canvasScale )
 					m.isHidden =true;
 				else
 					m.isHidden =false;
@@ -244,7 +257,7 @@ public class P5Canvas extends PApplet{
 		//Update anchors position
 		getUnit3().resetAnchors(xDrag,yDrag);
 		
-		computeDissolved();
+		//computeDissolved();
 		
 		
 	}
@@ -257,24 +270,72 @@ public class P5Canvas extends PApplet{
 	*******************************************************************/
 	private void updateProperties() {
 		
+		if(this.isEnable==false)
+			return;
 		//TODO: Calculate temp by checking kinematic energy of all the molecules
 		//Equation: 1/2 mv2 = 3/2 KT , K= 1.38 * 10-23 JK-1;
 		//Note: 1 mole = 6.022* 10 23;
 		float K = 1.38f;
 		float mole = 6.022f;
-		totalKineticEnergy = 0;
+		float totalKineticEnergy =0;
+		float tempAvgKineticEnergy = 0;
 		for( int i = 0;i<State.molecules.size();i++)
 		{
 			totalKineticEnergy += State.molecules.get(i).getKineticEnergy();
 		}
-		//temp = (float) ((totalKineticEnergy *2) /(3*K*mole) -273.15);
-		//System.out.println("totalKineticEnergy is "+totalKineticEnergy);
+		tempAvgKineticEnergy = totalKineticEnergy/State.molecules.size();
+		//Push new temp Average KE into energy queue
+		energyQueue.offer(tempAvgKineticEnergy);
+		//If energy queue overflows, remove head one
+		if(energyQueue.size()>energyQueueSize)
+			energyQueue.poll();
+		//If energy queue is full, we calculate average value of all KEs that in queue
+		if(energyQueue.size()>=energyQueueSize)
+		{
+			averageKineticEnergy = 0;
+			Iterator<Float> f = energyQueue.iterator();
+			while(f.hasNext())
+			{
+				averageKineticEnergy+= f.next();
+			}
+			averageKineticEnergy = averageKineticEnergy/energyQueue.size();
+			temp = (float) ((averageKineticEnergy *2) /(3*K*mole) )*100;
+			//System.out.println("averageKineticEnergy is "+averageKineticEnergy+",temp is "+temp);
+			energyQueue.clear();
+		}
+		
+		//Update molecule status base on new temp
+		for (int i = 0; i < molecules.size(); i++) {
+			Molecule m = molecules.get(i);
+			m.setPropertyByHeat(false); 
+		}
+		//Calculate saturation based on new temp
+		computeSaturation();
+		getMain().getCanvas().satCount=0;
 		
 		//Known: V-currentVolume n-mol T-temp R
 		mol = State.molecules.size();
 		
 		//Unknown: Pressure
 		pressure = (mol* R* temp)/currentVolume;
+		
+		//Update lblTempValue
+		DecimalFormat myFormatter = new DecimalFormat("###.##");
+	      String output = null;
+		if(getMain().lblVolumeValue.isShowing())
+		{
+			getMain().lblVolumeValue.setText(Float.toString(currentVolume)+" mL");
+		}
+		if(getMain().lblTempValue.isShowing())
+		{
+			output = myFormatter.format(temp);
+			getMain().lblTempValue.setText(output+" \u2103");
+		}
+		if(getMain().lblKEValue.isShowing())
+		{
+			output = myFormatter.format(averageKineticEnergy);
+			getMain().lblKEValue.setText(output+" J");
+		}
 		
 		//Update bars
 		if(getMain().barPressure!=null)
@@ -316,7 +377,7 @@ public class P5Canvas extends PApplet{
 	{
 		unitList.get(main.selectedUnit-1).applyForce(main.selectedSim, main.selectedSet);
 	}
-	
+	/*
 	public void computeEnergy(){
 		
 		for (int i=0; i< Compound.names.size();i++){
@@ -354,19 +415,9 @@ public class P5Canvas extends PApplet{
 		}
 	
 	}
+	*/
 	
-	public static void checkSpeed(int index, Molecule m){
-		float expectedAverage = 100f;
-		Vec2 vec = m.body.getLinearVelocity();
-		float v = 0f;
-		if (vec!=null){
-			v = vec.x*vec.x + vec.y*vec.y;
-		}
-		if (v>expectedAverage*2)
-			m.body.setLinearVelocity(vec.mul(0.5f) );
-		else if (v>expectedAverage)
-			m.body.setLinearVelocity(vec.mul(0.9f) );
-	}	
+	
 	
 
 		
@@ -576,11 +627,28 @@ public class P5Canvas extends PApplet{
 				getMain().addBtns.get(compoundName).setEnabled(false);
 			}
 			computeOutput(compoundName,count);
+			AddEnergyToMolecule(count);
 				
 		}
 		
 		isEnable = tmp;
 		return res;
+	}
+	
+	/******************************************************************
+	* FUNCTION :     addMolecule
+	* DESCRIPTION :  Add current average Kinetic Energy to newly added molecule
+	*
+	* INPUTS :       count(int)
+	* OUTPUTS:       None
+	*******************************************************************/
+	public void AddEnergyToMolecule(int count)
+	{
+		int moleNum = State.molecules.size();
+		for(int i =0;i<count;i++)
+		{
+			State.molecules.get(moleNum-1-i).setKineticEnergy(averageKineticEnergy);
+		}
 	}
 	
 
@@ -623,6 +691,7 @@ public class P5Canvas extends PApplet{
 	public void reset()
 	{
 		isEnable =false;
+		//currentVolume = getMain().defaultVolume;
 		//Reset boundaries
 		setBoundary(0,0,defaultW,defaultH);
 		
@@ -634,16 +703,17 @@ public class P5Canvas extends PApplet{
 		//Reset Gravity
 		box2d.setGravity(0f,-10f);
 
+		//Reset function set intial temperature of one simulation
 		unitList.get(main.selectedUnit-1).reset();
 	}
-	
+	/*
 	//Get current number of a certain molecule
 	public int getMoleculesNum(String compoundName)
 	{
 		int index = Compound.names.indexOf(compoundName);
 		int num= Compound.getMoleculeNum(index);	
 		return num;
-	}
+	}*/
 	//Get max allowed number of molecules
 	public int getMoleculesCap(String compoundName)
 	{
@@ -684,7 +754,7 @@ public class P5Canvas extends PApplet{
 		isEnable = tmp;
 	}
 	
-	//Set Speed of Molecules; values are from 0 to 100; 100 is default value 
+	//Set Speed of Simulation; values are from 0 to 100; 100 is default value 
 	public void setSpeed(float speed) {
 		speedRate = speed;
 	}
@@ -698,28 +768,24 @@ public class P5Canvas extends PApplet{
 	
 	//Set Heat of Molecules; values are from 0 to 100; 50 is default value 
 	public void setHeat(int value) {
-		temp = value;
-		for (int i = 0; i < molecules.size(); i++) {
-			Molecule m = molecules.get(i);
-			m.setPropertyByHeat(false); 
-		}
-		double v = (double) (value-main.heatMin)/200;
-		v=v+0.3;
-		if (v>1) v=1;
+
+		//Change bottom boundary color based on temp change
+		double v = (double) (value-main.heatMin)/(main.heatMax- main.heatMin);
 		Color color = ColorScales.getColor(1-v, "redblue", 1f);
 		heatRGB = color.getRGB();
 		
-		computeSaturation();
-		getMain().getCanvas().satCount=0;
+		//Record current heat.
+		heat = value;
+
 	}
-	
-	//Set Scale of Molecules; values are from 0 to 100; 50 is default value 
-	public void setScale(int value, int defaultScale) {
+	/*
+	//Set Scale of World; values are from 0 to 100; 50 is default value 
+	public void setScale(int value) {
 		boolean tmp = isEnable;
 		isEnable = false;
-		scale = (float) value*0.77f/defaultScale;
+		scale = (float) value;
 		isEnable = tmp;
-	}
+	}*/
 	
 	//Set Volume; values are from 0 to 100; 50 is default value 
 	public void setVolume(int value) {
@@ -755,9 +821,51 @@ public class P5Canvas extends PApplet{
 	* INPUTS :       c(Contact)
 	* OUTPUTS:       None
 	*******************************************************************/
-	public void beginContact(Contact c) {		
+	public void beginContact(Contact c) {	
+		
+		//Check if molecule contacts with heater
+		heatMolecule(c);
+		
+		//Specified beginReaction function for each unit
 		unitList.get(main.selectedUnit-1).beginReaction(c);
 
+	}
+	public void heatMolecule(Contact c)
+	{
+		Molecule mole = null;
+		Boundary boundary = null;
+		//If heater is not on, return
+		if(heat == getMain().defaultHeat)
+			return;
+		// Get our objects that reference these bodies
+		Object o1 = c.m_fixtureA.m_body.getUserData();
+		Object o2 = c.m_fixtureB.m_body.getUserData();
+		if (o1 == null || o2 == null)
+			return;
+
+		String c1 = o1.getClass().getName();
+		String c2 = o2.getClass().getName();
+		// Make sure reaction only takes place between molecules and boundaries
+		if (c1.equals("simulations.models.Molecule") && o2 == boundaries[3]) {
+			mole = (Molecule) o1;
+			boundary = (Boundary) o2;
+		}
+		else if (o1 == boundaries[3] && c2.equals("simulations.models.Molecule"))
+		{
+			mole = (Molecule) o2;
+			boundary = (Boundary)o1;
+		}
+		if( mole ==null ||boundary ==null)
+			return;
+		//System.out.println("Molecule touched bottom boundary");
+		//Change molecule speed base on heat
+		float scale = 1;
+		scale = (heat- main.heatMin)/ ((main.heatMax-main.heatMin)/2);
+		Vec2 velocity = mole.getLinearVelocity();
+		velocity = velocity.mul(scale);
+		mole.setLinearVelocity(velocity);
+		
+		
 	}
 	
 	//Set up reaction products while initializing for graph rendering 
@@ -772,19 +880,31 @@ public class P5Canvas extends PApplet{
 		
 	public void mouseMoved() {	
 	
+		/*//Deprecated: mouse resize top boundary
 		//Check the top boundary
 		int id = boundaries[2].isIn(mouseX, mouseY);
 		if (id==2)
 			this.cursor(Cursor.N_RESIZE_CURSOR);
 		else
 			this.cursor(Cursor.DEFAULT_CURSOR);
+			*/
 	}
 		
 	public void mousePressed() {
 		isHidden = true;
 		xStart = mouseX;
 		yStart = mouseY;
-		draggingBoundary = boundaries[2].isIn(mouseX, mouseY);
+		//draggingBoundary = boundaries[2].isIn(mouseX, mouseY);
+		//Check if molecules are selected by mouse
+		for(int i = 0 ; i<State.molecules.size();i++)
+		{
+			if(State.molecules.get(i).contains(mouseX/canvasScale,mouseY/canvasScale))
+			{
+				//TODO: bind molecule with mouse
+				System.out.println("Molecule selected:"+State.molecules.get(i).getName());
+				break;
+			}
+		}
 	}
 	
 	public void mouseReleased() {
@@ -792,7 +912,7 @@ public class P5Canvas extends PApplet{
 		xDrag =0;
 		yDrag =0;
 		isDrag = false;
-		draggingBoundary =-1;
+		//draggingBoundary =-1;
 		
 		//Check the top boundary
 	/*	int id = boundaries[2].isIn(mouseX, mouseY);
@@ -810,14 +930,14 @@ public class P5Canvas extends PApplet{
 			isDrag = true;
 			int xTmp = xDrag;
 			int yTmp = yDrag;
-			xDrag = (int) ((mouseX-xStart)/scale);
-			yDrag = (int) ((mouseY-yStart)/scale);
+			xDrag = (int) ((mouseX-xStart)/canvasScale);
+			yDrag = (int) ((mouseY-yStart)/canvasScale);
 			
 			//Dragging the top boundary
-			if (draggingBoundary!=2){
+			//if (draggingBoundary!=2)
+			{
 				setBoundary(x+xDrag -xTmp,y+yDrag - yTmp,w,h);
 				//TODO: reset anchors
-				
 			}
 		}
 	}
