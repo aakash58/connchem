@@ -2,6 +2,7 @@ package simulations.models;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Random;
 
 import processing.core.*;
 import simulations.P5Canvas;
@@ -296,11 +297,12 @@ public class Molecule {
 			fric = 0.6f;
 		else
 			fric = 0;
-
+		/*
 		if (name.equals("Water") && temp < 40)
 			scale = 1 + (40 - temp) / 200f;
 		else
 			scale = 1f;
+			*/
 
 		if((p5Canvas.getMain().selectedUnit==1||p5Canvas.getMain().selectedUnit==2))
 		{
@@ -536,28 +538,28 @@ public class Molecule {
 		/************************** Boundary Check **************************/
 		/* If molecules go out of boundary, reset their position */
 		/* Top boundary check, top boundary has max y value */
-		if (body.getPosition().y + PBox2D.scalarPixelsToWorld(this.minSize / 2) > boundaries[2].body
+		if (body.getPosition().y + PBox2D.scalarPixelsToWorld(this.minSize / 2) > p5Canvas.boundaries[2].body
 				.getPosition().y) {
 			Vec2 v = new Vec2(body.getPosition().x,
-					boundaries[2].body.getPosition().y
+					p5Canvas.boundaries[2].body.getPosition().y
 							- PBox2D.scalarPixelsToWorld(getMaxSize() / 2));
 			if (body != null && v != null)
 				body.setTransform(v, body.getAngle());
 		}
 		/* Bottom boundary check, bot boundary has min y value */
 		else if (body.getPosition().y
-				- PBox2D.scalarPixelsToWorld(this.minSize / 2) < boundaries[3].body
+				- PBox2D.scalarPixelsToWorld(this.minSize / 2) < p5Canvas.boundaries[3].body
 					.getPosition().y) {
 			Vec2 v = new Vec2(body.getPosition().x,
-					boundaries[3].body.getPosition().y
+					p5Canvas.boundaries[3].body.getPosition().y
 							+ PBox2D.scalarPixelsToWorld(getMaxSize() / 2));
 			if (body != null && v != null)
 				body.setTransform(v, body.getAngle());
 		}
 		/* Left boundary check, left boundary has min x value */
-		if (body.getPosition().x - PBox2D.scalarPixelsToWorld(this.minSize / 2) < boundaries[0].body
+		if (body.getPosition().x - PBox2D.scalarPixelsToWorld(this.minSize / 2) < p5Canvas.boundaries[0].body
 				.getPosition().x) {
-			Vec2 v = new Vec2(boundaries[0].body.getPosition().x
+			Vec2 v = new Vec2(p5Canvas.boundaries[0].body.getPosition().x
 					+ PBox2D.scalarPixelsToWorld(getMaxSize() / 2),
 					body.getPosition().y);
 			if (body != null && v != null)
@@ -565,9 +567,9 @@ public class Molecule {
 		}
 		/* Right boundary check, right boundary has max x value */
 		else if (body.getPosition().x
-				+ PBox2D.scalarPixelsToWorld(this.minSize / 2) > boundaries[1].body
+				+ PBox2D.scalarPixelsToWorld(this.minSize / 2) > p5Canvas.boundaries[1].body
 					.getPosition().x) {
-			Vec2 v = new Vec2(boundaries[1].body.getPosition().x
+			Vec2 v = new Vec2(p5Canvas.boundaries[1].body.getPosition().x
 					- PBox2D.scalarPixelsToWorld(getMaxSize() / 2),
 					body.getPosition().y);
 			if (body != null && v != null)
@@ -852,9 +854,23 @@ public class Molecule {
 		scalar = (float) Math.sqrt(scalar);
 		return scalar;
 	}
+	public void setKineticEnergy(float ke)
+	{
+		Random rand = new Random(System.nanoTime());
+		double velocityScalar = Math.sqrt(ke*2/body.getMass());
+		double velocityX = (rand.nextFloat()-0.5)*velocityScalar;
+		double velocityY =0;
+		boolean direction = rand.nextBoolean();
+		double directionV = (direction?1:-1);
+		velocityY = directionV * Math.sqrt(velocityScalar*velocityScalar-velocityX*velocityX);
+		this.setLinearVelocity(new Vec2((float)velocityX,(float)velocityY));
+		
+	}
 	public float getKineticEnergy()
 	{
-		return (0.5f*mass*getLinearVelocityScalar()*getLinearVelocityScalar());
+		float eRotational= 0.5f* body.getInertia()*body.getAngularVelocity()* body.getAngularVelocity();
+		float eTransitional= 0.5f * body.getMass()* (Vec2.dot(body.getLinearVelocity(),body.getLinearVelocity()));
+		return eRotational+eTransitional;
 	}
 	public void setLinearVelocity(Vec2 vec)
 	{
@@ -862,24 +878,18 @@ public class Molecule {
 	}
 	public void setTableIndex(int index)
 	{
-		/*
-		if(tableIndex==-1)
-		{
-			this.tableIndex = index;
-			p5Canvas.getTableView().increaseRowCount(tableIndex, 1);
-		}
-		else
-		{
-			if(this.tableIndex==index)
-				return;
-			p5Canvas.getTableView().increaseRowCount(tableIndex, -1);
-			tableIndex = index;
-			p5Canvas.getTableView().increaseRowCount(tableIndex, 1);
-		}*/
 		this.tableIndex = index;
 	}
 	public int getTableIndex()
 	{
 		return this.tableIndex;
 	}
+	//Check if molecule contains mouse pressed point
+	  public boolean contains(float x, float y) {
+		  Vec2 p5CanvasPoint = new Vec2(x,y);
+		    Vec2 worldPoint = box2d.coordPixelsToWorld(p5CanvasPoint);
+		    Fixture s = body.getFixtureList();
+		    boolean inside = s.testPoint(worldPoint);
+		    return inside;
+		  }
 }

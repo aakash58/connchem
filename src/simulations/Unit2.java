@@ -1788,6 +1788,19 @@ public class Unit2 extends UnitBase{
 			
 		}
 		
+		public void checkSpeed(int index, Molecule m){
+			float expectedAverage = 100f;
+			Vec2 vec = m.body.getLinearVelocity();
+			float v = 0f;
+			if (vec!=null){
+				v = vec.x*vec.x + vec.y*vec.y;
+			}
+			if (v>expectedAverage*2)
+				m.body.setLinearVelocity(vec.mul(0.5f) );
+			else if (v>expectedAverage)
+				m.body.setLinearVelocity(vec.mul(0.9f) );
+		}
+		
 		//Apply force function for Unit
 		public void applyForce(int sim, int set)
 		{

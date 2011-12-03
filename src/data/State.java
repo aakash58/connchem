@@ -13,11 +13,7 @@ public class State {
 	public static ArrayList<Molecule> molecules = new ArrayList<Molecule>();
 	public static ArrayList<Anchor> anchors = new ArrayList<Anchor>();
 	// A list we'll use to track fixed objects
-	/* LeftBoundary   0
-	*  RightBoundary  1
-	*  TopBoundary    2
-	*  BottomBoundary 3 */
-	public static Boundary[] boundaries = new Boundary[4];
+
 	public static HashMap<String,Integer> moleculesAdded = new HashMap<String,Integer>();
 	
 	public State()

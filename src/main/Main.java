@@ -157,20 +157,29 @@ public class Main {
 	private JLabel canvasControlLabel_main_pressure;
 	public int defaultPressure = 1;
 
-	public int defaultZoom = 50;
-	public JSlider zoomSlider = new JSlider(0, 100, defaultZoom);
+	public int defaultZoom = 100;
+	public int currentZoom = defaultZoom;
+	public int zoomMin = 30;
+	public int zoomMax = 200;
+	public JSlider zoomSlider = new JSlider(zoomMin, zoomMax, defaultZoom);
 	public JLabel canvasControlLabel_main_scale;
 	public JLabel zoomLabel = null;
 	public int defaultSpeed = 100;
 	public JLabel speedLabel;
 	public JSlider speedSlider = new JSlider(0, 100, defaultSpeed);
 	public JLabel canvasControlLabel_main_speed;
-	public int defaultHeat = 25;
-	public int heatMin = -10;
-	public int heatMax = 200;
+	//Heat is input
+	public int defaultHeat = 50;
+	public int heatMin = 0;
+	public int heatMax = 100;
+	public int heatTickSpacing = 10;
 	public JLabel heatLabel ;
 	public JLabel canvasControlLabel_main_heat;
 	public JSlider heatSlider = new JSlider(heatMin, heatMax, defaultHeat);
+	//Temp is output. Used for simple bar
+	public int tempMin = -20;
+	public int tempMax = 200;
+	
 	public JLabel lblPlaceHolder;
 	
 	//play, reset button and their listeners
@@ -213,6 +222,7 @@ public class Main {
 	public JLabel lblPressureText;
 	public JLabel lblPressureValue;
 	public JLabel lblVolumeText;
+	public JLabel lblVolumeTitle;
 	public JLabel lblVolumeValue;
 	public JLabel lblEqualText;
 	public JLabel lblMolText;
@@ -220,7 +230,10 @@ public class Main {
 	public JLabel lblRText;
 	public JLabel lblRValue;
 	public JLabel lblTempText;
+	public JLabel lblTempTitle;
 	public JLabel lblTempValue;
+	public JLabel lblKETitle;
+	public JLabel lblKEValue;
 	public SimpleBar barPressure;
 	public SimpleBar barVolume;
 	public SimpleBar barMol;
@@ -780,13 +793,18 @@ public class Main {
 	//Reset Global Parameter
 	public void resetParameter()
 	{
-		heatMin = -10;
-		heatMax = 200;
+		tempMin = -20;
+		tempMax = 200;
 		//volumeSlider.setValue(defaultVolume);
 		pressureSlider.setValue(defaultPressure);
 		zoomSlider.setValue(defaultZoom);
 		speedSlider.setValue(defaultSpeed);
 		heatSlider.setValue(defaultHeat);
+		volumeSlider.setValue(defaultVolume);
+		getP5Canvas().setVolume(defaultVolume);
+		volumeLabel.setText(defaultVolume+ " mL");
+
+		
 		
 	}
 	
@@ -866,10 +884,12 @@ public class Main {
 		dashboard.removeAll();
 		//rightPanel.remove(outputControls);
 		
+		dashboard.setLayout(new MigLayout("", "[grow,right][100]",
+				"[][][][][][]"));
 		if (selectedUnit == 2) //Unit 2, showing solution information 
 		{
-			dashboard.setLayout(new MigLayout("", "[grow,right][100]",
-					"[][][][][][]"));
+//			dashboard.setLayout(new MigLayout("", "[grow,right][100]",
+//					"[][][][][][]"));
 			dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
 			dashboard.add(elapsedTime, "cell 1 0");
 			dashboard.add(cBoxConvert, "cell 0 1");
@@ -891,6 +911,26 @@ public class Main {
 		else if(selectedUnit == 4)//Gas law, showing PV=nRT
 		{
 			String alignStr = new String(", align center");
+			if( selectedSim==1)
+			{
+				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(elapsedTime, "cell 1 0");
+				dashboard.add(lblVolumeTitle,"cell 0 1");
+				dashboard.add(lblVolumeValue,"cell 1 1");
+			}
+			else if (selectedSim==2)
+			{
+				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(elapsedTime, "cell 1 0");
+				dashboard.add(lblVolumeTitle,"cell 0 1");
+				dashboard.add(lblVolumeValue,"cell 1 1");
+				dashboard.add(lblTempTitle,"cell 0 2");
+				dashboard.add(lblTempValue,"cell 1 2");
+				dashboard.add(lblKETitle,"cell 0 3");
+				dashboard.add(lblKEValue,"cell 1 3");
+			}
+			else
+			{
 			int barWidth = 40;
 			int barHeight = 120;
 			dashboard.setLayout(new MigLayout("","[45][45][25][45][45][45]","[][][grow][]"));
@@ -898,16 +938,16 @@ public class Main {
 			dashboard.add(elapsedTime, "cell 5 3 ");
 			
 			dashboard.add(lblPressureText, "cell 0 0"+alignStr);
-			dashboard.add(lblPressureValue ,"cell 0 1"+alignStr);
+			//dashboard.add(lblPressureValue ,"cell 0 1"+alignStr);
 			dashboard.add(lblVolumeText,"cell 1 0"+alignStr);
-			dashboard.add(lblVolumeValue,"cell 1 1"+alignStr);
+			//dashboard.add(lblVolumeValue,"cell 1 1"+alignStr);
 			dashboard.add(lblEqualText,"cell 2 0"+alignStr);
 			dashboard.add(lblMolText,"cell 3 0"+alignStr); 
-			dashboard.add(lblMolValue,"cell 3 1"+alignStr); 
+			//dashboard.add(lblMolValue,"cell 3 1"+alignStr); 
 			dashboard.add(lblRText,"cell 4 0"+alignStr); 
-			dashboard.add(lblRValue, "cell 4 1"+alignStr); 
+			//dashboard.add(lblRValue, "cell 4 1"+alignStr); 
 			dashboard.add(lblTempText,"cell 5 0"+alignStr); 
-			dashboard.add(lblTempValue,"cell 5 1"+alignStr);
+			//dashboard.add(lblTempValue,"cell 5 1"+alignStr);
 
 			barPressure.setPreferredSize(new Dimension(barWidth,barHeight));
 			barVolume.setPreferredSize(new Dimension(barWidth,barHeight));
@@ -917,10 +957,11 @@ public class Main {
 			dashboard.add(barVolume,"cell 1 2"+alignStr);
 			dashboard.add(barMol,"cell 3 2"+alignStr);
 			dashboard.add(barTemp,"cell 5 2"+alignStr);
+			}
 		}
 		else {
-			dashboard.setLayout(new MigLayout("", "[grow,right][100]",
-					"[][][][][][]"));
+//			dashboard.setLayout(new MigLayout("", "[grow,right][100]",
+//					"[][][][][][]"));
 			dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
 			dashboard.add(elapsedTime, "cell 1 0");
 			//dashboard.add(cBoxConvert, "cell 0 1");
@@ -988,20 +1029,20 @@ public class Main {
 				// Reset zoomSlider
 //				zoomSlider.requestFocus();
 				zoomSlider.setValue(defaultZoom);
-				zoomLabel.setText(defaultZoom * 2 + "%");
-				getP5Canvas().setScale(defaultZoom, defaultZoom);
+				zoomLabel.setText(defaultZoom  + "%");
 //				speedSlider.requestFocus();
 //				heatSlider.requestFocus();
-	
+				/*
 				float heatMin = getP5Canvas().yaml.getControlHeatSliderMin(
 						selectedUnit, selectedSim);
 				float heatMax = getP5Canvas().yaml.getControlHeatSliderMax(
 						selectedUnit, selectedSim);
 				float heatInit = getP5Canvas().yaml.getControlHeatSliderInit(
 						selectedUnit, selectedSim);
+						*/
 				heatSlider.setMaximum((int) heatMax);
 				heatSlider.setMinimum((int) heatMin);
-				heatSlider.setValue((int) heatInit);
+				heatSlider.setValue((int) defaultHeat);
 				if (this.selectedUnit == 3) {
 					heatSlider.setEnabled(false);
 					volumeSlider.setEnabled(false);
@@ -1169,8 +1210,9 @@ public class Main {
 
 		/**************************CENTER PANEL********************************/
 		centerPanel = new JPanel();
-		volumeLabel = new JLabel(getP5Canvas().currentVolume + "mL");
+		volumeLabel = new JLabel(defaultVolume + "mL");
 		volumeSlider = new JSlider(minVolume, maxVolume, defaultVolume);
+		/*
 		centerPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -1179,7 +1221,7 @@ public class Main {
 				getP5Canvas().updateSize(getP5Canvas().getSize(), volume);
 				volumeLabel.setText(volume + " mL");
 			}
-		});
+		});*/
 		mainFrame.getContentPane().add(centerPanel, "cell 1 2,grow");
 		// leftPanel Width=282 rightPanel Width =255
 		centerPanel.setLayout(new MigLayout("insets 0, gap 2",
@@ -1200,11 +1242,9 @@ public class Main {
 				if (!isVolumeblocked) {
 					int value = ((JSlider) e.getSource()).getValue();
 					getP5Canvas().setVolume(value);
-					int volume = (int) getP5Canvas().getSize().height
-							/ getP5Canvas().multiplierVolume;
-					volumeLabel
-							.setText((volume + getP5Canvas().currentVolume - getP5Canvas().defaultVolume)
-									+ " mL");
+//					int volume = (int) getP5Canvas().getSize().height
+//							/ getP5Canvas().multiplierVolume;
+					volumeLabel.setText(value+ " mL");
 				}
 			}
 		});
@@ -1232,15 +1272,14 @@ public class Main {
 //		clPanel.add(l2, "cell 0 3,alignx center");
 
 		// Set up Zoom Slider
-		zoomLabel = new JLabel(defaultZoom * 2 + "%");
+		zoomLabel = new JLabel(defaultZoom + "%");
 		
-		zoomSlider = new JSlider(10, 100, defaultZoom);
 		zoomSlider.setOrientation(SwingConstants.VERTICAL);
 		zoomSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue();
-				zoomLabel.setText(value * 2 + "%");
-				getP5Canvas().setScale(value, defaultZoom);
+				zoomLabel.setText(value  + "%");
+				currentZoom = value;
 
 			}
 		});
@@ -1274,10 +1313,13 @@ public class Main {
 		//crPanel.add(new JLabel("    "), "cell 0 3,alignx center");
 
 		// Set up Heat Slider
-		heatLabel = new JLabel(defaultHeat + "\u2103");
+		heatLabel = new JLabel(defaultHeat + " J");
 		canvasControlLabel_main_heat = new JLabel("Heat");
 		getP5Canvas().setHeat(defaultHeat);
 		heatSlider.setOrientation(SwingConstants.VERTICAL);
+		heatSlider.setMinorTickSpacing(heatTickSpacing);
+		heatSlider.setSnapToTicks(true);
+		heatSlider.setPaintTicks(true);
 		heatSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue();
@@ -1382,18 +1424,22 @@ public class Main {
 		lblPressureText = new JLabel ("P (atm)");
 		lblPressureValue = new JLabel("");
 		lblVolumeText = new JLabel("V (L)");
-		lblVolumeValue = new JLabel ("");
+		lblVolumeTitle = new JLabel("Volume of gas:");
+		lblVolumeValue = new JLabel (" mL");
 		lblEqualText = new JLabel("=");
 		lblMolText = new JLabel ("n (mol)");
 		lblMolValue = new JLabel ("");
 		lblRText = new JLabel ("R");
 		lblRValue = new JLabel ();
 		lblTempText = new JLabel("T (K)");
-		lblTempValue = new JLabel ("");
+		lblTempTitle = new JLabel ("Temperature:");
+		lblTempValue = new JLabel (" \u2103");
+		lblKETitle = new JLabel("Kinetic Energy:");
+		lblKEValue = new JLabel(" J");
 		barPressure = new SimpleBar(0,100,30);
 		barVolume = new SimpleBar(minVolume,maxVolume,40);
 		barMol = new SimpleBar(0,100,60);
-		barTemp  = new SimpleBar(heatMin,heatMax,defaultHeat);
+		barTemp  = new SimpleBar(tempMin,tempMax,defaultHeat);
 
 		//Set up welcome menu
 		if (isWelcomed) {

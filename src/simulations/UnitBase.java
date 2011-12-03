@@ -132,72 +132,90 @@ public abstract class UnitBase {
 	 *******************************************************************/
 	public boolean addWaterMolecules(boolean isAppEnable, String compoundName,
 			int count) {
-		boolean res = false;
-		int creationCount = 0;
+		boolean res = true;
 
-		if (isAppEnable) // if Applet is enable
-			creationCount = 0;
-		else
-			creationCount++;
-		// variables are used to distribute molecules
-		int mod = creationCount % 4; // When the system is paused; Otherwise,
-										// molecules are create at the same
-										// position
-
-		float centerX = 0; // X Coordinate around which we are going to add
-							// molecules
-		float centerY = 0; // Y Coordinate around which we are going to add
-							// molecules
-		float x_ = 0; // X Coordinate for a specific molecule
-		float y_ = 0; // Y Coordinate for a specific molecule
 		int dimension = 0; // Decide molecule cluster is 2*2 or 3*3
-		int leftBorder = 40;// Left padding
-		int offsetX = 0; // X offset from left border to 3/4 width of canvas
-		Random rand = null;
 
-		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
-
-		float moleWidth = size.x;
-		float moleHeight = size.y;
-		boolean isFit = false;
-		Vec2 topLeft = new Vec2(0, 0);
-		Vec2 botRight = new Vec2(0, 0);
-		// boolean dimensionDecided = false;
-		int k = 0;
-		for (k = 1; k < 10; k++) {
+		for (int k = 1; k < 10; k++) {
 			if (count <= (k * k)) {
 				dimension = k;
 				break;
 			}
 		}
-		int rowNum = count / dimension + 1;
-		int colNum = dimension;
+		int numRow = (int) Math.ceil((float)count/dimension);
+		int numCol = dimension;
+
+		float centerX = 0; // X Coordinate around which we are going to add
+							// molecules
+		float centerY = 0; // Y Coordinate around which we are going to add
+							// molecules
+		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
+		float increX = p5Canvas.w/16;
+		float offsetX = size.x/2+size.x/6;
+		centerX = p5Canvas.x+offsetX;
+		centerY = p5Canvas.y + size.y - Boundary.difVolume;
+		Random rand = null;
+		
+
+		
+		Vec2 topLeft = new Vec2(centerX-size.x/2,centerY-size.y/2);
+		Vec2 botRight = new Vec2(centerX + numCol*size.x,centerY + numRow*size.y);
+		// boolean dimensionDecided = false;
+
 		boolean isClear = false;
+		
+		Vec2 molePos = new Vec2(0,0);
+		Vec2 molePosInPix = new Vec2(0,0);
 
-		// Check if there are enough space for water spawn,
-		// in case that water molecules will not going out of screen
-		while (!isFit) {
-			rand = new Random();
-			offsetX = rand.nextInt((int) ((p5Canvas.w / 5) * 4));
-			centerX = p5Canvas.x + leftBorder + offsetX;
-			centerY = p5Canvas.y + 80 - Boundary.difVolume + (mod - 1.5f) * 20;
-			topLeft.set(centerX, centerY);
-			botRight.set(centerX + colNum * moleWidth, centerY + rowNum
-					* moleHeight);
-			if (topLeft.x > p5Canvas.x && botRight.x < p5Canvas.x + p5Canvas.w
-					&& topLeft.y > p5Canvas.y
-					&& botRight.y < p5Canvas.y + p5Canvas.h)
-				isFit = true;
+		// Check if there are any molecules in add area. If yes, add molecules
+		// to another area.
+		while (!isClear) {
+
+			// Reset flag
+			isClear = true;
+
+			for (int k = 0; k < molecules.size(); k++) {
+
+				if (true) {
+					molePos.set(molecules.get(k).getPosition());
+					molePosInPix.set(box2d.coordWorldToPixels(molePos));
+			
+					if (areaBodyCheck(molePosInPix, topLeft, botRight)) {
+						isClear = false;
+						break;
+					}
+				}
+			}
+			if (!isClear) {
+				centerX += increX;
+				topLeft = new Vec2(centerX-size.x/2, centerY-size.y/2);
+				botRight = new Vec2(centerX + numCol * (size.x), centerY + numRow
+						* size.y);
+				// If we have gone through all available areas.
+				if (botRight.x > (p5Canvas.x + p5Canvas.w)) {
+					isClear = true; // Ready to jump out
+					res = false; // Set output bolean flag to false
+					// TO DO: Show tooltip on Add button when we cant add more
+					// compounds
+				}
+			}
 		}
+		if (res) // If there is enough space, add compounds
+		{
 
-		// Add molecules into p5Canvas
-		for (int i = 0; i < count; i++) {
+			for (int i = 0; i < count; i++) {
+				float x, y,angle=0;
 
-			x_ = centerX + i % dimension * moleWidth + creationCount;
-			y_ = centerY + i / dimension * moleHeight;
+				int r = i % numRow;
+				x = centerX + (i / numRow) * (size.x);
+			
 
-			res = molecules.add(new Molecule(x_, y_, compoundName, box2d,
-					p5Canvas, 0));
+				y = centerY + (i % numRow) * size.y;
+				
+				molecules.add(new Molecule(x, y, compoundName, box2d, p5Canvas,
+						angle));
+				res = true;
+			}
 		}
 
 		return res;
@@ -427,6 +445,7 @@ public abstract class UnitBase {
 		Vec2 topLeft = new Vec2(0, 0);
 		Vec2 botRight = new Vec2(0, 0);
 		float spacing = moleWidth;
+		float maxVelocity = 40;
 
 		boolean isClear = false;
 
@@ -459,6 +478,11 @@ public abstract class UnitBase {
 			{
 				res = molecules.add(new Molecule(x_, y_, compoundName, box2d,
 						p5Canvas, 0));
+				Random rand = new Random(System.nanoTime());
+				float velocityX = (rand.nextFloat()-0.5f)*maxVelocity;
+				
+				float velocityY = (rand.nextFloat()-0.5f)*maxVelocity;
+				State.molecules.get(State.molecules.size()-1).setLinearVelocity(new Vec2(velocityX,velocityY));
 			}
 
 		}
@@ -749,7 +773,7 @@ public abstract class UnitBase {
 			for (int i = 0; i < p5Canvas.products.size(); i++) {
 				Vec2 loc = mOld[0].getPosition();
 				float x1 = PBox2D.scalarWorldToPixels(loc.x);
-				float y1 = p5Canvas.h * 0.77f
+				float y1 = p5Canvas.h * p5Canvas.canvasScale
 						- PBox2D.scalarWorldToPixels(loc.y);
 				Vec2 newVec = new Vec2(x1, y1);
 				mNew = new Molecule(newVec.x, newVec.y,

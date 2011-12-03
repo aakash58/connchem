@@ -25,7 +25,7 @@ public class Boundary {
 	private int volumeSliderValue;
 	private int volumeSliderDefaultValue;
 	private float yOriginal=0; //Original y of body when created
-	public static float difVolume; //Increase or Decrease in Volume
+	public static float difVolume; //The difference between current and origin top boundary , in form of pixel coordinates
 	public static boolean isTransformed =false; //Increase or Decrease in Volume
 	
 	
@@ -38,7 +38,7 @@ public class Boundary {
 		w = w_;
 		h = h_;
 		volumeSliderValue =sliderValue_;
-		volumeSliderDefaultValue =p5Canvas.defaultVolume;
+		volumeSliderDefaultValue = p5Canvas.getMain().defaultVolume;
 		// Figure out the box2d coordinates
 		box2dW = box2d.scalarPixelsToWorld(w_/2);
 		box2dH = box2d.scalarPixelsToWorld(h_/2);
@@ -89,20 +89,26 @@ public class Boundary {
 	
 	public void display() {
 		float a = body.getAngle();
-		// parent.rectMode(parent.CENTER);
+		
+		//Transform top boundary to right position before draw it
+		if (id==2)
+	    {
+			if(isTransformed)
+		    {
+				Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
+						box2d.scalarPixelsToWorld(difVolume));
+				body.setTransform(v, body.getAngle());
+				isTransformed =false;
+		    }
+		}	
+		
+		//Start to draw boundaries
 		Vec2 pos = box2d.getBodyPixelCoord(body);
 		p5Canvas.pushMatrix();
 		p5Canvas.translate(pos.x, pos.y);
 		p5Canvas.rotate(-a);
 		float pShapeW =w;
 		float pShapeH =h;
-	
-		if (id==2 && isTransformed){
-			Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
-					box2d.scalarPixelsToWorld(difVolume));
-			body.setTransform(v, body.getAngle());
-			isTransformed =false;
-		}	
 		if (id==3)
 			p5Canvas.fill(p5Canvas.heatRGB);
 		else{
@@ -110,13 +116,7 @@ public class Boundary {
 		}	
 		p5Canvas.noStroke();
 		p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);
-		
 		p5Canvas.popMatrix();
-		
-		
-		//if (id==2)
-		//	parent.rect(x, y-difVolume, w, h);
-		
 	 	
 	}
 
@@ -138,8 +138,8 @@ public class Boundary {
 			xx=x-w/2; 	
 			yy=y-h/2;
 		}
-		xx = xx*p5Canvas.scale;
-		yy = yy*p5Canvas.scale;
+		xx = xx*p5Canvas.canvasScale;
+		yy = yy*p5Canvas.canvasScale;
 		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+h){
 			return id;
 		}

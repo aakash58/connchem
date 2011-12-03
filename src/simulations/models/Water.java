@@ -13,7 +13,7 @@ public class Water {
 	{
 		p5Canvas = parent;
 	}
-	public void setForceWater(int indexWater, Molecule mWater) { // draw background
+	public void setForceWater(int indexWater, Molecule mWater) { 
 		if (p5Canvas.temp<=0){
 			for (int e = 0; e < mWater.getNumElement(); e++) {
 				float sumForceX=0;
@@ -89,6 +89,7 @@ public class Water {
 				Vec2 normV = normalizeForce(new Vec2(x,y));
 				float forceX;
 				float forceY;
+				float attractForce=1;
 				if (mWater.polarity==m.polarity){
 					float fTemp = mWater.freezingTem;
 					float bTemp = mWater.boilingTem;
@@ -105,8 +106,8 @@ public class Water {
 						gravityY = (bTemp-p5Canvas.temp)/(bTemp-fTemp);
 						gravityX = gravityY*0.6f;
 					}	
-					forceX =  (-normV.x/dis)*m.getBodyMass()*mWater.getBodyMass()*gravityX*3000;
-					forceY =  (-normV.y/dis)*m.getBodyMass()*mWater.getBodyMass()*gravityY*3000;
+					forceX =  (-normV.x/dis)*m.getBodyMass()*mWater.getBodyMass()*gravityX*attractForce;
+					forceY =  (-normV.y/dis)*m.getBodyMass()*mWater.getBodyMass()*gravityY*attractForce;
 				}	
 				else{
 					float num = m.getNumElement();
