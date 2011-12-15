@@ -98,6 +98,8 @@ public class Body {
 	
 	public Object m_userData;
 	
+	public float m_gravityScale;
+	
 	public Body(final BodyDef bd, World world) {
 		assert (bd.position.isValid());
 		assert (bd.linearVelocity.isValid());
@@ -168,6 +170,8 @@ public class Body {
 		
 		m_fixtureList = null;
 		m_fixtureCount = 0;
+		
+		m_gravityScale = 1.0f;
 	}
 	
 	// TODO djm: check out about this new fixture here

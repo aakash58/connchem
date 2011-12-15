@@ -426,7 +426,7 @@ units:
         qty: 0
         cap: 95
 - unit: 4
-  name: "Pressure and Gas Laws"
+  name: "Gas Laws"
   sims:
   - sim: 1
     name: "Physical Properties of Air"
@@ -445,7 +445,7 @@ units:
         qty: 10
         cap: 15
   - sim: 2
-    name: "KMT"
+    name: "Kinetic Molecular Theory"
     sets:
     - set: 1
       compounds: 
@@ -453,21 +453,48 @@ units:
         qty: 10
         cap: 50
   - sim: 3
-    name: "Undefined"
+    name: "Pressure"
     sets:
     - set: 1
       compounds: 
       - compound: "Helium"
-        qty: 10
-        cap: 50
+        qty: 5
+        cap: 25
   - sim: 4
-    name: "Boyles Law"
+    name: "Gas Law"
     sets:
     - set: 1
       compounds: 
       - compound: "Helium"
         qty: 10
-        cap: 50
+        cap: 25
+    - set: 2
+      compounds: 
+      - compound: "Helium"
+        qty: 10
+        cap: 25
+    - set: 3
+      compounds: 
+      - compound: "Helium"
+        qty: 10
+        cap: 25
+  - sim: 5
+    name: "Partial Pressure"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Helium"
+        qty: 0
+        cap: 8
+      - compound: "Oxygen"
+        qty: 0
+        cap: 6
+      - compound: "Chlorine"
+        qty: 0
+        cap: 8
+      - compound: "Carbon-Dioxide"
+        qty: 0
+        cap: 5
 - unit: 5
   name: "Thermodynamics"
   sims:

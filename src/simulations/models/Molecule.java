@@ -8,16 +8,13 @@ import processing.core.*;
 import simulations.P5Canvas;
 import simulations.PBox2D;
 
-import main.Canvas;
-import main.Main;
-import main.TableView;
 
 import org.jbox2d.common.*;
 import org.jbox2d.collision.shapes.CircleShape;
-import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.collision.shapes.MassData;
+
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.joints.DistanceJoint;
-import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.PrismaticJoint;
 
 import data.DBinterface;
@@ -93,6 +90,7 @@ public class Molecule {
 	private boolean reactive = true; // Molecule can only react if this flag is
 										// true
 	private int tableIndex = -1;
+	//private boolean showTrail = false;
 
 	/******************************************************************
 	 * FUNCTION : Molecule() DESCRIPTION : Molecule Constructor
@@ -144,7 +142,7 @@ public class Molecule {
 				elementNames.set(i, new String("Chlorine")) ;
 			else if(elementNames.get(i).equals("Bromide"))
 				elementNames.set(i, new String("Bromine")) ;
-			mass+= DBinterface.getElementMass(elementNames.get(i));
+			mass+= DBinterface.getElementMass(elementNames.get(i))/1000;
 		}
 		sumForceX = new float[numElement];
 		sumForceY = new float[numElement];
@@ -286,6 +284,7 @@ public class Molecule {
 	 *******************************************************************/
 	public void setPropertyByHeat(boolean isInitial) {
 		float temp = p5Canvas.temp;
+		/*
 		//Set up restituion
 		res = (temp - freezingTem) / (boilingTem - freezingTem);
 		if (res > 0.05)
@@ -297,13 +296,36 @@ public class Molecule {
 			fric = 0.6f;
 		else
 			fric = 0;
-		/*
-		if (name.equals("Water") && temp < 40)
-			scale = 1 + (40 - temp) / 200f;
-		else
-			scale = 1f;
-			*/
+		*/
+		
+		//New setting
+		//Solid case
+		if( temp<=freezingTem)
+		{
+			res = 0.05f;
+			fric = 0.6f;
+			setGravityScale(1.0f);
+		}
+		//Liquid case
+		else if (temp>freezingTem&&temp<boilingTem)
+		{
+			res = 1.0f;
+			fric = 0f;
+			setGravityScale(1.0f);
+		}
+		//Gas case
+		else 
+		{
+			res=1.0f;
+			fric = 0f;
+			this.setGravityScale(0.0f);
+			
+		}
+		
 
+			
+
+		
 		if((p5Canvas.getMain().selectedUnit==1||p5Canvas.getMain().selectedUnit==2))
 		{
 		if (name.equals("Water"))
@@ -350,7 +372,13 @@ public class Molecule {
 			setRestitution(res);
 			setFriction(fric);
 			if (name.equals("Water"))
-				setRadius(scale);
+				
+			{   if(temp < 40)
+					scale = 1 + (40 - temp) / 200f;
+				else
+					scale = 1f;
+					setRadius(scale);
+				}
 		}
 	}
 
@@ -369,6 +397,7 @@ public class Molecule {
 		bd.type = BodyType.DYNAMIC;
 		bd.position.set(box2d.coordPixelsToWorld(new Vec2(x, y)));
 		bd.angle = angle;
+	
 		// This infinitive loop fix nullPointerException because
 		// box2d.createBody(bd) may create a null body
 		body = box2d.createBody(bd);
@@ -416,6 +445,18 @@ public class Molecule {
 				.random(-1, 1)));
 		body.setAngularVelocity(0);
 		body.setUserData(this);
+		//Set mass property to the data got from database
+		//It has been proved to not work
+		/*
+		MassData data = new MassData();
+		body.getMassData(data);
+		float factor = mass / data.mass;
+		data.mass*= factor;
+		data.I*=factor;
+		body.setMassData(data);
+		*/
+		//body.resetMassData();
+		
 	}	
 	
 
@@ -525,7 +566,7 @@ public class Molecule {
 		// body.applyForce(new Vec2(0,-yyy), body.getPosition());
 
 		//Update molecule positions
-		if (p5Canvas.isDrag && p5Canvas.draggingBoundary < 0) {
+		if (p5Canvas.isDrag ) {
 			float xx = xTmp + PBox2D.scalarPixelsToWorld(p5Canvas.xDrag);
 			float yy = yTmp - PBox2D.scalarPixelsToWorld(p5Canvas.yDrag);
 			Vec2 v = new Vec2(xx, yy);
@@ -652,6 +693,9 @@ public class Molecule {
 						- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);
 			}
 		}
+		//If this molecule is picked to show trail, make it transparent
+		//if(showTrail && p5Canvas.isTrackingEnabled)
+		//	p5Canvas.tint(p5Canvas.backgroundColor,126);
 
 		if (name.equals("Calcium-Ion")) {
 			p5Canvas.stroke(Color.BLUE.getRGB());
@@ -811,6 +855,21 @@ public class Molecule {
 			mul = 4.0f;
 		return mul;
 	}
+	
+	//Set scale that gravity will apply on body
+	//Range from 0.0 to 1.0
+	public void setGravityScale(float gs)
+	{
+		if(gs>=1.0f)
+			gs = 1.0f;
+		else if ( gs<=0.0f)
+			gs = 0.0f;
+		if(body!=null)
+		{
+			//body.m_linearDamping=1.0f;
+			body.m_gravityScale = gs;
+		}
+	}
 
 	/**
 	 * @return the maxSize
@@ -866,6 +925,11 @@ public class Molecule {
 		this.setLinearVelocity(new Vec2((float)velocityX,(float)velocityY));
 		
 	}
+	public void constrainKineticEnergy(float ratio)
+	{
+		Vec2 velocity = this.getLinearVelocity();
+		velocity.mulLocal((float)Math.sqrt(ratio));
+	}
 	public float getKineticEnergy()
 	{
 		float eRotational= 0.5f* body.getInertia()*body.getAngularVelocity()* body.getAngularVelocity();
@@ -887,9 +951,21 @@ public class Molecule {
 	//Check if molecule contains mouse pressed point
 	  public boolean contains(float x, float y) {
 		  Vec2 p5CanvasPoint = new Vec2(x,y);
+		  boolean inside = false;
 		    Vec2 worldPoint = box2d.coordPixelsToWorld(p5CanvasPoint);
 		    Fixture s = body.getFixtureList();
-		    boolean inside = s.testPoint(worldPoint);
+		    while(s!=null)
+		    {
+		      inside = s.testPoint(worldPoint);
+		      if(inside)
+		    	  return inside;
+		      s=s.getNext();
+		    }
+		    
 		    return inside;
 		  }
+//	  public void setShowTrail(boolean flag	)
+//	  {
+//		  showTrail = flag;
+//	  }
 }

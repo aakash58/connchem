@@ -24,7 +24,7 @@ public class Boundary {
 	private int id =-1;
 	private int volumeSliderValue;
 	private int volumeSliderDefaultValue;
-	private float yOriginal=0; //Original y of body when created
+	private float yOriginal =0; //Original y of body when created
 	public static float difVolume; //The difference between current and origin top boundary , in form of pixel coordinates
 	public static boolean isTransformed =false; //Increase or Decrease in Volume
 	
