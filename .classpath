@@ -8,7 +8,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/yamlbeans-1.06.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-nop-1.6.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jbox2d-library-2.1.2.jar"/>
 	<classpathentry kind="lib" path="/Users/administrator/Documents/ConnChem/connchem/lib/JTattoo.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

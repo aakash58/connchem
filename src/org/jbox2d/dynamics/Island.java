@@ -242,6 +242,7 @@ public class Island {
 			if (b.getType() != BodyType.DYNAMIC){
 				continue;
 			}
+			Vec2 gra = gravity.mul(b.m_gravityScale);
 			
 
 			// Integrate velocities.
@@ -250,8 +251,8 @@ public class Island {
 //			b.m_linearVelocity.addLocal(temp);
 //			b.m_angularVelocity += step.dt * b.m_invI * b.m_torque;
 			
-			b.m_linearVelocity.x += (b.m_force.x * b.m_invMass + gravity.x)*step.dt;
-			b.m_linearVelocity.y += (b.m_force.y * b.m_invMass + gravity.y)*step.dt;
+			b.m_linearVelocity.x += (b.m_force.x * b.m_invMass + gra.x)*step.dt;
+			b.m_linearVelocity.y += (b.m_force.y * b.m_invMass + gra.y)*step.dt;
 			b.m_angularVelocity += step.dt * b.m_invI * b.m_torque;
 			
 

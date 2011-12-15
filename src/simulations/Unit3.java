@@ -36,7 +36,7 @@ public class Unit3 extends UnitBase {
 
 	private float sodiumJointLength;
 	private int frameCounter = 0;
-	private int computeTriggerInterval = 30;
+	private int computeTriggerInterval = p5Canvas.FRAME_RATE;
 	private boolean isAnchorSetup = false;
 	public int combinationIndex = -1;
 	public String [][] combination = new String[15][2];

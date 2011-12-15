@@ -80,7 +80,7 @@ public class Unit1 extends UnitBase {
 	@Override
 	protected void reset() {
 		// TODO Auto-generated method stub
-		p5Canvas.temp = 25;
+		//p5Canvas.temp = 25;
 
 	}
 	public void beginReaction( Contact c)
@@ -122,15 +122,15 @@ public class Unit1 extends UnitBase {
 				float fTemp = mIndex.freezingTem;
 				float bTemp = mIndex.boilingTem;
 				float gravityX,gravityY;
-				if (p5Canvas.temp>=bTemp){
+				if (p5Canvas.temp>=bTemp){ //Gas case
 					gravityX = 0;
 					gravityY = 0;
 				}
-				else if (p5Canvas.temp<=fTemp){
+				else if (p5Canvas.temp<=fTemp){ //Solid case
 					gravityY = (bTemp-p5Canvas.temp)/(bTemp-fTemp);
 					gravityX = gravityY*2f;
 				}	
-				else{
+				else{ // Liquid case
 					gravityY = (bTemp-p5Canvas.temp)/(bTemp-fTemp);
 					gravityX = gravityY*0.6f;
 				}	

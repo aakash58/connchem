@@ -89,11 +89,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 public class Main {
-	// Controllers
-	// this is a different change.
-	private P5Canvas p5Canvas;
-	// private Unit2 unit2 = new Unit2();
-	// TODO flag
+
 	public JFrame mainFrame;
 	public JMenu simMenu = new JMenu("Choose Simulation");
 	public int selectedUnit = 2;
@@ -106,14 +102,13 @@ public class Main {
 
 	private int minSliderValue = 1;
 	private int maxSliderValue = 9;
-	public JPanel dynamicPanel;
 	public JScrollPane dynamicScrollPane;
 	public ArrayList additionalPanelList = new ArrayList();
 	public ArrayList defaultSetMolecules = new ArrayList();
 	private CustomPopupMenu scrollablePopupMenu;
 	public String[] moleculeNames = null;
 
-	private String sliderLabel = new String("Add "); // Label parameter on left
+	private String lblAddLabel = new String("Add "); // Label parameter on left
 														// panel
 
 	public JPanel leftPanel; // "Input" panel on left of application
@@ -127,6 +122,8 @@ public class Main {
 	private JMenuBar menuBar;
 
 	/**************************** Left Panel parameters ****************************/
+	public JPanel dynamicPanel; //Panel that holes molecule icon and add button
+	public HashMap moleculeSliderMap = new HashMap<String, JSlider>();
 	private JLabel lblInput;
 	private JLabel lblInputTipR;
 	private JLabel lblInputTipL;
@@ -140,7 +137,15 @@ public class Main {
 																				// for
 																				// every
 																				// compound
+	//Check box parameter
+	private JPanel checkBoxPanel;
+	JCheckBox boxMoleculeHiding;
+	JCheckBox boxMoleculeTracking;
+	JCheckBox boxDisplayForce;
+	JCheckBox boxDisplayJoint;
+	
 
+	/**************************** Central Panel parameters ****************************/
 	private JPanel clPanel; // Center Left control Panel containing volume
 							// slider and Zoom Slider
 	private JPanel crPanel;
@@ -156,7 +161,6 @@ public class Main {
 	public JLabel pressureLabel;
 	private JLabel canvasControlLabel_main_pressure;
 	public int defaultPressure = 1;
-
 	public int defaultZoom = 100;
 	public int currentZoom = defaultZoom;
 	public int zoomMin = 30;
@@ -220,10 +224,15 @@ public class Main {
 	public JPanel outputControls;
 	//Lables used in Unit 4
 	public JLabel lblPressureText;
+	public JLabel lblPressureTitle;
 	public JLabel lblPressureValue;
+	public JLabel lblCollisionTitle;
+	public JLabel lblCollisionValue;
 	public JLabel lblVolumeText;
 	public JLabel lblVolumeTitle;
-	public JLabel lblVolumeValue;
+	public JLabel lblVolumeTitle2;   //for Unit4 Sim1 Set2
+	public JLabel lblVolumeValue;   
+	public JLabel lblVolumeValue2; //for Unit4 Sim1 Set2
 	public JLabel lblEqualText;
 	public JLabel lblMolText;
 	public JLabel lblMolValue;
@@ -234,13 +243,14 @@ public class Main {
 	public JLabel lblTempValue;
 	public JLabel lblKETitle;
 	public JLabel lblKEValue;
+
 	public SimpleBar barPressure;
 	public SimpleBar barVolume;
 	public SimpleBar barMol;
 	public SimpleBar barTemp;
 
 
-
+	private P5Canvas p5Canvas;
 	public int pause = 0; // the length of the pause at the beginning
 	public int speed = 1000; // recur every second.
 	public Timer timer;
@@ -523,30 +533,31 @@ public class Main {
 						// Get Compound Name
 						String cName = getCompoundName(selectedUnit,
 								selectedSim, selectedSet, i);
-						//defaultSetMolecules.add(cName);
+						
+						//Add Compound Name label
 						JLabel label = new JLabel(cName);
 						final String fixedName = cName.replace(" ", "-");
-
 						// Repaint molecules icon
 						label.setIcon(new ImageIcon(Main.class
 								.getResource("/resources/compoundsPng50/"
 										+ fixedName + ".png")));
 						panel.add(label, "cell 0 0 3 1,growx");
 
-						// Repaint slider label
-						final JLabel label_1 = new JLabel(sliderLabel
+						// Add Slider label
+						final JLabel label_1 = new JLabel(lblAddLabel
 								+ sliderValue);
 						panel.add(label_1, "cell 0 1");
 
-						// Repaint slider and set up slider event listener
+						// Add slider and set up slider event listener
 						JSlider slider = new JSlider(minSliderValue,
 								maxSliderValue, sliderValue);
 						panel.add(slider, "cell 1 1");
+						moleculeSliderMap.put(fixedName,slider);
 						slider.addChangeListener(new ChangeListener() {
 							public void stateChanged(ChangeEvent e) {
 								int value = ((JSlider) e.getSource())
 										.getValue();
-								label_1.setText(sliderLabel + value);
+								label_1.setText(lblAddLabel + value);
 							}
 						});
 
@@ -567,9 +578,9 @@ public class Main {
 									// Get number showing on slider bar
 									int count = Integer.parseInt(label_1
 											.getText().substring(
-													sliderLabel.length()));
+													lblAddLabel.length()));
 									// Check if molecule number is going over
-									// predefined cap number
+									// cap number
 									// If yes, add molecules no more than cap
 									// number
 
@@ -594,13 +605,11 @@ public class Main {
 										// Disable Add button
 										if (getP5Canvas().addMolecule(
 												fixedName, count)) {
-											// if(!fixedName.equals("Water"))
 											{
-												// int num =
-												// State.moleculesAdded.get(fixedName);
 												State.moleculesAdded.put(
 														fixedName, currentNum
 																+ count);
+												
 											}
 											arg0.getComponent().setEnabled(
 													false);
@@ -608,14 +617,8 @@ public class Main {
 									} else {
 										if (getP5Canvas().addMolecule(
 												fixedName, count)) {
-											// if(!fixedName.equals("Water"))
-											// {
-											// int num =
-											// State.moleculesAdded.get(fixedName);
 											State.moleculesAdded.put(fixedName,
 													currentNum + count);
-
-											// }
 										}
 									}
 
@@ -730,13 +733,14 @@ public class Main {
 
 		// Update sliders around the center panel
 		updateCenterPanel();
-		// Reset canvas
-		getP5Canvas().reset();
 		
 		updateLeftPanel();
 
 		// Reset right panel
 		updateRightPanel();
+		
+		// Reset p5Canvas
+		getP5Canvas().reset();
 
 		// Load information of new generation
 		if (!(selectedUnit == 3 && selectedSim == 2)) {
@@ -777,8 +781,7 @@ public class Main {
 		}
 
 		getCanvas().reset();
-
-
+		
 		// getP5Canvas().isEnable =temp;
 
 		// reset timer
@@ -801,10 +804,18 @@ public class Main {
 		speedSlider.setValue(defaultSpeed);
 		heatSlider.setValue(defaultHeat);
 		volumeSlider.setValue(defaultVolume);
-		getP5Canvas().setVolume(defaultVolume);
 		volumeLabel.setText(defaultVolume+ " mL");
-
+		lblVolumeValue.setText(" mL");
+		lblVolumeValue2.setText(" mL");
+		lblPressureValue.setText(" kPa");
+		lblCollisionValue.setText("");
+		lblTempValue.setText(" \u2103");
+		lblKEValue.setText(" J");
 		
+		barMol.reset();
+		barPressure.reset();
+		barVolume.reset();
+		barTemp.reset();
 		
 	}
 	
@@ -837,8 +848,18 @@ public class Main {
 		// Update Molecule Legends on left panel
 		updateDynamicPanel();
 		
+		updateCheckboxPanel();
+		
 		leftPanel.updateUI();
 		
+	}
+	private void updateCheckboxPanel()
+	{
+		checkBoxPanel.removeAll();
+		checkBoxPanel.add(boxMoleculeHiding, BorderLayout.NORTH);
+		checkBoxPanel.add(boxMoleculeTracking,BorderLayout.CENTER);
+		checkBoxPanel.add(boxDisplayForce, BorderLayout.SOUTH);
+		//checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
 	}
 
 	// Reset right panel
@@ -915,6 +936,17 @@ public class Main {
 			{
 				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
 				dashboard.add(elapsedTime, "cell 1 0");
+				if(selectedSet ==1 )
+				{
+					lblVolumeTitle.setText("Volume of Helium:");
+				}
+				else if(selectedSet ==2 )
+				{
+					lblVolumeTitle.setText("Volume of Chlorine:");
+					lblVolumeTitle2.setText("Volume of Oxygen:");
+					dashboard.add(lblVolumeTitle2, "cell 0 2");
+					dashboard.add(lblVolumeValue2,"cell 1 2");
+				}
 				dashboard.add(lblVolumeTitle,"cell 0 1");
 				dashboard.add(lblVolumeValue,"cell 1 1");
 			}
@@ -922,6 +954,7 @@ public class Main {
 			{
 				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
 				dashboard.add(elapsedTime, "cell 1 0");
+				lblVolumeTitle.setText("Volume of Bromine:");
 				dashboard.add(lblVolumeTitle,"cell 0 1");
 				dashboard.add(lblVolumeValue,"cell 1 1");
 				dashboard.add(lblTempTitle,"cell 0 2");
@@ -929,11 +962,20 @@ public class Main {
 				dashboard.add(lblKETitle,"cell 0 3");
 				dashboard.add(lblKEValue,"cell 1 3");
 			}
-			else
+			else if( selectedSim==3)
+			{
+				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(elapsedTime, "cell 1 0");
+				dashboard.add(lblCollisionTitle,"cell 0 1");
+				dashboard.add(lblCollisionValue,"cell 1 1");
+				dashboard.add(lblPressureTitle,"cell 0 2");
+				dashboard.add(lblPressureValue,"cell 1 2");
+			}
+			else if( selectedSim ==4)
 			{
 			int barWidth = 40;
 			int barHeight = 120;
-			dashboard.setLayout(new MigLayout("","[45][45][25][45][45][45]","[][][grow][]"));
+			dashboard.setLayout(new MigLayout("","[45][45][25][45][25][45]","[][][grow][]"));
 			dashboard.add(lblElapsedTimeText, "cell 2 3 3 1, align center");
 			dashboard.add(elapsedTime, "cell 5 3 ");
 			
@@ -957,6 +999,19 @@ public class Main {
 			dashboard.add(barVolume,"cell 1 2"+alignStr);
 			dashboard.add(barMol,"cell 3 2"+alignStr);
 			dashboard.add(barTemp,"cell 5 2"+alignStr);
+			}
+			else if( selectedSim ==5)
+			{
+				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(elapsedTime, "cell 1 0");
+				dashboard.add(lblPressureTitle,"cell 0 2");
+				dashboard.add(lblPressureValue,"cell 1 2");
+				lblVolumeTitle.setText("Volume of Helium:");
+				dashboard.add(lblVolumeTitle,"cell 0 3");
+				dashboard.add(lblVolumeValue,"cell 1 3");
+				dashboard.add(lblTempTitle,"cell 0 4");
+				dashboard.add(lblTempValue,"cell 1 4");
+				
 			}
 		}
 		else {
@@ -1161,10 +1216,10 @@ public class Main {
 		timerSubpanel.add(resetBtn, "cell 1 0, align center");
 
 		// Add Checkbox to checkBoxPanel
-		JPanel checkBoxPanel = new JPanel();
+		checkBoxPanel = new JPanel();
 		checkBoxPanel.setLayout(new BorderLayout());
-		JCheckBox cBox1 = new JCheckBox("Enable Molecule Hiding");
-		cBox1.addItemListener(new ItemListener() {
+		boxMoleculeHiding = new JCheckBox("Enable Molecule Hiding");
+		boxMoleculeHiding.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
 					getP5Canvas().isHidingEnabled = true;
@@ -1172,8 +1227,18 @@ public class Main {
 					getP5Canvas().isHidingEnabled = false;
 			}
 		});
-		JCheckBox forceCheckbox = new JCheckBox("Display Forces");
-		forceCheckbox.addItemListener(new ItemListener() {
+		boxMoleculeTracking = new JCheckBox("Enable Molecule Tracking");
+		boxMoleculeTracking.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e)
+			{
+				if (e.getStateChange() == ItemEvent.SELECTED)
+					getP5Canvas().isTrackingEnabled = true;
+				else if (e.getStateChange() == ItemEvent.DESELECTED)
+					getP5Canvas().isTrackingEnabled = false;
+			}
+		});
+		boxDisplayForce = new JCheckBox("Display Forces");
+		boxDisplayForce.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
 					getP5Canvas().isDisplayForces = true;
@@ -1182,8 +1247,8 @@ public class Main {
 			}
 		});
 
-		JCheckBox jointsCheckbox = new JCheckBox("Display Joints");
-		jointsCheckbox.addItemListener(new ItemListener() {
+		boxDisplayJoint = new JCheckBox("Display Joints");
+		boxDisplayJoint.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
 					getP5Canvas().isDisplayJoints = true;
@@ -1191,9 +1256,9 @@ public class Main {
 					getP5Canvas().isDisplayJoints = false;
 			}
 		});
-		checkBoxPanel.add(cBox1, BorderLayout.NORTH);
-		checkBoxPanel.add(forceCheckbox, BorderLayout.CENTER);
-		checkBoxPanel.add(jointsCheckbox, BorderLayout.SOUTH);
+		//checkBoxPanel.add(boxMoleculeHiding, BorderLayout.NORTH);
+		//checkBoxPanel.add(boxDisplayForce, BorderLayout.CENTER);
+		//checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
 		timerSubpanel.add(checkBoxPanel, "cell 1 1, align center");
 
 		timerSubpanel.add(getTableSet(), "cell 0 0 1 2,growy");
@@ -1240,18 +1305,22 @@ public class Main {
 		volumeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				if (!isVolumeblocked) {
-					int value = ((JSlider) e.getSource()).getValue();
-					getP5Canvas().setVolume(value);
-//					int volume = (int) getP5Canvas().getSize().height
-//							/ getP5Canvas().multiplierVolume;
-					volumeLabel.setText(value+ " mL");
+					JSlider vSlider = (JSlider) e.getSource();
+					int value = (vSlider).getValue();
+					p5Canvas.currentVolume = value;
+					
+					if(value<p5Canvas.volumeMinBoundary)
+					{
+						value = p5Canvas.volumeMinBoundary;
+						volumeLabel.setText(value+ " mL");
+					}
 				}
 			}
 		});
 		canvasControlLabel_main_volume = new JLabel("Volume");
 
 		// Set up Pressure Slide
-		getP5Canvas().setPressure(defaultPressure);
+		//getP5Canvas().setPressure(defaultPressure);
 		pressureSlider.setOrientation(SwingConstants.VERTICAL);
 		pressureLabel = new JLabel(defaultPressure + " atm");
 
@@ -1260,7 +1329,7 @@ public class Main {
 		pressureSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue();
-				getP5Canvas().setPressure(value);
+				//getP5Canvas().setPressure(value);
 				pressureLabel.setText(value + " atm");
 
 			}
@@ -1280,7 +1349,6 @@ public class Main {
 				int value = ((JSlider) e.getSource()).getValue();
 				zoomLabel.setText(value  + "%");
 				currentZoom = value;
-
 			}
 		});
 		canvasControlLabel_main_scale = new JLabel("Zoom");
@@ -1313,7 +1381,8 @@ public class Main {
 		//crPanel.add(new JLabel("    "), "cell 0 3,alignx center");
 
 		// Set up Heat Slider
-		heatLabel = new JLabel(defaultHeat + " J");
+		int level = (defaultHeat-(heatMax+heatMin)/2)/heatTickSpacing;
+		heatLabel = new JLabel(Integer.toString(level));
 		canvasControlLabel_main_heat = new JLabel("Heat");
 		getP5Canvas().setHeat(defaultHeat);
 		heatSlider.setOrientation(SwingConstants.VERTICAL);
@@ -1324,7 +1393,11 @@ public class Main {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue();
 				getP5Canvas().setHeat(value);
-				heatLabel.setText(value + "\u2103");
+				int level = (value-(heatMax+heatMin)/2)/heatTickSpacing;
+				if(value>0)
+					heatLabel.setText("+ "+level);
+				else if(value<0)
+					heatLabel.setText("- "+Math.abs(level));
 			}
 		});
 	
@@ -1421,11 +1494,16 @@ public class Main {
 		//rightPanel.add(outputControls, "cell 0 5,grow");
 		
 		//Intialize labels for unit 4
-		lblPressureText = new JLabel ("P (atm)");
+		lblPressureText = new JLabel ("P (kPa)");
+		lblPressureTitle = new JLabel ("Pressure:" );
 		lblPressureValue = new JLabel("");
+		lblCollisionTitle = new JLabel("Collisions in last 5 sec:");
+		lblCollisionValue = new JLabel("");
 		lblVolumeText = new JLabel("V (L)");
 		lblVolumeTitle = new JLabel("Volume of gas:");
 		lblVolumeValue = new JLabel (" mL");
+		lblVolumeTitle2 = new JLabel("Volume of gas:");
+		lblVolumeValue2 = new JLabel(" mL");
 		lblEqualText = new JLabel("=");
 		lblMolText = new JLabel ("n (mol)");
 		lblMolValue = new JLabel ("");
@@ -1436,10 +1514,10 @@ public class Main {
 		lblTempValue = new JLabel (" \u2103");
 		lblKETitle = new JLabel("Kinetic Energy:");
 		lblKEValue = new JLabel(" J");
-		barPressure = new SimpleBar(0,100,30);
-		barVolume = new SimpleBar(minVolume,maxVolume,40);
-		barMol = new SimpleBar(0,100,60);
-		barTemp  = new SimpleBar(tempMin,tempMax,defaultHeat);
+		barPressure = new SimpleBar(0,350,30);
+		barVolume = new SimpleBar(minVolume,maxVolume,63);
+		barMol = new SimpleBar(0,50,10);
+		barTemp  = new SimpleBar(tempMin,tempMax,25);
 
 		//Set up welcome menu
 		if (isWelcomed) {
@@ -1693,9 +1771,12 @@ public class Main {
 						}
 					} else // General case
 					{
+						
 						playBtn.setIcon(new ImageIcon(
 								Main.class
 										.getResource("/resources/png48x48/iconPause.png")));
+						if(!getP5Canvas().isSimStarted)
+							getP5Canvas().isSimStarted = true;
 						getP5Canvas().isEnable = true;
 						timer.start();
 					}

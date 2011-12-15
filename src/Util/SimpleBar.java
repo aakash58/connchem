@@ -15,6 +15,7 @@ public class SimpleBar extends JPanel {
 	private float min;
 	private float max;
 	private float value;
+	private float defaultValue;
 	private Color foreColor = new Color(16, 20, 132);
 	private Color bgColor = new Color(16, 20, 132,128);
 	private Color fontColor = new Color(255,255,255);
@@ -27,6 +28,7 @@ public class SimpleBar extends JPanel {
 		min = vMin;
 		max = vMax;
 		value = vValue;	
+		defaultValue = value;
 	}
 	public SimpleBar(float vMin, float vMax)
 	{
@@ -91,6 +93,16 @@ public class SimpleBar extends JPanel {
 			 value = min;
 		 else
 			 value = v;
+	 }
+	 
+	 public void setMax(float v)
+	 {
+		 if(v>min)
+			 max = v;
+	 }
+	 public void reset()
+	 {
+		 value = defaultValue;
 	 }
 
 }
