@@ -471,7 +471,7 @@ units:
     - set: 2
       compounds: 
       - compound: "Helium"
-        qty: 10
+        qty: 15
         cap: 25
     - set: 3
       compounds: 

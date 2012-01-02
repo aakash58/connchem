@@ -139,10 +139,10 @@ public class Main {
 																				// compound
 	//Check box parameter
 	private JPanel checkBoxPanel;
-	JCheckBox boxMoleculeHiding;
-	JCheckBox boxMoleculeTracking;
-	JCheckBox boxDisplayForce;
-	JCheckBox boxDisplayJoint;
+	public JCheckBox boxMoleculeHiding;
+	public JCheckBox boxMoleculeTracking;
+	public JCheckBox boxDisplayForce;
+	public JCheckBox boxDisplayJoint;
 	
 
 	/**************************** Central Panel parameters ****************************/
@@ -243,6 +243,8 @@ public class Main {
 	public JLabel lblTempValue;
 	public JLabel lblKETitle;
 	public JLabel lblKEValue;
+	public JLabel lblMoleTitle;
+	public JLabel lblMoleValue;
 
 	public SimpleBar barPressure;
 	public SimpleBar barVolume;
@@ -486,6 +488,7 @@ public class Main {
 			started = false;
 			btnIds.clear();
 			btnNames.clear();
+			moleculeSliderMap.clear();
 
 			if (!(selectedUnit == 3 && selectedSim == 2)) {
 				// Get Compounds information in selected set from Yaml file
@@ -521,6 +524,7 @@ public class Main {
 						heatPanel.add(canvasControlLabel_main_heat,"cell 0 0,align left");
 						start=2;
 					}
+
 					//LOOP: Add molecule legends for all the molecules
 					for (int i =0; i < compounds.size(); i++) {
 						JPanel panel = new JPanel();
@@ -628,7 +632,8 @@ public class Main {
 
 					}
 				}
-			} else // In unit3 sim 2 case
+			}
+			else // In unit3 sim 2 case
 			{
 				// Get Compounds information in set 1 from Yaml file
 				ArrayList compounds = getSetCompounds(selectedUnit,
@@ -811,11 +816,13 @@ public class Main {
 		lblCollisionValue.setText("");
 		lblTempValue.setText(" \u2103");
 		lblKEValue.setText(" J");
+		lblMoleValue.setText(" mol");
 		
 		barMol.reset();
 		barPressure.reset();
 		barVolume.reset();
 		barTemp.reset();
+	
 		
 	}
 	
@@ -857,6 +864,7 @@ public class Main {
 	{
 		checkBoxPanel.removeAll();
 		checkBoxPanel.add(boxMoleculeHiding, BorderLayout.NORTH);
+		if(selectedUnit==4 &&selectedSim==2)
 		checkBoxPanel.add(boxMoleculeTracking,BorderLayout.CENTER);
 		checkBoxPanel.add(boxDisplayForce, BorderLayout.SOUTH);
 		//checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
@@ -955,12 +963,14 @@ public class Main {
 				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
 				dashboard.add(elapsedTime, "cell 1 0");
 				lblVolumeTitle.setText("Volume of Bromine:");
-				dashboard.add(lblVolumeTitle,"cell 0 1");
-				dashboard.add(lblVolumeValue,"cell 1 1");
-				dashboard.add(lblTempTitle,"cell 0 2");
-				dashboard.add(lblTempValue,"cell 1 2");
-				dashboard.add(lblKETitle,"cell 0 3");
-				dashboard.add(lblKEValue,"cell 1 3");
+				dashboard.add(lblMoleTitle, "cell 0 1");
+				dashboard.add(lblMoleValue, "cell 1 1");
+				dashboard.add(lblVolumeTitle,"cell 0 2");
+				dashboard.add(lblVolumeValue,"cell 1 2");
+				dashboard.add(lblTempTitle,"cell 0 3");
+				dashboard.add(lblTempValue,"cell 1 3");
+				dashboard.add(lblKETitle,"cell 0 4");
+				dashboard.add(lblKEValue,"cell 1 4");
 			}
 			else if( selectedSim==3)
 			{
@@ -1499,7 +1509,7 @@ public class Main {
 		lblPressureValue = new JLabel("");
 		lblCollisionTitle = new JLabel("Collisions in last 5 sec:");
 		lblCollisionValue = new JLabel("");
-		lblVolumeText = new JLabel("V (L)");
+		lblVolumeText = new JLabel("V (mL)");
 		lblVolumeTitle = new JLabel("Volume of gas:");
 		lblVolumeValue = new JLabel (" mL");
 		lblVolumeTitle2 = new JLabel("Volume of gas:");
@@ -1509,11 +1519,13 @@ public class Main {
 		lblMolValue = new JLabel ("");
 		lblRText = new JLabel ("R");
 		lblRValue = new JLabel ();
-		lblTempText = new JLabel("T (K)");
+		lblTempText = new JLabel("T (\u2103)");
 		lblTempTitle = new JLabel ("Temperature:");
 		lblTempValue = new JLabel (" \u2103");
 		lblKETitle = new JLabel("Kinetic Energy:");
 		lblKEValue = new JLabel(" J");
+		lblMoleTitle = new JLabel("Mole of gas:");
+		lblMoleValue = new JLabel(" mol");
 		barPressure = new SimpleBar(0,350,30);
 		barVolume = new SimpleBar(minVolume,maxVolume,63);
 		barMol = new SimpleBar(0,50,10);

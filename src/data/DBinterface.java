@@ -31,7 +31,7 @@ public class DBinterface {
 		try{
 			Class.forName("org.sqlite.JDBC");
 			
-			/*
+			
 			//Distribution Configuration
 			ExtractFileFromJar();
 			File dbFile = new File(destDir, dbFileName);
@@ -40,14 +40,15 @@ public class DBinterface {
 			    // DB file is in the same directory with jar file
 				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
 			}
-			*/
 			
 			
+			
+			/*
 			//Debug Configuration
 			String dbPath = ClassLoader.getSystemResource("data/"+dbFileName).toString();
 			dbPath = dbPath.replace("file:", "");
 			conn = DriverManager.getConnection("jdbc:sqlite:src/data/chemdb");
-			
+			*/
 		    
 			stat = conn.createStatement();
 			

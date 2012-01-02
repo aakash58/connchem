@@ -3136,4 +3136,10 @@ public class Unit3 extends UnitBase {
 		
 	}
 
+	@Override
+	public void initialize() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
