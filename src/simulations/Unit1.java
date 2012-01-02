@@ -355,4 +355,10 @@ public class Unit1 extends UnitBase {
 		}
 	}
 
+	@Override
+	public void initialize() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

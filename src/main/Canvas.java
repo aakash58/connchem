@@ -62,12 +62,14 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		{
 		case 1:
 		case 2:
+		case 4:
 			maxCount =8;
-			
 			break;
 		case 3:
-		default:
 			maxCount = 160;
+			break;
+		default:
+			
 			break;
 		}
 
@@ -160,6 +162,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		
 		//Get molecules number from simulation before painting
 		updateMoleculeCount();
+		
 		//Update tableView, which is presenting molecule legends below chart
 		main.getTableView().updateTableView();
 		
@@ -193,10 +196,10 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	//Paint lines
 	private void paintLines(Graphics2D g,int w, int h,int w2, int h2,int margin)
 	{
-		int linePadding = 3;
+		int linePadding = 1;
 		//int marginY = h+2-Compound.names.size()*linePadding;
 		int marginY = h;
-		if(main.selectedUnit==1 || main.selectedUnit==2)
+		if(main.selectedUnit==1 || main.selectedUnit==2||main.selectedUnit==4)
 		{
 		for (int i=0; i< Compound.names.size();i++){
 			int num2 = Compound.counts.get(i);
@@ -217,7 +220,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				num1 = tmpLine.getNum2();
 			}	
 			//Draw one line segment at the end of existing line every time rendering
-			Line l = new Line(margin, marginY+0*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
+			Line l = new Line(margin, marginY+i*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
 			lines[i].add(l);
 			
 		}

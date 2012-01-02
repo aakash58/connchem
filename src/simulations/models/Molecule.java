@@ -447,14 +447,14 @@ public class Molecule {
 		body.setUserData(this);
 		//Set mass property to the data got from database
 		//It has been proved to not work
-		/*
+		
 		MassData data = new MassData();
 		body.getMassData(data);
 		float factor = mass / data.mass;
 		data.mass*= factor;
 		data.I*=factor;
 		body.setMassData(data);
-		*/
+		
 		//body.resetMassData();
 		
 	}	
@@ -779,6 +779,7 @@ public class Molecule {
 
 	// This function removes the particle from the box2d world
 	public void killBody() {
+		if(body!=null)
 		box2d.destroyBody(body);
 		body.m_world = null;
 	}

@@ -63,6 +63,8 @@ public abstract class UnitBase {
 	//Used to check in every frame if there is new molecule spawned and old ones need to be killed
 	public abstract void updateMolecules(int sim, int set);
 	
+	public abstract void initialize();
+	
 	//Reset all parameter to initial states
 	protected abstract void reset();
 	

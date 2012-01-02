@@ -6,6 +6,8 @@ import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 
+import processing.core.PShape;
+
 import simulations.P5Canvas;
 import simulations.PBox2D;
 
@@ -27,6 +29,8 @@ public class Boundary {
 	private float yOriginal =0; //Original y of body when created
 	public static float difVolume; //The difference between current and origin top boundary , in form of pixel coordinates
 	public static boolean isTransformed =false; //Increase or Decrease in Volume
+	private PShape baseShape = new PShape();
+	private PShape weightShape = new PShape();
 	
 	
 	public Boundary(int id_,float x_,float y_, float w_, float h_, int sliderValue_, PBox2D box2d_, P5Canvas parent_) {
@@ -68,6 +72,13 @@ public class Boundary {
 		body.setUserData(this);
 		yOriginal = body.getPosition().y ;
 		isTransformed =true;
+		if(id==2)
+		{
+			String basePath = "resources/compoundsSvg/base.svg";
+			String weightPath = "resources/compoundsSvg/weight-with-base.svg";
+			baseShape =  p5Canvas.loadShape(basePath);
+			weightShape = p5Canvas.loadShape(weightPath);
+		}
 	}
 	public float getId(){
 		return id;
@@ -115,7 +126,10 @@ public class Boundary {
 			p5Canvas.fill(Color.WHITE.getRGB());
 		}	
 		p5Canvas.noStroke();
+		
 		p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);
+		if(id ==2 )
+			p5Canvas.shape(baseShape, pShapeW/-2, pShapeH/-2);
 		p5Canvas.popMatrix();
 	 	
 	}
