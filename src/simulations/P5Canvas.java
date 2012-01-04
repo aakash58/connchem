@@ -212,7 +212,7 @@ public class P5Canvas extends PApplet {
 				this);
 		Boundary rBound = new Boundary(1, x + w, y, bW, 2 * h, sliderValue,
 				box2d, this);
-		Boundary tBound = new Boundary(2, x + w / 2, y, w + bW, bW,
+		Boundary tBound = new Boundary(2, x + w / 2, y, w-bW , bW,
 				sliderValue, box2d, this);
 		Boundary bBound = new Boundary(3, x + w / 2, y + h, w + bW, bW,
 				sliderValue, box2d, this);

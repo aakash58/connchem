@@ -19,8 +19,8 @@ public class Boundary {
 	PBox2D box2d;
 	private float x;
 	private float y;
-	private float w;
-	private float h;
+	public float w;
+	public float h;
 	private float box2dW;
 	private float box2dH;
 	private int id =-1;
@@ -47,12 +47,12 @@ public class Boundary {
 		box2dW = box2d.scalarPixelsToWorld(w_/2);
 		box2dH = box2d.scalarPixelsToWorld(h_/2);
 		
-		// Create the body
 		
 		// Define the polygon
 		PolygonShape polygonShape = new PolygonShape();
 		polygonShape.setAsBox(box2dW, box2dH);
 		
+		// Create the body
 		BodyDef bd = new BodyDef();
 		bd.type = BodyType.STATIC;
         bd.position.set(box2d.coordPixelsToWorld(new Vec2(x_,y_)));
@@ -64,7 +64,7 @@ public class Boundary {
 		FixtureDef fd = new FixtureDef();
         fd.shape = polygonShape;
     	fd.density = 0f;    // No density means it won't move!
-        fd.friction = 1.0f;
+        fd.friction = 0.3f;
     	fd.restitution =1f;
         body.createFixture(fd);
         
@@ -125,11 +125,26 @@ public class Boundary {
 		else{
 			p5Canvas.fill(Color.WHITE.getRGB());
 		}	
-		p5Canvas.noStroke();
+
+		if(id ==2 ) //Render top boundary with a real image 
+		{	
+			float width = baseShape.getWidth();
+			float height = baseShape.getHeight();
+			float ratio = pShapeW/width;
+			width *=ratio;
+			height*=ratio;
+			//For Unit 4 Sim 4 Set 2, we use weight top boundary image instead of base image
+			if(p5Canvas.getMain().selectedUnit==4 && p5Canvas.getMain().selectedSim==4 &&p5Canvas.getMain().selectedSet==2)
+				p5Canvas.shape(weightShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
+			else
+				p5Canvas.shape(baseShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
+		}
+		else
+		{
+			p5Canvas.noStroke();
+			p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);	
+		}
 		
-		p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);
-		if(id ==2 )
-			p5Canvas.shape(baseShape, pShapeW/-2, pShapeH/-2);
 		p5Canvas.popMatrix();
 	 	
 	}
