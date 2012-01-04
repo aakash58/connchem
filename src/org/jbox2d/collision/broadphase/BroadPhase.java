@@ -261,7 +261,7 @@ public class BroadPhase implements TreeCallback {
 		for (int i = 0; i < m_moveCount; i++) {
 			if (m_moveBuffer[i] == proxy) {
 				m_moveBuffer[i] = null;
-				return;
+				//return;
 			}
 		}
 	}

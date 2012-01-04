@@ -863,6 +863,12 @@ public class Main {
 	private void updateCheckboxPanel()
 	{
 		checkBoxPanel.removeAll();
+		//Reset selected value
+		boxMoleculeHiding.setSelected(false);
+		boxMoleculeTracking.setSelected(false);
+		boxDisplayForce.setSelected(false);
+		boxDisplayJoint.setSelected(false);
+		//Re-add checkboxes to parent panel
 		checkBoxPanel.add(boxMoleculeHiding, BorderLayout.NORTH);
 		if(selectedUnit==4 &&selectedSim==2)
 		checkBoxPanel.add(boxMoleculeTracking,BorderLayout.CENTER);
@@ -1068,11 +1074,11 @@ public class Main {
 //					pressureSlider.requestFocus();
 				
 			    //Add Speed slider
-				crPanel.add(speedLabel, "cell 0 0,alignx left");
+				crPanel.add(speedLabel, "cell 0 0,alignx center");
 				crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
 				crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
 				//Add Heat slider
-				crPanel.add(heatLabel, "cell 0 4,alignx left");
+				crPanel.add(heatLabel, "cell 0 4,alignx center");
 				crPanel.add(heatSlider, "cell 0 5,alignx left,growy");
 				crPanel.add(canvasControlLabel_main_heat, "cell 0 6");
 
@@ -1124,11 +1130,11 @@ public class Main {
 
 				
 				//Add Speed Slider
-				crPanel.add(speedLabel, "cell 0 0,alignx left");
+				crPanel.add(speedLabel, "cell 0 0,alignx center");
 				crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
 				crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
 				//Add Heat Slider
-				crPanel.add(heatLabel, "cell 0 4,alignx left");
+				crPanel.add(heatLabel, "cell 0 4,alignx center");
 				crPanel.add(heatSlider, "cell 0 5,alignx left,growy");
 				crPanel.add(canvasControlLabel_main_heat, "cell 0 6");
 				break;
@@ -1404,9 +1410,11 @@ public class Main {
 				int value = ((JSlider) e.getSource()).getValue();
 				getP5Canvas().setHeat(value);
 				int level = (value-(heatMax+heatMin)/2)/heatTickSpacing;
-				if(value>0)
+				if(level>0)
 					heatLabel.setText("+ "+level);
-				else if(value<0)
+				else if( level==0)
+					heatLabel.setText("0");
+				else 
 					heatLabel.setText("- "+Math.abs(level));
 			}
 		});

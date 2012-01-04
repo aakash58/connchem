@@ -82,8 +82,13 @@ units:
       #minTemperature: 1000
       #maxTemperature: 2000
       compounds:
-      - compound: "Phosphorus"
+      - compound: "Silver"
         qty: 15
+        cap: 50
+    - set: 7
+      compounds:
+      - compound: "Silicon Dioxide"
+        qty: 5
         cap: 50
   - sim: 3
     name: "Physical Changes"

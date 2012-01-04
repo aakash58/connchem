@@ -40,7 +40,6 @@ public class Molecule {
 	public float fric;
 	public float res;
 	private float scale = 1;
-	private int legendId=-1; //Legend Id used to connect molecule to graph legend
 
 	private float xTmp;   //Temporary x to save x position while dragging, in world coordinates
 	private float yTmp;   //Temporary x to save x position while dragging, in world coordinates
@@ -90,7 +89,6 @@ public class Molecule {
 	private boolean reactive = true; // Molecule can only react if this flag is
 										// true
 	private int tableIndex = -1;
-	//private boolean showTrail = false;
 
 	/******************************************************************
 	 * FUNCTION : Molecule() DESCRIPTION : Molecule Constructor
@@ -302,7 +300,7 @@ public class Molecule {
 		//Solid case
 		if( temp<=freezingTem)
 		{
-			res = 0.05f;
+			res = 0.5f;
 			fric = 0.6f;
 			setGravityScale(1.0f);
 		}
@@ -589,8 +587,8 @@ public class Molecule {
 		}
 		/* Bottom boundary check, bot boundary has min y value */
 		else if (body.getPosition().y
-				- PBox2D.scalarPixelsToWorld(this.minSize / 2) < p5Canvas.boundaries[3].body
-					.getPosition().y) {
+				- PBox2D.scalarPixelsToWorld(this.minSize/ 2) < (p5Canvas.boundaries[3].body
+					.getPosition().y - p5Canvas.boundaries[3].h)) {
 			Vec2 v = new Vec2(body.getPosition().x,
 					p5Canvas.boundaries[3].body.getPosition().y
 							+ PBox2D.scalarPixelsToWorld(getMaxSize() / 2));
@@ -693,9 +691,6 @@ public class Molecule {
 						- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);
 			}
 		}
-		//If this molecule is picked to show trail, make it transparent
-		//if(showTrail && p5Canvas.isTrackingEnabled)
-		//	p5Canvas.tint(p5Canvas.backgroundColor,126);
 
 		if (name.equals("Calcium-Ion")) {
 			p5Canvas.stroke(Color.BLUE.getRGB());
@@ -965,8 +960,5 @@ public class Molecule {
 		    
 		    return inside;
 		  }
-//	  public void setShowTrail(boolean flag	)
-//	  {
-//		  showTrail = flag;
-//	  }
+
 }
