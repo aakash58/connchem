@@ -107,7 +107,7 @@ public class P5Canvas extends PApplet {
 	ArrayList<String> products = new ArrayList<String>();
 	ArrayList<Molecule> killingList = new ArrayList<Molecule>();
 	// public int draggingBoundary =-1; //
-	private boolean isFirstTime = true;
+	//private boolean isFirstTime = true;
 	public boolean isHidden = false;
 
 	// Time step property
@@ -140,8 +140,10 @@ public class P5Canvas extends PApplet {
 
 	/******* Colors ********/
 	public int backgroundColor = Color.lightGray.getRGB();
-	int canvasBorderColor = Color.white.getRGB();
-	int selectBorderColor = Color.WHITE.getRGB();
+	public int canvasBorderColor = Color.WHITE.getRGB();
+	public int selectBorderColor = Color.WHITE.getRGB();  //The select rect color in when molecule masking enabled
+	public int boundaryColor = Color.WHITE.getRGB();
+	
 
 
 	public P5Canvas(Main parent) {
@@ -182,10 +184,46 @@ public class P5Canvas extends PApplet {
 		box2d.listenForCollisions();
 		defaultW = 560 / canvasScale;
 		defaultH = 635 / canvasScale;
-		setBoundary(0, 0, defaultW, defaultH);
+		size((int) (560), (int) (638));
+		
+		createBoundary(0, 0, defaultW, defaultH);
 
 		setupHeaterLimit();
 		currentVolume = getMain().defaultVolume;
+
+	}
+	public void createBoundary(float xx, float yy, float ww, float hh) {
+		if (hh > maxH)
+			return;
+		x = xx;
+		y = yy;
+		w = ww;
+		h = hh;
+
+		// Add a bunch of fixed boundaries
+		float bW = 10.f; // boundary width
+		int sliderValue = 0;
+		if (main.volumeSlider != null)
+			sliderValue = getMain().volumeSlider.getValue();
+		else
+			sliderValue = getMain().defaultVolume;
+		Boundary lBound = new Boundary(0, x, y, bW, 2 * h, sliderValue, box2d,
+				this);
+		Boundary rBound = new Boundary(1, x + w, y, bW, 2 * h, sliderValue,
+				box2d, this);
+		Boundary tBound = new Boundary(2, x + w / 2, y, w-bW , bW,
+				sliderValue, box2d, this);
+		Boundary bBound = new Boundary(3, x + w / 2, y + h, w + bW, bW,
+				sliderValue, box2d, this);
+
+		for(int i = 0;i<4;i++){
+			if (boundaries[i] != null)
+				boundaries[i].killBody();
+		}
+		boundaries[0] = lBound;
+		boundaries[1] = rBound;
+		boundaries[2] = tBound;
+		boundaries[3] = bBound;
 
 	}
 
@@ -196,10 +234,6 @@ public class P5Canvas extends PApplet {
 		y = yy;
 		w = ww;
 		h = hh;
-		if (isFirstTime) {
-			size((int) (560), (int) (638));
-			isFirstTime = false;
-		}
 
 		// Add a bunch of fixed boundaries
 		float bW = 10.f; // boundary width
@@ -239,7 +273,7 @@ public class P5Canvas extends PApplet {
 		if (isEnable && firstRun) {
 			// Initialization function to intial parameters
 			unitList.get(main.selectedUnit - 1).initialize();
-			
+
 			firstRun = false;
 		}
 

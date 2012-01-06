@@ -108,7 +108,7 @@ public class Main {
 	private CustomPopupMenu scrollablePopupMenu;
 	public String[] moleculeNames = null;
 
-	private String lblAddLabel = new String("Add "); // Label parameter on left
+	private String lblAddTitle = new String("Add "); // Label parameter on left
 														// panel
 
 	public JPanel leftPanel; // "Input" panel on left of application
@@ -537,7 +537,8 @@ public class Main {
 						// Get Compound Name
 						String cName = getCompoundName(selectedUnit,
 								selectedSim, selectedSet, i);
-						
+						panel.setName(cName);
+
 						//Add Compound Name label
 						JLabel label = new JLabel(cName);
 						final String fixedName = cName.replace(" ", "-");
@@ -548,12 +549,22 @@ public class Main {
 						panel.add(label, "cell 0 0 3 1,growx");
 
 						// Add Slider label
-						final JLabel label_1 = new JLabel(lblAddLabel
-								+ sliderValue);
+						final JLabel label_1 = new JLabel(lblAddTitle + sliderValue);
+						label_1.setName("lblAmount");
+						
+						//In Unit 2, we show "grams" that will be added instead of number of molecules
+						//mToMass should be set the same value as that in Unit2
+						if(selectedUnit == 2 )
+						{
+							int mToMass = 10;
+							if(selectedSet == 4  )
+								mToMass = 20;
+							label_1.setText(lblAddTitle + sliderValue*mToMass + "g" );
+						}
 						panel.add(label_1, "cell 0 1");
 
 						// Add slider and set up slider event listener
-						JSlider slider = new JSlider(minSliderValue,
+						final JSlider slider = new JSlider(minSliderValue,
 								maxSliderValue, sliderValue);
 						panel.add(slider, "cell 1 1");
 						moleculeSliderMap.put(fixedName,slider);
@@ -561,7 +572,16 @@ public class Main {
 							public void stateChanged(ChangeEvent e) {
 								int value = ((JSlider) e.getSource())
 										.getValue();
-								label_1.setText(lblAddLabel + value);
+
+								if(selectedUnit == 2 )
+								{
+									int mToMass = 10;
+									if(selectedSet == 4  )
+										mToMass = 20;
+									label_1.setText(lblAddTitle + value*mToMass + "g" );
+								}
+								else
+									label_1.setText(lblAddTitle + value);
 							}
 						});
 
@@ -580,9 +600,7 @@ public class Main {
 
 								if (arg0.getComponent().isEnabled()) {
 									// Get number showing on slider bar
-									int count = Integer.parseInt(label_1
-											.getText().substring(
-													lblAddLabel.length()));
+									int count = slider.getValue();
 									// Check if molecule number is going over
 									// cap number
 									// If yes, add molecules no more than cap
@@ -1879,7 +1897,7 @@ public class Main {
 		inputTipTextL[0] = new String("<html>step 1:<p>step 2:<p>step 3:<p><p>step 4:<p><p></html>");
 		inputTipTextR[1]= new String("<html>Select the amount of desired solute, and press \"ADD\"."
 				+ "<p>Select the amount of desired water, and press \"ADD\"."
-				+ "<p>Set the temperature slider to the desired temperature."
+				+ "<p>Move the Heat slider to heat solution."
 				+ "<p> Press \"PLAY\".</html>"); //Unit 2 set 3
 		inputTipTextL[1] = new String("<html>step 1:<p><p>step 2:<p><P>step 3:<p><p>step 4:</html>");
 
