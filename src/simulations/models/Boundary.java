@@ -92,39 +92,43 @@ public class Boundary {
 	}
 		
 	public void set(int v){
+		
 			volumeSliderValue = v;
 			difVolume = (volumeSliderValue-volumeSliderDefaultValue)*p5Canvas.multiplierVolume;
-			isTransformed =true;
+			if( difVolume!=0)
+				isTransformed =true;
+			else 
+				isTransformed = false;
 	}
 	
 	
 	public void display() {
 		float a = body.getAngle();
 		
+		//Start to draw boundaries
+		Vec2 pos = box2d.getBodyPixelCoord(body);
+		
 		//Transform top boundary to right position before draw it
 		if (id==2)
 	    {
-			if(isTransformed)
+			if(isTransformed && p5Canvas.isSimStarted)
 		    {
 				Vec2 v = new Vec2(body.getPosition().x, yOriginal + 
 						box2d.scalarPixelsToWorld(difVolume));
+//				boolean tmp = p5Canvas.isEnable;
+//				p5Canvas.isEnable = false;
 				body.setTransform(v, body.getAngle());
+//				p5Canvas.isEnable = tmp;
 				isTransformed =false;
+				
 		    }
 		}	
 		
-		//Start to draw boundaries
-		Vec2 pos = box2d.getBodyPixelCoord(body);
 		p5Canvas.pushMatrix();
 		p5Canvas.translate(pos.x, pos.y);
 		p5Canvas.rotate(-a);
 		float pShapeW =w;
 		float pShapeH =h;
-		if (id==3)
-			p5Canvas.fill(p5Canvas.heatRGB);
-		else{
-			p5Canvas.fill(Color.WHITE.getRGB());
-		}	
 
 		if(id ==2 ) //Render top boundary with a real image 
 		{	
@@ -138,12 +142,20 @@ public class Boundary {
 				p5Canvas.shape(weightShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
 			else
 				p5Canvas.shape(baseShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
+			
 		}
+		
+		//Color
+		if(id ==2)
+			p5Canvas.noFill();
+		else if (id ==3)
+			p5Canvas.fill(p5Canvas.heatRGB);
 		else
 		{
-			p5Canvas.noStroke();
-			p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);	
+			p5Canvas.fill(p5Canvas.boundaryColor);
 		}
+		p5Canvas.noStroke();
+		p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);	
 		
 		p5Canvas.popMatrix();
 	 	

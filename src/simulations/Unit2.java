@@ -2,12 +2,15 @@ package simulations;
 
 import static data.State.molecules;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Random;
 import java.text.DecimalFormat;
 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import main.Main;
@@ -1625,6 +1628,24 @@ public class Unit2 extends UnitBase{
 		this.mToMass = 10;
 		if (p5Canvas.getMain().selectedSet == 4)
 			this.mToMass = 20;
+		/*
+		//Reset Add molecule lable
+		Component [] panels = p5Canvas.getMain().dynamicPanel.getComponents();
+		for(Component c : panels)
+		{
+			if(!c.getName().equals("Water"))
+			{
+				for( Component cc: ((JPanel)c).getComponents() )
+				{
+					if(cc.getName().equals("lblAmount"))
+					{
+						((JLabel)cc).setText("");
+					}
+				}
+			}
+				//((panel)c).
+		}*/
+		
 		computeDissolved();
 	}
 
