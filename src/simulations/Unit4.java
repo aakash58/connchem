@@ -153,9 +153,9 @@ public class Unit4 extends UnitBase {
 			}
 			else if (p5Canvas.getMain().selectedSet==2)
 			{
-				p5Canvas.getMain().volumeSlider.setEnabled(false);
 				//Make initial volume smaller
-				p5Canvas.currentVolume/=2;
+				p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume/2);
+				p5Canvas.getMain().volumeSlider.setEnabled(false);
 				lastTemp = p5Canvas.temp;
 			}
 			else if (p5Canvas.getMain().selectedSet==3)
@@ -414,10 +414,10 @@ public class Unit4 extends UnitBase {
 		String c1 = o1.getClass().getName();
 		String c2 = o2.getClass().getName();
 		// Make sure reaction only takes place between molecules and boundaries
-		if (c1.equals("simulations.models.Molecule") && o2 == p5Canvas.boundaries[2]) {
+		if (c1.equals("simulations.models.Molecule") && o2 == p5Canvas.boundaries.getTopBoundary()) {
 			mole = (Molecule) o1;
 			boundary = (Boundary) o2;
-		} else if (o1 == p5Canvas.boundaries[2]
+		} else if (o1 == p5Canvas.boundaries.getTopBoundary()
 				&& c2.equals("simulations.models.Molecule")) {
 			mole = (Molecule) o2;
 			boundary = (Boundary) o1;
@@ -443,9 +443,13 @@ public class Unit4 extends UnitBase {
 		if (p5Canvas.currentVolume > p5Canvas.volumeMaxBoundary)
 			p5Canvas.currentVolume = p5Canvas.volumeMaxBoundary;
 
-		p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
+		if(p5Canvas.currentVolume!=lastVolume)
+		{
+			p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
+			//p5Canvas.boundaries.setVolume(p5Canvas.currentVolume);
+		}
 		// Change volume label
-		p5Canvas.getMain().volumeLabel.setText(p5Canvas.currentVolume + " mL");
+		//p5Canvas.setVolume(p5Canvas.currentVolume);
 		
 		lastTemp = p5Canvas.temp;
 		lastMole = State.molecules.size();

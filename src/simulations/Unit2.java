@@ -85,7 +85,7 @@ public class Unit2 extends UnitBase{
 		float centerX = p5Canvas.x + 50; // X coordinate around which we are going to add
 								// Ions, 50 is border width
 		// centerX += rand.nextFloat()*(w/3*2);
-		float centerY = p5Canvas.y + 80 - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + 80 - p5Canvas.boundaries.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 
@@ -209,7 +209,7 @@ public class Unit2 extends UnitBase{
 
 		float centerX = p5Canvas.x + 50; // X coordinate around which we are going to add
 								// Ions, 260 is to make SiO2 spawn in the middle
-		float centerY = p5Canvas.y + 80 - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + 80 - p5Canvas.boundaries.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 		Vec2 topLeft = new Vec2(centerX, centerY);
@@ -316,7 +316,7 @@ public class Unit2 extends UnitBase{
 
 		float centerX = p5Canvas.x + 65; // X coordinate around which we are going to
 									// add Ions, 50 is border width
-		float centerY = p5Canvas.y + 100 - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + 100 - p5Canvas.boundaries.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 
@@ -498,7 +498,7 @@ public class Unit2 extends UnitBase{
 		
 		float centerX = p5Canvas.x + 50; // X coordinate around which we are going to
 									// add Ions, 50 is border width
-		float centerY = p5Canvas.y + 100 - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + 100 - p5Canvas.boundaries.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 
@@ -620,7 +620,7 @@ public class Unit2 extends UnitBase{
 
 		// Initializing
 		centerX = p5Canvas.x + moleWidth/2;
-		centerY = p5Canvas.y + moleHeight - Boundary.difVolume;
+		centerY = p5Canvas.y + moleHeight - p5Canvas.boundaries.difVolume;
 		topLeft = new Vec2(centerX - 0.5f * moleWidth, centerY - 0.5f * moleHeight);
 		botRight = new Vec2(centerX + colNum * moleWidth, centerY + rowNum
 				* moleHeight);
@@ -1878,7 +1878,7 @@ public class Unit2 extends UnitBase{
 			int numRow = (int) (Math.ceil(count/6.)+1);
 			
 			float centerX = p5Canvas.x + 200 ;                              //X coordinate around which we are going to add Ions, 50 is border width
-			float centerY = p5Canvas.y + 80-Boundary.difVolume;             //Y coordinate around which we are going to add Ions
+			float centerY = p5Canvas.y + 80-p5Canvas.boundaries.difVolume;             //Y coordinate around which we are going to add Ions
 			
 			for (int i=0;i<count;i++){
 				float x_,y_,angle;

@@ -47,7 +47,7 @@ public class P5Canvas extends PApplet {
 	public float x = 0;
 	public float y = 0;
 	public float w;// width of the boundary
-	public float h;// width of the boundary
+	public float h;// height of the boundary
 	public float defaultW;
 	public float defaultH;
 
@@ -86,12 +86,12 @@ public class P5Canvas extends PApplet {
 	//public int lastVolume;
 	public int volumeMinBoundary = 10;
 	public int volumeMaxBoundary = 100;
-	public float multiplierVolume = 13f; // Multiplier from pixels to ml
+	
 	public float maxH = 1100;// minimum height of container
 
 	public int heatRGB = 0;
-
-	public Boundary[] boundaries = new Boundary[4];
+	public Boundaries boundaries = null;
+	//public Boundary[] boundaries = new Boundary[4];
 	/*
 	 * LeftBoundary 0 RightBoundary 1 TopBoundary 2 BottomBoundary 3
 	 */
@@ -133,7 +133,7 @@ public class P5Canvas extends PApplet {
 											// start of sim
 	public int[] heaterLimit;
 
-
+	public float multiplierVolume = 13f; // Multiplier from world coordinates to ml
 
 	public boolean firstRun = true;
 
@@ -159,6 +159,8 @@ public class P5Canvas extends PApplet {
 		unitList.add(unit2);
 		unitList.add(unit3);
 		unitList.add(unit4);
+		
+		boundaries = new Boundaries (this);
 
 	}
 
@@ -185,84 +187,14 @@ public class P5Canvas extends PApplet {
 		defaultW = 560 / canvasScale;
 		defaultH = 635 / canvasScale;
 		size((int) (560), (int) (638));
+		w = defaultW;
+		h = defaultH;
 		
-		createBoundary(0, 0, defaultW, defaultH);
+		currentVolume = getMain().defaultVolume;
+		boundaries.create(x, y, w, h,currentVolume);
 
 		setupHeaterLimit();
-		currentVolume = getMain().defaultVolume;
-
-	}
-	public void createBoundary(float xx, float yy, float ww, float hh) {
-		if (hh > maxH)
-			return;
-		x = xx;
-		y = yy;
-		w = ww;
-		h = hh;
-
-		// Add a bunch of fixed boundaries
-		float bW = 10.f; // boundary width
-		int sliderValue = 0;
-		if (main.volumeSlider != null)
-			sliderValue = getMain().volumeSlider.getValue();
-		else
-			sliderValue = getMain().defaultVolume;
-		Boundary lBound = new Boundary(0, x, y, bW, 2 * h, sliderValue, box2d,
-				this);
-		Boundary rBound = new Boundary(1, x + w, y, bW, 2 * h, sliderValue,
-				box2d, this);
-		Boundary tBound = new Boundary(2, x + w / 2, y, w-bW , bW,
-				sliderValue, box2d, this);
-		Boundary bBound = new Boundary(3, x + w / 2, y + h, w + bW, bW,
-				sliderValue, box2d, this);
-
-		for(int i = 0;i<4;i++){
-			if (boundaries[i] != null)
-				boundaries[i].killBody();
-		}
-		boundaries[0] = lBound;
-		boundaries[1] = rBound;
-		boundaries[2] = tBound;
-		boundaries[3] = bBound;
-
-	}
-
-	public void setBoundary(float xx, float yy, float ww, float hh) {
-		if (hh > maxH)
-			return;
-		x = xx;
-		y = yy;
-		w = ww;
-		h = hh;
-
-		// Add a bunch of fixed boundaries
-		float bW = 10.f; // boundary width
-		int sliderValue = 0;
-		if (main.volumeSlider != null)
-			sliderValue = getMain().volumeSlider.getValue();
-		else
-			sliderValue = getMain().defaultVolume;
-		Boundary lBound = new Boundary(0, x, y, bW, 2 * h, sliderValue, box2d,
-				this);
-		Boundary rBound = new Boundary(1, x + w, y, bW, 2 * h, sliderValue,
-				box2d, this);
-		Boundary tBound = new Boundary(2, x + w / 2, y, w-bW , bW,
-				sliderValue, box2d, this);
-		Boundary bBound = new Boundary(3, x + w / 2, y + h, w + bW, bW,
-				sliderValue, box2d, this);
-
-		if (boundaries[0] != null)
-			boundaries[0].killBody();
-		if (boundaries[1] != null)
-			boundaries[1].killBody();
-		if (boundaries[2] != null)
-			boundaries[2].killBody();
-		if (boundaries[3] != null)
-			boundaries[3].killBody();
-		boundaries[0] = lBound;
-		boundaries[1] = rBound;
-		boundaries[2] = tBound;
-		boundaries[3] = bBound;
+		
 
 	}
 
@@ -277,7 +209,9 @@ public class P5Canvas extends PApplet {
 			firstRun = false;
 		}
 
-		setVolume();
+		//In Unit 4 Sim 4 Set 2, update volume every frame
+		if(main.selectedUnit==4&&main.selectedSim==4&&main.selectedSet==2)
+			setVolume(currentVolume);
 		updateMolecules(); // update molecules which are newly created
 		updateProperties(); // Update temperature and pressure etc
 
@@ -307,9 +241,7 @@ public class P5Canvas extends PApplet {
 		}
 
 		// Draw boundary
-		for (int i = 0; i < 4; i++) {
-			boundaries[i].display();
-		}
+		boundaries.display();
 
 		/*
 		 * Random pick one molecule and track it if tracking molecule checkbox
@@ -741,8 +673,7 @@ public class P5Canvas extends PApplet {
 		firstRun = true;
 		temp = 25;
 		currentVolume = getMain().defaultVolume;
-		// Reset boundaries
-		setBoundary(0, 0, defaultW, defaultH);
+
 
 		removeAllMolecules();
 		removeAllAnchors();
@@ -763,7 +694,8 @@ public class P5Canvas extends PApplet {
 		isTrackingEnabled = false;
 		getMain().boxMoleculeTracking.setSelected(isTrackingEnabled);
 
-		
+		// Reset boundaries
+		boundaries.resetBoundary(0, 0, defaultW, defaultH,currentVolume);
 	}
 
 	/*
@@ -838,17 +770,19 @@ public class P5Canvas extends PApplet {
 	 */
 
 	// Set Volume; values are from 0 to 100; 50 is default value
-	public void setVolume() {
+	public void setVolume(int v) {
 		boolean tmp = isEnable;
 		isEnable = false;
-		if (currentVolume < volumeMinBoundary
-				|| currentVolume > volumeMaxBoundary) {
+		currentVolume = v;
+		if (currentVolume < volumeMinBoundary) 
 			currentVolume = volumeMinBoundary;
-			main.volumeSlider.setValue(currentVolume);
-			main.volumeSlider.updateUI();
-			main.volumeLabel.setText(currentVolume + " mL");
-		}
-		boundaries[2].set(currentVolume);
+		else if(currentVolume > volumeMaxBoundary)
+			currentVolume = volumeMaxBoundary;
+		
+		//main.volumeSlider.setValue(currentVolume);
+		//main.volumeSlider.updateUI();
+		main.volumeLabel.setText(currentVolume + " mL");
+		boundaries.setVolume(currentVolume);
 		isEnable = tmp;
 	}
 
@@ -896,11 +830,12 @@ public class P5Canvas extends PApplet {
 
 		String c1 = o1.getClass().getName();
 		String c2 = o2.getClass().getName();
+		
 		// Make sure reaction only takes place between molecules and boundaries
-		if (c1.equals("simulations.models.Molecule") && o2 == boundaries[3]) {
+		if (c1.equals("simulations.models.Molecule") && o2 == boundaries.getBotBoundary()) {
 			mole = (Molecule) o1;
 			boundary = (Boundary) o2;
-		} else if (o1 == boundaries[3]
+		} else if (o1 == boundaries.getBotBoundary()
 				&& c2.equals("simulations.models.Molecule")) {
 			mole = (Molecule) o2;
 			boundary = (Boundary) o1;
@@ -1091,7 +1026,7 @@ public class P5Canvas extends PApplet {
 					// Dragging all molecules
 					isDrag = true;
 					// Reseting boundaries position
-					setBoundary(x + xDrag - xTmp, y + yDrag - yTmp, w, h);
+					boundaries.moveBoundary(xDrag - xTmp, yDrag - yTmp);
 					
 				}
 			} else // Drag the whole canvas, everything on the canvas moves with
@@ -1100,7 +1035,7 @@ public class P5Canvas extends PApplet {
 				// Dragging all molecules
 				isDrag = true;
 				// Reseting boundaries position
-				setBoundary(x + xDrag - xTmp, y + yDrag - yTmp, w, h);
+				boundaries.moveBoundary(xDrag - xTmp, yDrag - yTmp);
 
 			}
 			// TODO: reset anchors
@@ -1180,5 +1115,9 @@ public class P5Canvas extends PApplet {
 
 	public TableView getTableView() {
 		return main.getTableView();
+	}
+	public PBox2D getBox2d()
+	{
+		return box2d;
 	}
 }
