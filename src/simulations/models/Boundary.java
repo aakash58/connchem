@@ -1,7 +1,5 @@
 package simulations.models;
 
-import java.awt.Color;
-
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
@@ -17,36 +15,37 @@ public class Boundary {
 	// But we also have to make a body for box2d to know about it
 	public Body body;
 	PBox2D box2d;
+	Boundaries boundaries;
 	private float x;
 	private float y;
 	public float w;
 	public float h;
-	private float box2dW;
-	private float box2dH;
+	//private Vec2 positionOrigin;
+	//private float box2dW;
+	//private float box2dH;
+	//private float boundaryWidth;
 	private int id =-1;
-	private int volumeSliderValue;
-	private int volumeSliderDefaultValue;
+	//private int volumeSliderValue;
+	//private int volumeSliderDefaultValue;
 	private float yOriginal =0; //Original y of body when created
-	public static float difVolume; //The difference between current and origin top boundary , in form of pixel coordinates
-	public static boolean isTransformed =false; //Increase or Decrease in Volume
+	//public static boolean isTransformed =false; //Increase or Decrease in Volume
 	private PShape baseShape = new PShape();
 	private PShape weightShape = new PShape();
 	
 	
-	public Boundary(int id_,float x_,float y_, float w_, float h_, int sliderValue_, PBox2D box2d_, P5Canvas parent_) {
-		id = id_;
-		this.p5Canvas = parent_;
-		this.box2d = box2d_;
-		x=x_;
-		y=y_;
-		w = w_;
-		h = h_;
-		volumeSliderValue =sliderValue_;
-		volumeSliderDefaultValue = p5Canvas.getMain().defaultVolume;
+	
+	public Boundary(int _id, float xv, float yv, float wv, float hv, Boundaries parent) {
+		id = _id;
+		boundaries = parent;
+		p5Canvas = boundaries.getP5Canvas();
+		box2d = p5Canvas.getBox2d();
+		x=xv;
+		y=yv;
+		w = wv;
+		h = hv;
 		// Figure out the box2d coordinates
-		box2dW = box2d.scalarPixelsToWorld(w_/2);
-		box2dH = box2d.scalarPixelsToWorld(h_/2);
-		
+		float box2dW = box2d.scalarPixelsToWorld(w/2);
+		float box2dH = box2d.scalarPixelsToWorld(h/2);
 		
 		// Define the polygon
 		PolygonShape polygonShape = new PolygonShape();
@@ -55,7 +54,7 @@ public class Boundary {
 		// Create the body
 		BodyDef bd = new BodyDef();
 		bd.type = BodyType.STATIC;
-        bd.position.set(box2d.coordPixelsToWorld(new Vec2(x_,y_)));
+        bd.position.set(box2d.coordPixelsToWorld(new Vec2(x,y)));
 		body = box2d.createBody(bd);
 		while (body ==null){ 
 			body = box2d.createBody(bd);
@@ -70,9 +69,10 @@ public class Boundary {
         
 	//	body.setMassFromShapes();
 		body.setUserData(this);
-		yOriginal = body.getPosition().y ;
-		isTransformed =true;
-		if(id==2)
+		//positionOrigin = new Vec2(body.getPosition());
+		yOriginal = body.getPosition().y;
+		//isTransformed =true;
+		if(id==boundaries.TOP)
 		{
 			String basePath = "resources/compoundsSvg/base.svg";
 			String weightPath = "resources/compoundsSvg/weight-with-base.svg";
@@ -80,6 +80,38 @@ public class Boundary {
 			weightShape = p5Canvas.loadShape(weightPath);
 		}
 	}
+	
+	//Reset position of boundary, input in pixel coordinates
+	public void resetPosition(float xv,float yv)
+	{
+		//TODO: set boundary position
+		Vec2 vec = box2d.coordPixelsToWorld(new Vec2(xv,yv));
+		body.setTransform(vec, body.getAngle());
+	}
+	
+	//Move boundary, input is move vector in pixel coordinates
+	public void move(float xv,float yv)
+	{
+		Vec2 move = box2d.vectorPixelsToWorld(new Vec2(xv,yv));
+		Vec2 pos = new Vec2(body.getPosition());
+		pos.addLocal(move);
+		body.setTransform(pos, body.getAngle());
+		
+		this.yOriginal+=move.y;
+	}
+	
+	//Designed to move top boundary, x value will never be changed while volume is changing
+	public void setY(float dif)
+	{
+		Vec2 pos = new Vec2(body.getPosition());
+		Vec2 vec = new Vec2();
+		vec.x = pos.x;
+		vec.y = this.yOriginal + box2d.scalarPixelsToWorld(dif);
+		if(!body.isAwake())
+			body.setAwake(true);
+		body.setTransform(vec, body.getAngle());
+	}
+	
 	public float getId(){
 		return id;
 	}
@@ -90,7 +122,7 @@ public class Boundary {
 	public float getY(){
 		return y;
 	}
-		
+		/*
 	public void set(int v){
 		
 			volumeSliderValue = v;
@@ -100,7 +132,7 @@ public class Boundary {
 			else 
 				isTransformed = false;
 	}
-	
+	*/
 	
 	public void display() {
 		float a = body.getAngle();
@@ -108,6 +140,7 @@ public class Boundary {
 		//Start to draw boundaries
 		Vec2 pos = box2d.getBodyPixelCoord(body);
 		
+		/*
 		//Transform top boundary to right position before draw it
 		if (id==2)
 	    {
@@ -122,15 +155,16 @@ public class Boundary {
 				isTransformed =false;
 				
 		    }
-		}	
-		
+		}	*/
+		/***************************** Draw Boundary ***************************/
 		p5Canvas.pushMatrix();
 		p5Canvas.translate(pos.x, pos.y);
 		p5Canvas.rotate(-a);
 		float pShapeW =w;
 		float pShapeH =h;
 
-		if(id ==2 ) //Render top boundary with a real image 
+		//Render top boundary with a real image 
+		if(id == boundaries.TOP) 
 		{	
 			float width = baseShape.getWidth();
 			float height = baseShape.getHeight();
@@ -142,13 +176,13 @@ public class Boundary {
 				p5Canvas.shape(weightShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
 			else
 				p5Canvas.shape(baseShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
-			
 		}
 		
 		//Color
-		if(id ==2)
+		if(id == boundaries.TOP)
 			p5Canvas.noFill();
-		else if (id ==3)
+			//p5Canvas.fill(p5Canvas.boundaryColor);
+		else if (id == boundaries.BOT)
 			p5Canvas.fill(p5Canvas.heatRGB);
 		else
 		{
@@ -158,38 +192,18 @@ public class Boundary {
 		p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);	
 		
 		p5Canvas.popMatrix();
+		/****************************** End Drawing *******************************/
 	 	
 	}
-
-	public int isIn(float x_, float y_) {
-		float xx=0, yy=0;
-		if(id==0){
-			xx=x-w/2; 	
-			yy=y-h/2;
-		}
-		else if(id==1){
-			xx=x-w/2; 	
-			yy=y-h/2;
-		}
-		else if(id==2){
-			xx=x-w/2; 	
-			yy=y-h/2;
-		}
-		else if(id==3){
-			xx=x-w/2; 	
-			yy=y-h/2;
-		}
-		xx = xx*p5Canvas.canvasScale;
-		yy = yy*p5Canvas.canvasScale;
-		if (xx<=x_ && x_<xx+w && yy<y_ && y_<yy+h){
-			return id;
-		}
-		else 
-			return -1;
+	
+	public float getOriginalY()
+	{
+		return this.yOriginal;
 	}
 		
-	public void killBody() {
-		box2d.destroyBody(body);
+	public void destroy() {
+		if(this.body!=null)
+			box2d.destroyBody(body);
 		body.m_world =null;
 	}
 }

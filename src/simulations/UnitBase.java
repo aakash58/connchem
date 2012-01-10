@@ -155,7 +155,7 @@ public abstract class UnitBase {
 		float increX = p5Canvas.w/16;
 		float offsetX = size.x/2+size.x/6;
 		centerX = p5Canvas.x+offsetX;
-		centerY = p5Canvas.y + size.y - Boundary.difVolume;
+		centerY = p5Canvas.y + size.y - p5Canvas.boundaries.difVolume;
 		Random rand = null;
 		
 
@@ -277,7 +277,7 @@ public abstract class UnitBase {
 
 		// Initializing
 		centerX = p5Canvas.x + 50;
-		centerY = p5Canvas.y + 80 - Boundary.difVolume;
+		centerY = p5Canvas.y + 80 - p5Canvas.boundaries.difVolume;
 		topLeft = new Vec2(centerX - 0.5f * size.x, centerY - 0.5f * size.y);
 		botRight = new Vec2(centerX + colNum * size.x, centerY + rowNum
 				* size.y);
@@ -362,7 +362,7 @@ public abstract class UnitBase {
 		
 		float centerX = p5Canvas.x + moleWidth/2; // X coordinate around which we are going to
 									// add Ions, 50 is border width
-		float centerY = (float) (p5Canvas.y + p5Canvas.h- ((float)numRow+0.5)*moleHeight - Boundary.difVolume); // Y coordinate around
+		float centerY = (float) (p5Canvas.y + p5Canvas.h- ((float)numRow+0.5)*moleHeight - p5Canvas.boundaries.difVolume); // Y coordinate around
 														// which we are going to
 														// add Ions
 
@@ -591,7 +591,7 @@ public abstract class UnitBase {
 		float offsetX = size.x/2+size.x/6;
 		float centerX = p5Canvas.x + offsetX; // X coordinate around which we are going to add
 								// Ions, 50 is border width
-		float centerY = p5Canvas.y + p5Canvas.h -size.y*numRow - Boundary.difVolume; // Y coordinate around
+		float centerY = p5Canvas.y + p5Canvas.h -size.y*numRow - p5Canvas.boundaries.difVolume; // Y coordinate around
 														// which we are going to
 														// add Ions
 

@@ -577,28 +577,28 @@ public class Molecule {
 		/************************** Boundary Check **************************/
 		/* If molecules go out of boundary, reset their position */
 		/* Top boundary check, top boundary has max y value */
-		if (body.getPosition().y + PBox2D.scalarPixelsToWorld(this.minSize / 2) > p5Canvas.boundaries[2].body
+		if (body.getPosition().y + PBox2D.scalarPixelsToWorld(this.minSize / 2) > p5Canvas.boundaries.getTopBoundary().body
 				.getPosition().y) {
 			Vec2 v = new Vec2(body.getPosition().x,
-					p5Canvas.boundaries[2].body.getPosition().y
+					p5Canvas.boundaries.getTopBoundary().body.getPosition().y
 							- PBox2D.scalarPixelsToWorld(getMaxSize() / 2));
 			if (body != null && v != null)
 				body.setTransform(v, body.getAngle());
 		}
 		/* Bottom boundary check, bot boundary has min y value */
 		else if (body.getPosition().y
-				- PBox2D.scalarPixelsToWorld(this.minSize/ 2) < (p5Canvas.boundaries[3].body
-					.getPosition().y - p5Canvas.boundaries[3].h)) {
+				- PBox2D.scalarPixelsToWorld(this.minSize/ 2) < (p5Canvas.boundaries.getBotBoundary().body
+					.getPosition().y - p5Canvas.boundaries.getBotBoundary().h)) {
 			Vec2 v = new Vec2(body.getPosition().x,
-					p5Canvas.boundaries[3].body.getPosition().y
+					p5Canvas.boundaries.getBotBoundary().body.getPosition().y
 							+ PBox2D.scalarPixelsToWorld(getMaxSize() / 2));
 			if (body != null && v != null)
 				body.setTransform(v, body.getAngle());
 		}
 		/* Left boundary check, left boundary has min x value */
-		if (body.getPosition().x - PBox2D.scalarPixelsToWorld(this.minSize / 2) < p5Canvas.boundaries[0].body
+		if (body.getPosition().x - PBox2D.scalarPixelsToWorld(this.minSize / 2) < p5Canvas.boundaries.getLeftBoundary().body
 				.getPosition().x) {
-			Vec2 v = new Vec2(p5Canvas.boundaries[0].body.getPosition().x
+			Vec2 v = new Vec2(p5Canvas.boundaries.getLeftBoundary().body.getPosition().x
 					+ PBox2D.scalarPixelsToWorld(getMaxSize() / 2),
 					body.getPosition().y);
 			if (body != null && v != null)
@@ -606,9 +606,9 @@ public class Molecule {
 		}
 		/* Right boundary check, right boundary has max x value */
 		else if (body.getPosition().x
-				+ PBox2D.scalarPixelsToWorld(this.minSize / 2) > p5Canvas.boundaries[1].body
+				+ PBox2D.scalarPixelsToWorld(this.minSize / 2) > p5Canvas.boundaries.getRightBoundar().body
 					.getPosition().x) {
-			Vec2 v = new Vec2(p5Canvas.boundaries[1].body.getPosition().x
+			Vec2 v = new Vec2(p5Canvas.boundaries.getRightBoundar().body.getPosition().x
 					- PBox2D.scalarPixelsToWorld(getMaxSize() / 2),
 					body.getPosition().y);
 			if (body != null && v != null)

@@ -1341,13 +1341,17 @@ public class Main {
 				if (!isVolumeblocked) {
 					JSlider vSlider = (JSlider) e.getSource();
 					int value = (vSlider).getValue();
+					
+					p5Canvas.setVolume(value);
+					
+					/*
 					p5Canvas.currentVolume = value;
 					
 					if(value<p5Canvas.volumeMinBoundary)
 					{
 						value = p5Canvas.volumeMinBoundary;
 						volumeLabel.setText(value+ " mL");
-					}
+					}*/
 				}
 			}
 		});

@@ -275,7 +275,7 @@ public class Unit3 extends UnitBase {
 		offsetX = p5Canvas.w / 2 - (colNum * moleWidth) / 2;
 		centerX = p5Canvas.x + leftBorder + offsetX;
 		centerY = p5Canvas.y + p5Canvas.h - rowNum * moleHeight
-				- Boundary.difVolume;
+				- p5Canvas.boundaries.difVolume;
 
 		if (spawnStyle == SpawnStyle.SolidCube) {
 			// Create molecules align in cube pattern
@@ -391,7 +391,7 @@ public class Unit3 extends UnitBase {
 				}
 
 				centerY = p5Canvas.y + p5Canvas.h - rowNum * lineSpace
-						- Boundary.difVolume;
+						- p5Canvas.boundaries.difVolume;
 				y_ = centerY + i / dimension * lineSpace;
 				res = molecules.add(new Molecule(x_, y_, compoundName, box2d,
 						p5Canvas, (float) (Math.PI / 2)));
@@ -521,7 +521,7 @@ public class Unit3 extends UnitBase {
 		// offsetX = p5Canvas.w / 2 - (colNum * moleWidth) / 2;
 		centerX = (p5Canvas.x + p5Canvas.w) / 2;
 		centerY = p5Canvas.y + p5Canvas.h - (moleHeight + moleWidth)
-				- Boundary.difVolume;
+				- p5Canvas.boundaries.difVolume;
 		float lineSpace = moleHeight / 2 + moleWidth / 2;
 
 		int startIndex = State.molecules.size() - 1;
