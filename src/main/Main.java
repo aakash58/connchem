@@ -245,6 +245,9 @@ public class Main {
 	public JLabel lblKEValue;
 	public JLabel lblMoleTitle;
 	public JLabel lblMoleValue;
+	public JLabel lblMultiplicationText1;
+	public JLabel lblMultiplicationText2;
+	public JLabel lblMultiplicationText3;
 
 	public SimpleBar barPressure;
 	public SimpleBar barVolume;
@@ -888,7 +891,7 @@ public class Main {
 		boxDisplayJoint.setSelected(false);
 		//Re-add checkboxes to parent panel
 		checkBoxPanel.add(boxMoleculeHiding, BorderLayout.NORTH);
-		if(selectedUnit==4 &&selectedSim==2)
+		if(this.isSimSelected(4, 2))
 		checkBoxPanel.add(boxMoleculeTracking,BorderLayout.CENTER);
 		checkBoxPanel.add(boxDisplayForce, BorderLayout.SOUTH);
 		//checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
@@ -1009,30 +1012,29 @@ public class Main {
 			{
 			int barWidth = 40;
 			int barHeight = 120;
-			dashboard.setLayout(new MigLayout("","[45][45][25][45][25][45]","[][][grow][]"));
-			dashboard.add(lblElapsedTimeText, "cell 2 3 3 1, align center");
-			dashboard.add(elapsedTime, "cell 5 3 ");
+			dashboard.setLayout(new MigLayout("","[45][8][45][25][45][8][10][8][45]","[][][grow][]"));
+			//dashboard.add(lblElapsedTimeText, "cell 0 3 5 1, align center");
+			//dashboard.add(elapsedTime, "cell 5 3 ");
 			
 			dashboard.add(lblPressureText, "cell 0 0"+alignStr);
-			//dashboard.add(lblPressureValue ,"cell 0 1"+alignStr);
-			dashboard.add(lblVolumeText,"cell 1 0"+alignStr);
-			//dashboard.add(lblVolumeValue,"cell 1 1"+alignStr);
-			dashboard.add(lblEqualText,"cell 2 0"+alignStr);
-			dashboard.add(lblMolText,"cell 3 0"+alignStr); 
-			//dashboard.add(lblMolValue,"cell 3 1"+alignStr); 
-			dashboard.add(lblRText,"cell 4 0"+alignStr); 
-			//dashboard.add(lblRValue, "cell 4 1"+alignStr); 
-			dashboard.add(lblTempText,"cell 5 0"+alignStr); 
-			//dashboard.add(lblTempValue,"cell 5 1"+alignStr);
+			dashboard.add(lblMultiplicationText1, "cell 1 0"+alignStr);
+			dashboard.add(lblVolumeText,"cell 2 0"+alignStr);
+
+			dashboard.add(lblEqualText,"cell 3 0"+alignStr);
+			dashboard.add(lblMolText,"cell 4 0"+alignStr); 
+			dashboard.add(lblMultiplicationText2, "cell 5 0"+alignStr);
+			dashboard.add(lblRText,"cell 6 0"+alignStr); 
+			dashboard.add(lblMultiplicationText3, "cell 7 0"+alignStr);
+			dashboard.add(lblTempText,"cell 8 0"+alignStr); 
 
 			barPressure.setPreferredSize(new Dimension(barWidth,barHeight));
 			barVolume.setPreferredSize(new Dimension(barWidth,barHeight));
 			barMol.setPreferredSize(new Dimension(barWidth,barHeight));
 			barTemp.setPreferredSize(new Dimension(barWidth,barHeight));
 			dashboard.add(barPressure,"cell 0 2"+alignStr);
-			dashboard.add(barVolume,"cell 1 2"+alignStr);
-			dashboard.add(barMol,"cell 3 2"+alignStr);
-			dashboard.add(barTemp,"cell 5 2"+alignStr);
+			dashboard.add(barVolume,"cell 2 2"+alignStr);
+			dashboard.add(barMol,"cell 4 2"+alignStr);
+			dashboard.add(barTemp,"cell 8 2"+alignStr);
 			}
 			else if( selectedSim ==5)
 			{
@@ -1049,11 +1051,15 @@ public class Main {
 			}
 		}
 		else {
-//			dashboard.setLayout(new MigLayout("", "[grow,right][100]",
-//					"[][][][][][]"));
+
 			dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
 			dashboard.add(elapsedTime, "cell 1 0");
-			//dashboard.add(cBoxConvert, "cell 0 1");
+			//Add simulation that needs temperature output
+			if(isSimSelected(1, 3)||isSimSelected(1,4))
+			{
+				dashboard.add(lblTempTitle," cell 0 1, alignx right");
+				dashboard.add(lblTempValue,"cell 1 1");
+			}
 		}
 		dashboard.updateUI();
 	}
@@ -1556,6 +1562,9 @@ public class Main {
 		lblKEValue = new JLabel(" J");
 		lblMoleTitle = new JLabel("Mole of gas:");
 		lblMoleValue = new JLabel(" mol");
+		lblMultiplicationText1 = new JLabel("*");
+		lblMultiplicationText2 = new JLabel("*");
+		lblMultiplicationText3 = new JLabel("*");
 		barPressure = new SimpleBar(0,350,30);
 		barVolume = new SimpleBar(minVolume,maxVolume,63);
 		barMol = new SimpleBar(0,50,10);
@@ -2097,5 +2106,15 @@ public class Main {
 	 */
 	public void setTableView(TableView tableView) {
 		this.tableView = tableView;
+	}
+	
+	public boolean isSimSelected(int unit,int sim, int set)
+	{
+		return (selectedUnit==unit && selectedSim ==sim && selectedSet ==set);
+	}
+	
+	public boolean isSimSelected(int unit,int sim)
+	{
+		return (selectedUnit==unit && selectedSim ==sim );
 	}
 }

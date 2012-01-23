@@ -121,6 +121,8 @@ public class Unit4 extends UnitBase {
 		// TODO Auto-generated method stub
 		setupSimulations();
 		lastTemp = p5Canvas.temp;
+		p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
+		p5Canvas.getMain().volumeSlider.setEnabled(true);
 		lastVolume = p5Canvas.currentVolume;
 		collisionPositions.clear();
 		collisionColors.clear();
@@ -135,7 +137,7 @@ public class Unit4 extends UnitBase {
 			break;
 		case 2:
 			//box2d.setGravity(0f, 0f);
-			p5Canvas.getMain().heatSlider.setEnabled(false);
+			//p5Canvas.getMain().heatSlider.setEnabled(false);
 			p5Canvas.temp =100;
 			
 			//Add first point to trail points list.
@@ -245,10 +247,9 @@ public class Unit4 extends UnitBase {
 					oriPixel.set(ori);
 					desPixel.set(des);
 					// Update trail position when user is dragging
-					
-					if (p5Canvas.isDrag) {
-						desPixel.x += (p5Canvas.xDrag);
-						desPixel.y += (p5Canvas.yDrag);
+					if (p5Canvas.isDrag) {	
+							desPixel.x += (p5Canvas.xDrag);
+							desPixel.y += (p5Canvas.yDrag);
 					}
 					else
 					{
@@ -506,15 +507,24 @@ public class Unit4 extends UnitBase {
 	
 	public void mouseReleased()
 	{
-		//Update collision positions
-		for(Vec2 vec: this.collisionPositions)
+		updateTrailPosition();
+	}
+	
+	//Update collision positions of trail after mouse dragging
+	public void updateTrailPosition()
+	{
+		if(!p5Canvas.startDraggingMolecule)
 		{
-			vec.x+=p5Canvas.xDrag;
-			vec.y+=p5Canvas.yDrag;
+			
+			for(Vec2 vec: this.collisionPositions)
+			{
+				vec.x+=p5Canvas.xDrag;
+				vec.y+=p5Canvas.yDrag;
+			}
+			
+			lastXDrag = p5Canvas.xDrag;
+			lastYDrag = p5Canvas.yDrag;
 		}
-		
-		lastXDrag = p5Canvas.xDrag;
-		lastYDrag = p5Canvas.yDrag;
 	}
 
 }

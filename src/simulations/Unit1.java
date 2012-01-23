@@ -18,14 +18,14 @@ import simulations.models.Water;
 import simulations.models.Simulation.SpawnStyle;
 
 public class Unit1 extends UnitBase {
-	private Water waterComputation;
+	// private Water waterComputation;
 
 	public Unit1(P5Canvas parent, PBox2D box) {
 		super(parent, box);
 		// TODO Auto-generated constructor stub
 		unitNum = 1;
 		setupSimulations();
-		waterComputation = new Water(p5Canvas);
+		// waterComputation = new Water(p5Canvas);
 	}
 
 	@Override
@@ -55,8 +55,12 @@ public class Unit1 extends UnitBase {
 		if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
 			Molecule m1 = (Molecule) p5Canvas.killingList.get(0);
 			Molecule m2 = (Molecule) p5Canvas.killingList.get(1);
+			Vec2 loc = null;
 			for (int i = 0; i < p5Canvas.products.size(); i++) {
-				Vec2 loc = m1.getPosition();
+				if (i == 0)
+					loc = m1.getPosition();
+				else
+					loc = m2.getPosition();
 				float x1 = PBox2D.scalarWorldToPixels(loc.x);
 				float y1 = p5Canvas.h * p5Canvas.canvasScale
 						- PBox2D.scalarWorldToPixels(loc.y);
@@ -66,15 +70,12 @@ public class Unit1 extends UnitBase {
 				molecules.add(m);
 				if (i == 0)
 					m.body.setLinearVelocity(m1.body.getLinearVelocity());
-
 				else {
 					m.body.setLinearVelocity(m2.body.getLinearVelocity());
 				}
 			}
-			m1.killBody();
-			m2.killBody();
-			molecules.remove(m1);
-			molecules.remove(m2);
+			m1.destroy();
+			m2.destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
 		}
@@ -84,22 +85,25 @@ public class Unit1 extends UnitBase {
 	protected void reset() {
 		// TODO Auto-generated method stub
 		p5Canvas.temp = 25;
+
 		switch (p5Canvas.getMain().selectedSim) {
 		case 1:
+			// We dont need heat slider in Sim 1
+			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
 		case 2:
-			if (p5Canvas.getMain().selectedSet == 2) // Hydrogen-Peroxide
-				p5Canvas.temp = 75;
-
-			else if (p5Canvas.getMain().selectedSet == 4) // Mercury
-				p5Canvas.temp = 100;
-			else if (p5Canvas.getMain().selectedSet == 6) // Silver
-				p5Canvas.temp = 100;
-
+			// We dont need heat slider in Sim 2
+			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
 		case 3:
+			// p5Canvas.setRestitutionDamp(true);
 			break;
 		case 4:
+			// p5Canvas.setRatioKE(4.0f); // Hydrogen-Peroxide
+			break;
+		case 5:
+			// We dont need heat slider in Sim 5
+			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
 		}
 
@@ -111,65 +115,77 @@ public class Unit1 extends UnitBase {
 
 	@Override
 	protected void computeForce(int sim, int set) {
-		
-		switch(sim)
-		{
+
+		switch (sim) {
 		case 1:
 		case 3:
 		case 4:
-			computeForceGeneric();
+			computeForceGeneric(sim,set);
 			break;
 		case 2:
-			if(set==7)
-				this.computeForceSiO2();
+			if (set == 7)
+				computeForceSiO2();
 			else
-				computeForceGeneric();
+				computeForceGeneric(sim,set);
 			break;
 		case 5:
-			computeForceGeneric();
+			computeForceGeneric(sim,set);
+			if(set==1)  //Bromine and water
+				addForceBromine(sim,set);
+			else if (set ==4) //Pentane and water
+				addForcePentane(sim,set);
+			else if( set==5)
+				addForceBromine(sim,set);
+			else if( set==6)
+				addForceBromine(sim,set);
+				addForcePentane(sim,set);
+
 			break;
-		
+
 		}
 
 	}
-	
-	public void computeForceGeneric()
-	{
+
+	public void computeForceGeneric(int sim, int set) {
 		Molecule moleThis = null;
 		Vec2 locThis = new Vec2();
 		Molecule moleOther = null;
 		Vec2 locOther = new Vec2();
-		float xValue = 0;
-		float yValue = 0;
 		float forceX = 0;
 		float forceY = 0;
-		float dis = 0;
 		// float scale = 3000;
 
 		for (int i = 0; i < State.molecules.size(); i++) {
 
 			moleThis = State.molecules.get(i);
+			locThis = moleThis.getPosition();
 			for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { // Select
-
 				moleThis.sumForceX[thisE] = 0;
 				moleThis.sumForceY[thisE] = 0;
+				moleThis.sumForceWaterX[thisE] = 0;
+				moleThis.sumForceWaterY[thisE] = 0;
 			}
-			
+
 			for (int k = 0; k < State.molecules.size(); k++) {
 				moleOther = State.molecules.get(k);
-				if (k == i || !moleThis.getName().equals(moleOther.getName()))
-					//Only have forces on the same kind of molecule
+				if (k == i
+						|| (!moleThis.getName().equals(moleOther.getName()) && !moleOther
+								.getName().equals("Water")))
+					// Only have forces on the same kind of molecule
 					continue;
-				
 				locOther = moleOther.getPosition();
-				locThis = moleThis.getPosition();
 				if (locOther == null || locThis == null)
 					continue;
+				
 				float x = locThis.x - locOther.x;
 				float y = locThis.y - locOther.y;
 				float disSquare = x * x + y * y;
 				Vec2 direction = normalizeForce(new Vec2(x, y));
-				if (moleThis.getName().equals( moleOther.getName())) {
+
+				//Add attractive force to same kind molecule
+				if(moleThis.getName().equals(moleOther.getName()))
+				{
+					
 					float fTemp = moleThis.freezingTem;
 					float bTemp = moleThis.boilingTem;
 					float gravityX, gravityY;
@@ -189,62 +205,211 @@ public class Unit1 extends UnitBase {
 					forceY = (-direction.y / disSquare)
 							* moleOther.getBodyMass() * moleThis.getBodyMass()
 							* gravityY;
+
+					for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) {
+
+						// Water case
+						if (moleThis.getName().equals("Water")) {
+							if (thisE == 2) {
+								moleThis.sumForceX[thisE] += forceX * 3000;
+								moleThis.sumForceY[thisE] += forceY * 3000;
+							}
+						}
+						// Hydrogen-Peroxide case
+						else if (moleThis.getName().equals("Hydrogen-Peroxide")) {
+							if(!((sim==5&&set==3)||(sim==5&&set==5) ))
+							{
+								if (thisE == 2 || thisE == 3) {
+									moleThis.sumForceX[thisE] += forceX * 1200;
+									moleThis.sumForceY[thisE] += forceY * 1200;
+								}
+							}
+						} else if (moleThis.getName().equals("Pentane")) // No
+																			// force
+																			// applied
+																			// on
+																			// Pentane
+						{
+							
+						}
+
+						else if (moleThis.getName().equals("Mercury")) {
+							moleThis.sumForceX[thisE] += forceX * 200;
+							moleThis.sumForceY[thisE] += forceY * 250;
+						} else if (moleThis.getName().equals("Bromine")) {
+							if(!((sim==5&&set==1)||(sim==5&&set==5)))
+							{
+							moleThis.sumForceX[thisE] += forceX * 50;
+							moleThis.sumForceY[thisE] += forceY * 100;
+							}
+						}
+						// Silver case
+						else if (moleThis.getName().equals("Silver")) {
+							moleThis.sumForceX[thisE] += forceX * 1000;
+							moleThis.sumForceY[thisE] += forceY * 1000;
+						}
+
+						else {
+							moleThis.sumForceX[thisE] += forceX * 30;
+							moleThis.sumForceY[thisE] += forceY * 30;
+						}
+
+					}
 				}
+				//If mixture, add attractive force to both water and this molecule
+				else {
+					if(moleThis.getName().equals("Water"))
+						continue;
+					forceX =(-direction.x/disSquare)*1f;
+					forceY =(-direction.y / disSquare)*1f;
+				for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) {
 
-				for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { 
+						// Hydrogen-Peroxide case
+						if (moleThis.getName().equals("Hydrogen-Peroxide")) {
+							if (thisE == 2 || thisE == 3) {
+								moleThis.sumForceWaterX[thisE] += forceX ;
+								moleThis.sumForceWaterY[thisE] += forceY ;
+								//Add reversed force on water
+								moleOther.sumForceWaterX[2]-=forceX;
+								moleOther.sumForceWaterY[2]-=forceY;
 
-					// Water case
-					if (moleThis.getName().equals("Water")) {
-						if (thisE == 2) {
-							moleThis.sumForceX[thisE] += forceX * 3000;
-							moleThis.sumForceY[thisE] += forceY * 3000;
+							}
+						} else if (moleThis.getName().equals("Pentane")) 
+						{
+							if(!((sim==5&&set==1)||(sim==5&&set==5)))
+							{
+							float rate = 0.3f;
+							moleThis.sumForceWaterX[thisE] += forceX*rate ;
+							moleThis.sumForceWaterY[thisE] += forceY*rate ;
+							}
+							
 						}
-					}
-					// Hydrogen-Peroxide case
-					else if (moleThis.getName().equals("Hydrogen-Peroxide")) {
-						if (thisE == 2 || thisE == 3) {
-							moleThis.sumForceX[thisE] += forceX / 2 * 3000;
-							moleThis.sumForceY[thisE] += forceY / 2 * 3000;
+
+						else if (moleThis.getName().equals("Mercury")) {
+							//Mercury doesnt mix with water
+							
+						} else if (moleThis.getName().equals("Bromine")) {
+							moleThis.sumForceWaterX[thisE] += forceX ;
+							moleThis.sumForceWaterY[thisE] += forceY ;
 						}
-					} else if (moleThis.getName().equals("Pentane")) // No force
-																		// applied
-																		// on
-																		// Pentane
-					{
-						/*
-						 * if( thisE ==4) { moleThis.sumForceX[thisE]+=forceX;
-						 * moleThis.sumForceY[thisE]+=forceY; }
-						 */
+						// Silver case
+						else if (moleThis.getName().equals("Silver")) {
+							moleThis.sumForceWaterX[thisE] += forceX ;
+							moleThis.sumForceWaterY[thisE] += forceY ;
+						}
+
+						else {
+							moleThis.sumForceWaterX[thisE] += forceX ;
+							moleThis.sumForceWaterY[thisE] += forceY ;
+						}
+
 					}
-					// Silver case
-					else if (moleThis.getName().equals("Silver")) {
-						moleThis.sumForceX[thisE] += forceX * 200;
-						moleThis.sumForceY[thisE] += forceY * 200;
-					}
-					// Silicon Dioxide case
-					else if (moleThis.getName().equals("Silicon-Dioxide")) {
-						moleThis.sumForceX[thisE] += forceX * 100;
-						moleThis.sumForceY[thisE] += forceY * 100;
-					} 
-					// Silicon Dioxide case
-					else if (moleThis.getName().equals("Mercury")) {
-						moleThis.sumForceX[thisE] += forceX * 50;
-						moleThis.sumForceY[thisE] += forceY * 30;
-					} 
-					else if (moleThis.getName().equals("Bromine")) {
-						moleThis.sumForceX[thisE] += forceX * 50;
-						moleThis.sumForceY[thisE] += forceY * 30;
-					} 
+
+				} 
+
+			}
+		}
+	}
+	//Add some up forces to bromine so that they wont stay at the bottom
+	//Add repulsive force for Sim 5 set 6
+	public void addForceBromine(int sim, int set)
+	{
+		Molecule moleThis = null;
+		Molecule moleOther = null;
+		float gravityCompensation = 0.0000007f;
+		float diffY=0.0f;
+		float forceY =1.0f;
+		float forceRepulsive = 0.025f;
+		if(sim==5&&set==6)
+			forceRepulsive = 0.05f;
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+		for( int i=0;i<State.molecules.size();i++)
+		{
+			moleThis = State.molecules.get(i);
+			if(moleThis.getName().equals("Bromine"))
+			{
+				
+				for(int element=0;element<moleThis.getNumElement();element++)
+				{
+					//Add up force
+					locThis.set(moleThis.getElementLocation(element));
+					diffY = p5Canvas.y+p5Canvas.h-box2d.scalarWorldToPixels(locThis.y);
+					forceY = gravityCompensation*diffY*diffY;
+					moleThis.sumForceY[element]+=forceY;
 					
-					else {
-						moleThis.sumForceX[thisE] += forceX * 30;
-						moleThis.sumForceY[thisE] += forceY * 30;
-					}
-
-			
-
+				
+						for( int k=0;k<State.molecules.size();k++)
+						{
+							moleOther = State.molecules.get(k);
+							if(moleOther.getName().equals("Bromine"))
+							{
+								locOther = moleOther.getPosition();
+								Vec2 vecDiff = locThis.sub(locOther);
+								vecDiff = normalizeForce(vecDiff);
+								moleThis.sumForceX[element]+= vecDiff.x * forceRepulsive;
+								moleThis.sumForceY[element]+= vecDiff.y * forceRepulsive;
+							} 
+						}
+					
+					
 				}
-
+			}
+		}
+	}
+	
+	//Add some up forces to pentane so that they will always be on top of water
+	public void addForcePentane(int sim, int set)
+	{
+		Molecule moleThis = null;
+		Molecule moleOther = null;
+		float gravityCompensation = 0.040f;
+		//float diffY=0.0f;
+		
+		float forceYTop =0.002f;
+		float forceYBot =0.07f;
+		if(sim==5&&set==6)
+		{
+			gravityCompensation = 0.075f;
+			forceYTop =  0.02f;
+			forceYBot =0.07f;
+		}
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+		for( int i=0;i<State.molecules.size();i++)
+		{
+			moleThis = State.molecules.get(i);
+			if(moleThis.getName().equals("Pentane"))
+			{
+				
+				for(int e=0;e<moleThis.getNumElement();e++)
+				{
+					locThis.set(moleThis.getElementLocation(e));
+					moleThis.sumForceY[e] += gravityCompensation;
+			
+						for(int k =0;k<State.molecules.size();k++)
+						{	
+							moleOther = State.molecules.get(k);
+							if(moleOther.getName().equals("Water"))
+							{
+								locOther.set(moleOther.getPosition());
+								if( Math.abs(locThis.x-locOther.x)<10)
+								{
+									if(locOther.y>locThis.y&&locOther.y - locThis.y<=1 ) //If there is any water molecule on top of pentane
+									{
+										moleThis.sumForceWaterY[e] += forceYTop;
+									}
+									else if(locOther.y< locThis.y && locThis.y - locOther.y<=1)
+									{
+										moleThis.sumForceWaterY[e] += forceYBot;
+									}
+									
+								}
+							}
+						}
+					
+					
+				}
 			}
 		}
 	}
@@ -253,54 +418,7 @@ public class Unit1 extends UnitBase {
 		super.applyForce(sim, set);
 	}
 
-	/*
-	private void setForce(int index, Molecule moleThis) { // draw background
-		for (int i = 0; i < molecules.size(); i++) {
-			if (i == index)
-				continue;
-
-			Molecule moleOther = molecules.get(i);
-			Vec2 locOther = moleOther.getPosition();
-			Vec2 locThis = moleThis.getPosition();
-			if (locOther == null || locThis == null)
-				continue;
-			float x = locThis.x - locOther.x;
-			float y = locThis.y - locOther.y;
-			float disSquare = x * x + y * y;
-			Vec2 direction = normalizeForce(new Vec2(x, y));
-			float forceX = 0;
-			float forceY = 0;
-
-			if (moleThis.polarity == moleOther.polarity) {
-				float fTemp = moleThis.freezingTem;
-				float bTemp = moleThis.boilingTem;
-				float gravityX, gravityY;
-				if (p5Canvas.temp >= bTemp) { // Gas case
-					gravityX = 0;
-					gravityY = 0;
-				} else if (p5Canvas.temp <= fTemp) { // Solid case
-					gravityY = (bTemp - p5Canvas.temp) / (bTemp - fTemp);
-					gravityX = gravityY * 2f;
-				} else { // Liquid case
-					gravityY = (bTemp - p5Canvas.temp) / (bTemp - fTemp);
-					gravityX = gravityY * 0.6f;
-				}
-				forceX = (-direction.x / disSquare) * moleOther.getBodyMass()
-						* moleThis.getBodyMass() * gravityX * 3000;
-				forceY = (-direction.y / disSquare) * moleOther.getBodyMass()
-						* moleThis.getBodyMass() * gravityY * 3000;
-			} else {
-				float num = moleOther.getNumElement();
-				forceX = (direction.x / disSquare) * moleOther.getBodyMass()
-						* moleThis.getBodyMass() * 300 * num;
-				forceY = (direction.y / disSquare) * moleOther.getBodyMass()
-						* moleThis.getBodyMass() * 300 * num;
-			}
-			// moleThis.addForce(new Vec2(forceX,forceY));
-
-		}
-	}
-*/
+	//Normalize the input force
 	public Vec2 normalizeForce(Vec2 v) {
 		float dis = (float) Math.sqrt(v.x * v.x + v.y * v.y);
 		return new Vec2(v.x / dis, v.y / dis);
@@ -311,31 +429,22 @@ public class Unit1 extends UnitBase {
 			int count) {
 		// TODO Auto-generated method stub
 		boolean res = false;
-		/*
-		 * int sim = p5Canvas.getMain().selectedSim; int set =
-		 * p5Canvas.getMain().selectedSet; Simulation simulation =
-		 * this.getSimulation(sim, set); SpawnStyle spawnStyle =
-		 * simulation.getSpawnStyle(compoundName); if (spawnStyle ==
-		 * SpawnStyle.Gas) { res = this.addGasMolecule(isAppEnable,
-		 * compoundName, count); } else if (spawnStyle == SpawnStyle.Solvent){
-		 * res = this.addSolvent(isAppEnable, compoundName, count, simulation);
-		 * }
-		 */
 		// TO DO: Check if molecules are in gas or water
 		if (compoundName.equals("Silicon-Dioxide"))
-			res = addSiO2(compoundName,count, box2d, p5Canvas); 
+			res = addSiO2(compoundName, count, box2d, p5Canvas);
 		else
 			res = addWaterMolecules(isAppEnable, compoundName, count);
 
 		return res;
 	}
-
+	
 	/******************************************************************
 	 * FUNCTION : addPentane DESCRIPTION : Specific function used to add Pentane
 	 * 
 	 * INPUTS : CompoundName(String), count(int),
 	 * box2d_(PBox2D),parent_(P5Canvas) OUTPUTS: None
 	 *******************************************************************/
+	/*
 	public boolean addPentane(String compoundName, int count) {
 
 		boolean res = true;
@@ -373,7 +482,7 @@ public class Unit1 extends UnitBase {
 			}
 		}
 		int rowNum = count / dimension + 1;
-		int colNum = dimension;
+		int colNum = (int)Math.ceil((float)count/rowNum);
 		boolean isClear = false;
 		Vec2 molePos = new Vec2(0, 0); // Molecule position parameter
 		Vec2 molePosInPix = new Vec2(0, 0);
@@ -438,7 +547,8 @@ public class Unit1 extends UnitBase {
 
 		return res;
 	}
-
+*/
+	
 	/******************************************************************
 	 * FUNCTION : reactAfterContact DESCRIPTION : react function after collision
 	 * detected Called by beginContact()
@@ -508,10 +618,19 @@ public class Unit1 extends UnitBase {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+		// Set up speed ratio for molecules
+		setupSpeed();
+
+		switch (p5Canvas.getMain().selectedSim) {
+		case 3:
+			// p5Canvas.setRestitutionDamp(true);
+			break;
+		case 4:
+			break;
+		}
 
 	}
-	
+
 	/******************************************************************
 	 * FUNCTION : addSiO2 DESCRIPTION : Specific function used to add addSiO2,
 	 * Called by addMolecule() The shape of molecule cluster is like a pyramid
@@ -536,11 +655,14 @@ public class Unit1 extends UnitBase {
 
 		Vec2 size1 = Molecule.getShapeSize(compoundName_, parent_);
 
-		float centerX = p5Canvas.x + 50; // X coordinate around which we are going to add
-								// Ions, 260 is to make SiO2 spawn in the middle
-		float centerY = p5Canvas.y + 80 - p5Canvas.boundaries.difVolume; // Y coordinate around
-														// which we are going to
-														// add Ions
+		float centerX = p5Canvas.x + 50; // X coordinate around which we are
+											// going to add
+		// Ions, 260 is to make SiO2 spawn in the middle
+		float centerY = p5Canvas.y + 80 - p5Canvas.boundaries.difVolume; // Y
+																			// coordinate
+																			// around
+		// which we are going to
+		// add Ions
 		Vec2 topLeft = new Vec2(centerX, centerY);
 		Vec2 botRight = new Vec2();
 		boolean isClear = false;
@@ -555,7 +677,6 @@ public class Unit1 extends UnitBase {
 		botRight.set(centerX + numCol * size1.x, centerY + numRow * size1.y);
 
 		while (!isClear) {
-	
 
 			isClear = true;
 			for (int k = 0; k < molecules.size(); k++) {
@@ -573,7 +694,8 @@ public class Unit1 extends UnitBase {
 			if (!isClear) {
 				centerX += increX;
 				topLeft.set(centerX, centerY);
-				botRight.set(centerX + numCol * size1.x, centerY + numRow * size1.y);
+				botRight.set(centerX + numCol * size1.x, centerY + numRow
+						* size1.y);
 				// If we have gone through all available areas.
 				if (centerX > (p5Canvas.x + p5Canvas.w)) {
 					isClear = true; // Ready to jump out
@@ -628,45 +750,51 @@ public class Unit1 extends UnitBase {
 
 	public void computeForceSiO2() { // draw
 		// background
+		float rateX = 25;
+		float rateY = 12;
 		for (int n = 0; n < molecules.size(); n++) {
 			Molecule mole = molecules.get(n);
-		for (int e = 0; e < mole.getNumElement(); e++) {
-			int indexCharge = mole.elementCharges.get(e);
-			Vec2 locIndex = mole.getElementLocation(e);
-			mole.sumForceX[e] = 0;
-			mole.sumForceY[e] = 0;
-			for (int i = 0; i < molecules.size(); i++) {
-				if (i == n)
-					continue;
-				Molecule m = molecules.get(i);
-				if (m.getName().equals("Water"))
-					continue;
+			if (mole.getName().equals("Silicon-Dioxide")) {
+				for (int e = 0; e < mole.getNumElement(); e++) {
+					int indexCharge = mole.elementCharges.get(e);
+					Vec2 locIndex = mole.getElementLocation(e);
+					mole.sumForceX[e] = 0;
+					mole.sumForceY[e] = 0;
+					for (int i = 0; i < molecules.size(); i++) {
+						if (i == n)
+							continue;
+						Molecule m = molecules.get(i);
+						if (m.getName().equals("Water"))
+							continue;
 
-				float forceX;
-				float forceY;
-				for (int e2 = 0; e2 < m.getNumElement(); e2++) {
-					Vec2 loc = m.getElementLocation(e2);
-					if (loc == null || locIndex == null)
-						continue;
-					float x = locIndex.x - loc.x;
-					float y = locIndex.y - loc.y;
-					float dis = x * x + y * y;
-					forceX = (float) ((x / Math.pow(dis, 1.5)) * 10);
-					forceY = (float) ((y / Math.pow(dis, 1.5)) * 10);
+						float forceX;
+						float forceY;
+						for (int e2 = 0; e2 < m.getNumElement(); e2++) {
+							Vec2 loc = m.getElementLocation(e2);
+							if (loc == null || locIndex == null)
+								continue;
+							float x = locIndex.x - loc.x;
+							float y = locIndex.y - loc.y;
+							float dis = x * x + y * y;
+							forceX = (float) ((x / Math.pow(dis, 1.5)) * rateX);
+							forceY = (float) ((y / Math.pow(dis, 1.5)) * rateY);
 
-					int charge = m.elementCharges.get(e2);
-					int mul = charge * indexCharge;
-					if (mul < 0) {
-						mole.sumForceX[e] += mul * forceX;
-						mole.sumForceY[e] += mul * forceY;
-					} else if (mul > 0) {
-						mole.sumForceX[e] += mul * forceX * mole.chargeRate;
-						mole.sumForceY[e] += mul * forceY * mole.chargeRate;
+							int charge = m.elementCharges.get(e2);
+							int mul = charge * indexCharge;
+							if (mul < 0) {
+								mole.sumForceX[e] += mul * forceX;
+								mole.sumForceY[e] += mul * forceY;
+							} else if (mul > 0) {
+								mole.sumForceX[e] += mul * forceX
+										* mole.chargeRate;
+								mole.sumForceY[e] += mul * forceY
+										* mole.chargeRate;
+							}
+						}
 					}
 				}
 			}
 		}
-	}
 	}
 
 }

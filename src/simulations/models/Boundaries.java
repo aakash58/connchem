@@ -90,7 +90,7 @@ public class Boundaries {
 		boundaries[3].resetPosition(x + w / 2, y + h);
 		
 		//volumeDefault = defVolume;
-		setVolume(currentVolume);
+		resetVolume(currentVolume);
 	}
 	
 	public void display()
@@ -102,15 +102,18 @@ public class Boundaries {
 	
 	public void setVolume(int v)
 	{
-		
-		
 		//Always move top boundary to change the volume
 		//flofat yTrans = PBox2D.scalarPixelsToWorld(difVolume);
 		volume = v;
 		difVolume = (volume - volumeDefault)*p5Canvas.multiplierVolume;
-		//Vec2 pos = boundaries[TOP].body.getPosition();
-		//float originalY = boundaries[TOP].getOriginalY();
 		boundaries[TOP].setY(difVolume);
+		
+	}
+	
+	public void resetVolume(int v)
+	{	volume = v;
+		difVolume = (volume - volumeDefault)*p5Canvas.multiplierVolume;
+		boundaries[TOP].resetY(difVolume);
 		
 	}
 

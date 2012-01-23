@@ -31,8 +31,8 @@ public class DBinterface {
 		try{
 			Class.forName("org.sqlite.JDBC");
 			
-			/*
-			//Distribution Configuration
+			
+			//********************** Distribution Configuration ***************************
 			ExtractFileFromJar();
 			File dbFile = new File(destDir, dbFileName);
 						
@@ -40,16 +40,15 @@ public class DBinterface {
 			    // DB file is in the same directory with jar file
 				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
 			}
+			//******************************************************************************
 			
-			*/
-			
-			
-			//Debug Configuration
+			/*
+			//************* Debug Configuration, please comment this block before make a release version ***********
 			String dbPath = ClassLoader.getSystemResource("data/"+dbFileName).toString();
 			dbPath = dbPath.replace("file:", "");
 			conn = DriverManager.getConnection("jdbc:sqlite:src/data/chemdb");
-			
-		    
+			//***********************************************************************************************************
+		    */
 			stat = conn.createStatement();
 			
 		}
@@ -71,7 +70,9 @@ public class DBinterface {
 		
 		//System.out.println("thisDir is "+thisDir);
 		String jarPath = thisDir.replace("!/data/", "");  //Get path of jar file
-		destDir = thisDir.replace("Simulation.jar!/data/", "");  //Set destDir as the current folder in which jar file sits
+		int lastSlashIndex = jarPath.lastIndexOf("/");
+		jarFileName = new String(jarPath.substring(lastSlashIndex+1));
+		destDir = thisDir.replace(jarFileName+"!/data/", "");  //Set destDir as the current folder in which jar file sits
 
 		//Find Jar file
 		try {
