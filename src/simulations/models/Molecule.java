@@ -88,7 +88,10 @@ public class Molecule {
 	public float ionDis = 0; // Use to compute dissolve
 	private boolean reactive = true; // Molecule can only react if this flag is
 										// true
+	//private boolean restitutionDampEnable = false;
 	private int tableIndex = -1;
+	private float ratioKE = 1;  //ratio that used to tune molecule speed with a given energy
+							//Does not change with temperature
 
 	/******************************************************************
 	 * FUNCTION : Molecule() DESCRIPTION : Molecule Constructor
@@ -307,7 +310,15 @@ public class Molecule {
 		//Liquid case
 		else if (temp>freezingTem&&temp<boilingTem)
 		{
-			res = 1.0f;
+			/*
+			if(restitutionDampEnable)
+			{
+				res = 0.7f + (temp - freezingTem) / (boilingTem - freezingTem);
+				res = (res>=1)?1:res;
+			}
+			else
+			*/
+				res = 1.0f;
 			fric = 0f;
 			setGravityScale(1.0f);
 		}
@@ -317,17 +328,15 @@ public class Molecule {
 			res=1.0f;
 			fric = 0f;
 			this.setGravityScale(0.0f);
-			
 		}
-		
-
-			
-
 		
 		if((p5Canvas.getMain().selectedUnit==1||p5Canvas.getMain().selectedUnit==2))
 		{
 		if (name.equals("Water"))
+		{
+			res =1.0f;
 			chargeRate = 0.95f;
+		}
 		else if (name.equals("Sodium-Ion")) {
 			chargeRate = 0.93f;
 			fric = 1;
@@ -371,12 +380,14 @@ public class Molecule {
 			setFriction(fric);
 			if (name.equals("Water"))
 				
-			{   if(temp < 40)
-					scale = 1 + (40 - temp) / 200f;
+			{   
+				if(temp < 100)
+					scale = 1 + (100 - temp) / 300f;
 				else
 					scale = 1f;
-					setRadius(scale);
-				}
+					//Enlarge molecule shape size to make them not close to each other
+					setRadius(1.25f);
+			}
 		}
 	}
 
@@ -802,9 +813,9 @@ public class Molecule {
 	private float setMul() {
 		float mul = 1.0f;
 		if (name.equals("Pentane"))
-			mul = 0.04f;
+			mul = 0.004f;
 		else if (name.equals("Bromine"))
-			mul = 0.45f;
+			mul = 0.0000001f;
 		else if (name.equals("Mercury"))
 			mul = 0.3f;
 		else if (name.equals("Hydrogen-Peroxide"))
@@ -909,6 +920,7 @@ public class Molecule {
 		scalar = (float) Math.sqrt(scalar);
 		return scalar;
 	}
+	/*
 	public void setKineticEnergy(float ke)
 	{
 		Random rand = new Random(System.nanoTime());
@@ -920,17 +932,24 @@ public class Molecule {
 		velocityY = directionV * Math.sqrt(velocityScalar*velocityScalar-velocityX*velocityX);
 		this.setLinearVelocity(new Vec2((float)velocityX,(float)velocityY));
 		
-	}
-	public void constrainKineticEnergy(float ratio)
+	}*/
+	
+	public void constrainKineticEnergy(float r)
 	{
+		float ratio = (float)Math.sqrt(r);
 		Vec2 velocity = this.getLinearVelocity();
-		velocity.mulLocal((float)Math.sqrt(ratio));
+		velocity.mulLocal(ratio);
+		
+		float angularVelocity = body.getAngularVelocity();
+		angularVelocity*=ratio;
+		body.setAngularVelocity(angularVelocity);
+		
 	}
 	public float getKineticEnergy()
 	{
 		float eRotational= 0.5f* body.getInertia()*body.getAngularVelocity()* body.getAngularVelocity();
 		float eTransitional= 0.5f * body.getMass()* (Vec2.dot(body.getLinearVelocity(),body.getLinearVelocity()));
-		return eRotational+eTransitional;
+		return (eRotational+eTransitional)*ratioKE;
 	}
 	public void setLinearVelocity(Vec2 vec)
 	{
@@ -960,5 +979,16 @@ public class Molecule {
 		    
 		    return inside;
 		  }
+	  /*
+	  public void setRestitutionDamp(boolean b)
+	  {
+		  this.restitutionDampEnable = b;
+	  }
+	  */
+	  public void setRatioKE(float v)
+	  {
+		  if( v>=0)
+			  ratioKE=v;
+	  }
 
 }

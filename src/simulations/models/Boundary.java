@@ -28,6 +28,7 @@ public class Boundary {
 	//private int volumeSliderValue;
 	//private int volumeSliderDefaultValue;
 	private float yOriginal =0; //Original y of body when created
+	private float yTop = 0;
 	//public static boolean isTransformed =false; //Increase or Decrease in Volume
 	private PShape baseShape = new PShape();
 	private PShape weightShape = new PShape();
@@ -71,6 +72,7 @@ public class Boundary {
 		body.setUserData(this);
 		//positionOrigin = new Vec2(body.getPosition());
 		yOriginal = body.getPosition().y;
+		yTop= yOriginal;
 		//isTransformed =true;
 		if(id==boundaries.TOP)
 		{
@@ -97,7 +99,7 @@ public class Boundary {
 		pos.addLocal(move);
 		body.setTransform(pos, body.getAngle());
 		
-		this.yOriginal+=move.y;
+		this.yTop+=move.y;
 	}
 	
 	//Designed to move top boundary, x value will never be changed while volume is changing
@@ -106,10 +108,17 @@ public class Boundary {
 		Vec2 pos = new Vec2(body.getPosition());
 		Vec2 vec = new Vec2();
 		vec.x = pos.x;
-		vec.y = this.yOriginal + box2d.scalarPixelsToWorld(dif);
+		vec.y = this.yTop + box2d.scalarPixelsToWorld(dif);
 		if(!body.isAwake())
 			body.setAwake(true);
 		body.setTransform(vec, body.getAngle());
+	}
+	
+	//Reset yTop to yOriginal, only be called during reset
+	public void resetY(float dif)
+	{
+		yTop = yOriginal;
+		setY(dif);
 	}
 	
 	public float getId(){

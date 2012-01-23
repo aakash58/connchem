@@ -78,9 +78,6 @@ units:
         qty: 15
         cap: 50
     - set: 6
-      #temperature: 1500
-      #minTemperature: 1000
-      #maxTemperature: 2000
       compounds:
       - compound: "Silver"
         qty: 15
@@ -88,7 +85,7 @@ units:
     - set: 7
       compounds:
       - compound: "Silicon Dioxide"
-        qty: 5
+        qty: 10
         cap: 50
   - sim: 3
     name: "Physical Changes"
@@ -116,44 +113,56 @@ units:
       compounds:
       - compound: "Water"
         qty: 30
-        cap: 50
+        cap: 60
       - compound: "Bromine"
-        qty: 15
-        cap: 50
+        qty: 8
+        cap: 16
     - set: 2
       compounds:
       - compound: "Water"
         qty: 30
+        cap: 60
       - compound: "Mercury"
         qty: 20
+        cap: 40
     - set: 3
       compounds:
       - compound: "Water"
-        qty: 20
+        qty: 25
+        cap: 60
       - compound: "Hydrogen Peroxide"
         qty: 15
+        cap: 30
     - set: 4
       compounds:
       - compound: "Water"
         qty: 30
+        cap: 60
       - compound: "Pentane"
-        qty: 8
+        qty: 4
+        cap: 8
     - set: 5
       compounds:
       - compound: "Water"
-        qty: 20
+        qty: 30
+        cap: 50
       - compound: "Bromine"
-        qty: 15
+        qty: 4
+        cap: 6
       - compound: "Hydrogen Peroxide"
-        qty: 15
+        qty: 6
+        cap: 10
     - set: 6
       compounds:
       - compound: "Water"
         qty: 30
+        cap: 50
       - compound: "Bromine"
-        qty: 9
+        qty: 6
+        cap: 6
       - compound: "Pentane"
-        qty: 8
+        qty: 2
+        cap: 6
 - unit: 2
   name: "Solutions"
   sims:

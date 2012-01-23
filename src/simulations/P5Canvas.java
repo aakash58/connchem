@@ -39,9 +39,7 @@ import static data.State.*;
 import static simulations.models.Compound.*;
 
 public class P5Canvas extends PApplet {
-	/**
-	 * 
-	 */
+
 	private Main main = null;
 	private final long serialVersionUID = 1L;
 	public float x = 0;
@@ -91,14 +89,10 @@ public class P5Canvas extends PApplet {
 
 	public int heatRGB = 0;
 	public Boundaries boundaries = null;
-	//public Boundary[] boundaries = new Boundary[4];
-	/*
-	 * LeftBoundary 0 RightBoundary 1 TopBoundary 2 BottomBoundary 3
-	 */
 
 	// public long count = 0;
-	public long curTime = 0;
-	public long oldTime = 0;
+	public int curTime = 0;
+	public int oldTime = 0;
 	public int xStart = 0;
 	public int yStart = 0;
 	public int xDrag = 0; // x offset after dragging
@@ -120,6 +114,8 @@ public class P5Canvas extends PApplet {
 
 	public int FRAME_RATE = 30;
 	public float averageKineticEnergy = 0;
+	public int heatMoleculeTimes = 0;
+	public int heatMoleculeMaxTimes = 10;
 	public Queue<Float> energyQueue = new LinkedList<Float>();
 	public int energyQueueSize = 30;
 	public ArrayList<UnitBase> unitList = new ArrayList<UnitBase>();
@@ -136,6 +132,7 @@ public class P5Canvas extends PApplet {
 	public float multiplierVolume = 13f; // Multiplier from world coordinates to ml
 
 	public boolean firstRun = true;
+	public boolean startDraggingMolecule = false;
 
 
 	/******* Colors ********/
@@ -270,6 +267,7 @@ public class P5Canvas extends PApplet {
 
 		// Dissolution function used in Unit 2
 		computeDissolved();
+		
 
 	}
 
@@ -351,13 +349,13 @@ public class P5Canvas extends PApplet {
 
 	// Calculate temp from average kinetic energy
 	public float getTempFromKE() {
-		return (float) ((averageKineticEnergy * 2) / (0.15f * K * mole)) * 100
+		return (float) ((averageKineticEnergy * 2 * 100) / (0.15f * K * mole )) 
 				+ tempMin;
 	}
 
 	// Calculate kinetic energy from temp
 	public float getKEFromTemp() {
-		return (float) (0.15f * K * mole * (temp - tempMin)) / (2 * 100);
+		return (float) (0.15f * K * mole  * (temp - tempMin)) / (2 * 100);
 	}
 
 
@@ -386,15 +384,18 @@ public class P5Canvas extends PApplet {
 	// change
 	public void constrainKineticEnergy() {
 		// First, sum up all average Energy to get total KE
-		float idealKE = State.molecules.size() * this.averageKineticEnergy;
+		float idealKE = State.molecules.size() * averageKineticEnergy;
 		// Second, find out the ratio of ideal stable KE to current real KE
 		float currentKE = 0;
 		for (int i = 0; i < State.molecules.size(); i++) {
 			currentKE += State.molecules.get(i).getKineticEnergy();
 		}
+		
 		float ratio = idealKE / currentKE;
 		// Third, each molecule`s KE multiplied with ratio
 		for (int i = 0; i < State.molecules.size(); i++) {
+			//Not apply to those whose energy is below average too much
+			if(State.molecules.get(i).getKineticEnergy()>(averageKineticEnergy/1.25f))
 			State.molecules.get(i).constrainKineticEnergy(ratio);
 		}
 
@@ -668,12 +669,11 @@ public class P5Canvas extends PApplet {
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
 	public void reset() {
+		//Reset parameters
 		isEnable = false;
 		isSimStarted = false;
-		firstRun = true;
 		temp = 25;
 		currentVolume = getMain().defaultVolume;
-
 
 		removeAllMolecules();
 		removeAllAnchors();
@@ -696,6 +696,9 @@ public class P5Canvas extends PApplet {
 
 		// Reset boundaries
 		boundaries.resetBoundary(0, 0, defaultW, defaultH,currentVolume);
+		
+		firstRun = true;
+
 	}
 
 	/*
@@ -808,9 +811,6 @@ public class P5Canvas extends PApplet {
 
 		// Check if molecule contacts with heater
 		heatMolecule(c);
-		// For Unit4 Sim4 Set2, move top boundary when temperature changes
-		// in order to keep pressure constant
-
 
 		// Specified beginReaction function for each unit
 		unitList.get(main.selectedUnit - 1).beginReaction(c);
@@ -819,6 +819,7 @@ public class P5Canvas extends PApplet {
 	public void heatMolecule(Contact c) {
 		Molecule mole = null;
 		Boundary boundary = null;
+		float forceValue = 1.0f;
 		// If heater is not on, return
 		if (heat == getMain().defaultHeat)
 			return;
@@ -842,34 +843,108 @@ public class P5Canvas extends PApplet {
 		}
 		if (mole == null || boundary == null)
 			return;
+		
+		//For Unit 4 Sim 4 Set 2, if top boundary reach top or low point we are not going to heat anymore
+		if(main.isSimSelected(4, 4, 2))
+		{
+			int midLevel = (main.heatMax - main.heatMin)/2;
+			if((currentVolume<=volumeMinBoundary && heat<midLevel) || (currentVolume>=volumeMaxBoundary && heat>midLevel))
+				return;
+		}
 
 		// If temp has not reached max, keep heating.
 		if (!reachHeatLimit(temp)) {
-			// Change molecule speed base on heat
-			float scale = 0f;
-			scale = (float) (heat - (main.heatMax - main.heatMin) / 2)
-					/ (main.heatMax - main.heatMin);
-			scale *= 0.4f;
-			scale += 1.0f;
-			Vec2 velocity = mole.getLinearVelocity();
-			velocity = velocity.mul(scale);
-			mole.setLinearVelocity(velocity);
+			float scale = 1f;
+				curTime = Main.time;
+				// Change molecule speed base on heat
+				scale = (float) (heat - (main.heatMax - main.heatMin) / 2)
+						/ (main.heatMax - main.heatMin);
+				scale *= 0.4f;
+				scale += 1.0f;
+				Vec2 velocity = mole.getLinearVelocity();
+				velocity = velocity.mul(scale);
+				
+				//Heat always go faster than freezing,
+				//So we add time limit to heat process
+				if(scale>1) 
+				{
+					if(curTime == oldTime)  //If timer has not ticked yet
+					{
+						if(heatMoleculeTimes<heatMoleculeMaxTimes) //heat
+						{
+							mole.setLinearVelocity(velocity);
+							
+							//Add some small force to make solid vibrate
+							if(scale>1 && temp<=mole.freezingTem)
+							{
+								Random rand = new Random();
+								float x = rand.nextFloat()*0.5f;
+								float y = rand.nextFloat()*0.5f;
+								x*=(rand.nextBoolean())?1:-1;
+								Vec2 force = new Vec2(x, y);
+								force.mulLocal(scale);
+								mole.addForce(force);
+							}
+							heatMoleculeTimes++;
+							// Calculate new KE
+							calculateKE(scale); 
+							//System.out.println("Time = "+curTime+", Temp = "+temp);
+						}
+					}
+					else //update curTime
+					{
+						oldTime = curTime;
+						heatMoleculeTimes = 0;
+					}
+					
+				}
+				else //Freeze process
+				{
+					mole.setLinearVelocity(velocity);
+					// Calculate new KE
+					calculateKE(scale); 
+				}
 
-			// Save last temperature value
-			//unit4.lastTemp = temp;
-			// Calculate new KE
-			calculateKE();
+			
+
 
 		}
 
 	}
 
-
-	
-
-
 	// The only function that can change kinetic energy.
 	// Should be called after all the function that changes velocity or mole.
+	private void calculateKE(float limit) {
+		float totalKineticEnergy = 0;
+		float lastAverageKE = averageKineticEnergy;
+		for (int i = 0; i < State.molecules.size(); i++) {
+			totalKineticEnergy += State.molecules.get(i).getKineticEnergy();
+		}
+		averageKineticEnergy = totalKineticEnergy / State.molecules.size();
+		
+		//Add restrictions
+		if( limit <= 1.0f) //AKE should go down, but cant be smaller than limit
+		{
+			if(averageKineticEnergy> lastAverageKE) //AKE cant be larger
+				averageKineticEnergy = lastAverageKE;
+			else
+			{
+				if((averageKineticEnergy/lastAverageKE)<limit) //AKE cant be too smaller
+					averageKineticEnergy=limit*lastAverageKE;
+			}
+		}
+		else //AKE should go up, but cant be larger than limit
+		{
+			if(averageKineticEnergy < lastAverageKE)
+				averageKineticEnergy = lastAverageKE;
+			else
+			{
+				if((averageKineticEnergy/lastAverageKE) > limit )
+					averageKineticEnergy=limit*lastAverageKE;
+			}
+			
+		}
+	}
 	private void calculateKE() {
 		float totalKineticEnergy = 0;
 		for (int i = 0; i < State.molecules.size(); i++) {
@@ -886,10 +961,10 @@ public class P5Canvas extends PApplet {
 		heaterLimit[3] = (int) tempMin; // -2
 		heaterLimit[4] = (int) tempMin; // -1
 		// 0 does not change anything， no need to set a limit
-		heaterLimit[6] = 80; // +1
-		heaterLimit[7] = 130; // +2
-		heaterLimit[8] = 180; // +3
-		heaterLimit[9] = 220; // +4
+		heaterLimit[6] = 50; // +1
+		heaterLimit[7] = 75; // +2
+		heaterLimit[8] = 100; // +3
+		heaterLimit[9] = 160; // +4
 		heaterLimit[10] = 250; // +5
 
 	}
@@ -951,7 +1026,7 @@ public class P5Canvas extends PApplet {
 						mouseY / scale)) {
 					// TODO: bind molecule with mouse
 					trackedId = i;
-					// startDraggingMolecule = true;
+					startDraggingMolecule = true;
 					// System.out.println("Selected id:"+trackedId);
 					break;
 				}
@@ -961,31 +1036,29 @@ public class P5Canvas extends PApplet {
 
 	public void mouseReleased() {
 		isHidden = false;
-
 		isDrag = false;
-
-		if (getMain().selectedUnit == 4 && getMain().selectedSim == 2) {
-			if (trackedId != -1) {
-				// Set molecule speed as drag speed
-				State.molecules.get(trackedId).setLinearVelocity(dragSpeed);
-				calculateKE();
-			}
-			trackedId = -1;
-			
-		}
 		
 		unit4.mouseReleased();
 		
 		xDrag = 0;
 		yDrag = 0;
-		// draggingBoundary =-1;
 
-		// Check the top boundary
-		/*
-		 * int id = boundaries[2].isIn(mouseX, mouseY); if (id==2)
-		 * this.cursor(Cursor.N_RESIZE_CURSOR); else
-		 * this.cursor(Cursor.DEFAULT_CURSOR);
-		 */
+		if (getMain().selectedUnit == 4 && getMain().selectedSim == 2) {
+			if(startDraggingMolecule)
+			{
+				if (trackedId != -1) {
+					// Set molecule speed as drag speed
+					State.molecules.get(trackedId).setLinearVelocity(dragSpeed);
+					calculateKE();
+					trackedId = -1;
+				}
+				startDraggingMolecule = false;
+			}
+			
+		}
+		
+
+	
 	}
 
 	public void mouseDragged() {
@@ -999,7 +1072,7 @@ public class P5Canvas extends PApplet {
 			yDrag = (int) ((mouseY - yStart) / canvasScale);
 
 			// TODO: Enable throw molecule function in Unit 4 Sim 2
-			if (getMain().selectedUnit == 4 && getMain().selectedSim == 2) {
+			if (main.isSimSelected(4, 2)) {
 				if (trackedId != -1) {
 					float scale = canvasScale
 							* ((float) getMain().currentZoom / 100);
@@ -1009,13 +1082,12 @@ public class P5Canvas extends PApplet {
 					Molecule trackedMole = State.molecules.get(trackedId);
 					// System.out.println("Velocity is "+trackedMole.getLinearVelocity());
 					Vec2 prePos = new Vec2(trackedMole.getPosition());
-
-					// if(startDraggingMolecule) //Set molecule velocity to
-					// (0,0) when drag starts
-					{
+//					if(startDraggingMolecule) 
+//					//Set molecule velocity to (0,0) when drag starts
+//					{
 						trackedMole.setLinearVelocity(new Vec2(0, 0));
-						// startDraggingMolecule = false;
-					}
+//						startDraggingMolecule = false;
+//					}
 					trackedMole.setPosition(pos, angle);
 					float ratio = 20;
 					dragSpeed = pos.sub(prePos).mul(ratio);
@@ -1120,4 +1192,14 @@ public class P5Canvas extends PApplet {
 	{
 		return box2d;
 	}
+	
+	/*
+	//Set restitution of molecules, in order to make them not that bouncy
+	public void setRestitutionDamp(boolean b)
+	{
+		for( int i =0;i<State.molecules.size();i++)
+		{
+			State.molecules.get(i).setRestitutionDamp(b);
+		}
+	}*/
 }
