@@ -60,16 +60,12 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		maxTime =60;
 		switch(main.selectedUnit)
 		{
-		case 1:
-		case 2:
-		case 4:
-			maxCount =8;
-			break;
+		
 		case 3:
 			maxCount = 160;
 			break;
 		default:
-			
+			maxCount =8;
 			break;
 		}
 
@@ -144,6 +140,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		case 3:
 		case 4:
 			g.drawString("total mass", 0, 0);
+			break;
+		case 5:
+			g.drawString("Concentration", 0, 0);
 			break;
 		}
 		
