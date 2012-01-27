@@ -22,6 +22,8 @@ import simulations.models.Simulation.SpawnStyle;
 
 import java.util.Random;
 
+import javax.swing.JPanel;
+
 /**
  * @author Qin Li UnitBase class is base class of all Units class. Some simple
  *         functions implemented in this class
@@ -63,6 +65,16 @@ public abstract class UnitBase {
 
 	// Reset all parameter to initial states
 	protected abstract void reset();
+	
+	public abstract void updateOutput(int sim,int set);
+	
+	//Update output text on right panel
+	public void resetDashboard(int sim, int set)
+	{
+		JPanel dashboard = p5Canvas.getMain().dashboard;
+		dashboard.add(p5Canvas.getMain().lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+		dashboard.add(p5Canvas.getMain().elapsedTime, "cell 1 0");
+	}
 	
 	//Set up speed ratio for molecules
 	//Called by reset()
@@ -914,7 +926,7 @@ public abstract class UnitBase {
 	public int getDissolvedNum() {
 		return this.num_dissolved;
 	}
-
+/*
 	public void computeDissolved() {
 
 		// Compute saturation and the max number can be dissovled at current
@@ -959,7 +971,7 @@ public abstract class UnitBase {
 		}
 
 	}
-
+*/
 	public int numDissolved_atSaturation() {
 		int num = Math.round(computeSat() / molToMass());
 		return num;

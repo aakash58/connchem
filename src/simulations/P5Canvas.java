@@ -51,18 +51,16 @@ public class P5Canvas extends PApplet {
 
 	// A reference to our box2d world
 	private PBox2D box2d;
-	private Unit1 unit1;
-	private Unit2 unit2; // Unit2 object containing all the functions used in
-							// Unit2
-	private Unit3 unit3;
-	private Unit4 unit4;
+
 	// public Water waterComputation;
-	public boolean isEnable = false;
-	public boolean isHidingEnabled = false;
+	public boolean isEnable = false;       //Is simulation going on or stopped
+	public boolean isHidingEnabled = false;//Is molecule hidding enabled
+	public boolean isHidden = false;       //Is molecule hidding triggered
 	public boolean isTrackingEnabled = false;
 	public boolean isDisplayForces = false;
 	public boolean isDisplayJoints = false;
-	public boolean isConvertMol = false;
+	public boolean isDrag = false;   //Is p5Canvas being dragged
+
 
 	public int creationCount = 0;
 	// Properties of container
@@ -79,7 +77,6 @@ public class P5Canvas extends PApplet {
 	public float speedRate = 1.0f;
 	// Default value of canvas scale
 	public float canvasScale = 0.77f;
-
 	public int currentVolume;
 	//public int lastVolume;
 	public int volumeMinBoundary = 10;
@@ -97,12 +94,9 @@ public class P5Canvas extends PApplet {
 	public int yStart = 0;
 	public int xDrag = 0; // x offset after dragging
 	public int yDrag = 0; // y offset after dragging
-	public boolean isDrag = false;
 	ArrayList<String> products = new ArrayList<String>();
 	ArrayList<Molecule> killingList = new ArrayList<Molecule>();
-	// public int draggingBoundary =-1; //
-	//private boolean isFirstTime = true;
-	public boolean isHidden = false;
+	public UnitList unitList = null;
 
 	// Time step property
 	private float defaultTimeStep = 1.0f / 60.0f;
@@ -118,7 +112,7 @@ public class P5Canvas extends PApplet {
 	public int heatMoleculeMaxTimes = 10;
 	public Queue<Float> energyQueue = new LinkedList<Float>();
 	public int energyQueueSize = 30;
-	public ArrayList<UnitBase> unitList = new ArrayList<UnitBase>();
+	//public ArrayList<UnitBase> unitList = new ArrayList<UnitBase>();
 	float K = 1.38f; // K is ke/temp constant
 	float mole = 6.022f; // mole is another constant that used to calculate temp
 
@@ -147,6 +141,7 @@ public class P5Canvas extends PApplet {
 
 		setMain(parent);
 		box2d = new PBox2D(this);
+		/*
 		setUnit1(new Unit1(this, box2d));
 		setUnit2(new Unit2(this, box2d));
 		setUnit3(new Unit3(this, box2d));
@@ -156,6 +151,8 @@ public class P5Canvas extends PApplet {
 		unitList.add(unit2);
 		unitList.add(unit3);
 		unitList.add(unit4);
+		*/
+		unitList = new UnitList(this,box2d);
 		
 		boundaries = new Boundaries (this);
 
@@ -201,7 +198,7 @@ public class P5Canvas extends PApplet {
 
 		if (isEnable && firstRun) {
 			// Initialization function to intial parameters
-			unitList.get(main.selectedUnit - 1).initialize();
+			unitList.initialize(main.selectedUnit);
 
 			firstRun = false;
 		}
@@ -245,7 +242,7 @@ public class P5Canvas extends PApplet {
 		 * is selected
 		 */
 		if (isTrackingEnabled)
-			unit4.displayTrail();
+			unitList.getUnit4().displayTrail();
 
 		// Draw all molecules
 		for (int i = 0; i < molecules.size(); i++) {
@@ -263,10 +260,10 @@ public class P5Canvas extends PApplet {
 		}
 
 		// Update anchors position
-		getUnit3().resetAnchors(xDrag, yDrag);
+		unitList.getUnit3().resetAnchors(xDrag, yDrag);
 
-		// Dissolution function used in Unit 2
-		computeDissolved();
+		
+
 		
 
 	}
@@ -287,8 +284,7 @@ public class P5Canvas extends PApplet {
 			Molecule m = molecules.get(i);
 			m.setPropertyByHeat(false);
 		}
-		// Calculate saturation based on new temp
-		computeSaturation();
+
 		getMain().getCanvas().satCount = 0;
 
 		// Known: V-currentVolume n-mol T-temp R
@@ -301,50 +297,9 @@ public class P5Canvas extends PApplet {
 		pressure = (mol * R * (temp - tempMin)) / (currentVolume);
 		// Translate pressure from atmosphere into Kpa
 		pressure *= atmToKpa;
-		// System.out.println("averageKineticEnergy is "+averageKineticEnergy+",temp is "+temp+", pressure is "+pressure);
-		// Update lblTempValue
-		DecimalFormat myFormatter = new DecimalFormat("###.##");
-		String output = null;
-		if (getMain().lblVolumeValue.isShowing()) {
-			getMain().lblVolumeValue.setText(Float.toString(currentVolume)
-					+ " mL");
-			getMain().lblVolumeValue2.setText(Float.toString(currentVolume)
-					+ " mL");
-		}
-		if (getMain().lblTempValue.isShowing()) {
-			output = myFormatter.format(temp);
-			getMain().lblTempValue.setText(output + " \u2103");
-		}
-		if (getMain().lblKEValue.isShowing()) {
-			output = myFormatter.format(averageKineticEnergy);
-			getMain().lblKEValue.setText(output + " J");
-		}
-		if (getMain().lblPressureValue.isShowing()) {
-			output = myFormatter.format(pressure);
-			getMain().lblPressureValue.setText(output + " kPa");
-		}
-		if (getMain().lblMoleValue.isShowing())
-		{
-			getMain().lblMoleValue.setText( mol + " mol");
-		}
 
-		// Update bars
-		if (getMain().barPressure != null)
-			if (getMain().barPressure.isShowing()) {
-				getMain().barPressure.setValue(pressure);
-				getMain().barPressure.updateUI();
-				// System.out.println("pressure is "+pressure);
-				getMain().barVolume.setValue(currentVolume);
-				getMain().barVolume.updateUI();
-				// System.out.println("currentVolume is "+currentVolume);
-				getMain().barMol.setValue(mol);
-				getMain().barMol.updateUI();
-				// System.out.println("mol is "+mol);
-				getMain().barTemp.setValue(temp);
-				getMain().barTemp.updateUI();
-				// System.out.println("temp is "+temp);
-
-			}
+		//Print out properties on right panel
+		unitList.updateOutput(main.selectedUnit, main.selectedSim, main.selectedSet);
 	}
 
 	// Calculate temp from average kinetic energy
@@ -367,8 +322,7 @@ public class P5Canvas extends PApplet {
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
 	public void computeForces() {
-		unitList.get(main.selectedUnit - 1).computeForce(main.selectedSim,
-				main.selectedSet);
+		unitList.computeForces(main.selectedUnit, main.selectedSim,main.selectedSet);
 		// Apply forces after set forces
 		applyForce();
 
@@ -376,8 +330,7 @@ public class P5Canvas extends PApplet {
 
 	// Apply force at the begginning of every frame
 	public void applyForce() {
-		unitList.get(main.selectedUnit - 1).applyForce(main.selectedSim,
-				main.selectedSet);
+		unitList.applyForce(main.selectedUnit, main.selectedSim, main.selectedSet);
 	}
 
 	// Constrain Energy. To fake that molecules` average kinetic energy does not
@@ -413,26 +366,7 @@ public class P5Canvas extends PApplet {
 		popStyle();
 	}
 
-	public float getDensity(String compoundName) {
-		if (compoundName.equals("Sodium-Chloride"))
-			return 2.165f;
-		else if (compoundName.equals("Silicon-Dioxide"))
-			return 1.52f;
-		else if (compoundName.equals("Calcium-Chloride"))
-			return 2.15f;
-		else if (compoundName.equals("Sodium-Bicarbonate"))
-			return 2.20f;
-		else if (compoundName.equals("Potassium-Chloride"))
-			return 1.984f;
-		else if (compoundName.equals("Glycerol"))
-			return 1.261f;
-		else if (compoundName.equals("Pentane"))
-			return 0.63f;
-		else if (compoundName.equals("Acetic-Acid"))
-			return 1.049f;
-		else
-			return 1;
-	}
+
 
 	public static float getMolMass(String compoundName) {
 		if (compoundName.equals("Sodium-Chloride"))
@@ -455,135 +389,8 @@ public class P5Canvas extends PApplet {
 			return 1;
 	}
 
-	// Change 'g' to 'mol' in "Amount Added" label when "ConvertMassToMol"
-	// checkbox is selected
-	public void convertMassMol1() {
-		double mass = getUnit2().getTotalNum() * getUnit2().getMolToMass();
-		if (Compound.names.size() <= 1)
-			return;
-		float mol = (float) (mass / getMolMass(Compound.names.get(1)));
-		DecimalFormat df = new DecimalFormat("###.##");
-		main.m1Mass.setText(df.format(mol) + " mol");
-	}
 
-	// Change 'g' to 'mol' in "Dissolved" label when "ConvertMassToMol" checkbox
-	// is selected
-	public void convertMassMol2() {
-		double dis = getUnit2().getMassDissolved();
-		if (Compound.names.size() <= 1)
-			return;
-		float mol2 = (float) (dis / getMolMass(Compound.names.get(1)));
-		DecimalFormat df = new DecimalFormat("###.##");
-		main.m1Disolved.setText(df.format(mol2) + " mol");
-	}
 
-	// Change 'mol' to 'g' in "Amount Added" label when "ConvertMassToMol"
-	// checkbox is deselected
-	public void convertMolMass1() {
-		double mass = getUnit2().getTotalNum() * getUnit2().getMolToMass();
-		DecimalFormat df = new DecimalFormat("###.##");
-		main.m1Mass.setText(df.format(mass) + " g");
-	}
-
-	// Change 'mol' to 'g' in "Dissolved" label when "ConvertMassToMol" checkbox
-	// is deselected
-	public void convertMolMass2() {
-		double mass = getUnit2().getMassDissolved();
-		if (Compound.names.size() <= 1)
-			return;
-		DecimalFormat df = new DecimalFormat("###.##");
-		main.m1Disolved.setText(df.format(mass) + " g");
-	}
-
-	/******************************************************************
-	 * FUNCTION : computeOutput DESCRIPTION : Compute total amount of water and
-	 * other molecules
-	 * 
-	 * INPUTS : compoundName(String), count(int) OUTPUTS: None
-	 *******************************************************************/
-	private void computeOutput(String compoundName, int count) {
-		if (compoundName.equals("Water")) {
-			getUnit2().addWaterMolecules(count);
-			DecimalFormat df = new DecimalFormat("###.#");
-			float waterNum = getUnit2().getWaterNum();
-			float water100 = (float) getUnit2().getWater100Ml() / 100;
-			main.waterVolume.setText(df.format(waterNum / water100) + " mL");
-			computeSaturation();
-		}
-		if (main.selectedUnit == 2 && !compoundName.equals("Water")
-				&& count > 0) {
-			getUnit2().addTotalMolecules(count);
-			DecimalFormat df = new DecimalFormat("###.#");
-			// In Unit 2, ALL SETS, the output monitor for the amount added
-			// should be "amount added".
-			if (main.selectedUnit == 2)
-				main.m1Label.setText("Amount Added:");
-			else
-				main.m1Label.setText(compoundName + ":");
-			float total = getUnit2().getTotalNum() * getUnit2().getMolToMass();
-			main.m1Mass.setText(df.format(total) + " g");
-			if (isConvertMol) {
-				convertMassMol1();
-			}
-		}
-		// Compute SoluteVolume
-		float waterVolume = (float) (getUnit2().getWaterNum() / (getUnit2()
-				.getWater100Ml() / 100.));
-		float cVolume = 0;
-		if (Compound.names.size() > 1) {
-			float dens = getDensity(Compound.names.get(1));
-			float total = getUnit2().getTotalNum() * getUnit2().getMolToMass();
-			cVolume = total / dens;
-		}
-
-		DecimalFormat df = new DecimalFormat("###.#");
-		// If there is no water molecules added at the beginning in Unit 2, we
-		// want "Solution Volume" label show nothing
-		if (main.selectedUnit == 2 && waterVolume == 0) {
-			main.soluteVolume.setText(" ");
-		} else
-			main.soluteVolume.setText(df.format(waterVolume + cVolume) + " mL");
-
-		main.dashboard.updateUI();
-
-		getMain().getCanvas().satCount = 0;
-	}
-
-	public void computeSaturation() {
-		float sat = getUnit2().computeSat();
-		if (main.satMass != null) {
-			DecimalFormat df = new DecimalFormat("###.#");
-			main.satMass.setText(df.format(sat) + " g");
-			if (main.selectedSet == 3 || main.selectedSet == 5)
-				main.satMass.setText("\u221e"); // u221e is Unicode Character
-												// "infinite"
-			// Main.dashboard.updateUI();
-		}
-
-	}
-
-	/******************************************************************
-	 * FUNCTION : computeDisolved DESCRIPTION : Function to compute mass of
-	 * dissolved solute
-	 * 
-	 * INPUTS : None OUTPUTS: None
-	 *******************************************************************/
-	public void computeDissolved() {
-
-		// If there is no Dissolved label, we dont compute solution
-		if (getMain().m1Disolved == null)
-			return;
-
-		switch (getMain().selectedUnit) {
-		case 2:
-			getUnit2().computeDissolved();
-			break;
-		case 3: // unit3.computeDissolved();
-			break;
-
-		}
-
-	}
 
 	/******************************************************************
 	 * FUNCTION : addMoleculeRandomly DESCRIPTION : Initially add molecule to
@@ -597,8 +404,7 @@ public class P5Canvas extends PApplet {
 		boolean tmp = isEnable;
 		isEnable = false;
 
-		res = unitList.get(main.selectedUnit - 1).addMolecules(tmp,
-				compoundName, count);
+		res = unitList.addMolecule(main.selectedUnit, tmp, compoundName, count);
 
 		// If we successfully added molecules, update compound number
 		if (res) {
@@ -612,8 +418,7 @@ public class P5Canvas extends PApplet {
 				if (!getMain().addBtns.isEmpty())
 					getMain().addBtns.get(compoundName).setEnabled(false);
 			}
-			computeOutput(compoundName, count);
-			// AddEnergyToMolecule(count);
+
 
 		}
 
@@ -650,13 +455,11 @@ public class P5Canvas extends PApplet {
 		int index = Compound.names.indexOf(compoundName);
 		int addCount = Compound.counts.get(index) + count;
 
-		res = unitList.get(main.selectedUnit - 1).addMolecules(tmp,
-				compoundName, count);
+		res = unitList.addMolecule(main.selectedUnit, tmp, compoundName, addCount);
 
 		// If we successfully added molecules, update compound number
 		if (res) {
 			Compound.counts.set(index, addCount);
-			computeOutput(compoundName, count);
 		}
 
 		isEnable = tmp;
@@ -684,7 +487,7 @@ public class P5Canvas extends PApplet {
 		box2d.setGravity(0f, -10f);
 
 		// Reset function set intial temperature of one simulation
-		unitList.get(main.selectedUnit - 1).reset();
+		unitList.reset(main.selectedUnit);
 
 		// Get initial Kinetic Energy from temp
 		averageKineticEnergy = getKEFromTemp();
@@ -796,8 +599,7 @@ public class P5Canvas extends PApplet {
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
 	private void updateMolecules() {
-		unitList.get(main.selectedUnit - 1).updateMolecules(main.selectedSim,
-				main.selectedSet);
+		unitList.updateMolecules(main.selectedUnit, main.selectedSim, main.selectedSet);
 
 	}
 
@@ -813,7 +615,7 @@ public class P5Canvas extends PApplet {
 		heatMolecule(c);
 
 		// Specified beginReaction function for each unit
-		unitList.get(main.selectedUnit - 1).beginReaction(c);
+		unitList.beginContact(main.selectedUnit, c);
 	}
 
 	public void heatMolecule(Contact c) {
@@ -992,8 +794,7 @@ public class P5Canvas extends PApplet {
 
 	// Set up reaction products while initializing for graph rendering
 	public void setupReactionProducts() {
-		unitList.get(main.selectedUnit - 1).setupReactionProducts(
-				main.selectedSim, main.selectedSet);
+		unitList.setupReactionProducts(main.selectedUnit, main.selectedSim, main.selectedSet);
 	}
 
 	/******************************** MOUSE EVENT ******************************/
@@ -1038,7 +839,7 @@ public class P5Canvas extends PApplet {
 		isHidden = false;
 		isDrag = false;
 		
-		unit4.mouseReleased();
+		unitList.getUnit4().mouseReleased();
 		
 		xDrag = 0;
 		yDrag = 0;
@@ -1124,65 +925,21 @@ public class P5Canvas extends PApplet {
 	public void preSolve(Contact c, Manifold m) {
 	}
 
-	/**
-	 * @return the unit2
-	 */
 	public Unit2 getUnit2() {
-		return unit2;
+		return unitList.getUnit2();
 	}
-
-	/**
-	 * @param unit2
-	 *            the unit2 to set
-	 */
-	public void setUnit2(Unit2 unit2) {
-		this.unit2 = unit2;
+	public Unit3 getUnit3() {
+		return unitList.getUnit3();
 	}
-
-	/**
-	 * @return the main
-	 */
+	public Unit4 getUnit4() {
+		return unitList.getUnit4();
+	}
 	public Main getMain() {
 		return main;
 	}
 
-	/**
-	 * @param main
-	 *            the main to set
-	 */
 	public void setMain(Main main) {
 		this.main = main;
-	}
-
-	/**
-	 * @return the unit3
-	 */
-	public Unit3 getUnit3() {
-		return unit3;
-	}
-
-	/**
-	 * @param unit3
-	 *            the unit3 to set
-	 */
-	public void setUnit3(Unit3 unit3) {
-		this.unit3 = unit3;
-	}
-
-	public Unit4 getUnit4() {
-		return unit4;
-	}
-
-	public void setUnit4(Unit4 unit4) {
-		this.unit4 = unit4;
-	}
-
-	public Unit1 getUnit1() {
-		return unit1;
-	}
-
-	public void setUnit1(Unit1 unit1) {
-		this.unit1 = unit1;
 	}
 
 	public TableView getTableView() {

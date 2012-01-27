@@ -2,13 +2,18 @@ package simulations;
 
 import static data.State.molecules;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Random;
 import java.text.DecimalFormat;
 
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -42,9 +47,21 @@ public class Unit2 extends UnitBase{
 	private int mToMass = 10;
 
 	private Water waterComputation;
-	//private int addWaterDelay = 8000; //Parameter specifies delay of saturation computation after we add water molecules to canvas
-	                           //In seconds
-	//private ActionListener timerPerformer = null; //ActionListener of timer used to increase numWater
+
+	//Output labels
+	//Labels used in Unit 2
+	public JLabel m1Mass;
+	public JLabel m1Disolved; // "Dissolved" label showing how much solute has dissovled
+	public JLabel satMass; //
+	public JLabel waterVolume;
+	public JLabel m1Label;
+	public JLabel m1MassLabel;
+	public JLabel solventLabel;
+	public JLabel satLabel;
+	public JLabel solutionLabel;
+	public JLabel soluteVolume;
+	public JCheckBox cBoxConvert; //Convert mass to mol
+	public boolean isConvertMol = false;
 
 
 	public Unit2(P5Canvas parent, PBox2D box) {
@@ -52,8 +69,42 @@ public class Unit2 extends UnitBase{
 		unitNum = 2;
 		waterComputation = new Water(p5Canvas);
 
+		setupOutputLabels();
 	}
 
+	private void setupOutputLabels()
+	{
+		//Initialzie labels for Unit 2
+
+		m1Label = new JLabel("Compound Mass:");
+		m1Mass = new JLabel("0 g");
+		m1MassLabel = new JLabel("Dissolved:");
+		//dashboard.add(m1MassLabel, "cell 0 2,alignx right");
+		m1Disolved = new JLabel("0 g");
+		satLabel = new JLabel("Saturation:");
+		satMass = new JLabel("0 g");
+		solventLabel = new JLabel("Solvent Volume:");
+		waterVolume = new JLabel("0 mL");
+		solutionLabel = new JLabel("Solution Volume:");
+		soluteVolume = new JLabel("0 mL");
+		// Set up "Convert to Mass" Checkbox
+		cBoxConvert = new JCheckBox("Convert Mass to Moles");
+		cBoxConvert.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					isConvertMol = true;
+					// Change 'g' to 'mol' in Amount Added label
+					convertMassMol1();
+					// Change 'g' to 'mol' in "Dissolved" label
+					convertMassMol2();
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					isConvertMol = false;
+					convertMolMass1();
+					convertMolMass2();
+				}
+			}
+		});
+	}
 
 
 	/******************************************************************
@@ -1628,23 +1679,7 @@ public class Unit2 extends UnitBase{
 		this.mToMass = 10;
 		if (p5Canvas.getMain().selectedSet == 4)
 			this.mToMass = 20;
-		/*
-		//Reset Add molecule lable
-		Component [] panels = p5Canvas.getMain().dynamicPanel.getComponents();
-		for(Component c : panels)
-		{
-			if(!c.getName().equals("Water"))
-			{
-				for( Component cc: ((JPanel)c).getComponents() )
-				{
-					if(cc.getName().equals("lblAmount"))
-					{
-						((JLabel)cc).setText("");
-					}
-				}
-			}
-				//((panel)c).
-		}*/
+
 		
 		computeDissolved();
 	}
@@ -1742,19 +1777,108 @@ public class Unit2 extends UnitBase{
 			setMassDissolved(getTotalNum()* getMolToMass()) ;
 		}	
 		
-		p5Canvas.getMain().m1Disolved.setText(df.format(getMassDissolved())+" g");
+		m1Disolved.setText(df.format(getMassDissolved())+" g");
 		float temp = p5Canvas.temp;
 		if (temp<=0 || temp>=100){ 
 			setMassDissolved(0) ;
-			p5Canvas.getMain().m1Disolved.setText("0 g");
+			m1Disolved.setText("0 g");
 		}
 		
 		//If ConvertToMol checkbox is selected, we need to change 'g' to 'mol'
-		if (p5Canvas.isConvertMol){
-			p5Canvas.convertMassMol2();
+		if (isConvertMol){
+			convertMassMol2();
 		}
 		
 	}
+		
+
+		/******************************************************************
+		 * FUNCTION : computeOutput DESCRIPTION : Compute total amount of water and
+		 * other molecules
+		 * 
+		 * INPUTS : compoundName(String), count(int) OUTPUTS: None
+		 *******************************************************************/
+		private void computeOutput(String compoundName, int count) {
+			Main main = p5Canvas.getMain();
+			if (compoundName.equals("Water")) {
+				addWaterMolecules(count);
+				DecimalFormat df = new DecimalFormat("###.#");
+				float waterNum = getWaterNum();
+				float water100 = (float) getWater100Ml() / 100;
+				waterVolume.setText(df.format(waterNum / water100) + " mL");
+				computeSaturation();
+			}
+			if (main.selectedUnit == 2 && !compoundName.equals("Water")
+					&& count > 0) {
+				addTotalMolecules(count);
+				DecimalFormat df = new DecimalFormat("###.#");
+				// In Unit 2, ALL SETS, the output monitor for the amount added
+				// should be "amount added".
+				if (main.selectedUnit == 2)
+					m1Label.setText("Amount Added:");
+				else
+					m1Label.setText(compoundName + ":");
+				float total = getTotalNum() * getMolToMass();
+				m1Mass.setText(df.format(total) + " g");
+				if (isConvertMol) {
+					convertMassMol1();
+				}
+			}
+			// Compute SoluteVolume
+			float waterVolume = (float) (getWaterNum() / (getWater100Ml() / 100.));
+			float cVolume = 0;
+			if (Compound.names.size() > 1) {
+				float dens = getDensity(Compound.names.get(1));
+				float total = getTotalNum() * getMolToMass();
+				cVolume = total / dens;
+			}
+
+			DecimalFormat df = new DecimalFormat("###.#");
+			// If there is no water molecules added at the beginning in Unit 2, we
+			// want "Solution Volume" label show nothing
+			if (main.selectedUnit == 2 && waterVolume == 0) {
+				soluteVolume.setText(" ");
+			} else
+				soluteVolume.setText(df.format(waterVolume + cVolume) + " mL");
+
+			main.dashboard.updateUI();
+			main.getCanvas().satCount = 0;
+		}
+
+		public void computeSaturation() {
+			float sat = computeSat();
+			Main main = p5Canvas.getMain();
+			if (satMass != null) {
+				DecimalFormat df = new DecimalFormat("###.#");
+				satMass.setText(df.format(sat) + " g");
+				if (main.selectedSet == 3 || main.selectedSet == 5)
+					satMass.setText("\u221e"); // u221e is Unicode Character
+													// "infinite"
+				// Main.dashboard.updateUI();
+			}
+
+		}
+
+		public float getDensity(String compoundName) {
+			if (compoundName.equals("Sodium-Chloride"))
+				return 2.165f;
+			else if (compoundName.equals("Silicon-Dioxide"))
+				return 1.52f;
+			else if (compoundName.equals("Calcium-Chloride"))
+				return 2.15f;
+			else if (compoundName.equals("Sodium-Bicarbonate"))
+				return 2.20f;
+			else if (compoundName.equals("Potassium-Chloride"))
+				return 1.984f;
+			else if (compoundName.equals("Glycerol"))
+				return 1.261f;
+			else if (compoundName.equals("Pentane"))
+				return 0.63f;
+			else if (compoundName.equals("Acetic-Acid"))
+				return 1.049f;
+			else
+				return 1;
+		}
 	
 		public float computeIonSeperation() {
 		float dis = 0;
@@ -1776,6 +1900,46 @@ public class Unit2 extends UnitBase{
 		public void setupSimulations() {
 			// TODO Auto-generated method stub
 			
+		}
+		
+		// Change 'g' to 'mol' in "Amount Added" label when "ConvertMassToMol"
+		// checkbox is selected
+		public void convertMassMol1() {
+			double mass = getTotalNum() * getMolToMass();
+			if (Compound.names.size() <= 1)
+				return;
+			float mol = (float) (mass / getMolMass(Compound.names.get(1)));
+			DecimalFormat df = new DecimalFormat("###.##");
+			m1Mass.setText(df.format(mol) + " mol");
+		}
+
+		// Change 'g' to 'mol' in "Dissolved" label when "ConvertMassToMol" checkbox
+		// is selected
+		public void convertMassMol2() {
+			double dis = getMassDissolved();
+			if (Compound.names.size() <= 1)
+				return;
+			float mol2 = (float) (dis / getMolMass(Compound.names.get(1)));
+			DecimalFormat df = new DecimalFormat("###.##");
+			m1Disolved.setText(df.format(mol2) + " mol");
+		}
+
+		// Change 'mol' to 'g' in "Amount Added" label when "ConvertMassToMol"
+		// checkbox is deselected
+		public void convertMolMass1() {
+			double mass = getTotalNum() * getMolToMass();
+			DecimalFormat df = new DecimalFormat("###.##");
+			m1Mass.setText(df.format(mass) + " g");
+		}
+
+		// Change 'mol' to 'g' in "Dissolved" label when "ConvertMassToMol" checkbox
+		// is deselected
+		public void convertMolMass2() {
+			double mass = getMassDissolved();
+			if (Compound.names.size() <= 1)
+				return;
+			DecimalFormat df = new DecimalFormat("###.##");
+			m1Disolved.setText(df.format(mass) + " g");
 		}
 
 		@Override
@@ -1862,7 +2026,10 @@ public class Unit2 extends UnitBase{
 				res = addWaterMolecules(isAppEnable,compoundName,count);
 				
 			}
-			// TODO Auto-generated method stub
+			if(res)
+			{
+				computeOutput(compoundName, count);
+			} 
 			return res;
 		}
 		
@@ -1897,6 +2064,29 @@ public class Unit2 extends UnitBase{
 			}
 			return res;
 		}
+		
+		public void resetDashboard(int sim, int set)
+		{
+			JPanel dashboard = p5Canvas.getMain().dashboard;
+			Main main = p5Canvas.getMain();
+
+				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(main.elapsedTime, "cell 1 0");
+				dashboard.add(cBoxConvert, "cell 0 1");
+				dashboard.add(m1Label, "cell 0 2,alignx right");
+				dashboard.add(m1Mass, "cell 1 2");
+				dashboard.add(m1MassLabel, "cell 0 3,alignx right");
+				dashboard.add(m1Disolved, "cell 1 3");
+				// dashboard.add(satLabel, "cell 0 3,alignx right");
+				// dashboard.add(satMass, "cell 1 3");
+				dashboard.add(solventLabel, "cell 0 4,alignx right");
+				dashboard.add(waterVolume, "cell 1 4");
+				waterVolume.setText("0 mL");
+				dashboard.add(solutionLabel, "cell 0 5,alignx right");
+				dashboard.add(soluteVolume, "cell 1 5");
+				soluteVolume.setText("");
+				//rightPanel.add(outputControls, "cell 0 5,grow");			} 
+		}
 
 
 
@@ -1912,5 +2102,17 @@ public class Unit2 extends UnitBase{
 		public void initialize() {
 			// TODO Auto-generated method stub
 			
+		}
+
+
+
+		@Override
+		public void updateOutput(int sim, int set) {
+			
+			// Calculate saturation based on new temp
+			computeSaturation();
+			
+			// Dissolution function used in Unit 2
+			computeDissolved();
 		}
 }

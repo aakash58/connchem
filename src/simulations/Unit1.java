@@ -2,8 +2,12 @@ package simulations;
 
 import static data.State.molecules;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
@@ -19,6 +23,9 @@ import simulations.models.Simulation.SpawnStyle;
 
 public class Unit1 extends UnitBase {
 	// private Water waterComputation;
+	
+	private JLabel lblTempTitle;
+	private JLabel lblTempValue;
 
 	public Unit1(P5Canvas parent, PBox2D box) {
 		super(parent, box);
@@ -26,6 +33,12 @@ public class Unit1 extends UnitBase {
 		unitNum = 1;
 		setupSimulations();
 		// waterComputation = new Water(p5Canvas);
+		setupOutputLabels();
+	}
+	private void setupOutputLabels()
+	{
+		lblTempTitle = new JLabel ("Temperature:");
+		lblTempValue = new JLabel (" \u2103");
 	}
 
 	@Override
@@ -83,8 +96,12 @@ public class Unit1 extends UnitBase {
 
 	@Override
 	protected void reset() {
-		// TODO Auto-generated method stub
+
+		//Reset temperature
 		p5Canvas.temp = 25;
+		
+		//Reset output Labels
+		lblTempValue.setText(" \u2103");
 
 		switch (p5Canvas.getMain().selectedSim) {
 		case 1:
@@ -795,6 +812,28 @@ public class Unit1 extends UnitBase {
 				}
 			}
 		}
+	}
+	
+	public void resetDashboard(int sim,int set)
+	{
+		super.resetDashboard(sim,set);
+		JPanel dashboard = p5Canvas.getMain().dashboard;
+		if(sim==3||sim==4)
+		{
+			dashboard.add(lblTempTitle," cell 0 1, alignx right");
+			dashboard.add(lblTempValue,"cell 1 1");
+		}
+	}
+	@Override
+	public void updateOutput(int sim, int set) {
+		// Update lblTempValue
+		DecimalFormat myFormatter = new DecimalFormat("###.##");
+		String output = null;
+		if (lblTempValue.isShowing()) {
+			output = myFormatter.format(p5Canvas.temp);
+			lblTempValue.setText(output + " \u2103");
+		}
+		
 	}
 
 }

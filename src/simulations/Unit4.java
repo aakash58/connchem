@@ -2,16 +2,24 @@ package simulations;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
+
+import main.Main;
+import net.miginfocom.swing.MigLayout;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import Util.ColorScales;
+import Util.SimpleBar;
 
 import data.State;
 
@@ -41,19 +49,85 @@ public class Unit4 extends UnitBase {
 	int trailMoleculeId = 0; // Keep track of id of molecule whose trail is
 	// showing, used in Unit 4 Sim 2
 	private float trailDist = 600f;
+	
+	//Output labels
+	//Lables used in Unit 4
+	public JLabel lblPressureText;
+	public JLabel lblPressureTitle;
+	public JLabel lblPressureValue;
+	public JLabel lblCollisionTitle;
+	public JLabel lblCollisionValue;
+	public JLabel lblVolumeText;
+	public JLabel lblVolumeTitle;
+	public JLabel lblVolumeTitle2;   //for Unit4 Sim1 Set2
+	public JLabel lblVolumeValue;   
+	public JLabel lblVolumeValue2; //for Unit4 Sim1 Set2
+	public JLabel lblEqualText;
+	public JLabel lblMolText;
+	public JLabel lblMolValue;
+	public JLabel lblRText;
+	public JLabel lblRValue;
+	public JLabel lblTempText;
+	public JLabel lblTempTitle;
+	public JLabel lblTempValue;
+	public JLabel lblKETitle;
+	public JLabel lblKEValue;
+	public JLabel lblMoleTitle;
+	public JLabel lblMoleValue;
+	public JLabel lblMultiplicationText1;
+	public JLabel lblMultiplicationText2;
+	public JLabel lblMultiplicationText3;
+	public SimpleBar barPressure;
+	public SimpleBar barVolume;
+	public SimpleBar barMol;
+	public SimpleBar barTemp;
 
 	public Unit4(P5Canvas parent, PBox2D box) {
 		super(parent, box);
-		// TODO Auto-generated constructor stub
 		unitNum = 4;
 		setupSimulations();
 		lastTemp = p5Canvas.temp;
 		lastVolume = p5Canvas.currentVolume;
+		setupOutputLabels();
+	}
+	
+	private void setupOutputLabels()
+	{
+		Main main = p5Canvas.getMain();
+		//Intialize labels for unit 4
+		lblPressureText = new JLabel ("P (kPa)");
+		lblPressureTitle = new JLabel ("Pressure:" );
+		lblPressureValue = new JLabel("");
+		lblCollisionTitle = new JLabel("Collisions in last 5 sec:");
+		lblCollisionValue = new JLabel("");
+		lblVolumeText = new JLabel("V (mL)");
+		lblVolumeTitle = new JLabel("Volume of gas:");
+		lblVolumeValue = new JLabel (" mL");
+		lblVolumeTitle2 = new JLabel("Volume of gas:");
+		lblVolumeValue2 = new JLabel(" mL");
+		lblEqualText = new JLabel("=");
+		lblMolText = new JLabel ("n (mol)");
+		lblMolValue = new JLabel ("");
+		lblRText = new JLabel ("R");
+		lblRValue = new JLabel ();
+		lblTempText = new JLabel("T (\u2103)");
+		lblTempTitle = new JLabel ("Temperature:");
+		lblTempValue = new JLabel (" \u2103");
+		lblKETitle = new JLabel("Kinetic Energy:");
+		lblKEValue = new JLabel(" J");
+		lblMoleTitle = new JLabel("Mole of gas:");
+		lblMoleValue = new JLabel(" mol");
+		lblMultiplicationText1 = new JLabel("*");
+		lblMultiplicationText2 = new JLabel("*");
+		lblMultiplicationText3 = new JLabel("*");
+		barPressure = new SimpleBar(0,350,30);
+		barVolume = new SimpleBar(main.minVolume,main.maxVolume,63);
+		barMol = new SimpleBar(0,50,10);
+		barTemp  = new SimpleBar(main.tempMin,main.tempMax,25);
 	}
 
 	@Override
 	public void setupSimulations() {
-		// TODO Auto-generated method stub
 		simulations = new Simulation[SIMULATION_NUMBER];
 
 		simulations[0] = new Simulation(unitNum, 1, 1);
@@ -101,7 +175,6 @@ public class Unit4 extends UnitBase {
 
 	@Override
 	public void updateMolecules(int sim, int set) {
-		// TODO Auto-generated method stub
 		//No reactions happen in this unit
 		if(p5Canvas.isEnable)
 		{
@@ -109,7 +182,7 @@ public class Unit4 extends UnitBase {
 			if (frameCounter >= this.computeTriggerInterval)
 			{
 				//System.out.println("Collision count is "+collisionCount);
-				p5Canvas.getMain().lblCollisionValue.setText(Integer.toString(collisionCount));
+				lblCollisionValue.setText(Integer.toString(collisionCount));
 				frameCounter = 0;
 				collisionCount = 0;
 			}
@@ -118,8 +191,9 @@ public class Unit4 extends UnitBase {
 
 	@Override
 	protected void reset() {
-		// TODO Auto-generated method stub
 		setupSimulations();
+		
+		//Reset Parameters
 		lastTemp = p5Canvas.temp;
 		p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
 		p5Canvas.getMain().volumeSlider.setEnabled(true);
@@ -127,6 +201,21 @@ public class Unit4 extends UnitBase {
 		collisionPositions.clear();
 		collisionColors.clear();
 		
+		//Reset output labels
+		lblVolumeValue.setText(" mL");
+		lblVolumeValue2.setText(" mL");
+		lblPressureValue.setText(" kPa");
+		lblCollisionValue.setText("");
+		lblTempValue.setText(" \u2103");
+		lblKEValue.setText(" J");
+		lblMoleValue.setText(" mol");
+		
+		barMol.reset();
+		barPressure.reset();
+		barVolume.reset();
+		barTemp.reset();
+		
+		//Customization
 		switch(p5Canvas.getMain().selectedSim)
 		{
 		case 1:
@@ -136,13 +225,7 @@ public class Unit4 extends UnitBase {
 				p5Canvas.temp = 400;
 			break;
 		case 2:
-			//box2d.setGravity(0f, 0f);
-			//p5Canvas.getMain().heatSlider.setEnabled(false);
 			p5Canvas.temp =100;
-			
-			//Add first point to trail points list.
-			//if(State.molecules.size()>p5Canvas.trailMoleculeId)
-			//p5Canvas.collisionPositions.add(State.molecules.get(p5Canvas.trailMoleculeId).getPosition());
 			break;
 		case 3:
 			p5Canvas.getMain().heatSlider.setEnabled(false);
@@ -150,7 +233,7 @@ public class Unit4 extends UnitBase {
 		case 4:
 			if(p5Canvas.getMain().selectedSet==1)
 			{
-				p5Canvas.getMain().barPressure.setMax(800);
+				barPressure.setMax(800);
 				p5Canvas.getMain().heatSlider.setEnabled(false);
 			}
 			else if (p5Canvas.getMain().selectedSet==2)
@@ -197,8 +280,8 @@ public class Unit4 extends UnitBase {
 
 	@Override
 	protected void computeForce(int sim, int set) {
-		// TODO Auto-generated method stub
 
+		
 	}
 
 
@@ -333,7 +416,6 @@ public class Unit4 extends UnitBase {
 	@Override
 	public boolean addMolecules(boolean isAppEnable, String compoundName,
 			int count) {
-		// TODO Auto-generated method stub
 			boolean res = false;
 
 			int sim = p5Canvas.getMain().selectedSim;
@@ -525,6 +607,141 @@ public class Unit4 extends UnitBase {
 			lastXDrag = p5Canvas.xDrag;
 			lastYDrag = p5Canvas.yDrag;
 		}
+	}
+	
+	public void resetDashboard(int sim,int set)
+	{
+		//Gas law, showing PV=nRT
+		Main main = p5Canvas.getMain();
+		JPanel dashboard = main.dashboard;
+			String alignStr = new String(", align center");
+			if( sim==1)
+			{
+				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(main.elapsedTime, "cell 1 0");
+				if(set ==1 )
+				{
+					lblVolumeTitle.setText("Volume of Helium:");
+				}
+				else if(set ==2 )
+				{
+					lblVolumeTitle.setText("Volume of Chlorine:");
+					lblVolumeTitle2.setText("Volume of Oxygen:");
+					dashboard.add(lblVolumeTitle2, "cell 0 2");
+					dashboard.add(lblVolumeValue2,"cell 1 2");
+				}
+				dashboard.add(lblVolumeTitle,"cell 0 1");
+				dashboard.add(lblVolumeValue,"cell 1 1");
+			}
+			else if (sim==2)
+			{
+				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(main.elapsedTime, "cell 1 0");
+				lblVolumeTitle.setText("Volume of Bromine:");
+				dashboard.add(lblMoleTitle, "cell 0 1");
+				dashboard.add(lblMoleValue, "cell 1 1");
+				dashboard.add(lblVolumeTitle,"cell 0 2");
+				dashboard.add(lblVolumeValue,"cell 1 2");
+				dashboard.add(lblTempTitle,"cell 0 3");
+				dashboard.add(lblTempValue,"cell 1 3");
+				dashboard.add(lblKETitle,"cell 0 4");
+				dashboard.add(lblKEValue,"cell 1 4");
+			}
+			else if( sim==3)
+			{
+				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(main.elapsedTime, "cell 1 0");
+				dashboard.add(lblCollisionTitle,"cell 0 1");
+				dashboard.add(lblCollisionValue,"cell 1 1");
+				dashboard.add(lblPressureTitle,"cell 0 2");
+				dashboard.add(lblPressureValue,"cell 1 2");
+			}
+			else if( sim ==4)
+			{
+			int barWidth = 40;
+			int barHeight = 120;
+			dashboard.setLayout(new MigLayout("","[45][8][45][25][45][8][10][8][45]","[][][grow][]"));
+			dashboard.add(main.lblElapsedTimeText, "cell 0 3 4 1, align right");
+			dashboard.add(main.elapsedTime, "cell 4 3 3 1, align left");
+			
+			dashboard.add(lblPressureText, "cell 0 0"+alignStr);
+			dashboard.add(lblMultiplicationText1, "cell 1 0"+alignStr);
+			dashboard.add(lblVolumeText,"cell 2 0"+alignStr);
+
+			dashboard.add(lblEqualText,"cell 3 0"+alignStr);
+			dashboard.add(lblMolText,"cell 4 0"+alignStr); 
+			dashboard.add(lblMultiplicationText2, "cell 5 0"+alignStr);
+			dashboard.add(lblRText,"cell 6 0"+alignStr); 
+			dashboard.add(lblMultiplicationText3, "cell 7 0"+alignStr);
+			dashboard.add(lblTempText,"cell 8 0"+alignStr); 
+
+			barPressure.setPreferredSize(new Dimension(barWidth,barHeight));
+			barVolume.setPreferredSize(new Dimension(barWidth,barHeight));
+			barMol.setPreferredSize(new Dimension(barWidth,barHeight));
+			barTemp.setPreferredSize(new Dimension(barWidth,barHeight));
+			dashboard.add(barPressure,"cell 0 2"+alignStr);
+			dashboard.add(barVolume,"cell 2 2"+alignStr);
+			dashboard.add(barMol,"cell 4 2"+alignStr);
+			dashboard.add(barTemp,"cell 8 2"+alignStr);
+			}
+			else if( sim ==5)
+			{
+				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(main.elapsedTime, "cell 1 0");
+				dashboard.add(lblPressureTitle,"cell 0 2");
+				dashboard.add(lblPressureValue,"cell 1 2");
+				lblVolumeTitle.setText("Volume of Helium:");
+				dashboard.add(lblVolumeTitle,"cell 0 3");
+				dashboard.add(lblVolumeValue,"cell 1 3");
+				dashboard.add(lblTempTitle,"cell 0 4");
+				dashboard.add(lblTempValue,"cell 1 4");
+				
+			}
+		
+	}
+
+	@Override
+	public void updateOutput(int sim, int set) {
+		
+		// Update lblTempValue
+		DecimalFormat myFormatter = new DecimalFormat("###.##");
+		String output = null;
+		if (lblVolumeValue.isShowing()) {
+			lblVolumeValue.setText(Float.toString(p5Canvas.currentVolume)
+					+ " mL");
+			lblVolumeValue2.setText(Float.toString(p5Canvas.currentVolume)
+					+ " mL");
+		}
+		if (lblTempValue.isShowing()) {
+			output = myFormatter.format(p5Canvas.temp);
+			lblTempValue.setText(output + " \u2103");
+		}
+		if (lblKEValue.isShowing()) {
+			output = myFormatter.format(p5Canvas.averageKineticEnergy);
+			lblKEValue.setText(output + " J");
+		}
+		if (lblPressureValue.isShowing()) {
+			output = myFormatter.format(p5Canvas.pressure);
+			lblPressureValue.setText(output + " kPa");
+		}
+		if (lblMoleValue.isShowing())
+		{
+			lblMoleValue.setText( p5Canvas.mol + " mol");
+		}
+
+		// Update bars
+		if (barPressure != null)
+			if (barPressure.isShowing()) {
+				barPressure.setValue(p5Canvas.pressure);
+				barPressure.updateUI();
+				barVolume.setValue(p5Canvas.currentVolume);
+				barVolume.updateUI();
+				barMol.setValue(p5Canvas.mol);
+				barMol.updateUI();
+				barTemp.setValue(p5Canvas.temp);
+				barTemp.updateUI();
+			}
+		
 	}
 
 }

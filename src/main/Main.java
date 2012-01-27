@@ -196,7 +196,9 @@ public class Main {
 	/***************************** Right Panel Parameter ***********************************/
 	public JPanel rightPanel; // Right panel container
 	JLabel lblOutput; // output label
-	JTabbedPane graphTabs;
+	JTabbedPane tabpanelGraph;
+	JPanel panelCanvas;
+	JButton btnGraphPopup;
 	JLabel lblSubMicroscopid;
 	JLabel lblOutputMacroscopicLevel;
 	JCheckBox cBoxHideWater;
@@ -208,51 +210,12 @@ public class Main {
 	public JLabel averageSystemEnergy;
 
 	public JLabel lblElapsedTimeText;
-	//Labels used in Unit 2
 	public JLabel elapsedTime; // "Elapsed Set Time" label
-	public JLabel m1Mass;
-	public JLabel m1Disolved; // "Dissolved" label showing how much solute has dissovled
-	public JLabel satMass; //
-	public JLabel waterVolume;
-	public JLabel m1Label;
-	public JLabel m1MassLabel;
-	public JLabel solventLabel;
-	public JLabel satLabel;
-	public JLabel solutionLabel;
-	public JLabel soluteVolume;
-	public JCheckBox cBoxConvert; //Convert mass to mol
-	public JPanel outputControls;
-	//Lables used in Unit 4
-	public JLabel lblPressureText;
-	public JLabel lblPressureTitle;
-	public JLabel lblPressureValue;
-	public JLabel lblCollisionTitle;
-	public JLabel lblCollisionValue;
-	public JLabel lblVolumeText;
-	public JLabel lblVolumeTitle;
-	public JLabel lblVolumeTitle2;   //for Unit4 Sim1 Set2
-	public JLabel lblVolumeValue;   
-	public JLabel lblVolumeValue2; //for Unit4 Sim1 Set2
-	public JLabel lblEqualText;
-	public JLabel lblMolText;
-	public JLabel lblMolValue;
-	public JLabel lblRText;
-	public JLabel lblRValue;
-	public JLabel lblTempText;
-	public JLabel lblTempTitle;
-	public JLabel lblTempValue;
-	public JLabel lblKETitle;
-	public JLabel lblKEValue;
-	public JLabel lblMoleTitle;
-	public JLabel lblMoleValue;
-	public JLabel lblMultiplicationText1;
-	public JLabel lblMultiplicationText2;
-	public JLabel lblMultiplicationText3;
 
-	public SimpleBar barPressure;
-	public SimpleBar barVolume;
-	public SimpleBar barMol;
-	public SimpleBar barTemp;
+	//public JPanel outputControls;
+
+
+
 
 
 	private P5Canvas p5Canvas;
@@ -755,8 +718,7 @@ public class Main {
 		// Reset state parameter
 		State.reset();
 
-		tableView.clearSelection(); // Deselect rows
-
+		
 		// Update sliders around the center panel
 		updateCenterPanel();
 		
@@ -831,18 +793,7 @@ public class Main {
 		heatSlider.setValue(defaultHeat);
 		volumeSlider.setValue(defaultVolume);
 		volumeLabel.setText(defaultVolume+ " mL");
-		lblVolumeValue.setText(" mL");
-		lblVolumeValue2.setText(" mL");
-		lblPressureValue.setText(" kPa");
-		lblCollisionValue.setText("");
-		lblTempValue.setText(" \u2103");
-		lblKEValue.setText(" J");
-		lblMoleValue.setText(" mol");
-		
-		barMol.reset();
-		barPressure.reset();
-		barVolume.reset();
-		barTemp.reset();
+
 	
 		
 	}
@@ -905,14 +856,15 @@ public class Main {
 		{
 		case 1:
 		case 4:
+		case 5:
 			rightPanel.add(lblOutput, "cell 0 1");
-			rightPanel.add(graphTabs, "cell 0 2,grow");
+			rightPanel.add(tabpanelGraph, "cell 0 2,grow");
 			rightPanel.add(dashboard, "cell 0 4,growy");
 
 			break;
 		case 3:
 			rightPanel.add(lblOutput, "cell 0 1");
-			rightPanel.add(graphTabs, "cell 0 2,grow");
+			rightPanel.add(tabpanelGraph, "cell 0 2,grow");
 			rightPanel.add(dashboard, "cell 0 4,growy");
 
 			if ((selectedSim == 1 && (selectedSet == 4 || selectedSet == 6
@@ -924,15 +876,59 @@ public class Main {
 		case 2: 
 			rightPanel.add(lblOutput, "cell 0 0");
 			rightPanel.add(lblSubMicroscopid, "cell 0 1");
-			rightPanel.add(graphTabs, "cell 0 2,grow");
+			rightPanel.add(tabpanelGraph, "cell 0 2,grow");
 			rightPanel.add(lblOutputMacroscopicLevel, "cell 0 3");
 			rightPanel.add(dashboard, "cell 0 4,growy");
 
 			break;
 
 		}
-		
+		updateTabPanelGraph();
 		updateDashboard(); // Reset dashboard on right panel
+	}
+	
+	//Reset tab panel on right panel
+	private void updateTabPanelGraph()
+	{
+		//Change tabpanelGraph
+		
+		
+		//Change sub-panel: panelGraph
+		panelCanvas.removeAll();
+		
+		switch(selectedUnit)
+		{
+			default:
+				panelCanvas.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
+						"[235.00:n][65,grow]"));
+				panelCanvas.add(getCanvas(), "cell 0 0,grow");
+				panelCanvas.add(btnGraphPopup, "cell 1 0,aligny top");
+				//Add molecule table to panelCanvas
+				panelCanvas.add(getTableView(), "cell 0 1,grow");
+			break;
+			case 5:
+				//In Unit 5 Sim1 graph does not show
+				if(selectedSim==1)
+				{
+					panelCanvas.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
+							"[235.00:n]"));
+					panelCanvas.add(getCanvas(), "cell 0 0,grow");
+					panelCanvas.add(btnGraphPopup, "cell 1 0,aligny top");
+				}
+				else
+				{
+					panelCanvas.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
+							"[235.00:n][65,grow]"));
+					panelCanvas.add(getCanvas(), "cell 0 0,grow");
+					panelCanvas.add(btnGraphPopup, "cell 1 0,aligny top");
+					//Add molecule table to panelCanvas
+					panelCanvas.add(getTableView(), "cell 0 1,grow");
+				}
+				break;
+		}
+		
+		//Reset table view on the panelCanvas 
+		tableView.clearSelection();
 	}
 
 	// Reset dashboard on right panel
@@ -942,125 +938,8 @@ public class Main {
 		
 		dashboard.setLayout(new MigLayout("", "[grow,right][100]",
 				"[][][][][][]"));
-		if (selectedUnit == 2) //Unit 2, showing solution information 
-		{
-//			dashboard.setLayout(new MigLayout("", "[grow,right][100]",
-//					"[][][][][][]"));
-			dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
-			dashboard.add(elapsedTime, "cell 1 0");
-			dashboard.add(cBoxConvert, "cell 0 1");
-			dashboard.add(m1Label, "cell 0 2,alignx right");
-			dashboard.add(m1Mass, "cell 1 2");
-			dashboard.add(m1MassLabel, "cell 0 3,alignx right");
-			dashboard.add(m1Disolved, "cell 1 3");
-			// dashboard.add(satLabel, "cell 0 3,alignx right");
-			// dashboard.add(satMass, "cell 1 3");
-			dashboard.add(solventLabel, "cell 0 4,alignx right");
-			dashboard.add(waterVolume, "cell 1 4");
-			waterVolume.setText("0 mL");
-			dashboard.add(solutionLabel, "cell 0 5,alignx right");
-			dashboard.add(soluteVolume, "cell 1 5");
-			soluteVolume.setText("");
-			//rightPanel.add(outputControls, "cell 0 5,grow");
-
-		} 
-		else if(selectedUnit == 4)//Gas law, showing PV=nRT
-		{
-			String alignStr = new String(", align center");
-			if( selectedSim==1)
-			{
-				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
-				dashboard.add(elapsedTime, "cell 1 0");
-				if(selectedSet ==1 )
-				{
-					lblVolumeTitle.setText("Volume of Helium:");
-				}
-				else if(selectedSet ==2 )
-				{
-					lblVolumeTitle.setText("Volume of Chlorine:");
-					lblVolumeTitle2.setText("Volume of Oxygen:");
-					dashboard.add(lblVolumeTitle2, "cell 0 2");
-					dashboard.add(lblVolumeValue2,"cell 1 2");
-				}
-				dashboard.add(lblVolumeTitle,"cell 0 1");
-				dashboard.add(lblVolumeValue,"cell 1 1");
-			}
-			else if (selectedSim==2)
-			{
-				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
-				dashboard.add(elapsedTime, "cell 1 0");
-				lblVolumeTitle.setText("Volume of Bromine:");
-				dashboard.add(lblMoleTitle, "cell 0 1");
-				dashboard.add(lblMoleValue, "cell 1 1");
-				dashboard.add(lblVolumeTitle,"cell 0 2");
-				dashboard.add(lblVolumeValue,"cell 1 2");
-				dashboard.add(lblTempTitle,"cell 0 3");
-				dashboard.add(lblTempValue,"cell 1 3");
-				dashboard.add(lblKETitle,"cell 0 4");
-				dashboard.add(lblKEValue,"cell 1 4");
-			}
-			else if( selectedSim==3)
-			{
-				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
-				dashboard.add(elapsedTime, "cell 1 0");
-				dashboard.add(lblCollisionTitle,"cell 0 1");
-				dashboard.add(lblCollisionValue,"cell 1 1");
-				dashboard.add(lblPressureTitle,"cell 0 2");
-				dashboard.add(lblPressureValue,"cell 1 2");
-			}
-			else if( selectedSim ==4)
-			{
-			int barWidth = 40;
-			int barHeight = 120;
-			dashboard.setLayout(new MigLayout("","[45][8][45][25][45][8][10][8][45]","[][][grow][]"));
-			//dashboard.add(lblElapsedTimeText, "cell 0 3 5 1, align center");
-			//dashboard.add(elapsedTime, "cell 5 3 ");
-			
-			dashboard.add(lblPressureText, "cell 0 0"+alignStr);
-			dashboard.add(lblMultiplicationText1, "cell 1 0"+alignStr);
-			dashboard.add(lblVolumeText,"cell 2 0"+alignStr);
-
-			dashboard.add(lblEqualText,"cell 3 0"+alignStr);
-			dashboard.add(lblMolText,"cell 4 0"+alignStr); 
-			dashboard.add(lblMultiplicationText2, "cell 5 0"+alignStr);
-			dashboard.add(lblRText,"cell 6 0"+alignStr); 
-			dashboard.add(lblMultiplicationText3, "cell 7 0"+alignStr);
-			dashboard.add(lblTempText,"cell 8 0"+alignStr); 
-
-			barPressure.setPreferredSize(new Dimension(barWidth,barHeight));
-			barVolume.setPreferredSize(new Dimension(barWidth,barHeight));
-			barMol.setPreferredSize(new Dimension(barWidth,barHeight));
-			barTemp.setPreferredSize(new Dimension(barWidth,barHeight));
-			dashboard.add(barPressure,"cell 0 2"+alignStr);
-			dashboard.add(barVolume,"cell 2 2"+alignStr);
-			dashboard.add(barMol,"cell 4 2"+alignStr);
-			dashboard.add(barTemp,"cell 8 2"+alignStr);
-			}
-			else if( selectedSim ==5)
-			{
-				dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
-				dashboard.add(elapsedTime, "cell 1 0");
-				dashboard.add(lblPressureTitle,"cell 0 2");
-				dashboard.add(lblPressureValue,"cell 1 2");
-				lblVolumeTitle.setText("Volume of Helium:");
-				dashboard.add(lblVolumeTitle,"cell 0 3");
-				dashboard.add(lblVolumeValue,"cell 1 3");
-				dashboard.add(lblTempTitle,"cell 0 4");
-				dashboard.add(lblTempValue,"cell 1 4");
-				
-			}
-		}
-		else {
-
-			dashboard.add(lblElapsedTimeText, "flowx,cell 0 0,alignx right");
-			dashboard.add(elapsedTime, "cell 1 0");
-			//Add simulation that needs temperature output
-			if(isSimSelected(1, 3)||isSimSelected(1,4))
-			{
-				dashboard.add(lblTempTitle," cell 0 1, alignx right");
-				dashboard.add(lblTempValue,"cell 1 1");
-			}
-		}
+		
+		p5Canvas.unitList.resetDashboard(selectedUnit, selectedSim, selectedSet);
 		dashboard.updateUI();
 	}
 
@@ -1109,6 +988,7 @@ public class Main {
 			break;
 			case 1:
 			case 3:
+			case 5:
 				//Add Volume Slider
 					clPanel.add(volumeLabel, "cell 0 0,alignx right");
 					clPanel.add(volumeSlider, "cell 0 1,alignx right");
@@ -1118,23 +998,10 @@ public class Main {
 					clPanel.add(zoomLabel, "cell 0 4,alignx right");
 					clPanel.add(zoomSlider, "cell 0 5,alignx right,growy");
 					clPanel.add(canvasControlLabel_main_scale, "cell 0 6,alignx right");
-
-				//volumeSlider.requestFocus();
-
 				// Reset zoomSlider
-//				zoomSlider.requestFocus();
 				zoomSlider.setValue(defaultZoom);
 				zoomLabel.setText(defaultZoom  + "%");
-//				speedSlider.requestFocus();
-//				heatSlider.requestFocus();
-				/*
-				float heatMin = getP5Canvas().yaml.getControlHeatSliderMin(
-						selectedUnit, selectedSim);
-				float heatMax = getP5Canvas().yaml.getControlHeatSliderMax(
-						selectedUnit, selectedSim);
-				float heatInit = getP5Canvas().yaml.getControlHeatSliderInit(
-						selectedUnit, selectedSim);
-						*/
+
 				heatSlider.setMaximum((int) heatMax);
 				heatSlider.setMinimum((int) heatMin);
 				heatSlider.setValue((int) defaultHeat);
@@ -1455,7 +1322,7 @@ public class Main {
 		rightPanel = new JPanel();
 		mainFrame.getContentPane().add(rightPanel, "cell 2 2,grow");
 		rightPanel.setLayout(new MigLayout("insets 0, gap 2",
-				"[320.00,grow,center]", "[6][][350.00,grow][][grow][grow]"));
+				"[320.00,grow,center]", "[6][][grow][][grow][grow]"));
 
 		// Set up "Output" title
 		lblOutput = new JLabel("Output");
@@ -1466,24 +1333,22 @@ public class Main {
 		lblSubMicroscopid.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
 
 		// Set up Graph
-		 graphTabs = new JTabbedPane(JTabbedPane.TOP);
-		lblSubMicroscopid.setLabelFor(graphTabs);
+		tabpanelGraph = new JTabbedPane(JTabbedPane.TOP);
+		lblSubMicroscopid.setLabelFor(tabpanelGraph);
 
-		JPanel graphSet_1 = new JPanel();
-		graphTabs.addTab("Compounds", null, graphSet_1, null);
-		graphSet_1.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
-				"[235.00:n][grow]"));
-		graphSet_1.add(getCanvas(), "cell 0 0,grow");
+		panelCanvas = new JPanel();
+		tabpanelGraph.addTab("Compounds", null, panelCanvas, null);
+		panelCanvas.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
+				"[235.00:n][65,grow]"));
+		panelCanvas.add(getCanvas(), "cell 0 0,grow");
 
-		JButton graphPopoutBtn_1 = new JButton("");
-		graphPopoutBtn_1.setEnabled(false);
-		graphPopoutBtn_1.setIcon(new ImageIcon(Main.class
+		btnGraphPopup = new JButton("");
+		btnGraphPopup.setEnabled(false);
+		btnGraphPopup.setIcon(new ImageIcon(Main.class
 				.getResource("/resources/png24x24/iconZoom.png")));
-		graphSet_1.add(graphPopoutBtn_1, "cell 1 0,aligny top");
-
-		graphSet_1.add(getTableView(), "cell 0 1,grow");
-
-		JPanel graphSet_2 = new JPanel();
+		panelCanvas.add(btnGraphPopup, "cell 1 0,aligny top");
+		//Add molecule table to panelCanvas
+		panelCanvas.add(getTableView(), "cell 0 1,grow");
 
 		// "Macrosopic Level" label
 		lblOutputMacroscopicLevel = new JLabel("Macroscopic Level");
@@ -1500,75 +1365,10 @@ public class Main {
 				"[][][][][][]"));
 
 		lblElapsedTimeText = new JLabel("Elapsed Set Time:");
-		//dashboard.add(elapsedTimeLabel, "flowx,cell 0 0,alignx right");
-
-		//Initialzie labels for Unit 2
 		elapsedTime = new JLabel("00");
 		elapsedTime.setForeground(new Color(0, 128, 0));
 		elapsedTime.setFont(new Font("Digital", Font.PLAIN, 28));
-		m1Label = new JLabel("Compound Mass:");
-		m1Mass = new JLabel("0 g");
-		m1MassLabel = new JLabel("Dissolved:");
-		//dashboard.add(m1MassLabel, "cell 0 2,alignx right");
-		m1Disolved = new JLabel("0 g");
-		satLabel = new JLabel("Saturation:");
-		satMass = new JLabel("0 g");
-		solventLabel = new JLabel("Solvent Volume:");
-		waterVolume = new JLabel("0 mL");
-		solutionLabel = new JLabel("Solution Volume:");
-		soluteVolume = new JLabel("0 mL");
-		// Set up "Convert to Mass" Checkbox
-		cBoxConvert = new JCheckBox("Convert Mass to Moles");
-		cBoxConvert.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					getP5Canvas().isConvertMol = true;
-					// Change 'g' to 'mol' in Amount Added label
-					getP5Canvas().convertMassMol1();
-					// Change 'g' to 'mol' in "Dissolved" label
-					getP5Canvas().convertMassMol2();
-				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-					getP5Canvas().isConvertMol = false;
-					getP5Canvas().convertMolMass1();
-					getP5Canvas().convertMolMass2();
-				}
-			}
-		});
-		//outputControls = new JPanel();
-		//outputControls.setLayout(new MigLayout("", "[]", "[]"));
-		//outputControls.add(cBoxConvert, "cell 0 0");
-		//rightPanel.add(outputControls, "cell 0 5,grow");
-		
-		//Intialize labels for unit 4
-		lblPressureText = new JLabel ("P (kPa)");
-		lblPressureTitle = new JLabel ("Pressure:" );
-		lblPressureValue = new JLabel("");
-		lblCollisionTitle = new JLabel("Collisions in last 5 sec:");
-		lblCollisionValue = new JLabel("");
-		lblVolumeText = new JLabel("V (mL)");
-		lblVolumeTitle = new JLabel("Volume of gas:");
-		lblVolumeValue = new JLabel (" mL");
-		lblVolumeTitle2 = new JLabel("Volume of gas:");
-		lblVolumeValue2 = new JLabel(" mL");
-		lblEqualText = new JLabel("=");
-		lblMolText = new JLabel ("n (mol)");
-		lblMolValue = new JLabel ("");
-		lblRText = new JLabel ("R");
-		lblRValue = new JLabel ();
-		lblTempText = new JLabel("T (\u2103)");
-		lblTempTitle = new JLabel ("Temperature:");
-		lblTempValue = new JLabel (" \u2103");
-		lblKETitle = new JLabel("Kinetic Energy:");
-		lblKEValue = new JLabel(" J");
-		lblMoleTitle = new JLabel("Mole of gas:");
-		lblMoleValue = new JLabel(" mol");
-		lblMultiplicationText1 = new JLabel("*");
-		lblMultiplicationText2 = new JLabel("*");
-		lblMultiplicationText3 = new JLabel("*");
-		barPressure = new SimpleBar(0,350,30);
-		barVolume = new SimpleBar(minVolume,maxVolume,63);
-		barMol = new SimpleBar(0,50,10);
-		barTemp  = new SimpleBar(tempMin,tempMax,25);
+
 
 		//Set up welcome menu
 		if (isWelcomed) {

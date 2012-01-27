@@ -126,7 +126,6 @@ public class Unit3 extends UnitBase {
 
 	@Override
 	public void updateMolecules(int sim, int set) {
-		// TODO Auto-generated method stub
 		int unit = 3;
 		boolean reactionHappened = false; // Boolean flag indicating is
 											// reactions have taken place
@@ -196,7 +195,7 @@ public class Unit3 extends UnitBase {
 					simulation);
 		}
 		else if (spawnStyle == SpawnStyle.SolidPavement) {
-			res = this.addSolidMoleculeSodium(isAppEnable, compoundName, count,
+			res = this.addSolidPavement(isAppEnable, compoundName, count,
 					simulation);
 		} else if (spawnStyle == SpawnStyle.SolidSpecial) {
 			if (compoundName.equals("Lithium-Sulfide"))
@@ -208,9 +207,6 @@ public class Unit3 extends UnitBase {
 		{
 			//Connect new created molecule to table index
 			int tIndex = p5Canvas.getTableView().getIndexByName(compoundName);
-			//Set tableSet of Hydrogen-Ion and Chloride to Hydrogen-Chloride in Sim 1 set 7
-			//if(sim==1 &&set==7 &&(compoundName.equals("Hydrogen-Ion")||compoundName.equals("Chloride"))) 
-				//tIndex = p5Canvas.getTableView().getIndexByName("Hydrogen-Chloride");
 			int lastIndex = State.molecules.size()-1;
 			for(int i = 0;i<count;i++)
 			{
@@ -229,7 +225,7 @@ public class Unit3 extends UnitBase {
 	 * INPUTS : isAppEnable(boolean), compoundName(String), count(int) OUTPUTS:
 	 * None
 	 *******************************************************************/
-	public boolean addSolidMoleculeSodium(boolean isAppEnable,
+	public boolean addSolidPavement(boolean isAppEnable,
 			String compoundName, int count, Simulation simulation) {
 		boolean res = true;
 
@@ -3135,9 +3131,16 @@ public class Unit3 extends UnitBase {
 			
 		
 	}
+	
 
 	@Override
 	public void initialize() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateOutput(int sim, int set) {
 		// TODO Auto-generated method stub
 		
 	}
