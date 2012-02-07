@@ -76,42 +76,7 @@ public abstract class UnitBase {
 		dashboard.add(p5Canvas.getMain().elapsedTime, "cell 1 0");
 	}
 	
-	//Set up speed ratio for molecules
-	//Called by reset()
-	public void setupSpeed()
-	{
-		String name = null;
-		Molecule mole = null;
-		for(int i =0;i<State.molecules.size();i++)
-		{
-			mole = State.molecules.get(i);
-			name = new String(mole.getName());
-			if(name.equals("Water"))
-				;
-			else if (name.equals("Hydrogen-Peroxide"))
-				mole.setRatioKE(0.25f);
-			else if (name.equals("Pentane"))
-				mole.setRatioKE(1.0f/6);
-			else if (name.equals("Mercury"))
-				mole.setRatioKE(1.0f/12);
-			else if (name.equals("Bromine"))
-				mole.setRatioKE(1.0f/12);
-			else if (name.equals("Silver"))
-				mole.setRatioKE(1.0f/12);
-			else if (name.equals("Silicon-Dioxide"))
-				mole.setRatioKE(1.0f/4);
-			else if (name.equals(""))
-				mole.setRatioKE(1.0f);
-			else if (name.equals(""))
-				mole.setRatioKE(1.0f);
-			else if (name.equals(""))
-				mole.setRatioKE(1.0f);
-			else if (name.equals(""))
-				mole.setRatioKE(1.0f);
-			else if (name.equals(""))
-				mole.setRatioKE(1.0f);
-		}
-	}
+
 
 	// Compute force for molecules, not necessary for all units
 	protected abstract void computeForce(int sim, int set);
@@ -626,6 +591,7 @@ public abstract class UnitBase {
 					// Make water lighter;
 					mole.body.m_mass = (float) (mole.body.getMass() * scale);
 				}
+			
 			}
 
 		}

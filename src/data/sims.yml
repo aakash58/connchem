@@ -519,15 +519,15 @@ units:
       compounds:
       - compound: "Methane"
         qty: 10
-        cap: 20
+        cap: 10
       - compound: "Oxygen"
         qty: 10
-        cap: 20
+        cap: 10
     - set: 2
       compounds:
       - compound: "Hydrogen Iodide"
-        qty: 12
-        cap: 20
+        qty: 10
+        cap: 10
   - sim: 2
     name: "Factors Affecting Rate"
     sets:
@@ -535,26 +535,26 @@ units:
       compounds:
       - compound: "Sodium-Bicarbonate"
         qty: 10
-        cap: 20
+        cap: 10
       - compound: "Acetic-Acid"
         qty: 10
-        cap: 20
+        cap: 10
     - set: 2
       compounds:
       - compound: "Sodium-Bicarbonate"
         qty: 10
-        cap: 20
+        cap: 10
       - compound: "Acetic-Acid"
         qty: 10
-        cap: 20
+        cap: 10
   - sim: 3
-    name: "Undefined"
+    name: "Concentration"
     sets:
     - set: 1
       compounds:
       - compound: "Nitryl-Chloride"
         qty: 10
-        cap: 20
+        cap: 10
       - compound: "Nitric-Oxide"
         qty: 10
         cap: 20
@@ -562,44 +562,63 @@ units:
       compounds:
       - compound: "Nitryl-Chloride"
         qty: 10
-        cap: 20
+        cap: 10
       - compound: "Nitric-Oxide"
         qty: 10
-        cap: 20
+        cap: 10
     - set: 3
       compounds:
       - compound: "Nitryl-Chloride"
         qty: 10
-        cap: 20
+        cap: 10
       - compound: "Nitric-Oxide"
         qty: 10
-        cap: 20
+        cap: 10
     - set: 4
       compounds:
-      - compound: "Nitrogen-Peroxide"
+      - compound: "Nitryl-Chloride"
         qty: 10
+        cap: 10
+      - compound: "Nitric-Oxide"
+        qty: 10
+        cap: 10
+    - set: 5
+      compounds:
+      - compound: "Nitryl-Chloride"
+        qty: 10
+        cap: 10
+      - compound: "Nitric-Oxide"
+        qty: 10
+        cap: 10
+      - compound: "Catalyst"
+        qty: 0
+        cap: 5
+    - set: 6
+      compounds:
+      - compound: "Nitrogen-Dioxide"
+        qty: 20
         cap: 20
   - sim: 4
-    name: "Undefined"
+    name: "Rate Law"
     sets:
     - set: 1
       compounds:
       - compound: "Ammonia"
         qty: 10
-        cap: 20
+        cap: 10
     - set: 2
       compounds:
       - compound: "Nitrogen-Dioxide"
         qty: 10
-        cap: 20
+        cap: 10
     - set: 3
       compounds:
       - compound: "Carbon-Monoxide"
         qty: 10
-        cap: 20
+        cap: 10
       - compound: "Nitrogen-Dioxide"
         qty: 10
-        cap: 20
+        cap: 10
 - unit: 6
   name: "Thermodynamics"
   sims:

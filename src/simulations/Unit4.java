@@ -733,13 +733,10 @@ public class Unit4 extends UnitBase {
 		if (barPressure != null)
 			if (barPressure.isShowing()) {
 				barPressure.setValue(p5Canvas.pressure);
-				barPressure.updateUI();
 				barVolume.setValue(p5Canvas.currentVolume);
-				barVolume.updateUI();
 				barMol.setValue(p5Canvas.mol);
-				barMol.updateUI();
 				barTemp.setValue(p5Canvas.temp);
-				barTemp.updateUI();
+				barPressure.getParent().repaint();
 			}
 		
 	}

@@ -7,6 +7,8 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
@@ -19,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -35,7 +38,7 @@ public class TableView extends JPanel {
 	public int colorChangingRow;
 	//public int selectedRow=-1;
 	private Main main;
-	MyTableModel myTable;
+	private MyTableModel myTable;
 	
 	
 	public TableView(Main parent) {
@@ -82,8 +85,8 @@ public class TableView extends JPanel {
 		   }
 		});
 		table.getColumnModel().getColumn(0).setPreferredWidth(10);
-		table.getColumnModel().getColumn(1).setPreferredWidth(50);
-		table.getColumnModel().getColumn(2).setPreferredWidth(130);
+		table.getColumnModel().getColumn(1).setPreferredWidth(40);
+		table.getColumnModel().getColumn(2).setPreferredWidth(120);
 		table.setSelectionBackground(Color.GRAY);//new Color(40,60,220));
 		
 		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
@@ -122,14 +125,31 @@ public class TableView extends JPanel {
 		data[0].clear();
 		data[1].clear();
 		data[2].clear();
-		
-		for (int i=0; i<Compound.names.size();i++){
-			data[0].add((Integer)Compound.counts.get(i));
-			data[1].add((Color)colors[i]);
-			data[2].add((String)Compound.names.get(i));
+		String name = null;
+		DecimalFormat myFormatter = new DecimalFormat("###.##");
+		String output = null;
+		switch(main.selectedUnit)
+		{
+		default:
+			for (int i=0; i<Compound.names.size();i++){
+				data[0].add((Integer)Compound.counts.get(i));
+				data[1].add((Color)colors[i]);
+				data[2].add((String)Compound.names.get(i));
+			}
+			break;
+		case 5:
+			for (int i=0; i<Compound.names.size();i++){
+				name = (String)Compound.names.get(i);
+				output = myFormatter.format((float)main.getP5Canvas().getUnit5().getConByName(name));
+				data[0].add(output);
+				data[1].add((Color)colors[i]);
+				data[2].add(name);
+			}
+			break;
 		}
+
 		if (this!=null && !stopUpdating){
-			this.table.updateUI();
+			table.repaint();
 		}		
 	}
 
@@ -310,6 +330,16 @@ public class TableView extends JPanel {
 		}
 		return -1;
 	}
+	
+	public void reset()
+	{
+		setColumnName(0,"    #");
+		setColumnWidth(0,10);
+		setColumnWidth(1,40);
+		setColumnWidth(2,120);
+		
+		clearSelection();
+	}
 	public void clearSelection()
 	{
 		table.clearSelection();
@@ -322,7 +352,7 @@ public class TableView extends JPanel {
 	}
 	
 	
-	class MyTableModel extends AbstractTableModel {
+	class MyTableModel extends AbstractTableModel implements TableModelListener {
 		private String[] columnNames = {};
 		
 		public MyTableModel() {
@@ -347,6 +377,11 @@ public class TableView extends JPanel {
 		public String getColumnName(int col) {
 			return columnNames[col];
 		}
+		
+//		public void setColumnName( int col, String s){
+//			columnNames[col] = new String(s);
+//			
+//		}
 
 		public Object getValueAt(int row, int col) {
 			return data[col].get(row);
@@ -369,12 +404,25 @@ public class TableView extends JPanel {
 			colors[row] = (Color) value;
 			fireTableCellUpdated(row, col);
 		}
+
+		@Override
+		public void tableChanged(TableModelEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 
 	public Main getMain() {
-		// TODO Auto-generated method stub
 		return main;
 	}
 	
+	public void setColumnName(int col, String s)
+	{
+		table.getColumnModel().getColumn(col).setHeaderValue(s);
+	}
+	public void setColumnWidth(int col, int w)
+	{
+		table.getColumnModel().getColumn(col).setPreferredWidth(w);
+	}
 
 }
