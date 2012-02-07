@@ -29,6 +29,7 @@ import org.jbox2d.dynamics.joints.PrismaticJoint;
 import org.jbox2d.dynamics.joints.PrismaticJointDef;
 
 import data.DBinterface;
+import data.State;
 
 import simulations.models.Boundary;
 import simulations.models.Compound;
@@ -2101,9 +2102,35 @@ public class Unit2 extends UnitBase{
 		@Override
 		public void initialize() {
 			// TODO Auto-generated method stub
+			setupSpeed();
 			
 		}
-
+		//Set up speed ratio for molecules
+		//Called by initialize()
+		public void setupSpeed()
+		{
+			String name = null;
+			Molecule mole = null;
+			for(int i =0;i<State.molecules.size();i++)
+			{
+				mole = State.molecules.get(i);
+				name = new String(mole.getName());
+				if(name.equals("Water"))
+					;
+				else if (name.equals("Hydrogen-Peroxide"))
+					mole.setRatioKE(0.25f);
+				else if (name.equals("Pentane"))
+					mole.setRatioKE(1.0f/6);
+				else if (name.equals("Mercury"))
+					mole.setRatioKE(1.0f/12);
+				else if (name.equals("Bromine"))
+					mole.setRatioKE(1.0f/12);
+				else if (name.equals("Silver"))
+					mole.setRatioKE(1.0f/12);
+				else if (name.equals("Silicon-Dioxide"))
+					mole.setRatioKE(1.0f/4);
+			}
+		}
 
 
 		@Override

@@ -37,6 +37,8 @@ public class Simulation {
 	private int anchorNum = 0;
 	private Vec2 anchorPos[];
 	
+	private float speed =1.0f; //Molecule speed moditifier for simulation
+	
 	public Simulation()
 	{
 		
@@ -66,6 +68,15 @@ public class Simulation {
 	{
 		anchorNum = num;
 		anchorPos = aPos;
+	}
+	public void setSpeed( float v)
+	{
+		speed = v;
+	}
+	
+	public float getSpeed( )
+	{
+		return speed;
 	}
 	public int getAnchorNum()
 	{

@@ -262,10 +262,6 @@ public class P5Canvas extends PApplet {
 		// Update anchors position
 		unitList.getUnit3().resetAnchors(xDrag, yDrag);
 
-		
-
-		
-
 	}
 
 	/******************************************************************
@@ -455,7 +451,7 @@ public class P5Canvas extends PApplet {
 		int index = Compound.names.indexOf(compoundName);
 		int addCount = Compound.counts.get(index) + count;
 
-		res = unitList.addMolecule(main.selectedUnit, tmp, compoundName, addCount);
+		res = unitList.addMolecule(main.selectedUnit, tmp, compoundName, count);
 
 		// If we successfully added molecules, update compound number
 		if (res) {
@@ -696,7 +692,9 @@ public class P5Canvas extends PApplet {
 					else //update curTime
 					{
 						oldTime = curTime;
-						heatMoleculeTimes = 0;
+						mole.setLinearVelocity(velocity);
+						calculateKE(scale); 
+						heatMoleculeTimes = 1;
 					}
 					
 				}
@@ -933,6 +931,9 @@ public class P5Canvas extends PApplet {
 	}
 	public Unit4 getUnit4() {
 		return unitList.getUnit4();
+	}
+	public Unit5 getUnit5()	{
+		return unitList.getUnit5();
 	}
 	public Main getMain() {
 		return main;

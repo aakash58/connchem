@@ -51,6 +51,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,6 +89,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
 
 public class Main {
 
@@ -369,77 +372,7 @@ public class Main {
 		throw new UnsupportedOperationException("Cannot list files for URL "
 				+ dirURL);
 	}
-	/*
-	public void removeAdditionalMolecule(int additionalIndex) {
-		int pos = defaultSetMolecules.size() + additionalIndex;
-		dynamicPanel.removeAll();
-		additionalPanelList.remove(pos);
-		for (int i = 0; i < additionalPanelList.size(); i++) {
-			JPanel p = (JPanel) additionalPanelList.get(i);
-			dynamicPanel.add(p, "cell 0 " + i + ",grow");
 
-		}
-	}
-	*/
-
-	/******************************************************************
-	 * FUNCTION : addAdditionalMolecule DESCRIPTION : Molecule Add Function for
-	 * customized button. Disable for now.
-	 * 
-	 * INPUTS : None OUTPUTS: None
-	 *******************************************************************/
-	/*
-	public void addAdditionalMolecule() {
-		// Default unit setting
-		JPanel panel = new JPanel();
-		panel.setBackground(this.selectedColor);
-		panel.setLayout(new MigLayout("insets 6, gap 0", "[][][69.00]", "[][]"));
-
-		// new molecule is at the end of additionalList
-		int newMolecule = this.scrollablePopupMenu.additionalList.size() - 1;
-		int pos = defaultSetMolecules.size() + newMolecule;
-		dynamicPanel.add(panel, "cell 0 " + pos + ",grow");
-		additionalPanelList.add(panel);
-
-		String cName = (String) this.scrollablePopupMenu.additionalList
-				.get(newMolecule);
-		JLabel label = new JLabel(cName);
-
-		final String fixedName = cName.replace(" ", "-");
-
-		label.setIcon(new ImageIcon(Main.class
-				.getResource("/resources/compoundsPng50/" + fixedName + ".png")));
-		panel.add(label, "cell 0 0 3 1,growx");
-
-		final JLabel label_1 = new JLabel("" + sliderValue);
-		panel.add(label_1, "cell 0 1");
-
-		JSlider slider = new JSlider(minSliderValue, maxSliderValue,
-				sliderValue);
-		panel.add(slider, "cell 1 1");
-		slider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				int value = ((JSlider) e.getSource()).getValue();
-				label_1.setText("" + value);
-			}
-		});
-
-		JButton button_1 = new JButton("");
-		button_1.setIcon(new ImageIcon(Main.class
-				.getResource("/resources/png16x16/plus.png")));
-		panel.add(button_1, "cell 2 1,growy");
-		button_1.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent arg0) {
-				int count = Integer.parseInt(label_1.getText());
-				getP5Canvas().addMolecule(fixedName, count);
-			}
-		});
-		if (dynamicPanel.getComponentCount() > 6) {
-			int h = dynamicPanel.getComponentCount() * 100;
-			dynamicScrollPane.getViewport().setViewPosition(
-					new java.awt.Point(0, h));
-		}
-	}*/
 
 	/******************************************************************
 	 * FUNCTION : updateDynamicPanel DESCRIPTION : Update molecule legends on
@@ -509,9 +442,9 @@ public class Main {
 						JLabel label = new JLabel(cName);
 						final String fixedName = cName.replace(" ", "-");
 						// Repaint molecules icon
-						label.setIcon(new ImageIcon(Main.class
-								.getResource("/resources/compoundsPng50/"
-										+ fixedName + ".png")));
+						ImageIcon icon = new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+ fixedName + ".png"));
+						//icon = scaleImageIcon(icon, 40, 30);
+						label.setIcon(icon);
 						panel.add(label, "cell 0 0 3 1,growx");
 
 						// Add Slider label
@@ -677,6 +610,22 @@ public class Main {
 			}
 		}
 	}
+	
+	private ImageIcon scaleImageIcon(ImageIcon origin,int w, int h)
+	{
+		/*Image src = origin.getImage();
+        int type = BufferedImage.TYPE_INT_RGB;
+        BufferedImage dst = new BufferedImage(w, h, type);
+        Graphics2D g2 = dst.createGraphics();
+        g2.drawImage(src, 0, 0, w, h, this);
+        g2.dispose();
+        return new ImageIcon(dst);*/
+		
+		Image img = origin.getImage();
+		Image newImg = img.getScaledInstance(w, h, java.awt.Image.SCALE_SMOOTH);
+		return new ImageIcon(newImg);
+
+	}
 
 	public void createPopupMenu() {
 
@@ -829,7 +778,7 @@ public class Main {
 		
 		updateCheckboxPanel();
 		
-		leftPanel.updateUI();
+		leftPanel.validate();
 		
 	}
 	private void updateCheckboxPanel()
@@ -885,6 +834,8 @@ public class Main {
 		}
 		updateTabPanelGraph();
 		updateDashboard(); // Reset dashboard on right panel
+		
+		rightPanel.validate();
 	}
 	
 	//Reset tab panel on right panel
@@ -908,7 +859,7 @@ public class Main {
 			break;
 			case 5:
 				//In Unit 5 Sim1 graph does not show
-				if(selectedSim==1)
+				if(selectedSim==1 || selectedSim == 4)
 				{
 					panelCanvas.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
 							"[235.00:n]"));
@@ -928,7 +879,7 @@ public class Main {
 		}
 		
 		//Reset table view on the panelCanvas 
-		tableView.clearSelection();
+		getTableView().reset();
 	}
 
 	// Reset dashboard on right panel
@@ -940,7 +891,7 @@ public class Main {
 				"[][][][][][]"));
 		
 		p5Canvas.unitList.resetDashboard(selectedUnit, selectedSim, selectedSet);
-		dashboard.updateUI();
+		//dashboard.repaint();
 	}
 
 	/******************************************************************
@@ -1046,7 +997,7 @@ public class Main {
 				break;
 			}
 			
-			centerPanel.updateUI();
+			centerPanel.repaint();
 		}
 
 	}
@@ -1644,23 +1595,23 @@ public class Main {
 
 		cBoxHideWaterListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if (tableView.contains("Water")) {
+				if (getTableView().contains("Water")) {
 					if (e.getStateChange() == ItemEvent.SELECTED) // Hide water
 					{
 						// Select all elements in tableview except water
-						tableView.selectAllRows();
+						getTableView().selectAllRows();
 						int[] rows = new int[1];
-						rows[0] = tableView.indexOf("Water");
-						tableView.deselectRows(rows);
+						rows[0] = getTableView().indexOf("Water");
+						getTableView().deselectRows(rows);
 					} else if (e.getStateChange() == ItemEvent.DESELECTED) // Show
 																			// water
 					{
 						// Show water
-						if (!tableView.selectedRowsIsEmpty()) {
-							int waterIndex = tableView.indexOf("Water");
-							if (!tableView.selectedRowsContain(waterIndex)) {
+						if (!getTableView().selectedRowsIsEmpty()) {
+							int waterIndex = getTableView().indexOf("Water");
+							if (!getTableView().selectedRowsContain(waterIndex)) {
 								int[] rows = { waterIndex };
-								tableView.addSelectedRow(rows);
+								getTableView().addSelectedRow(rows);
 							}
 						}
 

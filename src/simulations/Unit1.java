@@ -80,6 +80,7 @@ public class Unit1 extends UnitBase {
 				Vec2 newVec = new Vec2(x1, y1);
 				Molecule m = new Molecule(newVec.x, newVec.y,
 						p5Canvas.products.get(i), box2d, p5Canvas, 0);
+				//m.setRatioKE(v);
 				molecules.add(m);
 				if (i == 0)
 					m.body.setLinearVelocity(m1.body.getLinearVelocity());
@@ -451,7 +452,6 @@ public class Unit1 extends UnitBase {
 			res = addSiO2(compoundName, count, box2d, p5Canvas);
 		else
 			res = addWaterMolecules(isAppEnable, compoundName, count);
-
 		return res;
 	}
 	
@@ -646,6 +646,33 @@ public class Unit1 extends UnitBase {
 			break;
 		}
 
+	}
+	
+	//Set up speed ratio for molecules
+	//Called by reset()
+	public void setupSpeed()
+	{
+		String name = null;
+		Molecule mole = null;
+		for(int i =0;i<State.molecules.size();i++)
+		{
+			mole = State.molecules.get(i);
+			name = new String(mole.getName());
+			if(name.equals("Water"))
+				;
+			else if (name.equals("Hydrogen-Peroxide"))
+				mole.setRatioKE(0.25f);
+			else if (name.equals("Pentane"))
+				mole.setRatioKE(1.0f/6);
+			else if (name.equals("Mercury"))
+				mole.setRatioKE(1.0f/12);
+			else if (name.equals("Bromine"))
+				mole.setRatioKE(1.0f/12);
+			else if (name.equals("Silver"))
+				mole.setRatioKE(1.0f/12);
+			else if (name.equals("Silicon-Dioxide"))
+				mole.setRatioKE(1.0f/4);
+		}
 	}
 
 	/******************************************************************

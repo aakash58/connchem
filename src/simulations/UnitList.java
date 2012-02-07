@@ -103,6 +103,11 @@ public class UnitList {
 		return (Unit4) unitList[3];
 	}
 	
+	public Unit5 getUnit5()
+	{
+		return (Unit5)unitList[4];
+	}
+	
 	private boolean isExist(int unit)
 	{
 		return !(unitList[unit-1]==null);

@@ -76,7 +76,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		
 		//Clean lines after reset
 		main.getTableView().updateTableView();
-		this.updateUI();
+		this.repaint();
 	}
 	
 	public String formatTime(long count){
@@ -159,11 +159,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		
 		satCount+=2;
 		
-		//Get molecules number from simulation before painting
-		updateMoleculeCount();
-		
-		//Update tableView, which is presenting molecule legends below chart
-		main.getTableView().updateTableView();
+		//Update table value and be ready to show
+		updateTableValue();
 		
 		//Expand x scale if time reaches maxTime
 		if (Main.time>maxTime){
@@ -192,53 +189,63 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		
 	}
 	
+	//Update table value and be ready to show
+
+	private void updateTableValue()
+	{
+		//Get molecules number from simulation before painting
+		updateMoleculeCount();
+		
+		//Update tableView, which is presenting molecule legends below chart
+		main.getTableView().updateTableView();
+	}
+	
 	//Paint lines
 	private void paintLines(Graphics2D g,int w, int h,int w2, int h2,int margin)
 	{
 		int linePadding = 1;
 		//int marginY = h+2-Compound.names.size()*linePadding;
 		int marginY = h;
-		if(main.selectedUnit==1 || main.selectedUnit==2||main.selectedUnit==4)
+		switch(main.selectedUnit)
 		{
-		for (int i=0; i< Compound.names.size();i++){
-			int num2 = Compound.counts.get(i);
-			//Rescale Y-axis
-			if (num2>=maxCount){
-				if (maxCount==8)
-					maxCount=12;
-				else if (maxCount==12)
-					maxCount=20;
-				else
-					maxCount *=2;
-			}
-			
-			//####Paint lines####
-			int num1 =0;
-			if (lines[i].size()>0){
-				Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
-				num1 = tmpLine.getNum2();
-			}	
-			//Draw one line segment at the end of existing line every time rendering
-			Line l = new Line(margin, marginY+i*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
-			lines[i].add(l);
-			
-		}
-		}
-		else if (main.selectedUnit==3)
-		{
+		default:
 			for (int i=0; i< Compound.names.size();i++){
-
+				int num2 = Compound.counts.get(i);
+				//Rescale Y-axis
+				if (num2>=maxCount){
+					if (maxCount==8)
+						maxCount=12;
+					else if (maxCount==12)
+						maxCount=20;
+					else
+						maxCount *=2;
+				}
+				
+				//########Paint lines########
+				int num1 =0;
+				if (lines[i].size()>0){
+					Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
+					num1 = tmpLine.getNum2();
+				}	
+				//Draw one line segment at the end of existing line every time rendering
+				Line l = new Line(margin, marginY+i*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
+				lines[i].add(l);
+				
+			}
+			break;
+		case 3:
+			for (int i=0; i< Compound.names.size();i++){
 					int index = i ;
 					String name = Compound.names.get(index);
 					float mass = Compound.moleculeWeight.get(index)* Compound.counts.get(index);
 				int num2 = (int) mass;
 				//Rescale Y-axis
-
+	
 				if (num2>=maxCount){
 						maxCount *=2;
 				}
 				
-				//####Paint lines####
+				//############Paint lines############
 				int num1 =0;
 				if (lines[i].size()>0){
 					Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
@@ -247,9 +254,39 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				//Draw one line segment at the end of existing line every time rendering
 				Line l = new Line(margin, marginY+0*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
 				lines[i].add(l);
-				
+			
 			}
+			break;
+		case 5:
+			if(main.selectedSim!=1 && main.selectedSim!=4)
+			{
+				for (int i=0; i< Compound.names.size();i++){
+					int num2 = Compound.counts.get(i);
+					//Rescale Y-axis
+					if (num2>=maxCount){
+						if (maxCount==8)
+							maxCount=12;
+						else if (maxCount==12)
+							maxCount=20;
+						else
+							maxCount *=2;
+					}
+					
+					//########Paint lines########
+					int num1 =0;
+					if (lines[i].size()>0){
+						Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
+						num1 = tmpLine.getNum2();
+					}	
+					//Draw one line segment at the end of existing line every time rendering
+					Line l = new Line(margin, marginY+i*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
+					lines[i].add(l);
+					
+				}
+			}
+			break;
 		}
+	
 		
 		//Highlight selected line if any of them has been selected
 		boolean blinkColor = false;
