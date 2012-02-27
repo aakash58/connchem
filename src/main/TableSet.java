@@ -19,10 +19,10 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 
 public class TableSet extends JPanel {
-	public static JTable table = null;
-	public static JScrollPane scrollPane;
-	public static ArrayList set = new ArrayList();
-	public static int selectedRow=0; 
+	public  JTable table = null;
+	public  JScrollPane scrollPane;
+	public  ArrayList set = new ArrayList();
+	public  int selectedRow=0; 
 	private Main main;
 	
 	public TableSet(Main parent) {
@@ -61,12 +61,12 @@ public class TableSet extends JPanel {
 	}
 
 	
-	public static void setSelectedRow(int row) {
+	public void setSelectedRow(int row) {
 		selectedRow = row;
 		table.clearSelection();
 		if (selectedRow<0) selectedRow=0;
 		table.addRowSelectionInterval(selectedRow, selectedRow);
-		table.updateUI();
+		table.repaint();
 	}
 	private class RowListener implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent event) {
@@ -74,14 +74,17 @@ public class TableSet extends JPanel {
 				return;
 			}
 			selectedRow = table.getSelectedRow();
-			main.selectedSet = selectedRow +1;
+			if(selectedRow<0) //If no row selected, set it to 0
+				selectedRow = 0;	
+			main.setSelectedSet(selectedRow +1)  ;
 			main.reset();
 		}
 	}
 
-	public void updataSet(){
+	//Update table of sets while loading in specific sims
+	public void updateSet(){
 		set = new ArrayList();
-		ArrayList sets = YAMLinterface.getSets(main.selectedUnit, main.selectedSim);
+		ArrayList sets = YAMLinterface.getSets(main.getSelectedUnit(), main.getSelectedSim());
 		if (sets==null) return;
 		
 		for (int i=0; i<sets.size();i++){

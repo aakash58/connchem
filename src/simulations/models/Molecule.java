@@ -154,7 +154,7 @@ public class Molecule {
 
 		// Identify specific situation
 		if ((name.equals("Sodium-Ion") || name.equals("Potassium-Ion"))
-				&& (p5Canvas.getMain().selectedUnit == 2 && p5Canvas.getMain().selectedSet != 7)) {
+				&& (p5Canvas.getUnit() == 2 && p5Canvas.getSet() != 7)) {
 			circles[0][0] = 28;
 		} else if (name.equals("Calcium-Ion")) {
 			circles[0][0] = 28;
@@ -330,7 +330,7 @@ public class Molecule {
 			this.setGravityScale(0.0f);
 		}
 		
-		if((p5Canvas.getMain().selectedUnit==1||p5Canvas.getMain().selectedUnit==2))
+		if((p5Canvas.getUnit()==1||p5Canvas.getUnit()==2))
 		{
 		if (name.equals("Water"))
 		{
@@ -473,7 +473,7 @@ public class Molecule {
 		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
 		if ((compoundName_.equals("Sodium-Ion") || compoundName_
 				.equals("Potassium-Ion"))
-				&& (parent_.getMain().selectedUnit == 2 && parent_.getMain().selectedSet != 7)) {
+				&& (parent_.getUnit() == 2 && parent_.getSet() != 7)) {
 			path = "resources/compoundsSvg/" + "Chlorine-Ion" + ".svg";
 		}
 
@@ -736,8 +736,8 @@ public class Molecule {
 		/* Check if it is displaying joints */
 		if (p5Canvas.isDisplayJoints) {
 			// For Unit 1 and Unit 2
-			if (p5Canvas.getMain().selectedUnit == 1
-					|| p5Canvas.getMain().selectedUnit == 2) {
+			if (p5Canvas.getUnit() == 1
+					|| p5Canvas.getUnit() == 2) {
 				if (compoundJ >= 0) {
 					Vec2 pos2 = box2d.getBodyPixelCoord(molecules
 							.get(compoundJ).body);
@@ -821,7 +821,7 @@ public class Molecule {
 		else if (name.equals("Hydrogen-Peroxide"))
 			mul = 0.8f;
 		else if (name.equals("Sodium-Chloride"))
-			if(p5Canvas.getMain().selectedUnit==1 ||p5Canvas.getMain().selectedUnit==2)
+			if(p5Canvas.getUnit()==1 ||p5Canvas.getUnit()==2)
 			mul = 1.0f;
 			else
 				mul =4.0f;
@@ -840,7 +840,7 @@ public class Molecule {
 		else if (name.equals("Potassium-Ion"))
 			mul = 1.1f;
 		else if (name.equals("Chlorine"))
-			if(p5Canvas.getMain().selectedUnit==1 ||p5Canvas.getMain().selectedUnit==2)
+			if(p5Canvas.getUnit()==1 ||p5Canvas.getUnit()==2)
 			mul = 0.04f;
 			else
 				mul =0.4f;

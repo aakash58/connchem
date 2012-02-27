@@ -104,7 +104,7 @@ public class Unit1 extends UnitBase {
 		//Reset output Labels
 		lblTempValue.setText(" \u2103");
 
-		switch (p5Canvas.getMain().selectedSim) {
+		switch (p5Canvas.getSim()) {
 		case 1:
 			// We dont need heat slider in Sim 1
 			p5Canvas.getMain().heatSlider.setEnabled(false);
@@ -638,7 +638,7 @@ public class Unit1 extends UnitBase {
 		// Set up speed ratio for molecules
 		setupSpeed();
 
-		switch (p5Canvas.getMain().selectedSim) {
+		switch (p5Canvas.getSim()) {
 		case 3:
 			// p5Canvas.setRestitutionDamp(true);
 			break;

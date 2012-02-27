@@ -66,6 +66,8 @@ public abstract class UnitBase {
 	// Reset all parameter to initial states
 	protected abstract void reset();
 	
+	
+	//Update output labels while running
 	public abstract void updateOutput(int sim,int set);
 	
 	//Update output text on right panel
@@ -821,9 +823,9 @@ public abstract class UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			int unit = p5Canvas.getMain().selectedUnit;
-			int set = p5Canvas.getMain().selectedSet;
-			int sim = p5Canvas.getMain().selectedSim;
+			int unit = p5Canvas.getUnit();
+			int sim = p5Canvas.getSim();
+			int set = p5Canvas.getSet();
 			updateCompoundNumber(unit, sim, set);
 			return true;
 		}
@@ -888,7 +890,9 @@ public abstract class UnitBase {
 			}
 		}
 	}
-
+	protected void updateCompoundNumber(Simulation simulation) {
+		updateCompoundNumber(simulation.getUnitNum(),simulation.getSimNum(),simulation.getSetNum());
+	}
 	public int getDissolvedNum() {
 		return this.num_dissolved;
 	}
@@ -950,15 +954,15 @@ public abstract class UnitBase {
 		}
 		float r = (float) (p5Canvas.temp / 99.);
 		float sat = 0;
-		if (p5Canvas.getMain().selectedSet == 1
-				&& p5Canvas.getMain().selectedSim <= 3)
+		if (p5Canvas.getSet() == 1
+				&& p5Canvas.getSim()<= 3)
 			sat = (35.7f + r * (39.9f - 35.7f)); // Take number of Water to
 													// account
-		else if (p5Canvas.getMain().selectedSet == 2)
+		else if (p5Canvas.getSet() == 2)
 			sat = 0;
-		else if (p5Canvas.getMain().selectedSet == 3)
+		else if (p5Canvas.getSet() == 3)
 			sat = 0;
-		else if (p5Canvas.getMain().selectedSet == 4) {
+		else if (p5Canvas.getSet() == 4) {
 			if (0 < p5Canvas.temp && p5Canvas.temp <= 20) {
 				r = (float) (p5Canvas.temp / 20.);
 				sat = (59.5f + r * (74.5f - 59.5f));
@@ -979,14 +983,14 @@ public abstract class UnitBase {
 				r = (float) ((p5Canvas.temp - 80) / 20.);
 				sat = (147f + r * (159f - 147f));
 			}
-		} else if (p5Canvas.getMain().selectedSet == 5) {
+		} else if (p5Canvas.getSet()== 5) {
 			sat = 0;
-		} else if (p5Canvas.getMain().selectedSet == 6) {
+		} else if (p5Canvas.getSet() == 6) {
 			sat = 0;
-		} else if (p5Canvas.getMain().selectedSet == 7)
+		} else if (p5Canvas.getSet() == 7)
 			sat = (6.9f + r * (19.2f - 6.9f));
-		else if (p5Canvas.getMain().selectedSet == 1
-				&& p5Canvas.getMain().selectedSim == 4)
+		else if (p5Canvas.getSet() == 1
+				&& p5Canvas.getSim() == 4)
 			sat = (28f + r * (56.3f - 28f));
 		return sat * ((float) numWater / water100mL);
 	}

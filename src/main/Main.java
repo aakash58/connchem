@@ -95,9 +95,9 @@ public class Main {
 
 	public JFrame mainFrame;
 	public JMenu simMenu = new JMenu("Choose Simulation");
-	public int selectedUnit = 2;
-	public int selectedSim = 4;
-	public int selectedSet = 1;
+	private int selectedUnit = 2;
+	private int selectedSim = 4;
+	private int selectedSet = 1;
 	public boolean isWelcomed = true;
 	public Color selectedColor = new Color(200, 200, 150);
 	public Color backgroundColor = Color.LIGHT_GRAY;
@@ -119,7 +119,7 @@ public class Main {
 								// application
 	public JPanel welcomePanel; // "Welcome" Panel showing welcome info when
 								// application is first opened up
-	private Canvas canvas;
+	private Canvas canvas = null;
 	private TableView tableView;
 	private TableSet tableSet;
 	private JMenuBar menuBar;
@@ -225,10 +225,12 @@ public class Main {
 	public int pause = 0; // the length of the pause at the beginning
 	public int speed = 1000; // recur every second.
 	public Timer timer;
-	public static int time = 0;
+	public int time = 0;
 
-	private MouseListener mulBtnListener; // mouseListener used for 6 buttons in
+	private MouseAdapter mulBtnListener; // mouseListener used for 6 buttons in
 											// Unit3 Sim1
+	private MouseAdapter btnCatalystListener;
+	private MouseAdapter btnInertListener;
 	private ArrayList<Integer> btnIds = new ArrayList<Integer>(); // Button Ids
 																	// in Unit3
 																	// Sim2
@@ -292,8 +294,8 @@ public class Main {
 	 */
 	public Main() {
 		setP5Canvas(new P5Canvas(this));
-		setCanvas(new Canvas(this));
 		setTableView(new TableView(this));
+		setCanvas(new Canvas(this));
 
 		setTableSet(new TableSet(this));
 		scrollablePopupMenu = new CustomPopupMenu(this);
@@ -380,7 +382,7 @@ public class Main {
 	 * 
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
-	public void updateDynamicPanel() {
+	public void resetDynamicPanel() {
 		if (dynamicPanel != null) {
 			dynamicPanel.removeAll();
 			//defaultSetMolecules = new ArrayList();
@@ -400,7 +402,7 @@ public class Main {
 					dynamicScrollPane
 							.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 					int start =0;
-					if(selectedUnit==4)
+					if(selectedUnit==4||(selectedUnit==6&&selectedSim==2))
 					{
 						JPanel volumePanel = new JPanel();
 						//volumePanel.setBackground(backgroundColor);
@@ -423,24 +425,28 @@ public class Main {
 						heatPanel.add(canvasControlLabel_main_heat,"cell 0 0,align left");
 						start=2;
 					}
-
 					//LOOP: Add molecule legends for all the molecules
-					for (int i =0; i < compounds.size(); i++) {
+					int i = 0;
+					for (i =0; i < compounds.size(); i++) {
+						// Get Compound Name
+						String cName = getCompoundName(selectedUnit,
+								selectedSim, selectedSet, i);
+						final String fixedName = cName.replace(" ", "-");
+						if(getSelectedUnit()==6&&getSelectedSim()==2 && (fixedName.equals("Catalyst")||fixedName.equals("Inert")))
+						{
+							State.moleculesAdded.put(fixedName, 0); // Initialize
+							continue;
+						}
 						JPanel panel = new JPanel();
 						panel.setBackground(backgroundColor);
 						panel.setLayout(new MigLayout("insets 6, gap 0",
 								"[][][69.00]", "[][]"));
 						dynamicPanel.add(panel, "cell 0 " + (i+start) + ",grow");
 						//additionalPanelList.add(panel);
-
-						// Get Compound Name
-						String cName = getCompoundName(selectedUnit,
-								selectedSim, selectedSet, i);
 						panel.setName(cName);
 
 						//Add Compound Name label
 						JLabel label = new JLabel(cName);
-						final String fixedName = cName.replace(" ", "-");
 						// Repaint molecules icon
 						ImageIcon icon = new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+ fixedName + ".png"));
 						//icon = scaleImageIcon(icon, 40, 30);
@@ -496,59 +502,36 @@ public class Main {
 																// moleculesAdded
 						addBtn.addMouseListener(new MouseAdapter() {
 							public void mouseClicked(MouseEvent arg0) {
-
-								if (arg0.getComponent().isEnabled()) {
-									// Get number showing on slider bar
-									int count = slider.getValue();
-									// Check if molecule number is going over
-									// cap number
-									// If yes, add molecules no more than cap
-									// number
-
-									String fixedName = null;
-									for (Entry<String, JButton> entry : addBtns
-											.entrySet()) {
-										if (arg0.getComponent().equals(
-												entry.getValue())) {
-											fixedName = entry.getKey();
-										}
-									}
-
-									int cap = getP5Canvas().getMoleculesCap(
-											fixedName);
-									int currentNum = State.moleculesAdded
-											.get(fixedName);
-
-									if (cap <= (count + currentNum)) {
-										count = cap - currentNum;
-										if (count < 0)
-											count = 0;
-										// Disable Add button
-										if (getP5Canvas().addMolecule(
-												fixedName, count)) {
-											{
-												State.moleculesAdded.put(
-														fixedName, currentNum
-																+ count);
-												
-											}
-											arg0.getComponent().setEnabled(
-													false);
-										}
-									} else {
-										if (getP5Canvas().addMolecule(
-												fixedName, count)) {
-											State.moleculesAdded.put(fixedName,
-													currentNum + count);
-										}
-									}
-
-								}
+								addMolecule(arg0,null,0);
 							}
 						});
 
 					}
+					if(getSelectedUnit()==6&&getSelectedSim()==2) //Add catalyst button and inert gas button in Unit 6 Sim 2
+					{
+						JPanel buttonPanel = new JPanel();
+						buttonPanel.setLayout(new MigLayout("insets 6, gap 4","[grow]20[grow]", "[][]"));
+						dynamicPanel.add(buttonPanel, "cell 0 " + (i+start) + ",grow");
+						// Draw Molecule button
+						JButton btnCatalyst = new JButton();
+						JLabel lblCatalyst = new JLabel("Add Catalyst");
+						btnCatalyst.setIcon(new ImageIcon(Main.class
+								.getResource("/resources/compoundsPng50/Catalyst.png")));
+						btnCatalyst.addMouseListener(btnCatalystListener);
+						JButton btnInertGas = new JButton();
+						JLabel lblInertGas = new JLabel("Add Inert Gas");
+						btnInertGas.setIcon(new ImageIcon(Main.class
+								.getResource("/resources/compoundsPng50/Inert.png")));
+						btnInertGas.addMouseListener(btnInertListener);
+						buttonPanel.add(btnCatalyst,"cell 0 0, align center,growx");
+						buttonPanel.add(lblCatalyst, "cell 0 1, align center");
+						buttonPanel.add(btnInertGas,"cell 1 0, align center,growx");
+						buttonPanel.add(lblInertGas,"cell 1 1, align center");
+
+
+					}
 				}
+				
 			}
 			else // In unit3 sim 2 case
 			{
@@ -647,12 +630,13 @@ public class Main {
 	public void reset() {
 		// boolean temp = getP5Canvas().isEnable;
 		
-		//Reset parameter
-		resetParameter();
-
 		// Disable p5Canvas and stop timer
 		timer.stop();
-		getP5Canvas().isEnable = false;
+		getP5Canvas().setEnabled(false);
+		
+		//Reset parameter
+		resetParameter();
+		
 		playBtn.setIcon(new ImageIcon(Main.class
 				.getResource("/resources/png48x48/iconPlay.png")));
 
@@ -667,17 +651,18 @@ public class Main {
 		// Reset state parameter
 		State.reset();
 
-		
-		// Update sliders around the center panel
-		updateCenterPanel();
-		
-		updateLeftPanel();
-
-		// Reset right panel
-		updateRightPanel();
-		
 		// Reset p5Canvas
 		getP5Canvas().reset();
+		
+		// Update sliders around the center panel
+		resetCenterPanel();
+		
+		resetLeftPanel();
+
+		// Reset right panel
+		resetRightPanel();
+		
+
 
 		// Load information of new generation
 		if (!(selectedUnit == 3 && selectedSim == 2)) {
@@ -742,13 +727,15 @@ public class Main {
 		heatSlider.setValue(defaultHeat);
 		volumeSlider.setValue(defaultVolume);
 		volumeLabel.setText(defaultVolume+ " mL");
+		
+		addBtns.clear();
 
 	
 		
 	}
 	
 	//Reset left panel
-	private void updateLeftPanel()
+	private void resetLeftPanel()
 	{
 		// For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
 		if (selectedUnit == 2 && (selectedSim == 3||selectedSim==1||selectedSim==2)) {
@@ -774,14 +761,14 @@ public class Main {
 		}
 		
 		// Update Molecule Legends on left panel
-		updateDynamicPanel();
+		resetDynamicPanel();
 		
-		updateCheckboxPanel();
+		resetCheckboxPanel();
 		
 		leftPanel.validate();
 		
 	}
-	private void updateCheckboxPanel()
+	private void resetCheckboxPanel()
 	{
 		checkBoxPanel.removeAll();
 		//Reset selected value
@@ -795,21 +782,19 @@ public class Main {
 		checkBoxPanel.add(boxMoleculeTracking,BorderLayout.CENTER);
 		checkBoxPanel.add(boxDisplayForce, BorderLayout.SOUTH);
 		//checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
+		checkBoxPanel.repaint();
 	}
 
 	// Reset right panel
-	private void updateRightPanel() {
+	private void resetRightPanel() {
 		
 		rightPanel.removeAll();
 		switch (selectedUnit)
 		{
-		case 1:
-		case 4:
-		case 5:
+		default:
 			rightPanel.add(lblOutput, "cell 0 1");
 			rightPanel.add(tabpanelGraph, "cell 0 2,grow");
 			rightPanel.add(dashboard, "cell 0 4,growy");
-
 			break;
 		case 3:
 			rightPanel.add(lblOutput, "cell 0 1");
@@ -832,14 +817,14 @@ public class Main {
 			break;
 
 		}
-		updateTabPanelGraph();
-		updateDashboard(); // Reset dashboard on right panel
+		resetTabPanelGraph();
+		resetDashboard(); // Reset dashboard on right panel
 		
 		rightPanel.validate();
 	}
 	
 	//Reset tab panel on right panel
-	private void updateTabPanelGraph()
+	private void resetTabPanelGraph()
 	{
 		//Change tabpanelGraph
 		
@@ -883,7 +868,7 @@ public class Main {
 	}
 
 	// Reset dashboard on right panel
-	private void updateDashboard() {
+	private void resetDashboard() {
 		dashboard.removeAll();
 		//rightPanel.remove(outputControls);
 		
@@ -900,7 +885,7 @@ public class Main {
 	 * 
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
-	private void updateCenterPanel() {
+	private void resetCenterPanel() {
 		if (playBtn != null && centerPanel != null) {
 
 			clPanel.removeAll();
@@ -911,6 +896,9 @@ public class Main {
 
 			switch(selectedUnit)
 			{
+			default:
+				setupCentralStyle1();
+				break;
 			case 2:
 				
 				//Add Pressure slider
@@ -935,71 +923,80 @@ public class Main {
 				crPanel.add(heatLabel, "cell 0 4,alignx center");
 				crPanel.add(heatSlider, "cell 0 5,alignx left,growy");
 				crPanel.add(canvasControlLabel_main_heat, "cell 0 6");
-
 			break;
-			case 1:
-			case 3:
-			case 5:
-				//Add Volume Slider
-					clPanel.add(volumeLabel, "cell 0 0,alignx right");
-					clPanel.add(volumeSlider, "cell 0 1,alignx right");
-					clPanel.add(canvasControlLabel_main_volume,
-							"cell 0 2, alignx center");
-				//Add Zoom Slider
-					clPanel.add(zoomLabel, "cell 0 4,alignx right");
-					clPanel.add(zoomSlider, "cell 0 5,alignx right,growy");
-					clPanel.add(canvasControlLabel_main_scale, "cell 0 6,alignx right");
-				// Reset zoomSlider
-				zoomSlider.setValue(defaultZoom);
-				zoomLabel.setText(defaultZoom  + "%");
-
-				heatSlider.setMaximum((int) heatMax);
-				heatSlider.setMinimum((int) heatMin);
-				heatSlider.setValue((int) defaultHeat);
-				if (this.selectedUnit == 3) {
-					heatSlider.setEnabled(false);
-					volumeSlider.setEnabled(false);
-				}
-				else
-				{
-					heatSlider.setEnabled(true);
-					volumeSlider.setEnabled(true);
-				}
-				// Reset animation speed
-				speedSlider.setValue(defaultSpeed);
-				float speedRate = defaultSpeed / defaultSpeed;
-				getP5Canvas().setSpeed(speedRate);
-
-				
-				//Add Speed Slider
-				crPanel.add(speedLabel, "cell 0 0,alignx center");
-				crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
-				crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
-				//Add Heat Slider
-				crPanel.add(heatLabel, "cell 0 4,alignx center");
-				crPanel.add(heatSlider, "cell 0 5,alignx left,growy");
-				crPanel.add(canvasControlLabel_main_heat, "cell 0 6");
-				break;
 			case 4:
-				//Add Speed Slider
-				crPanel.add(speedLabel, "cell 0 0,alignx left");
-				crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
-				crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
-				//Add Zoom Slider
-				crPanel.add(zoomLabel, "cell 0 4,alignx left");
-				crPanel.add(zoomSlider, "cell 0 5,alignx left,growy");
-				crPanel.add(canvasControlLabel_main_scale, "cell 0 6");
-				
-				//Place holder
-				clPanel.add(lblPlaceHolder, "cell 0 0,alignx right");
-				lblPlaceHolder.setVisible(false);
-				
+				setupCentralStyle2();
 				break;
+			case 6:
+				if(selectedSim==1)
+				 setupCentralStyle1();
+				else
+					setupCentralStyle2();
 			}
 			
 			centerPanel.repaint();
 		}
 
+	}
+	
+	//Set up central panel layout
+	private void setupCentralStyle1()
+	{
+		//Add Volume Slider
+		clPanel.add(volumeLabel, "cell 0 0,alignx right");
+		clPanel.add(volumeSlider, "cell 0 1,alignx right");
+		clPanel.add(canvasControlLabel_main_volume,
+				"cell 0 2, alignx center");
+	//Add Zoom Slider
+		clPanel.add(zoomLabel, "cell 0 4,alignx right");
+		clPanel.add(zoomSlider, "cell 0 5,alignx right,growy");
+		clPanel.add(canvasControlLabel_main_scale, "cell 0 6,alignx right");
+	// Reset zoomSlider
+	zoomSlider.setValue(defaultZoom);
+	zoomLabel.setText(defaultZoom  + "%");
+
+	heatSlider.setMaximum((int) heatMax);
+	heatSlider.setMinimum((int) heatMin);
+	heatSlider.setValue((int) defaultHeat);
+	if (this.selectedUnit == 3) {
+		heatSlider.setEnabled(false);
+		volumeSlider.setEnabled(false);
+	}
+	else
+	{
+		heatSlider.setEnabled(true);
+		volumeSlider.setEnabled(true);
+	}
+	// Reset animation speed
+	speedSlider.setValue(defaultSpeed);
+	float speedRate = defaultSpeed / defaultSpeed;
+	getP5Canvas().setSpeed(speedRate);
+
+	
+	//Add Speed Slider
+	crPanel.add(speedLabel, "cell 0 0,alignx center");
+	crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
+	crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
+	//Add Heat Slider
+	crPanel.add(heatLabel, "cell 0 4,alignx center");
+	crPanel.add(heatSlider, "cell 0 5,alignx left,growy");
+	crPanel.add(canvasControlLabel_main_heat, "cell 0 6");
+	}
+	
+	private void setupCentralStyle2()
+	{
+		//Add Speed Slider
+		crPanel.add(speedLabel, "cell 0 0,alignx left");
+		crPanel.add(speedSlider, "cell 0 1,alignx left,growy");
+		crPanel.add(canvasControlLabel_main_speed, "cell 0 2");
+		//Add Zoom Slider
+		crPanel.add(zoomLabel, "cell 0 4,alignx left");
+		crPanel.add(zoomSlider, "cell 0 5,alignx left,growy");
+		crPanel.add(canvasControlLabel_main_scale, "cell 0 6");
+		
+		//Place holder
+		clPanel.add(lblPlaceHolder, "cell 0 0,alignx right");
+		lblPlaceHolder.setVisible(false);
 	}
 
 	/******************************************************************
@@ -1007,7 +1004,7 @@ public class Main {
 	 * 
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
-	public static void resetTimer() {
+	public  void resetTimer() {
 		time = 0;
 	}
 
@@ -1399,7 +1396,7 @@ public class Main {
 
 	// Set up MouseListerners
 	private void setupMouseListeners() {
-		mulBtnListener = new MouseListener() {
+		mulBtnListener = new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				int index = getComponentIndex(e.getComponent());
 
@@ -1427,26 +1424,6 @@ public class Main {
 					}
 				}
 
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
 			}
 		};
 	}
@@ -1619,9 +1596,87 @@ public class Main {
 				}
 			}
 		};
+		
+		btnCatalystListener = new MouseAdapter()
+		{
+			public void mouseClicked(MouseEvent e)
+			{
+				addMolecule(e,"Catalyst",5);
+			}
+		};
+		btnInertListener = new MouseAdapter()
+		{
+			public void mouseClicked(MouseEvent e)
+			{
+				addMolecule(e,"Inert",5);
+			}
+		};
+	}
+	
+	public void addMolecule(MouseEvent e, String compoundName,int num)
+	{
+		if (e.getComponent().isEnabled()) {
+			
+			int count = 0;
+			String fixedName = null;
+			if(compoundName==null)
+			{
+				// Check if molecule number is going over
+				// cap number
+				// If yes, add molecules no more than cap
+				// number
+	
+				
+				for (Entry<String, JButton> entry : addBtns
+						.entrySet()) {
+					if (e.getComponent().equals(
+							entry.getValue())) {
+						fixedName = entry.getKey();
+					}
+				}
+				JSlider slider = (JSlider)moleculeSliderMap.get(fixedName);
+				count = slider.getValue();
+
+			}
+			else
+			{
+				fixedName= new String(compoundName);
+				count = num;
+			}
+
+			int cap = getP5Canvas().getMoleculesCap(
+					fixedName);
+			int currentNum = State.moleculesAdded
+					.get(fixedName);
+
+			if (cap <= (count + currentNum)) {
+				count = cap - currentNum;
+				if (count < 0)
+					count = 0;
+				// Disable Add button
+				if (getP5Canvas().addMolecule(
+						fixedName, count)) {
+					{
+						State.moleculesAdded.put(
+								fixedName, currentNum
+										+ count);
+						
+					}
+					e.getComponent().setEnabled(
+							false);
+				}
+			} else {
+				if (getP5Canvas().addMolecule(
+						fixedName, count)) {
+					State.moleculesAdded.put(fixedName,
+							currentNum + count);
+				}
+			}
+
+		}
 	}
 
-	public static int getComponentIndex(Component component) {
+	public int getComponentIndex(Component component) {
 		if (component != null && component.getParent() != null) {
 			Container c = component.getParent();
 			for (int i = 0; i < c.getComponentCount(); i++) {
@@ -1773,7 +1828,7 @@ public class Main {
 										}
 									}
 								}
-								tableSet.updataSet();
+								tableSet.updateSet();
 								tableSet.setSelectedRow(0);
 							}
 						});
@@ -1867,5 +1922,21 @@ public class Main {
 	public boolean isSimSelected(int unit,int sim)
 	{
 		return (selectedUnit==unit && selectedSim ==sim );
+	}
+	public int getSelectedUnit()
+	{
+		return selectedUnit;
+	}
+	public int getSelectedSim()
+	{
+		return selectedSim;
+	}
+	public int getSelectedSet()
+	{
+		return selectedSet;
+	}
+	public void setSelectedSet(int v)
+	{
+		selectedSet = v;
 	}
 }

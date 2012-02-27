@@ -13,6 +13,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
 
+import simulations.P5Canvas;
 import simulations.models.Compound;
 
 import java.awt.Color;
@@ -30,6 +31,8 @@ import java.util.List;
 public class TableView extends JPanel {
 	public JTable table = null;
 	public boolean stopUpdating = false;
+	public final int MAXCOMPOUND = 50;
+
 	public JScrollPane scrollPane;
 	public ArrayList[] data = new ArrayList[3];
 	private int sat =222;
@@ -38,12 +41,14 @@ public class TableView extends JPanel {
 	public int colorChangingRow;
 	//public int selectedRow=-1;
 	private Main main;
+	private P5Canvas p5Canvas;
 	private MyTableModel myTable;
 	
 	
 	public TableView(Main parent) {
 		super(new GridLayout(1, 0));
 		this.main = parent;
+		p5Canvas = main.getP5Canvas();
 		 myTable = new MyTableModel();
 		
 		
@@ -103,7 +108,7 @@ public class TableView extends JPanel {
 		scrollPane.getViewport().setBackground(c);
 		table.setBackground(c);
 		
-		colors = new Color[main.getCanvas().MAXCOMPOUND];
+		colors = new Color[MAXCOMPOUND];
 		colors[0]= new Color(255,0,0,sat);
 		colors[1]= new Color(0,255,0,sat);
 		colors[2]= new Color(0,0,255,sat);
@@ -112,7 +117,7 @@ public class TableView extends JPanel {
 		colors[5]= new Color(255,0 ,255,sat);
 		colors[6]= Color.PINK;
 		colors[7]= Color.ORANGE;
-		for (int i = 8;i<main.getCanvas().MAXCOMPOUND;i++){
+		for (int i = 8;i<MAXCOMPOUND;i++){
 			colors[i] = Color.BLACK;
 		}
 		
@@ -128,7 +133,7 @@ public class TableView extends JPanel {
 		String name = null;
 		DecimalFormat myFormatter = new DecimalFormat("###.##");
 		String output = null;
-		switch(main.selectedUnit)
+		switch(p5Canvas.getUnit())
 		{
 		default:
 			for (int i=0; i<Compound.names.size();i++){
@@ -140,7 +145,16 @@ public class TableView extends JPanel {
 		case 5:
 			for (int i=0; i<Compound.names.size();i++){
 				name = (String)Compound.names.get(i);
-				output = myFormatter.format((float)main.getP5Canvas().getUnit5().getConByName(name));
+				output = myFormatter.format((float)p5Canvas.getUnit5().getConByName(name));
+				data[0].add(output);
+				data[1].add((Color)colors[i]);
+				data[2].add(name);
+			}
+			break;
+		case 6:
+			for (int i=0; i<Compound.names.size();i++){
+				name = (String)Compound.names.get(i);
+				output = myFormatter.format((float)main.getP5Canvas().getUnit6().getConByName(name));
 				data[0].add(output);
 				data[1].add((Color)colors[i]);
 				data[2].add(name);
@@ -149,7 +163,10 @@ public class TableView extends JPanel {
 		}
 
 		if (this!=null && !stopUpdating){
-			table.repaint();
+			//myTable.fireTableDataChanged();
+			for (int i=0; i<Compound.names.size();i++){
+			myTable.fireTableCellUpdated(i, 0);
+			}
 		}		
 	}
 
@@ -398,12 +415,15 @@ public class TableView extends JPanel {
 				return false;
 			}
 		}
-
+/*
 		public void setValueAt(Object value, int row, int col) {
+			if( col==1)
+				data[col].set(row, (Color)value);
+			else
 			data[col].set(row, value);
-			colors[row] = (Color) value;
+			//colors[row] = (Color) value;
 			fireTableCellUpdated(row, col);
-		}
+		}*/
 
 		@Override
 		public void tableChanged(TableModelEvent arg0) {

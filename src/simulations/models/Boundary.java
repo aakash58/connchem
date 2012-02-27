@@ -181,7 +181,7 @@ public class Boundary {
 			width *=ratio;
 			height*=ratio;
 			//For Unit 4 Sim 4 Set 2, we use weight top boundary image instead of base image
-			if(p5Canvas.getMain().selectedUnit==4 && p5Canvas.getMain().selectedSim==4 &&p5Canvas.getMain().selectedSet==2)
+			if(p5Canvas.getUnit()==4 && p5Canvas.getSim()==4 &&p5Canvas.getSet()==2)
 				p5Canvas.shape(weightShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
 			else
 				p5Canvas.shape(baseShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);

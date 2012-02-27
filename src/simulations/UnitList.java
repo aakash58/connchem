@@ -21,7 +21,7 @@ public class UnitList {
 		unitList[2] = new Unit3(p5Canvas,box2D);
 		unitList[3] = new Unit4(p5Canvas,box2D);
 		unitList[4] = new Unit5(p5Canvas,box2D);
-		unitList[5] = null;
+		unitList[5] = new Unit6(p5Canvas,box2D);
 		unitList[6] = null;
 		unitList[7] = null;
 		unitList[8] = null;
@@ -106,6 +106,10 @@ public class UnitList {
 	public Unit5 getUnit5()
 	{
 		return (Unit5)unitList[4];
+	}
+	public Unit6 getUnit6()
+	{
+		return (Unit6)unitList[5];
 	}
 	
 	private boolean isExist(int unit)
