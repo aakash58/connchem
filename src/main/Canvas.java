@@ -22,6 +22,7 @@ import data.DBinterface;
 import data.State;
 
 
+import simulations.P5Canvas;
 import simulations.Unit2;
 import simulations.models.Compound;
 import simulations.models.Molecule;
@@ -38,10 +39,14 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	public int maxTime =60;
 	public int satCount =0;
 	private Main main = null;
+	private P5Canvas p5Canvas  = null;
+	private TableView tableView = null;
 
 	
 	public Canvas( Main parent) {
 		main = parent;
+		p5Canvas = main.getP5Canvas();
+		tableView = main.getTableView();
 		for (int i=0; i<MAXCOMPOUND;i++){
 			lines[i] = new ArrayList();
 		}
@@ -58,7 +63,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			lines[i].clear();
 		}
 		maxTime =60;
-		switch(main.selectedUnit)
+		switch(p5Canvas.getUnit())
 		{
 		
 		case 3:
@@ -131,7 +136,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		g.rotate(-Math.PI/2.0);
 		g.setFont(new Font("Garamond", Font.PLAIN, 12));
 		g.setColor(Color.BLACK);
-		switch(main.selectedUnit)
+		switch(p5Canvas.getUnit())
 		{
 		case 1:
 		case 2:
@@ -142,7 +147,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			g.drawString("total mass", 0, 0);
 			break;
 		case 5:
-			g.drawString("Concentration", 0, 0);
+		case 6:
+			g.drawString("Concentration (M)", 0, 0);
 			break;
 		}
 		
@@ -163,13 +169,13 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		updateTableValue();
 		
 		//Expand x scale if time reaches maxTime
-		if (Main.time>maxTime){
+		if (main.time>maxTime){
 			maxTime *=2;
 		}
 		
 		paintLines(g,w,h,w2,h2,margin);
 		
-		main.elapsedTime.setText(formatTime(Main.time));
+		main.elapsedTime.setText(formatTime(main.time));
 	
 
 		
@@ -206,13 +212,13 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		int linePadding = 1;
 		//int marginY = h+2-Compound.names.size()*linePadding;
 		int marginY = h;
-		switch(main.selectedUnit)
+		switch(p5Canvas.getUnit())
 		{
 		default:
 			for (int i=0; i< Compound.names.size();i++){
 				int num2 = Compound.counts.get(i);
 				//Rescale Y-axis
-				if (num2>=maxCount){
+				if (num2>maxCount){
 					if (maxCount==8)
 						maxCount=12;
 					else if (maxCount==12)
@@ -228,7 +234,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					num1 = tmpLine.getNum2();
 				}	
 				//Draw one line segment at the end of existing line every time rendering
-				Line l = new Line(margin, marginY+i*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
+				Line l = new Line(margin, marginY+i*linePadding-margin, (int) main.time, (int) main.time+1,  num1, num2, h2, w2, this);
 				lines[i].add(l);
 				
 			}
@@ -252,16 +258,17 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					num1 = tmpLine.getNum2();
 				}	
 				//Draw one line segment at the end of existing line every time rendering
-				Line l = new Line(margin, marginY+0*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
+				Line l = new Line(margin, marginY+0*linePadding-margin, (int) main.time, (int) main.time+1,  num1, num2, h2, w2, this);
 				lines[i].add(l);
 			
 			}
 			break;
-		case 5:
-			if(main.selectedSim!=1 && main.selectedSim!=4)
+		case 5: //Get Concentration num
+			if(p5Canvas.getSim()!=1 && p5Canvas.getSim()!=4) //No graph in Unit 5 Sim 1 and 4
 			{
-				for (int i=0; i< Compound.names.size();i++){
-					int num2 = Compound.counts.get(i);
+				for (int i=0; i<tableView.data[0].size();i++){
+					int num2 = (int) Float.parseFloat( (String) tableView.data[0].get(i));
+					//int num2 = Compound.counts.get(i);
 					//Rescale Y-axis
 					if (num2>=maxCount){
 						if (maxCount==8)
@@ -279,10 +286,37 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 						num1 = tmpLine.getNum2();
 					}	
 					//Draw one line segment at the end of existing line every time rendering
-					Line l = new Line(margin, marginY+i*linePadding-margin, (int) Main.time, (int) Main.time+1,  num1, num2, h2, w2, this);
+					Line l = new Line(margin, marginY+i*linePadding-margin, (int) main.time, (int) main.time+1,  num1, num2, h2, w2, this);
 					lines[i].add(l);
 					
 				}
+			}
+			break;
+		case 6:
+			
+			for (int i=0; i<tableView.data[0].size();i++){
+				int num2 = (int) Float.parseFloat( (String) tableView.data[0].get(i));
+				//int num2 = Compound.counts.get(i);
+				//Rescale Y-axis
+				if (num2>=maxCount){
+					if (maxCount==8)
+						maxCount=12;
+					else if (maxCount==12)
+						maxCount=20;
+					else
+						maxCount *=2;
+				}
+				
+				//########Paint lines########
+				int num1 =0;
+				if (lines[i].size()>0){
+					Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
+					num1 = tmpLine.getNum2();
+				}	
+				//Draw one line segment at the end of existing line every time rendering
+				Line l = new Line(margin, marginY+i*linePadding-margin, (int) main.time, (int) main.time+1,  num1, num2, h2, w2, this);
+				lines[i].add(l);
+				
 			}
 			break;
 		}
@@ -304,7 +338,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	public void updateMoleculeCount(){
 	
 		//For particular cases
-		if (main.selectedUnit==1 && (main.selectedSim==4||(main.selectedSim==2&&main.selectedSet==2))){
+		if (p5Canvas.getUnit()==1 && (p5Canvas.getSim()==4||(p5Canvas.getSim()==2&&p5Canvas.getSet()==2))){
 			int H2OIndex = names.indexOf("Water");
 			int OIndex = names.indexOf("Oxygen");
 			int H2O2Index = names.indexOf("Hydrogen-Peroxide");
@@ -328,7 +362,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			Compound.counts.set(H2O2Index, H2O2Count);
 			
 		}
-		if (main.selectedUnit==2 && main.selectedSet==1 && main.selectedSim<4){
+		if (p5Canvas.getUnit()==2 && p5Canvas.getSet()==1 && p5Canvas.getSim()<4){
 			int NaIndex = names.indexOf("Sodium-Ion");
 			int ClIndex = names.indexOf("Chlorine-Ion");
 			int NaClIndex = names.indexOf("Sodium-Chloride");
@@ -344,7 +378,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			Compound.counts.set(NaClIndex,NaClCount);
 			
 		}
-		else if (main.selectedUnit==2 && main.selectedSet==4){
+		else if (p5Canvas.getUnit()==2 && p5Canvas.getSet()==4){
 			int CaIndex = names.indexOf("Calcium-Ion");
 			int ClIndex = names.indexOf("Chlorine-Ion");
 			int CaClIndex = names.indexOf("Calcium-Chloride");
@@ -359,7 +393,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			Compound.counts.set(ClIndex,2*(main.getP5Canvas().getUnit2().getTotalNum()-CaClCount));
 			Compound.counts.set(CaClIndex,CaClCount);
 		}
-		else if (main.selectedUnit==2 && main.selectedSet==7){
+		else if (p5Canvas.getUnit()==2 && p5Canvas.getSet()==7){
 			int NaIndex = names.indexOf("Sodium-Ion");
 			int HCO3Index = names.indexOf("Bicarbonate");
 			int NaHCO3Index = names.indexOf("Sodium-Bicarbonate");
@@ -374,7 +408,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			Compound.counts.set(HCO3Index,main.getP5Canvas().getUnit2().getTotalNum()-NaHCO3Count);
 			Compound.counts.set(NaHCO3Index, NaHCO3Count);
 		}
-		else if (main.selectedUnit==2 && main.selectedSet==1 && main.selectedSim==4){
+		else if (p5Canvas.getUnit()==2 && p5Canvas.getSet()==1 && p5Canvas.getSim()==4){
 			int KIndex = names.indexOf("Potassium-Ion");
 			if (KIndex<0) return;
 			int ClIndex = names.indexOf("Chlorine-Ion");
@@ -471,7 +505,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 				Line l = (Line) lines[i].get(j);
 				if (l.isIn(mouseX, mouseY)){
 					select =i; //Pick up the last lines
-					if(main.selectedUnit==3)
+					if(p5Canvas.getUnit()==3)
 					{
 						int index = i ;
 						String name = Compound.names.get(index);

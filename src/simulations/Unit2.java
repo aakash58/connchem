@@ -1450,14 +1450,14 @@ public class Unit2 extends UnitBase{
 		}
 		float r = (float) (p5Canvas.temp / 99.);
 		float sat = 0;
-		if (p5Canvas.getMain().selectedSet == 1 && p5Canvas.getMain().selectedSim <= 3)
+		if (p5Canvas.getSet() == 1 && p5Canvas.getSim() <= 3)
 			sat = (35.7f + r * (39.9f - 35.7f)); // Take number of Water to
 													// account
-		else if (p5Canvas.getMain().selectedSet == 2)
+		else if (p5Canvas.getSet() == 2)
 			sat = 0;
-		else if (p5Canvas.getMain().selectedSet == 3)
+		else if (p5Canvas.getSet() == 3)
 			sat = 0;
-		else if (p5Canvas.getMain().selectedSet == 4) {
+		else if (p5Canvas.getSet() == 4) {
 			if (0 < p5Canvas.temp && p5Canvas.temp <= 20) {
 				r = (float) (p5Canvas.temp / 20.);
 				sat = (59.5f + r * (74.5f - 59.5f));
@@ -1478,13 +1478,13 @@ public class Unit2 extends UnitBase{
 				r = (float) ((p5Canvas.temp - 80) / 20.);
 				sat = (147f + r * (159f - 147f));
 			}
-		} else if (p5Canvas.getMain().selectedSet == 5) {
+		} else if (p5Canvas.getSet() == 5) {
 			sat = 0;
-		} else if (p5Canvas.getMain().selectedSet == 6) {
+		} else if (p5Canvas.getSet() == 6) {
 			sat = 0;
-		} else if (p5Canvas.getMain().selectedSet == 7)
+		} else if (p5Canvas.getSet() == 7)
 			sat = (6.9f + r * (19.2f - 6.9f));
-		else if (p5Canvas.getMain().selectedSet == 1 && p5Canvas.getMain().selectedSim == 4)
+		else if (p5Canvas.getSet() == 1 && p5Canvas.getSim() == 4)
 			sat = (28f + r * (56.3f - 28f));
 		return sat * ((float) numWater / water100mL);
 	}
@@ -1496,7 +1496,7 @@ public class Unit2 extends UnitBase{
 			mIndex.addForce(new Vec2(mIndex.sumForceWaterX[e],
 					mIndex.sumForceWaterY[e]), e);
 
-			if (p5Canvas.getMain().selectedUnit == 2 && p5Canvas.getMain().selectedSet == 1) {
+			if (p5Canvas.getUnit() == 2 && p5Canvas.getSet() == 1) {
 				int num = mIndex.getNumElement();
 				float fX = 0;
 				float fY = 0;
@@ -1521,7 +1521,7 @@ public class Unit2 extends UnitBase{
 					num_gone++;
 					//p5Canvas.computeDisolved();
 				}
-			} else if (p5Canvas.getMain().selectedUnit == 2 && p5Canvas.getMain().selectedSet == 4) {
+			} else if (p5Canvas.getUnit() == 2 && p5Canvas.getSet() == 4) {
 				float s = mIndex.sumForceWaterX[0] * mIndex.sumForceWaterX[0]
 						+ mIndex.sumForceWaterY[0] * mIndex.sumForceWaterY[0];
 				float f = (float) Math.sqrt(s);
@@ -1581,7 +1581,7 @@ public class Unit2 extends UnitBase{
 					//p5Canvas.computeDisolved();
 
 				}
-			} else if (p5Canvas.getMain().selectedUnit == 2 && p5Canvas.getMain().selectedSet == 7) {
+			} else if (p5Canvas.getUnit() == 2 && p5Canvas.getSet() == 7) {
 				int num = mIndex.getNumElement();
 				float fX = 0;
 				float fY = 0;
@@ -1678,7 +1678,7 @@ public class Unit2 extends UnitBase{
 		num_gone = 0;
 		numWater = 0;
 		this.mToMass = 10;
-		if (p5Canvas.getMain().selectedSet == 4)
+		if (p5Canvas.getSet() == 4)
 			this.mToMass = 20;
 
 		
@@ -1774,7 +1774,7 @@ public class Unit2 extends UnitBase{
 		if (dis>total){
 			setMassDissolved((float) total) ;
 		}
-		if (p5Canvas.getMain().selectedSet==3 || p5Canvas.getMain().selectedSet==5){
+		if (p5Canvas.getSet()==3 || p5Canvas.getSet()==5){
 			setMassDissolved(getTotalNum()* getMolToMass()) ;
 		}	
 		
@@ -1809,13 +1809,13 @@ public class Unit2 extends UnitBase{
 				waterVolume.setText(df.format(waterNum / water100) + " mL");
 				computeSaturation();
 			}
-			if (main.selectedUnit == 2 && !compoundName.equals("Water")
+			if (p5Canvas.getUnit() == 2 && !compoundName.equals("Water")
 					&& count > 0) {
 				addTotalMolecules(count);
 				DecimalFormat df = new DecimalFormat("###.#");
 				// In Unit 2, ALL SETS, the output monitor for the amount added
 				// should be "amount added".
-				if (main.selectedUnit == 2)
+				if (p5Canvas.getUnit() == 2)
 					m1Label.setText("Amount Added:");
 				else
 					m1Label.setText(compoundName + ":");
@@ -1837,7 +1837,7 @@ public class Unit2 extends UnitBase{
 			DecimalFormat df = new DecimalFormat("###.#");
 			// If there is no water molecules added at the beginning in Unit 2, we
 			// want "Solution Volume" label show nothing
-			if (main.selectedUnit == 2 && waterVolume == 0) {
+			if (p5Canvas.getUnit() == 2 && waterVolume == 0) {
 				soluteVolume.setText(" ");
 			} else
 				soluteVolume.setText(df.format(waterVolume + cVolume) + " mL");
@@ -1852,7 +1852,7 @@ public class Unit2 extends UnitBase{
 			if (satMass != null) {
 				DecimalFormat df = new DecimalFormat("###.#");
 				satMass.setText(df.format(sat) + " g");
-				if (main.selectedSet == 3 || main.selectedSet == 5)
+				if (p5Canvas.getSet() == 3 || p5Canvas.getSet() == 5)
 					satMass.setText("\u221e"); // u221e is Unicode Character
 													// "infinite"
 				// Main.dashboard.updateUI();

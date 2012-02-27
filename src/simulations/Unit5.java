@@ -79,7 +79,7 @@ public class Unit5 extends UnitBase {
 	private HashMap<String, Float> moleculeConHash;
 
 	boolean catalystAdded = false;
-	float equalRatio = 0.4f; // Only 0.4 molecules in form of N2O4
+	float equalRatio = 0.6f; // Only 0.4 molecules in form of N2O4
 	float breakProbability = 0.5f; // The chance that N2O4 will break apart
 	int oldTime = 0;
 	int curTime = 0;
@@ -146,14 +146,13 @@ public class Unit5 extends UnitBase {
 		simulations[7].setupElements(elements7, spawnStyles7);
 
 		simulations[8] = new Simulation(unitNum, 3, 5);
-		String[] elements8 = { "Nitryl-Chloride", "Nitric-Oxide", "Catalyst" };
-		SpawnStyle[] spawnStyles8 = { SpawnStyle.Gas, SpawnStyle.Gas,
-				SpawnStyle.Gas };
+		String[] elements8 = { "Nitryl-Chloride", "Nitric-Oxide" };
+		SpawnStyle[] spawnStyles8 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[8].setupElements(elements8, spawnStyles8);
 
 		simulations[9] = new Simulation(unitNum, 3, 6);
-		String[] elements9 = { "Nitrogen-Dioxide" };
-		SpawnStyle[] spawnStyles9 = { SpawnStyle.Gas };
+		String[] elements9 = { "Dinitrogen-Tetroxide","Catalyst" };
+		SpawnStyle[] spawnStyles9 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[9].setupElements(elements9, spawnStyles9);
 
 		simulations[10] = new Simulation(unitNum, 4, 1);
@@ -236,6 +235,8 @@ public class Unit5 extends UnitBase {
 	 */
 	@Override
 	public void updateMolecules(int sim, int set) {
+		if(!p5Canvas.isEnabled())
+			return;
 		boolean reactionHappened = false; // Boolean flag indicating is
 											// reactions have taken place
 
@@ -309,9 +310,9 @@ public class Unit5 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			int unit = p5Canvas.getMain().selectedUnit;
-			int set = p5Canvas.getMain().selectedSet;
-			int sim = p5Canvas.getMain().selectedSim;
+			int unit = p5Canvas.getUnit();
+			int set = p5Canvas.getSet();
+			int sim = p5Canvas.getSim();
 			updateCompoundNumber(unit, sim, set);
 			return true;
 		}
@@ -333,6 +334,8 @@ public class Unit5 extends UnitBase {
 					indexNitrylChloride = i;
 			}
 
+			if(indexNitrylChloride<0)
+				indexNitrylChloride = 0;
 			Molecule mNew = null;
 			String nameNew = null;
 			for (int i = 0; i < p5Canvas.products.size(); i++) {
@@ -362,9 +365,9 @@ public class Unit5 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			int unit = p5Canvas.getMain().selectedUnit;
-			int set = p5Canvas.getMain().selectedSet;
-			int sim = p5Canvas.getMain().selectedSim;
+			int unit = p5Canvas.getUnit();
+			int set = p5Canvas.getSet();
+			int sim = p5Canvas.getSim();
 			updateCompoundNumber(unit, sim, set);
 			return true;
 		}
@@ -408,9 +411,9 @@ public class Unit5 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			int unit = p5Canvas.getMain().selectedUnit;
-			int set = p5Canvas.getMain().selectedSet;
-			int sim = p5Canvas.getMain().selectedSim;
+			int unit = p5Canvas.getUnit();
+			int set = p5Canvas.getSet();
+			int sim = p5Canvas.getSim();
 			updateCompoundNumber(unit, sim, set);
 			return true;
 		}
@@ -461,9 +464,9 @@ public class Unit5 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			int unit = p5Canvas.getMain().selectedUnit;
-			int set = p5Canvas.getMain().selectedSet;
-			int sim = p5Canvas.getMain().selectedSim;
+			int unit = p5Canvas.getUnit();
+			int set = p5Canvas.getSet();
+			int sim = p5Canvas.getSim();
 			updateCompoundNumber(unit, sim, set);
 			return true;
 		}
@@ -507,9 +510,9 @@ public class Unit5 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			int unit = p5Canvas.getMain().selectedUnit;
-			int set = p5Canvas.getMain().selectedSet;
-			int sim = p5Canvas.getMain().selectedSim;
+			int unit = p5Canvas.getUnit();
+			int set = p5Canvas.getSet();
+			int sim = p5Canvas.getSim();
 			updateCompoundNumber(unit, sim, set);
 			return true;
 		}
@@ -524,11 +527,19 @@ public class Unit5 extends UnitBase {
 		if(index!=-1) 
 			numNO2 = Compound.counts.get(index);
 		else numNO2 = 0;
-		index = Compound.names.indexOf("Nitrogen-Peroxide");
+		index = Compound.names.indexOf("Dinitrogen-Tetroxide");
 		if(index!=-1)
 			numN2O4 = Compound.counts.get(index);
 		else numN2O4 = 0;
 		int totalNum = numNO2 / 2 + numN2O4;
+		if(totalNum==0) //Reaction has not started yet
+			return false;
+		curTime = p5Canvas.getMain().time;
+		int decomposeTime = 16;
+		if(catalystAdded)
+			decomposeTime = 8;
+		int decomposeNumber = (int)(equalRatio*totalNum);
+		float decomposeIntervel = (float)decomposeTime/decomposeNumber;
 		
 		if (!p5Canvas.killingList.isEmpty()) {
 			if (p5Canvas.products != null && p5Canvas.products.size() > 0 && ((float)numN2O4 / totalNum <= equalRatio)) {
@@ -548,10 +559,6 @@ public class Unit5 extends UnitBase {
 							- PBox2D.scalarWorldToPixels(loc.y);
 					Vec2 newVec = new Vec2(x1, y1);
 					nameNew = p5Canvas.products.get(i);
-					// Vec2 size = Molecule.getShapeSize("Nitrogen-Dioxide",
-					// p5Canvas);
-					// newVec.x += size.x * (i/2);
-					// newVec.y += size.y * (i%2);
 
 					mNew = new Molecule(newVec.x, newVec.y, nameNew, box2d,
 							p5Canvas, (float) (Math.PI / 2));
@@ -565,81 +572,93 @@ public class Unit5 extends UnitBase {
 					mOld[i].destroy();
 				p5Canvas.products.clear();
 				p5Canvas.killingList.clear();
-				int unit = p5Canvas.getMain().selectedUnit;
-				int set = p5Canvas.getMain().selectedSet;
-				int sim = p5Canvas.getMain().selectedSim;
-				updateCompoundNumber(unit, sim, set);
+				
+				//Update molecule number
+				index = Compound.names.indexOf("Dinitrogen-Tetroxide");
+				Compound.counts.set(index, Compound.counts.get(index)+1);
+				index = Compound.names.indexOf("Nitrogen-Dioxide");
+				Compound.counts.set(index, Compound.counts.get(index)-2);
+				
 				return true;
 			}
 		}
-		
-		// Break up N2O4 if there are too many, in order to keep equalibrium
-		curTime = p5Canvas.getMain().time;
-		if (curTime != oldTime) {
-			index = Compound.names.indexOf("Nitrogen-Dioxide");
-				numNO2 = Compound.counts.get(index);
-			index = Compound.names.indexOf("Nitrogen-Peroxide");
-				numN2O4 = Compound.counts.get(index);
-			totalNum = numNO2 / 2 + numN2O4;
-			if (((float)numN2O4 / totalNum) > equalRatio) // If N2O4 is over numberred,
-													// break them up
+		//If has not reached equilibrium yet
+		if(curTime<=decomposeTime)
+		{
+			if(curTime%decomposeIntervel==0&& curTime!=0 &&curTime!=oldTime)
 			{
-				Random rand = new Random();
-				if (rand.nextFloat() < breakProbability) {
-					Molecule mole = null;
-					for (int i = 0; i < State.molecules.size(); i++) {
-						mole = State.molecules.get(i);
-						if (mole.getName().equals("Nitrogen-Peroxide")) {
-							Vec2 loc = mole.getPosition();
-							float x1 = PBox2D.scalarWorldToPixels(loc.x);
-							float y1 = p5Canvas.h * p5Canvas.canvasScale
-									- PBox2D.scalarWorldToPixels(loc.y);
-							Vec2 newVec = new Vec2(x1, y1);
-							String nameNew = new String("Nitrogen-Dioxide");
-							Vec2 size = Molecule.getShapeSize("Nitrogen-Dioxide",
-							p5Canvas);
-							//Create two new NO2 molecules
-							for(int k =0;k<2;k++)
-							{
-								if(i%2==0)
-								newVec.x += size.x;
-								else
-									newVec.x -= size.x;
-								Molecule mNew = new Molecule(newVec.x, newVec.y, nameNew, box2d,
-										p5Canvas, (float) (Math.PI / 2));
-								mNew.setRatioKE(1 / simulation.getSpeed());
-								molecules.add(mNew);
-								if(i%2==0)
-								mNew.body.setLinearVelocity(mole.body
-										.getLinearVelocity());
-								else
-									mNew.body.setLinearVelocity(mole.body
-											.getLinearVelocity().mulLocal(-1));
-							}
-						
-							mole.destroy();
-							
-							//Update molecule number
-							index = Compound.names.indexOf("Nitrogen-Peroxide");
-							Compound.counts.set(index, Compound.counts.get(index)-1);
-							index = Compound.names.indexOf("Nitrogen-Dioxide");
-							Compound.counts.set(index, Compound.counts.get(index)+2);
-							
-							return true;
-						}
+					return breakApartN2O4(simulation);
+			}
+		}
+		else //If reached equilibrium
+		{
+			// Break up N2O4 if there are too many, in order to keep equalibrium
+			if (curTime != oldTime) {
+				totalNum = numNO2 / 2 + numN2O4;
+				if (((float)numN2O4 / totalNum) > equalRatio) // If N2O4 is over numberred,
+														// break them up
+				{
+					Random rand = new Random();
+					if (rand.nextFloat() < breakProbability) {
+						 return breakApartN2O4(simulation);
 					}
 				}
+				oldTime = curTime;
 			}
-			oldTime = curTime;
 		}
 		return false;
 
 	}
-
-	private boolean reactChlorineNitrate(Simulation simulation) {
-		// TODO Auto-generated method stub
+	
+	//Break apart N2O4 in Sim 3 Set 6
+	private boolean breakApartN2O4(Simulation simulation)
+	{
+		Molecule mole = null;
+		int index =-1;
+		for (int i = 0; i < State.molecules.size(); i++) {
+			mole = State.molecules.get(i);
+			if (mole.getName().equals("Dinitrogen-Tetroxide")) {
+				Vec2 loc = mole.getPosition();
+				float x1 = PBox2D.scalarWorldToPixels(loc.x);
+				float y1 = p5Canvas.h * p5Canvas.canvasScale
+						- PBox2D.scalarWorldToPixels(loc.y);
+				Vec2 newVec = new Vec2(x1, y1);
+				String nameNew = new String("Nitrogen-Dioxide");
+				Vec2 size = Molecule.getShapeSize("Nitrogen-Dioxide",
+				p5Canvas);
+				//Create two new NO2 molecules
+				for(int k =0;k<2;k++)
+				{
+					if(k%2==0)
+					newVec.x += size.x;
+					else
+						newVec.x -= size.x;
+					Molecule mNew = new Molecule(newVec.x, newVec.y, nameNew, box2d,
+							p5Canvas, (float) (Math.PI / 2));
+					mNew.setRatioKE(1 / simulation.getSpeed());
+					molecules.add(mNew);
+					if(k%2==0)
+					mNew.body.setLinearVelocity(mole.body
+							.getLinearVelocity());
+					else
+						mNew.body.setLinearVelocity(mole.body
+								.getLinearVelocity().mul(-1));
+				}
+			
+				mole.destroy();
+				
+				//Update molecule number
+				index = Compound.names.indexOf("Dinitrogen-Tetroxide");
+				Compound.counts.set(index, Compound.counts.get(index)-1);
+				index = Compound.names.indexOf("Nitrogen-Dioxide");
+				Compound.counts.set(index, Compound.counts.get(index)+2);
+				oldTime = curTime;
+				return true;
+			}
+		}
 		return false;
 	}
+
 
 	/******************************************************************
 	 * FUNCTION : reactGeneric DESCRIPTION : Function for Sim 1 Set 1 raction
@@ -660,6 +679,8 @@ public class Unit5 extends UnitBase {
 			}
 			// Molecule m2 = (Molecule) p5Canvas.killingList.get(1);
 
+			if(methaneIndex<0)
+				methaneIndex = 0;
 			Molecule mNew = null;
 			String nameNew = null;
 			boolean isFirstWater = true;
@@ -695,9 +716,9 @@ public class Unit5 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			int unit = p5Canvas.getMain().selectedUnit;
-			int set = p5Canvas.getMain().selectedSet;
-			int sim = p5Canvas.getMain().selectedSim;
+			int unit = p5Canvas.getUnit();
+			int set = p5Canvas.getSet();
+			int sim = p5Canvas.getSim();
 			updateCompoundNumber(unit, sim, set);
 			return true;
 		}
@@ -750,9 +771,9 @@ public class Unit5 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			int unit = p5Canvas.getMain().selectedUnit;
-			int set = p5Canvas.getMain().selectedSet;
-			int sim = p5Canvas.getMain().selectedSim;
+			int unit = p5Canvas.getUnit();
+			int set = p5Canvas.getSet();
+			int sim = p5Canvas.getSim();
 			updateCompoundNumber(unit, sim, set);
 			return true;
 		}
@@ -782,20 +803,22 @@ public class Unit5 extends UnitBase {
 		barPressure.reset();
 		barVolume.reset();
 		barTemp.reset();
+		oldTime =0;
+		curTime = 0;
 		//moleculeNumHash.clear();
 		moleculeConHash.clear();
 		catalystAdded = false;
 
 		// Customization
-		int sim = p5Canvas.getMain().selectedSim;
-		int set = p5Canvas.getMain().selectedSet;
+		int set = p5Canvas.getSet();
+		int sim = p5Canvas.getSim();
 		Main main = p5Canvas.getMain();
 		p5Canvas.setVolume(60);
-		((TableView) main.getTableView()).setColumnName(0, "Concentration");
+		((TableView) main.getTableView()).setColumnName(0, "Molarity");
 		((TableView) main.getTableView()).setColumnWidth(0, 30);
 		((TableView) main.getTableView()).setColumnWidth(1, 30);
 		((TableView) main.getTableView()).setColumnWidth(2, 100);
-		// ((TableView)main.getTableView()).repaint();
+
 		// Set up speed ratio for molecules
 		setupSpeed();
 
@@ -830,6 +853,7 @@ public class Unit5 extends UnitBase {
 				main.volumeSlider.setEnabled(false);
 			} else if (set == 5) {
 				main.heatSlider.setEnabled(false);
+			} else if (set == 6) {
 				HashMap moleculeSliderMap = p5Canvas.getMain().moleculeSliderMap;
 				if (!moleculeSliderMap.isEmpty()) {
 					JSlider slider = (JSlider) moleculeSliderMap
@@ -837,7 +861,6 @@ public class Unit5 extends UnitBase {
 					slider.setValue(5);
 					slider.setEnabled(false);
 				}
-			} else if (set == 6) {
 				main.heatSlider.setEnabled(false);
 				main.volumeSlider.setEnabled(false);
 			}
@@ -853,8 +876,8 @@ public class Unit5 extends UnitBase {
 	public void setupSpeed() {
 		String name = null;
 		Molecule mole = null;
-		int sim = p5Canvas.getMain().selectedSim;
-		int set = p5Canvas.getMain().selectedSet;
+		int set = p5Canvas.getSet();
+		int sim = p5Canvas.getSim();
 		float speed = 1.0f;
 		switch (sim) {
 		case 1:
@@ -1065,6 +1088,8 @@ public class Unit5 extends UnitBase {
 		default:
 			break;
 		}
+		
+		dashboard.repaint();
 	}
 
 	/*
@@ -1074,8 +1099,175 @@ public class Unit5 extends UnitBase {
 	 */
 	@Override
 	protected void computeForce(int sim, int set) {
-		// TODO Auto-generated method stub
+		//Clear old force
+		clearAllMoleculeForce();
+		
+		switch (sim)
+		{
+		case 1:
+			if(set==1)
+				computeForceSim1Set1();
+			else if( set ==2 )
+				computeForceSim1Set2();
+			break;
+		case 2:
+			computeForceSim2();
+			break;
+		case 3:
+			break;
+		case 4:
+			break;
+			default:
+				break;
+		}
 
+	}
+	
+	private void clearAllMoleculeForce() {
+		for (Molecule mole : State.molecules) {
+			mole.clearForce();
+		}
+	}
+	
+	//Compute force function for Sim 1 Set 1
+	private void computeForceSim1Set1()
+	{
+		Molecule moleThis = null;
+		Molecule moleOther = null;
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+		float xValue =0 ;
+		float yValue = 0 ;
+		float forceX = 0;
+		float forceY = 0;
+		float dis = 0;
+		float forceScale = 0.1f;
+		curTime = p5Canvas.getMain().time;
+		//Pull Methane and Oxygen together after 15 secs
+		if(curTime>15)
+		{
+			for( int i=0;i<State.molecules.size();i++)
+			{
+				moleThis = State.molecules.get(i);
+				if(moleThis.getName().equals("Oxygen"))
+				{
+					for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { 
+						locThis.set(moleThis.getElementLocation(thisE));
+						moleThis.sumForceX[thisE] = 0;
+						moleThis.sumForceY[thisE] = 0;
+						for (int k = 0; k < molecules.size(); k++) {
+							if (k == i)
+								continue;
+							moleOther = molecules.get(k);
+							if (moleOther.getName().equals("Methane"))
+							{
+								locOther.set(moleOther.getPosition());
+								if (locThis == null || locOther == null)
+									continue;
+								xValue = locOther.x - locThis.x;
+								yValue = locOther.y - locThis.y;
+								dis = (float) Math.sqrt(xValue * xValue + yValue
+										* yValue);
+								forceX = (float) (xValue / dis) * forceScale;
+								forceY = (float) (yValue / dis) * forceScale;
+
+								// Add attraction force to thisMolecule
+								moleThis.sumForceX[thisE] += forceX;
+								moleThis.sumForceY[thisE] += forceY;
+								break;
+							}
+						}
+						
+					}
+		
+				}
+			}
+		}
+	}
+	
+	//Compute force function for Sim 1 Set 2
+	private void computeForceSim1Set2()
+	{
+		Molecule moleThis = null;
+		Molecule moleOther = null;
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+		float xValue =0 ;
+		float yValue = 0 ;
+		float forceX = 0;
+		float forceY = 0;
+		float dis = 0;
+		float forceScale = 0.6f;
+		curTime = p5Canvas.getMain().time;
+		//Pull Methane and Oxygen together after 15 secs
+		if(curTime>15)
+		{
+			for( int i=0;i<State.molecules.size();i++)
+			{
+				moleThis = State.molecules.get(i);
+				if(moleThis.getName().equals("Hydrogen-Iodide"))
+				{
+					for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { 
+						locThis.set(moleThis.getElementLocation(thisE));
+						moleThis.sumForceX[thisE] = 0;
+						moleThis.sumForceY[thisE] = 0;
+						for (int k = 0; k < molecules.size(); k++) {
+							if (k == i)
+								continue;
+							moleOther = molecules.get(k);
+							if (moleOther.getName().equals("Hydrogen-Iodide"))
+							{
+								locOther.set(moleOther.getPosition());
+								if (locThis == null || locOther == null)
+									continue;
+								xValue = locOther.x - locThis.x;
+								yValue = locOther.y - locThis.y;
+								dis = (float) Math.sqrt(xValue * xValue + yValue
+										* yValue);
+								forceX = (float) (xValue / dis) * forceScale;
+								forceY = (float) (yValue / dis) * forceScale;
+
+								// Add attraction force to thisMolecule
+								moleThis.sumForceX[thisE] += forceX;
+								moleThis.sumForceY[thisE] += forceY;
+								break;
+							}
+						}
+						
+					}
+		
+				}
+			}
+		}
+	}
+	
+	//Compute force function for Sim 2
+	private void computeForceSim2()
+	{
+		Molecule moleThis =null;
+		float topBoundary = p5Canvas.h / 2;
+		float gravityCompensation = 0.2f;
+
+
+		// high boundary check
+		for(int i =0;i<State.molecules.size();i++)
+		{
+			moleThis = molecules.get(i);
+			if(!moleThis.getName().equals("Carbon-Dioxide"))
+			{
+					Vec2 pos = box2d.coordWorldToPixels(moleThis.getPosition());
+					if (pos.y < topBoundary) {
+						for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { // Select
+																							// element
+		
+							moleThis.sumForceX[thisE] = 0;
+							moleThis.sumForceY[thisE] = (float) (gravityCompensation * -1*Math.sqrt(topBoundary- pos.y));
+		
+						}
+				}
+			}
+		}
+		
 	}
 
 	/*
@@ -1088,8 +1280,8 @@ public class Unit5 extends UnitBase {
 			int count) {
 		boolean res = false;
 
-		int sim = p5Canvas.getMain().selectedSim;
-		int set = p5Canvas.getMain().selectedSet;
+		int set = p5Canvas.getSet();
+		int sim = p5Canvas.getSim();
 		Simulation simulation = getSimulation(sim, set);
 		SpawnStyle spawnStyle = simulation.getSpawnStyle(compoundName);
 		if (spawnStyle == SpawnStyle.Gas) {
@@ -1291,8 +1483,8 @@ public class Unit5 extends UnitBase {
 		Object o1 = c.m_fixtureA.m_body.getUserData();
 		Object o2 = c.m_fixtureB.m_body.getUserData();
 
-		int sim = p5Canvas.getMain().selectedSim;
-		int set = p5Canvas.getMain().selectedSet;
+		int set = p5Canvas.getSet();
+		int sim = p5Canvas.getSim();
 		Simulation simulation = getSimulation(sim, set);
 
 		if (o1 == null || o2 == null)
@@ -1328,25 +1520,7 @@ public class Unit5 extends UnitBase {
 
 				}
 			}
-			/*
-			 * // If inreactive molecules collide else if (!m1.getReactive() &&
-			 * !m2.getReactive()) { // If one of these two molecules is a
-			 * Acetic-Acid molecule // Handle dissolution if
-			 * ((m1.getName().equals("Acetic-Acid") && !m2.getName().equals(
-			 * "Acetic-Acid")) || (!m1.getName().equals("Acetic-Acid") &&
-			 * m2.getName() .equals("Acetic-Acid"))) {
-			 * 
-			 * ArrayList<String> collider = new ArrayList<String>(); if
-			 * (m1.getName().equals("Acetic-Acid")) {
-			 * collider.add(m2.getName()); p5Canvas.products =
-			 * getDissolutionProducts(collider); if (p5Canvas.products.size() >
-			 * 0) { p5Canvas.killingList.add(m2); } } else {
-			 * collider.add(m1.getName()); p5Canvas.products =
-			 * getDissolutionProducts(collider); if (p5Canvas.products.size() >
-			 * 0) { p5Canvas.killingList.add(m1); } }
-			 * 
-			 * } }
-			 */
+		
 		}
 
 	}
@@ -1360,8 +1534,8 @@ public class Unit5 extends UnitBase {
 	private ArrayList<String> getReactionProducts(ArrayList<String> reactants,
 			Molecule m1, Molecule m2) {
 		ArrayList<String> products = new ArrayList<String>();
-		int sim = p5Canvas.getMain().selectedSim;
-		int set = p5Canvas.getMain().selectedSet;
+		int set = p5Canvas.getSet();
+		int sim = p5Canvas.getSim();
 		Random rand = new Random();
 		float probability = 1.0f;
 		float randomFloat = 0f;
@@ -1402,7 +1576,7 @@ public class Unit5 extends UnitBase {
 			else if (reactants.get(0).equals("Hydrogen-Iodide")
 					&& reactants.get(1).equals("Hydrogen-Iodide")
 					&& reactants.size() == 2) {
-				probability = 0.4f;
+				probability = 0.75f;
 				randomFloat = rand.nextFloat();
 				if (randomFloat <= probability) {
 				products.add("Hydrogen");
@@ -1422,22 +1596,32 @@ public class Unit5 extends UnitBase {
 			break;
 		case 3:
 			// Sim 3 set 1- set 5 ClNO2(g) + NO(g) -> NO2(g) + ClNO(g)
-			if (reactants.contains("Nitryl-Chloride")
-					&& reactants.contains("Nitric-Oxide")) {
-				if (!catalystAdded)
-					probability = 0.4f;
-				else
-					probability = 0.9f;
-				randomFloat = rand.nextFloat();
-				if (randomFloat <= probability) {
-					products.add("Nitrosyl-Chloride");
-					products.add("Nitrogen-Dioxide");
+			if( set!=6)
+			{
+				if (reactants.contains("Nitryl-Chloride")
+						&& reactants.contains("Nitric-Oxide")) {
+						probability = 0.4f;
+					randomFloat = rand.nextFloat();
+					if (randomFloat <= probability) {
+						products.add("Nitrosyl-Chloride");
+						products.add("Nitrogen-Dioxide");
+					}
 				}
 			}
 			// Sim 3 set 6 N2O4(g) <-> 2NO2(g)
-			else if (reactants.get(0).equals("Nitrogen-Dioxide")
-					&& reactants.get(1).equals("Nitrogen-Dioxide")) {
-				products.add("Nitrogen-Peroxide");
+			else
+			{
+				if (reactants.get(0).equals("Nitrogen-Dioxide")
+						&& reactants.get(1).equals("Nitrogen-Dioxide")) {
+					if (!catalystAdded)
+						probability = 0.75f;
+					else
+						probability = 0.95f;
+					randomFloat = rand.nextFloat();
+					if (randomFloat <= probability) {
+						products.add("Dinitrogen-Tetroxide");
+					}
+				}
 			}
 			break;
 		case 4:
@@ -1480,23 +1664,6 @@ public class Unit5 extends UnitBase {
 		dis = (float) Math.sqrt(dis);
 
 		return dis;
-	}
-
-	/******************************************************************
-	 * FUNCTION : getDissolutionProducts DESCRIPTION : Return elements of
-	 * reactants
-	 * 
-	 * INPUTS : reactants (Array<String>) OUTPUTS: None
-	 *******************************************************************/
-	private ArrayList<String> getDissolutionProducts(ArrayList<String> collider) {
-		ArrayList<String> products = new ArrayList<String>();
-		// Sim 2 set 1
-		if (true) {
-		} else {
-			// return null;
-		}
-		return products;
-
 	}
 
 	@Override
@@ -1585,34 +1752,8 @@ public class Unit5 extends UnitBase {
 
 	}
 
+	//Update Concentration value for all compounds
 	private void updateMoleculeCon() {
-		/*
-		String name = null;
-		int num = 0;
-		float volume = (float) p5Canvas.currentVolume / 1000;
-		//Reset all molecule numbers to zero
-		for( String moleName: moleculeNumHash.keySet())
-		{
-			moleculeNumHash.put(moleName, 0);
-		}
-		for (int i = 0; i < State.molecules.size(); i++) {
-			name = State.molecules.get(i).getName();
-			if (moleculeNumHash.containsKey(name)) {
-				num = moleculeNumHash.get(name);
-				num++;
-				moleculeNumHash.put(name, num);
-			} else {
-				moleculeNumHash.put(name, 1);
-			}
-		}
-
-		float mole = 0;
-		float con = 0;
-		for (String moleName : moleculeNumHash.keySet()) {
-			mole = (float) moleculeNumHash.get(moleName) / numMoleculePerMole;
-			con = mole / volume;
-			moleculeConHash.put(moleName, con);
-		}*/
 		
 		float mole = 0;
 		float con = 0;
@@ -1626,7 +1767,11 @@ public class Unit5 extends UnitBase {
 			{
 				con = 8.2f;
 			}
-			else if(name.equals("Acetic-Acid")||name.equals("Sodium-Acetate")||name.equals("Carbon-Dioxide")||name.equals("Water"))
+			else if(name.equals("Water"))
+			{
+				con =55.35f;
+			}
+			else if(name.equals("Acetic-Acid")||name.equals("Sodium-Acetate")||name.equals("Carbon-Dioxide"))
 			{
 				mole = (float) Compound.counts.get(i) / numMoleculePerMole;
 				con = mole / (volume/2);
@@ -1639,8 +1784,6 @@ public class Unit5 extends UnitBase {
 			moleculeConHash.put(Compound.names.get(i), con);
 		}
 		
-
-
 	}
 
 	public float getConByName(String s) {

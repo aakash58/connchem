@@ -75,7 +75,7 @@ public class Water {
 			}
 		
 		}
-		else if (p5Canvas.getMain().selectedUnit==1 && p5Canvas.getMain().selectedSim!=3){
+		else if (p5Canvas.getUnit()==1 && p5Canvas.getSim()!=3){
 			for (int i = 0; i < molecules.size(); i++) {
 				if (i==indexWater)
 					continue;

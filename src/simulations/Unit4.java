@@ -216,12 +216,12 @@ public class Unit4 extends UnitBase {
 		barTemp.reset();
 		
 		//Customization
-		switch(p5Canvas.getMain().selectedSim)
+		switch(p5Canvas.getSim())
 		{
 		case 1:
 			//Heat slider control disabled
 			p5Canvas.getMain().heatSlider.setEnabled(false);
-			if(p5Canvas.getMain().selectedSet==2)
+			if(p5Canvas.getSet()==2)
 				p5Canvas.temp = 400;
 			break;
 		case 2:
@@ -231,19 +231,19 @@ public class Unit4 extends UnitBase {
 			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
 		case 4:
-			if(p5Canvas.getMain().selectedSet==1)
+			if(p5Canvas.getSet()==1)
 			{
 				barPressure.setMax(800);
 				p5Canvas.getMain().heatSlider.setEnabled(false);
 			}
-			else if (p5Canvas.getMain().selectedSet==2)
+			else if (p5Canvas.getSet()==2)
 			{
 				//Make initial volume smaller
 				p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume/2);
 				p5Canvas.getMain().volumeSlider.setEnabled(false);
 				lastTemp = p5Canvas.temp;
 			}
-			else if (p5Canvas.getMain().selectedSet==3)
+			else if (p5Canvas.getSet()==3)
 			{
 				p5Canvas.getMain().volumeSlider.setEnabled(false);
 			}
@@ -418,8 +418,8 @@ public class Unit4 extends UnitBase {
 			int count) {
 			boolean res = false;
 
-			int sim = p5Canvas.getMain().selectedSim;
-			int set = p5Canvas.getMain().selectedSet;
+			int sim = p5Canvas.getSim();
+			int set = p5Canvas.getSet();
 			Simulation simulation = this.getSimulation(sim, set);
 			SpawnStyle spawnStyle = simulation.getSpawnStyle(compoundName);
 			if (spawnStyle == SpawnStyle.Gas) {
@@ -440,7 +440,7 @@ public class Unit4 extends UnitBase {
 
 
 		
-		switch(p5Canvas.getMain().selectedSim)
+		switch(p5Canvas.getSim())
 		{
 		case 2:
 				trackMoleculeCollision(c);
@@ -448,7 +448,7 @@ public class Unit4 extends UnitBase {
 			countWallCollision(c);
 			break;
 		case 4:
-			if(p5Canvas.getMain().selectedSet==2)
+			if(p5Canvas.getSet()==2)
 				moveTopBoundary(c);
 			break;
 		}

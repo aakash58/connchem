@@ -171,8 +171,8 @@ public class Unit3 extends UnitBase {
 			int count) {
 		boolean res = false;
 
-		int sim = p5Canvas.getMain().selectedSim;
-		int set = p5Canvas.getMain().selectedSet;
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
 		Simulation simulation = this.getSimulation(sim, set);
 		SpawnStyle spawnStyle = simulation.getSpawnStyle(compoundName);
 		if (spawnStyle == SpawnStyle.Gas) {
@@ -593,8 +593,8 @@ public class Unit3 extends UnitBase {
 		Object o1 = c.m_fixtureA.m_body.getUserData();
 		Object o2 = c.m_fixtureB.m_body.getUserData();
 
-		int sim = p5Canvas.getMain().selectedSim;
-		int set = p5Canvas.getMain().selectedSet;
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
 		Simulation simulation = getSimulation(sim, set);
 
 		if (o1 == null || o2 == null)
@@ -2134,7 +2134,6 @@ public class Unit3 extends UnitBase {
 
 	@Override
 	protected void computeForce(int sim, int set) {
-		// TODO Auto-generated method stub
 		// Set computeForce trigger interval
 		// This function is triggered every 10(computeTriggerInterval) frame
 
@@ -2191,6 +2190,7 @@ public class Unit3 extends UnitBase {
 		}
 	}
 
+	//Compute force funciton for Sim 1 Set 1
 	private void computeForceNaCl() {
 		Molecule mole = null;
 		Vec2 force = new Vec2();
@@ -2925,8 +2925,6 @@ public class Unit3 extends UnitBase {
 
 	@Override
 	protected void applyForce(int sim, int set) {
-		// TODO Auto-generated method stub
-
 		if (sim == 1) {
 			switch (set) {
 			case 1:
@@ -2977,8 +2975,8 @@ public class Unit3 extends UnitBase {
 	protected void reset() {
 		// TODO Auto-generated method stub
 		this.frameCounter = 0;
-		int sim = p5Canvas.getMain().selectedSim;
-		int set = p5Canvas.getMain().selectedSet;
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
 		this.isAnchorSetup = false;
 		setupSimulations();
 
@@ -3002,7 +3000,7 @@ public class Unit3 extends UnitBase {
 		// TODO Auto-generated method stub
 		boolean res = false;
 		
-		if(p5Canvas.getMain().selectedUnit==3 && p5Canvas.getMain().selectedSim==2)
+		if(p5Canvas.getUnit()==3 && p5Canvas.getSim()==2)
 		{
 			for(int i=0;i<combination.length;i++)
 			{

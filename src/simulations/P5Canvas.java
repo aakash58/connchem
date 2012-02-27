@@ -51,7 +51,9 @@ public class P5Canvas extends PApplet {
 
 	// A reference to our box2d world
 	private PBox2D box2d;
+	public int FRAME_RATE = 30;
 
+	
 	// public Water waterComputation;
 	public boolean isEnable = false;       //Is simulation going on or stopped
 	public boolean isHidingEnabled = false;//Is molecule hidding enabled
@@ -87,7 +89,10 @@ public class P5Canvas extends PApplet {
 	public int heatRGB = 0;
 	public Boundaries boundaries = null;
 
-	// public long count = 0;
+	//Simulation parameters
+	private int sim =0;
+	private int set =0;
+	private int unit =0;
 	public int curTime = 0;
 	public int oldTime = 0;
 	public int xStart = 0;
@@ -106,7 +111,6 @@ public class P5Canvas extends PApplet {
 	public static DBinterface db = new DBinterface();
 	public YAMLinterface yaml = new YAMLinterface();
 
-	public int FRAME_RATE = 30;
 	public float averageKineticEnergy = 0;
 	public int heatMoleculeTimes = 0;
 	public int heatMoleculeMaxTimes = 10;
@@ -125,7 +129,7 @@ public class P5Canvas extends PApplet {
 
 	public float multiplierVolume = 13f; // Multiplier from world coordinates to ml
 
-	public boolean firstRun = true;
+	private boolean firstRun = true;
 	public boolean startDraggingMolecule = false;
 
 
@@ -198,17 +202,19 @@ public class P5Canvas extends PApplet {
 
 		if (isEnable && firstRun) {
 			// Initialization function to intial parameters
-			unitList.initialize(main.selectedUnit);
+			unitList.initialize(unit);
 
 			firstRun = false;
 		}
 
 		//In Unit 4 Sim 4 Set 2, update volume every frame
-		if(main.selectedUnit==4&&main.selectedSim==4&&main.selectedSet==2)
+		if(unit==4&& sim==4&& set==2)
 			setVolume(currentVolume);
 		updateMolecules(); // update molecules which are newly created
 		updateProperties(); // Update temperature and pressure etc
 
+		updateOutput();
+			
 		/* Change Scale */
 		this.scale(canvasScale * ((float) getMain().currentZoom / 100));
 		/* Change Time Speed */
@@ -260,7 +266,8 @@ public class P5Canvas extends PApplet {
 		}
 
 		// Update anchors position
-		unitList.getUnit3().resetAnchors(xDrag, yDrag);
+		if(getUnit()==3)
+			unitList.getUnit3().resetAnchors(xDrag, yDrag);
 
 	}
 
@@ -294,8 +301,16 @@ public class P5Canvas extends PApplet {
 		// Translate pressure from atmosphere into Kpa
 		pressure *= atmToKpa;
 
-		//Print out properties on right panel
-		unitList.updateOutput(main.selectedUnit, main.selectedSim, main.selectedSet);
+		if(getUnit()==6) //Fix temperature and pressure in Unit6
+			unitList.getUnit6().updateProperties(getSim(), getSet());
+	}
+	
+	//Print out properties on right panel
+	public void updateOutput()
+	{
+		if (!this.isEnable || !this.isSimStarted)
+			return;
+		unitList.updateOutput(unit, sim,set);
 	}
 
 	// Calculate temp from average kinetic energy
@@ -318,7 +333,7 @@ public class P5Canvas extends PApplet {
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
 	public void computeForces() {
-		unitList.computeForces(main.selectedUnit, main.selectedSim,main.selectedSet);
+		unitList.computeForces(unit, sim, set);
 		// Apply forces after set forces
 		applyForce();
 
@@ -326,7 +341,7 @@ public class P5Canvas extends PApplet {
 
 	// Apply force at the begginning of every frame
 	public void applyForce() {
-		unitList.applyForce(main.selectedUnit, main.selectedSim, main.selectedSet);
+		unitList.applyForce( unit, sim, set);
 	}
 
 	// Constrain Energy. To fake that molecules` average kinetic energy does not
@@ -400,7 +415,7 @@ public class P5Canvas extends PApplet {
 		boolean tmp = isEnable;
 		isEnable = false;
 
-		res = unitList.addMolecule(main.selectedUnit, tmp, compoundName, count);
+		res = unitList.addMolecule(unit, tmp, compoundName, count);
 
 		// If we successfully added molecules, update compound number
 		if (res) {
@@ -451,7 +466,7 @@ public class P5Canvas extends PApplet {
 		int index = Compound.names.indexOf(compoundName);
 		int addCount = Compound.counts.get(index) + count;
 
-		res = unitList.addMolecule(main.selectedUnit, tmp, compoundName, count);
+		res = unitList.addMolecule(unit, tmp, compoundName, count);
 
 		// If we successfully added molecules, update compound number
 		if (res) {
@@ -474,16 +489,21 @@ public class P5Canvas extends PApplet {
 		temp = 25;
 		currentVolume = getMain().defaultVolume;
 
+		products.clear();
+		killingList.clear();
 		removeAllMolecules();
 		removeAllAnchors();
 
+		unit = getMain().getSelectedUnit();
+		sim = getMain().getSelectedSim();
+		set = getMain().getSelectedSet();
 		curTime = 0;
 		oldTime = 0;
 		// Reset Gravity
 		box2d.setGravity(0f, -10f);
 
 		// Reset function set intial temperature of one simulation
-		unitList.reset(main.selectedUnit);
+		unitList.reset(unit);
 
 		// Get initial Kinetic Energy from temp
 		averageKineticEnergy = getKEFromTemp();
@@ -595,7 +615,8 @@ public class P5Canvas extends PApplet {
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
 	private void updateMolecules() {
-		unitList.updateMolecules(main.selectedUnit, main.selectedSim, main.selectedSet);
+		if(isEnable)
+		unitList.updateMolecules(unit, sim, set);
 
 	}
 
@@ -611,7 +632,7 @@ public class P5Canvas extends PApplet {
 		heatMolecule(c);
 
 		// Specified beginReaction function for each unit
-		unitList.beginContact(main.selectedUnit, c);
+		unitList.beginContact(unit, c);
 	}
 
 	public void heatMolecule(Contact c) {
@@ -653,7 +674,7 @@ public class P5Canvas extends PApplet {
 		// If temp has not reached max, keep heating.
 		if (!reachHeatLimit(temp)) {
 			float scale = 1f;
-				curTime = Main.time;
+				curTime = getMain().time;
 				// Change molecule speed base on heat
 				scale = (float) (heat - (main.heatMax - main.heatMin) / 2)
 						/ (main.heatMax - main.heatMin);
@@ -771,20 +792,42 @@ public class P5Canvas extends PApplet {
 
 	// Check current temperature to see if we reach the max temp to which heater
 	// can heat up
+	// t: temperature
 	public boolean reachHeatLimit(float t) {
+		
 		boolean res = false;
+		//Current heat level
 		int scale = (heat - (main.heatMax + main.heatMin) / 2)
 				/ main.heatTickSpacing;
-		int midLevel = ((main.heatMax + main.heatMin) / 2)
-				/ main.heatTickSpacing;
-		if (scale < 0) // Set up minimum limit
+		switch(getUnit())
 		{
-			if (t < heaterLimit[scale + midLevel])
-				res = true;
-		} else if (scale > 0) // Set up maximum limit
-		{
-			if (t > heaterLimit[scale + midLevel])
-				res = true;
+		default:
+			int midLevel = ((main.heatMax + main.heatMin) / 2)
+					/ main.heatTickSpacing;
+			if (scale < 0) // Set up minimum limit
+			{
+				if (t < heaterLimit[scale + midLevel])
+					res = true;
+			} else if (scale > 0) // Set up maximum limit
+			{
+				if (t > heaterLimit[scale + midLevel])
+					res = true;
+			}
+			break;
+		case 6:
+			if(getSim()==2) //Min = 0, Max = 100
+			{
+				if (scale < 0) // Set up minimum limit
+				{
+					if (t < 0)
+						res = true;
+				} else if (scale > 0) // Set up maximum limit
+				{
+					if (t > 100)
+						res = true;
+				}
+			}
+			break;
 		}
 
 		return res;
@@ -792,7 +835,7 @@ public class P5Canvas extends PApplet {
 
 	// Set up reaction products while initializing for graph rendering
 	public void setupReactionProducts() {
-		unitList.setupReactionProducts(main.selectedUnit, main.selectedSim, main.selectedSet);
+		unitList.setupReactionProducts(unit, sim, set);
 	}
 
 	/******************************** MOUSE EVENT ******************************/
@@ -816,7 +859,7 @@ public class P5Canvas extends PApplet {
 		yStart = mouseY;
 		// draggingBoundary = boundaries[2].isIn(mouseX, mouseY);
 		// In Unit 4 Sim 2, molecules are able to be selected by mouse
-		if (getMain().selectedUnit == 4 && getMain().selectedSim == 2) {
+		if (unit == 4 && sim == 2) {
 			trackedId = -1;
 			for (int i = 0; i < State.molecules.size(); i++) {
 				float scale = canvasScale
@@ -842,7 +885,7 @@ public class P5Canvas extends PApplet {
 		xDrag = 0;
 		yDrag = 0;
 
-		if (getMain().selectedUnit == 4 && getMain().selectedSim == 2) {
+		if (unit == 4 && sim == 2) {
 			if(startDraggingMolecule)
 			{
 				if (trackedId != -1) {
@@ -935,6 +978,9 @@ public class P5Canvas extends PApplet {
 	public Unit5 getUnit5()	{
 		return unitList.getUnit5();
 	}
+	public Unit6 getUnit6()	{
+		return unitList.getUnit6();
+	}
 	public Main getMain() {
 		return main;
 	}
@@ -949,6 +995,23 @@ public class P5Canvas extends PApplet {
 	public PBox2D getBox2d()
 	{
 		return box2d;
+	}
+	
+	public int getUnit()
+	{
+		return unit;
+	}
+	public int getSim()
+	{
+		return sim;
+	}
+	public int getSet()
+	{
+		return set;
+	}
+	public boolean isFirstRun()
+	{
+		return firstRun;
 	}
 	
 	/*
