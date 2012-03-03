@@ -557,11 +557,7 @@ public class Unit6 extends UnitBase {
 		int set = p5Canvas.getSet();
 		Main main = p5Canvas.getMain();
 		
-		p5Canvas.setVolume(defaultVolume);
-		((TableView) main.getTableView()).setColumnName(0, "Concentration");
-		((TableView) main.getTableView()).setColumnWidth(0, 30);
-		((TableView) main.getTableView()).setColumnWidth(1, 30);
-		((TableView) main.getTableView()).setColumnWidth(2, 100);
+
 
 		// Set up speed ratio for molecules
 		setupSpeed();
@@ -584,8 +580,12 @@ public class Unit6 extends UnitBase {
 			}
 			break;
 		case 2:
+			p5Canvas.volumeMinBoundary = 20;
+			p5Canvas.getMain().tempMin=0;
+			p5Canvas.getMain().tempMax = 100;
 			break;
 		}
+		updateMoleculeCon();
 	}
 
 	private void setupSpeed() {
@@ -623,6 +623,16 @@ public class Unit6 extends UnitBase {
 			speed = 8;
 			getSimulation(sim, set).setSpeed(speed);
 		}
+	}
+	
+	public void resetTableView(int sim, int set)
+	{
+		Main main = p5Canvas.getMain();
+		p5Canvas.setVolume(defaultVolume);
+		((TableView) main.getTableView()).setColumnName(0, "Concentration");
+		((TableView) main.getTableView()).setColumnWidth(0, 30);
+		((TableView) main.getTableView()).setColumnWidth(1, 30);
+		((TableView) main.getTableView()).setColumnWidth(2, 100);
 	}
 
 	@Override

@@ -9,6 +9,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
+import main.Main;
+import main.TableView;
+
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.DistanceJoint;
@@ -895,6 +898,16 @@ public abstract class UnitBase {
 	}
 	public int getDissolvedNum() {
 		return this.num_dissolved;
+	}
+	
+	public void resetTableView(int sim, int set)
+	{
+		Main main = p5Canvas.getMain();
+		//Configure colume names and width
+		((TableView) main.getTableView()).setColumnName(0,"    #");
+		((TableView) main.getTableView()).setColumnWidth(0,10);
+		((TableView) main.getTableView()).setColumnWidth(1,40);
+		((TableView) main.getTableView()).setColumnWidth(2,120);
 	}
 /*
 	public void computeDissolved() {

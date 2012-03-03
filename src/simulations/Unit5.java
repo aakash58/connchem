@@ -787,6 +787,11 @@ public class Unit5 extends UnitBase {
 	 */
 	@Override
 	public void initialize() {
+		
+		if(p5Canvas.getSim()==1 || p5Canvas.getSim()==4) //No graph in Sim 1 and Sim 4
+		{
+			p5Canvas.getMain().getCanvas().setPaintLineEnable(false);
+		}
 
 	}
 
@@ -814,10 +819,7 @@ public class Unit5 extends UnitBase {
 		int sim = p5Canvas.getSim();
 		Main main = p5Canvas.getMain();
 		p5Canvas.setVolume(60);
-		((TableView) main.getTableView()).setColumnName(0, "Molarity");
-		((TableView) main.getTableView()).setColumnWidth(0, 30);
-		((TableView) main.getTableView()).setColumnWidth(1, 30);
-		((TableView) main.getTableView()).setColumnWidth(2, 100);
+		
 
 		// Set up speed ratio for molecules
 		setupSpeed();
@@ -870,6 +872,15 @@ public class Unit5 extends UnitBase {
 			main.volumeSlider.setEnabled(false);
 			break;
 		}
+	}
+	
+	public void resetTableView(int sim,int set)
+	{
+		Main main = p5Canvas.getMain();
+		((TableView) main.getTableView()).setColumnName(0, "Molarity");
+		((TableView) main.getTableView()).setColumnWidth(0, 30);
+		((TableView) main.getTableView()).setColumnWidth(1, 30);
+		((TableView) main.getTableView()).setColumnWidth(2, 100);
 	}
 
 	// Set up speed ratio for molecules

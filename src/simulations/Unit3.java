@@ -8,6 +8,7 @@ import static data.State.molecules;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -40,12 +41,16 @@ public class Unit3 extends UnitBase {
 	private boolean isAnchorSetup = false;
 	public int combinationIndex = -1;
 	public String [][] combination = new String[15][2];
+	private HashMap<String,Float> moleculeMassHash ;
+
+	private int numMoleculePerMole = 10;
 
 	public Unit3(P5Canvas parent, PBox2D box) {
 		super(parent, box);
 		// TODO Auto-generated constructor stub
 		//simulations = new Simulation[SIMULATION_NUMBER];
 		unitNum = 3;
+		moleculeMassHash =  new HashMap<String,Float>();
 		setupSimulations();
 		setupCombination();
 	}
@@ -2973,13 +2978,16 @@ public class Unit3 extends UnitBase {
 
 	@Override
 	protected void reset() {
-		// TODO Auto-generated method stub
+
+		//Reset parameters
 		this.frameCounter = 0;
 		int sim = p5Canvas.getSim();
 		int set = p5Canvas.getSet();
 		this.isAnchorSetup = false;
 		setupSimulations();
+		this.moleculeMassHash.clear();
 
+		//Customization
 		if (sim == 1 && set == 2) {
 			p5Canvas.getMain().heatSlider.setValue(185);
 			box2d.setGravity(0f, 0f);
@@ -2993,6 +3001,9 @@ public class Unit3 extends UnitBase {
 		}
 
 		// Add particular reaction into Compound global parameter
+		
+		//Initiate Molecule mass output
+		updateMoleculeMass();
 	}
 
 	//Set Combination index for Unit3 Sim 2
@@ -3130,6 +3141,36 @@ public class Unit3 extends UnitBase {
 		
 	}
 	
+	public void updateMoleculeMass()
+	{
+		String name = null;
+		float mole = 0;
+		float moleculeWeight = 0;
+		float count = 0;
+		float mass = 0;
+		for (int i =0;i<Compound.names.size();i++) {
+			name = new String(Compound.names.get(i));
+			//Special cases
+
+			//General case
+			{
+			//mole = (float) Compound.counts.get(i) / numMoleculePerMole;
+				count = Compound.counts.get(i) ;
+				mole = (float)count/numMoleculePerMole;
+				moleculeWeight = Compound.moleculeWeight.get(i);
+				mass = moleculeWeight* count;
+			}
+			moleculeMassHash.put(Compound.names.get(i), mass);
+		}
+	}
+	
+	public float getMassByName(String s) {
+		if (moleculeMassHash.containsKey(s))
+			return moleculeMassHash.get(s);
+		else
+			return 0;
+	}
+	
 
 	@Override
 	public void initialize() {
@@ -3139,8 +3180,8 @@ public class Unit3 extends UnitBase {
 
 	@Override
 	public void updateOutput(int sim, int set) {
-		// TODO Auto-generated method stub
-		
+
+		updateMoleculeMass();
 	}
 
 }

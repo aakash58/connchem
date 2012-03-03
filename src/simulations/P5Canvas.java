@@ -134,7 +134,7 @@ public class P5Canvas extends PApplet {
 
 
 	/******* Colors ********/
-	public int backgroundColor = Color.lightGray.getRGB();
+	public int backgroundColor = (new Color(146,146,146)).getRGB();
 	public int canvasBorderColor = Color.WHITE.getRGB();
 	public int selectBorderColor = Color.WHITE.getRGB();  //The select rect color in when molecule masking enabled
 	public int boundaryColor = Color.WHITE.getRGB();
@@ -201,10 +201,12 @@ public class P5Canvas extends PApplet {
 		// Add statement that need to do initialization in the first run
 
 		if (isEnable && firstRun) {
+			
 			// Initialization function to intial parameters
 			unitList.initialize(unit);
 
 			firstRun = false;
+
 		}
 
 		//In Unit 4 Sim 4 Set 2, update volume every frame
@@ -488,9 +490,15 @@ public class P5Canvas extends PApplet {
 		isSimStarted = false;
 		temp = 25;
 		currentVolume = getMain().defaultVolume;
+		volumeMinBoundary = 10;
+		volumeMaxBoundary = 100;
 
+		if(products!=null)
 		products.clear();
+		else products = new ArrayList<String>();
+		if(killingList!=null)
 		killingList.clear();
+		else killingList = new ArrayList<Molecule>();
 		removeAllMolecules();
 		removeAllAnchors();
 
@@ -913,7 +921,7 @@ public class P5Canvas extends PApplet {
 			xDrag = (int) ((mouseX - xStart) / canvasScale);
 			yDrag = (int) ((mouseY - yStart) / canvasScale);
 
-			// TODO: Enable throw molecule function in Unit 4 Sim 2
+			//Enable throw molecule function in Unit 4 Sim 2
 			if (main.isSimSelected(4, 2)) {
 				if (trackedId != -1) {
 					float scale = canvasScale

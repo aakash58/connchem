@@ -125,41 +125,20 @@ public class TableView extends JPanel {
 	}
 	
 	//Update tableView, which is presenting molecule legends below chart
-	public void updateTableView(){
+	//Reture false if values are not ready yet
+	public boolean updateTableView(){
 		
-		data[0].clear();
-		data[1].clear();
-		data[2].clear();
+		if(data[0].isEmpty())
+			return false;
+		int unit = p5Canvas.getUnit()	;
 		String name = null;
-		DecimalFormat myFormatter = new DecimalFormat("###.##");
+		DecimalFormat myFormatter = outputFormat(unit);
 		String output = null;
-		switch(p5Canvas.getUnit())
-		{
-		default:
-			for (int i=0; i<Compound.names.size();i++){
-				data[0].add((Integer)Compound.counts.get(i));
-				data[1].add((Color)colors[i]);
-				data[2].add((String)Compound.names.get(i));
-			}
-			break;
-		case 5:
-			for (int i=0; i<Compound.names.size();i++){
-				name = (String)Compound.names.get(i);
-				output = myFormatter.format((float)p5Canvas.getUnit5().getConByName(name));
-				data[0].add(output);
-				data[1].add((Color)colors[i]);
-				data[2].add(name);
-			}
-			break;
-		case 6:
-			for (int i=0; i<Compound.names.size();i++){
-				name = (String)Compound.names.get(i);
-				output = myFormatter.format((float)main.getP5Canvas().getUnit6().getConByName(name));
-				data[0].add(output);
-				data[1].add((Color)colors[i]);
-				data[2].add(name);
-			}
-			break;
+	
+		for (int i=0; i<Compound.names.size();i++){
+			name = (String)Compound.names.get(i);
+			output = myFormatter.format(dataConversion(unit,i));
+			data[0].set(i, output);
 		}
 
 		if (this!=null && !stopUpdating){
@@ -167,7 +146,8 @@ public class TableView extends JPanel {
 			for (int i=0; i<Compound.names.size();i++){
 			myTable.fireTableCellUpdated(i, 0);
 			}
-		}		
+		}	
+		return true;
 	}
 
 
@@ -350,13 +330,81 @@ public class TableView extends JPanel {
 	
 	public void reset()
 	{
-		setColumnName(0,"    #");
-		setColumnWidth(0,10);
-		setColumnWidth(1,40);
-		setColumnWidth(2,120);
+		int unit = p5Canvas.getUnit();
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
 		
+		p5Canvas.unitList.resetTableView(unit, sim, set);
+		
+		//Add Rows corresponding to compounds
+		data[0].clear();
+		data[1].clear();
+		data[2].clear();
+		
+		String name = null;
+		DecimalFormat myFormatter = outputFormat(unit);
+		String output = null;
+		
+			for (int i=0; i<Compound.names.size();i++){
+				name = (String)Compound.names.get(i);
+				output = myFormatter.format(dataConversion(unit,i));
+				data[0].add(output);
+				data[1].add((Color)colors[i]);
+				data[2].add(name);
+			}
+		
+			this.updateTableView();
+			
+		//Make sure on rows are selected
 		clearSelection();
 	}
+	
+	private float dataConversion(int unit,int indexOfCompound)
+	{
+		float res=0;
+		String name = null;
+		switch(unit)
+		{
+			default:
+				res = Compound.counts.get(indexOfCompound);
+				break;
+//			case 3:
+//				name = (String)Compound.names.get(indexOfCompound);
+//				res =  p5Canvas.getUnit3().getMassByName(name);
+//				break;
+			case 5:
+			    name = (String)Compound.names.get(indexOfCompound);
+				res = p5Canvas.getUnit5().getConByName(name);
+				break;
+			case 6:
+				name = (String)Compound.names.get(indexOfCompound);
+				res = p5Canvas.getUnit6().getConByName(name);
+				break;
+			
+		}
+		return res;
+	}
+	
+	private DecimalFormat outputFormat(int unit)
+	{
+		DecimalFormat myFormatter = null;
+		switch(unit)
+		{
+		default:
+			myFormatter = new DecimalFormat("###");
+			break;
+		case 3:
+		case 5:
+		case 6:
+			myFormatter = new DecimalFormat("###.##");
+			break;
+			
+		}
+		return myFormatter;
+	}
+	
+	
+	
 	public void clearSelection()
 	{
 		table.clearSelection();
