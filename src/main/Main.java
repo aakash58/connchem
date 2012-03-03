@@ -630,16 +630,19 @@ public class Main {
 	public void reset() {
 		// boolean temp = getP5Canvas().isEnable;
 		
+		//Stop drawing lines on graph
+		getCanvas().setPaintLineEnable(false);
+		
 		// Disable p5Canvas and stop timer
 		timer.stop();
+		
 		getP5Canvas().setEnabled(false);
 		
 		//Reset parameter
 		resetParameter();
 		
-		playBtn.setIcon(new ImageIcon(Main.class
-				.getResource("/resources/png48x48/iconPlay.png")));
-
+		
+	
 		/* Check if welcome menu showing */
 		if (isWelcomed && welcomePanel != null) {
 			mainFrame.remove(welcomePanel);
@@ -650,28 +653,21 @@ public class Main {
 		}
 		// Reset state parameter
 		State.reset();
+		
+		//Reset Compound
+		Compound.reset();
 
 		// Reset p5Canvas
 		getP5Canvas().reset();
 		
-		// Update sliders around the center panel
-		resetCenterPanel();
-		
-		resetLeftPanel();
-
-		// Reset right panel
-		resetRightPanel();
-		
-
-
 		// Load information of new generation
 		if (!(selectedUnit == 3 && selectedSim == 2)) {
 			ArrayList a = getSetCompounds(selectedUnit, selectedSim,
 					selectedSet);
 			if (a != null) {
-				Compound.names.clear();
-				Compound.counts.clear();
-				Compound.caps.clear();
+//				Compound.names.clear();
+//				Compound.counts.clear();
+//				Compound.caps.clear();
 				for (int i = 0; i < a.size(); i++) {
 					String s = (String) getCompoundName(selectedUnit,
 							selectedSim, selectedSet, i);
@@ -684,7 +680,7 @@ public class Main {
 					Compound.counts.add(num);
 					Compound.caps.add(cap);
 					// Update tableview before new molecule added
-					getTableView().updateTableView();
+					//getTableView().updateTableView();
 					if (num > 0) {
 						// Add initial number of molecules into p5Canvas
 						if (getP5Canvas().addMoleculeRandomly(s, num)) {
@@ -696,20 +692,28 @@ public class Main {
 				p5Canvas.setupReactionProducts();
 				Compound.setProperties();
 			}
-		} else {
-			Compound.names.clear();
-			Compound.counts.clear();
-			Compound.caps.clear();
 		}
+//		else {
+//			Compound.names.clear();
+//			Compound.counts.clear();
+//			Compound.caps.clear();
+//		}
+		
+		// Update sliders around the center panel
+		resetCenterPanel();
+		
+		resetLeftPanel();
 
-		getCanvas().reset();
+		// Reset right panel
+		resetRightPanel();
+		
 		
 		// getP5Canvas().isEnable =temp;
 
 		// reset timer
 		resetTimer();
 		
-		
+
 
 	}
 
@@ -737,6 +741,11 @@ public class Main {
 	//Reset left panel
 	private void resetLeftPanel()
 	{
+		//Change play icon to "PAUSE"
+		playBtn.setIcon(new ImageIcon(Main.class
+				.getResource("/resources/png48x48/iconPlay.png")));
+
+		
 		// For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
 		if (selectedUnit == 2 && (selectedSim == 3||selectedSim==1||selectedSim==2)) {
 			leftPanel.add(lblInputTipL,
@@ -788,6 +797,7 @@ public class Main {
 	// Reset right panel
 	private void resetRightPanel() {
 		
+		//Reset right layout
 		rightPanel.removeAll();
 		switch (selectedUnit)
 		{
@@ -817,13 +827,16 @@ public class Main {
 			break;
 
 		}
+		
+		//Reset Canvas and table view
 		resetTabPanelGraph();
+		
 		resetDashboard(); // Reset dashboard on right panel
 		
 		rightPanel.validate();
 	}
 	
-	//Reset tab panel on right panel
+	//Reset tab panel(Canvas and table view) on right panel
 	private void resetTabPanelGraph()
 	{
 		//Change tabpanelGraph
@@ -862,9 +875,12 @@ public class Main {
 				}
 				break;
 		}
-		
+	
 		//Reset table view on the panelCanvas 
 		getTableView().reset();
+		
+		getCanvas().reset();
+
 	}
 
 	// Reset dashboard on right panel
@@ -1502,7 +1518,7 @@ public class Main {
 											Compound.caps.add(cap);
 											// Update tableview before new
 											// molecule added
-											getTableView().updateTableView();
+											//getTableView().updateTableView();
 											if (num > 0) {
 												// Add initial number of
 												// molecules into p5Canvas

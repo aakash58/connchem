@@ -90,6 +90,12 @@ public class UnitList {
 			unitList[unit-1].updateOutput(sim,set);
 	}
 	
+	public void resetTableView(int unit,int sim, int set)
+	{
+		if(isExist(unit))
+			unitList[unit-1].resetTableView(sim,set);
+	}
+	
 	public Unit2 getUnit2()
 	{
 		return (Unit2) unitList[1];

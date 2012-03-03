@@ -20,6 +20,20 @@ public class Compound {
 	public static ArrayList<Float> minGasEnergy = new ArrayList<Float>();
 	public static ArrayList<Float> moleculeWeight = new ArrayList<Float>();
 	
+	
+	public static void reset()
+	{
+		names.clear();
+		counts.clear();
+		caps.clear();
+		fTemp.clear();
+		bTemp.clear();
+		minLiquidEnergy.clear();
+		rangeLiquidEnergy.clear();
+		minGasEnergy.clear();
+		moleculeWeight.clear();
+	}
+	
 	public static void setProperties(){
 		fTemp = new ArrayList<Float>();
 		bTemp = new ArrayList<Float>();

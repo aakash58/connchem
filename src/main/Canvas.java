@@ -41,6 +41,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	private Main main = null;
 	private P5Canvas p5Canvas  = null;
 	private TableView tableView = null;
+	private boolean paintLineEnabled;  //Flag representing whether we should draw lines or not
+	int curTime =0;
+	int oldTime =0;
 
 	
 	public Canvas( Main parent) {
@@ -55,10 +58,14 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		addMouseListener(this);
 		ToolTipManager.sharedInstance().setInitialDelay(0);
 		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+		//Start to draw lines on graph
+		setPaintLineEnable(false);
+		
 		
 	}
 	
 	public void reset(){
+		
 		for (int i=0; i<MAXCOMPOUND;i++){
 			lines[i].clear();
 		}
@@ -80,7 +87,9 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			main.elapsedTime.setText(formatTime(0));
 		
 		//Clean lines after reset
-		main.getTableView().updateTableView();
+		//main.getTableView().updateTableView();
+		setPaintLineEnable(true);
+		
 		this.repaint();
 	}
 	
@@ -165,9 +174,6 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		
 		satCount+=2;
 		
-		//Update table value and be ready to show
-		updateTableValue();
-		
 		//Expand x scale if time reaches maxTime
 		if (main.time>maxTime){
 			maxTime *=2;
@@ -196,131 +202,107 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 	}
 	
 	//Update table value and be ready to show
-
-	private void updateTableValue()
+	private boolean updateLineValue(int w, int h,int w2, int h2,int margin)
 	{
 		//Get molecules number from simulation before painting
 		updateMoleculeCount();
 		
 		//Update tableView, which is presenting molecule legends below chart
-		main.getTableView().updateTableView();
+		boolean isDataEmpty = !main.getTableView().updateTableView();
+		curTime = main.time;
+		
+		//Data value is only updated every second
+		if(curTime ==  oldTime || curTime==0)
+			return false;
+		else
+		{
+			oldTime = curTime;
+			
+			if(isDataEmpty )
+			{
+				return false;
+			}
+			else
+			{
+				int linePadding = 1;
+				int marginY = h+2-Compound.names.size()*linePadding;
+				//int marginY = h;
+				int unit = p5Canvas.getUnit();
+					
+					for (int i=0; i<Compound.names.size();i++){
+						int num2 =  (int)dataConversion(unit, i);
+						//int num2 = Compound.counts.get(i);
+						//Rescale Y-axis
+						if (num2>=maxCount){
+							while(num2>=maxCount)
+							{
+								if (maxCount==8)
+									maxCount=12;
+								else if (maxCount==12)
+									maxCount=20;
+								else
+									maxCount *=2;
+							}
+						}
+						
+						//########Paint lines########
+						int num1 =0;
+						if (lines[i].size()>0){
+							Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
+							num1 = tmpLine.getNum2();
+						}
+						else //The first second
+							num1 = num2;
+						//Draw one line segment at the end of existing line every time rendering
+						Line l = new Line(margin, marginY+i*linePadding-margin, (int) curTime-1, (int) curTime,  num1, num2, h2, w2, this);
+						lines[i].add(l);
+						
+					}
+					
+				
+				return true;
+			}
+		}
+	}
+	
+	private float dataConversion(int unit,int indexOfCompound)
+	{
+		float res=0;
+		String name = null;
+		switch(unit)
+		{
+			default:
+				res = Compound.counts.get(indexOfCompound);
+				break;
+			case 3:
+				name = (String)Compound.names.get(indexOfCompound);
+				res =  p5Canvas.getUnit3().getMassByName(name);
+				break;
+			case 5:
+				res = Float.parseFloat((String) tableView.data[0].get(indexOfCompound));
+				break;
+			case 6:
+				name = (String)Compound.names.get(indexOfCompound);
+				res = p5Canvas.getUnit6().getConByName(name);
+				break;
+		}
+		return res;
+	}
+	
+	public void setPaintLineEnable(boolean flag)
+	{
+		paintLineEnabled = flag;
+		
 	}
 	
 	//Paint lines
 	private void paintLines(Graphics2D g,int w, int h,int w2, int h2,int margin)
 	{
-		int linePadding = 1;
-		//int marginY = h+2-Compound.names.size()*linePadding;
-		int marginY = h;
-		switch(p5Canvas.getUnit())
-		{
-		default:
-			for (int i=0; i< Compound.names.size();i++){
-				int num2 = Compound.counts.get(i);
-				//Rescale Y-axis
-				if (num2>maxCount){
-					if (maxCount==8)
-						maxCount=12;
-					else if (maxCount==12)
-						maxCount=20;
-					else
-						maxCount *=2;
-				}
-				
-				//########Paint lines########
-				int num1 =0;
-				if (lines[i].size()>0){
-					Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
-					num1 = tmpLine.getNum2();
-				}	
-				//Draw one line segment at the end of existing line every time rendering
-				Line l = new Line(margin, marginY+i*linePadding-margin, (int) main.time, (int) main.time+1,  num1, num2, h2, w2, this);
-				lines[i].add(l);
-				
-			}
-			break;
-		case 3:
-			for (int i=0; i< Compound.names.size();i++){
-					int index = i ;
-					String name = Compound.names.get(index);
-					float mass = Compound.moleculeWeight.get(index)* Compound.counts.get(index);
-				int num2 = (int) mass;
-				//Rescale Y-axis
-	
-				if (num2>=maxCount){
-						maxCount *=2;
-				}
-				
-				//############Paint lines############
-				int num1 =0;
-				if (lines[i].size()>0){
-					Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
-					num1 = tmpLine.getNum2();
-				}	
-				//Draw one line segment at the end of existing line every time rendering
-				Line l = new Line(margin, marginY+0*linePadding-margin, (int) main.time, (int) main.time+1,  num1, num2, h2, w2, this);
-				lines[i].add(l);
-			
-			}
-			break;
-		case 5: //Get Concentration num
-			if(p5Canvas.getSim()!=1 && p5Canvas.getSim()!=4) //No graph in Unit 5 Sim 1 and 4
-			{
-				for (int i=0; i<tableView.data[0].size();i++){
-					int num2 = (int) Float.parseFloat( (String) tableView.data[0].get(i));
-					//int num2 = Compound.counts.get(i);
-					//Rescale Y-axis
-					if (num2>=maxCount){
-						if (maxCount==8)
-							maxCount=12;
-						else if (maxCount==12)
-							maxCount=20;
-						else
-							maxCount *=2;
-					}
-					
-					//########Paint lines########
-					int num1 =0;
-					if (lines[i].size()>0){
-						Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
-						num1 = tmpLine.getNum2();
-					}	
-					//Draw one line segment at the end of existing line every time rendering
-					Line l = new Line(margin, marginY+i*linePadding-margin, (int) main.time, (int) main.time+1,  num1, num2, h2, w2, this);
-					lines[i].add(l);
-					
-				}
-			}
-			break;
-		case 6:
-			
-			for (int i=0; i<tableView.data[0].size();i++){
-				int num2 = (int) Float.parseFloat( (String) tableView.data[0].get(i));
-				//int num2 = Compound.counts.get(i);
-				//Rescale Y-axis
-				if (num2>=maxCount){
-					if (maxCount==8)
-						maxCount=12;
-					else if (maxCount==12)
-						maxCount=20;
-					else
-						maxCount *=2;
-				}
-				
-				//########Paint lines########
-				int num1 =0;
-				if (lines[i].size()>0){
-					Line tmpLine = (Line) lines[i].get(lines[i].size()-1);
-					num1 = tmpLine.getNum2();
-				}	
-				//Draw one line segment at the end of existing line every time rendering
-				Line l = new Line(margin, marginY+i*linePadding-margin, (int) main.time, (int) main.time+1,  num1, num2, h2, w2, this);
-				lines[i].add(l);
-				
-			}
-			break;
-		}
-	
+		//Update table value and be ready to show
+		//If values are not ready, not draw
+		if (!updateLineValue(w,h,w2,h2,margin) || !paintLineEnabled)
+			return;
+		
 		
 		//Highlight selected line if any of them has been selected
 		boolean blinkColor = false;
@@ -509,7 +491,8 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 					{
 						int index = i ;
 						String name = Compound.names.get(index);
-						float mass = Compound.moleculeWeight.get(index)* Compound.counts.get(index);
+						//float mass = Compound.moleculeWeight.get(index)* Compound.counts.get(index);
+						float mass = p5Canvas.getUnit3().getMassByName(name);
 						DecimalFormat df = new DecimalFormat("###.##");
 						String massStr = df.format(mass);
 						String tooltipText = new String(name+": "+massStr+" g");
@@ -519,12 +502,7 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			
 			}
 		}
-		/*
-		if (select!=-1 && !main.getTableView().selectedRowsContain(select))
-		{
-			main.getTableView().addSelectedRow(select);
-		}
-		*/
+	
 	}
 
 	
