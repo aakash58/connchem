@@ -21,16 +21,16 @@ import java.util.ArrayList;
 public class TableSet extends JPanel {
 	public  JTable table = null;
 	public  JScrollPane scrollPane;
-	public  ArrayList set = new ArrayList();
+	public  ArrayList set;
 	public  int selectedRow=0; 
 	private Main main;
 	
 	public TableSet(Main parent) {
 		super(new GridLayout(1, 0));
 		main = parent;
-
 		MyTableModel myTable = new MyTableModel();
 		table = new JTable(myTable);
+
 		
 	    scrollPane = new JScrollPane(table);
 		JScrollBar jj = new JScrollBar();
@@ -64,8 +64,10 @@ public class TableSet extends JPanel {
 	public void setSelectedRow(int row) {
 		selectedRow = row;
 		table.clearSelection();
-		if (selectedRow<0) selectedRow=0;
-		table.addRowSelectionInterval(selectedRow, selectedRow);
+		if (selectedRow<0) 
+			selectedRow=0;
+		//table.addRowSelectionInterval(selectedRow, selectedRow);
+		table.getSelectionModel().setSelectionInterval(row, row);
 		table.repaint();
 	}
 	private class RowListener implements ListSelectionListener {
@@ -74,8 +76,10 @@ public class TableSet extends JPanel {
 				return;
 			}
 			selectedRow = table.getSelectedRow();
-			if(selectedRow<0) //If no row selected, set it to 0
-				selectedRow = 0;	
+			if(selectedRow<0) 
+				//Listener will be called when destroy last table set
+				//By adding this check we can skip clear selection conditions
+				return;	
 			main.setSelectedSet(selectedRow +1)  ;
 			main.reset();
 		}
@@ -83,7 +87,7 @@ public class TableSet extends JPanel {
 
 	//Update table of sets while loading in specific sims
 	public void updateSet(){
-		set = new ArrayList();
+		set.clear();
 		ArrayList sets = YAMLinterface.getSets(main.getSelectedUnit(), main.getSelectedSim());
 		if (sets==null) return;
 		
@@ -91,8 +95,12 @@ public class TableSet extends JPanel {
 			this.set.add(i+1);
 		}
 		if ( main.getTableSet() !=null){
-			table.updateUI();
+			table.updateUI();//We need to use updateUI() to change the look of tableSet
 		}		
+	}
+	public void reset()
+	{
+		selectedRow  = 0 ;
 	}
 	
 	class MyTableModel extends AbstractTableModel {

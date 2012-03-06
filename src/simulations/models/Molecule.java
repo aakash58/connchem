@@ -646,7 +646,7 @@ public class Molecule {
 		 * them
 		 */
 
-		if (! p5Canvas.getMain().getTableView().selectedRowsIsEmpty()) {
+		if (! p5Canvas.getTableView().selectedRowsIsEmpty()) {
 
 			String [] selectedMoleculesString = p5Canvas.getTableView().getSelectedMolecule();
 			if(selectedMoleculesString!=null)

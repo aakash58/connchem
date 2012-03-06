@@ -876,11 +876,10 @@ public class Unit5 extends UnitBase {
 	
 	public void resetTableView(int sim,int set)
 	{
-		Main main = p5Canvas.getMain();
-		((TableView) main.getTableView()).setColumnName(0, "Molarity");
-		((TableView) main.getTableView()).setColumnWidth(0, 30);
-		((TableView) main.getTableView()).setColumnWidth(1, 30);
-		((TableView) main.getTableView()).setColumnWidth(2, 100);
+		((TableView) p5Canvas.getTableView()).setColumnName(0, "Molarity");
+		((TableView) p5Canvas.getTableView()).setColumnWidth(0, 30);
+		((TableView) p5Canvas.getTableView()).setColumnWidth(1, 30);
+		((TableView) p5Canvas.getTableView()).setColumnWidth(2, 100);
 	}
 
 	// Set up speed ratio for molecules

@@ -170,6 +170,8 @@ public class Unit3 extends UnitBase {
 		
 
 	}
+	
+	
 
 
 	public boolean addMolecules(boolean isAppEnable, String compoundName,
@@ -216,6 +218,8 @@ public class Unit3 extends UnitBase {
 			for(int i = 0;i<count;i++)
 			{
 				State.molecules.get(lastIndex-i).setTableIndex(tIndex);
+				State.molecules.get(lastIndex - i).setRatioKE(
+						1 / simulation.getSpeed());
 			}
 		}
 
@@ -293,7 +297,6 @@ public class Unit3 extends UnitBase {
 				y_ = centerY + i / dimension * moleHeight;
 				res = molecules.add(new Molecule(x_, y_, compoundName, box2d,
 						p5Canvas, (float) (Math.PI / 2)));
-
 			}
 
 			/* Add joint for solid molecules */
@@ -691,6 +694,8 @@ public class Unit3 extends UnitBase {
 				mNew = new Molecule(newVec.x, newVec.y,
 						p5Canvas.products.get(i), box2d, p5Canvas,
 						(float) (Math.PI / 2));
+				mNew.setRatioKE(1 / simulation.getSpeed());
+
 				molecules.add(mNew);
 				mNew.body.setFixedRotation(true);
 				if (i == 0)
@@ -780,6 +785,8 @@ public class Unit3 extends UnitBase {
 				Vec2 newVec = new Vec2(x1, y1);
 				mNew2 = new Molecule(newVec.x, newVec.y, mNew.getName(), box2d,
 						p5Canvas, (float) (Math.PI / 2));
+				mNew.setRatioKE(1 / simulation.getSpeed());
+
 				molecules.add(mNew2);
 				mNew2.body.setFixedRotation(true);
 				mNew2.body.setLinearVelocity(secondSodium.body
@@ -863,6 +870,7 @@ public class Unit3 extends UnitBase {
 					mNew = new Molecule(newVec.x, newVec.y,
 							compoundName, box2d, p5Canvas,
 							(float) (Math.PI / 2));
+					mNew.setRatioKE(1 / simulation.getSpeed());
 
 					molecules.add(mNew);
 
@@ -927,6 +935,8 @@ public class Unit3 extends UnitBase {
 						 Molecule mole = new Molecule(newVec.x, newVec.y,
 								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
+						mole.setRatioKE(1 / simulation.getSpeed());
+
 						 newSilver.add(mole);
 						molecules.add(mole);
 						mole.body.setLinearVelocity(silverIon.body
@@ -945,6 +955,8 @@ public class Unit3 extends UnitBase {
 						newCopperII = new Molecule(newVec.x, newVec.y,
 								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
+						newCopperII.setRatioKE(1 / simulation.getSpeed());
+
 						molecules.add(newCopperII);
 						newCopperII.body.setLinearVelocity(copper.body
 								.getLinearVelocity());
@@ -1102,6 +1114,7 @@ public class Unit3 extends UnitBase {
 					mNew = new Molecule(newVec.x, newVec.y,
 							compoundName, box2d, p5Canvas,
 							(float) (Math.PI / 2));
+					mNew.setRatioKE(1 / simulation.getSpeed());
 
 					molecules.add(mNew);
 					//Set Copper-II and Sulfate tableIndex to "Copper-II-Sulfate"
@@ -1157,6 +1170,8 @@ public class Unit3 extends UnitBase {
 						newCopper = new Molecule(newVec.x, newVec.y,
 								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
+						newCopper.setRatioKE(1 / simulation.getSpeed());
+
 						molecules.add(newCopper);
 						newCopper.body.setLinearVelocity(copperIon.body
 								.getLinearVelocity());
@@ -1171,6 +1186,8 @@ public class Unit3 extends UnitBase {
 						newIronII = new Molecule(newVec.x, newVec.y,
 								p5Canvas.products.get(i), box2d, p5Canvas,
 								(float) (Math.PI / 2));
+						newIronII.setRatioKE(1 / simulation.getSpeed());
+
 						molecules.add(newIronII);
 						newIronII.body.setLinearVelocity(iron.body
 								.getLinearVelocity());
@@ -1285,6 +1302,8 @@ public class Unit3 extends UnitBase {
 						mNew = new Molecule(newVec.x, newVec.y,
 								ionName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
+						mNew.setRatioKE(1 / simulation.getSpeed());
+
 						molecules.add(mNew);
 							mNew.body.setLinearVelocity(new Vec2(0,0));
 							if(ionName.equals("Sodium-Ion")||ionName.equals("Chloride"))
@@ -1339,6 +1358,7 @@ public class Unit3 extends UnitBase {
 						silverChloride = new Molecule(newVec.x, newVec.y,
 								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
+						silverChloride.setRatioKE(1 / simulation.getSpeed());
 						molecules.add(silverChloride);
 						silverChloride.body.setLinearVelocity(silverIon.body
 								.getLinearVelocity());
@@ -1456,6 +1476,8 @@ public class Unit3 extends UnitBase {
 					mNew = new Molecule(newVec.x, newVec.y,
 							compoundName, box2d, p5Canvas,
 							(float) (Math.PI / 2));
+					mNew.setRatioKE(1 / simulation.getSpeed());
+
 					//Set tableIndx of mNew to Hydrogen-Sulfide or Lithium-Chloride
 					if(compoundName.equals("Lithium-Ion"))
 						compoundName = new String("Lithium-Chloride");
@@ -1572,6 +1594,8 @@ public class Unit3 extends UnitBase {
 						mNew = new Molecule(newVec.x, newVec.y,
 								compoundName, box2d, p5Canvas,
 								(float) (Math.PI / 2));
+						mNew.setRatioKE(1 / simulation.getSpeed());
+
 						molecules.add(mNew);
 						
 						//Set tableIndex of mNew to that of compound which it was
@@ -1601,12 +1625,18 @@ public class Unit3 extends UnitBase {
 					Molecule ion1 = null;
 					Molecule ion2 = null;
 					Molecule ion3 = null;
+					Molecule bigIon = null;
+
 					ion1 = (Molecule) p5Canvas.killingList.get(0);
 					ion2 = (Molecule) p5Canvas.killingList.get(1);
 					if(p5Canvas.killingList.size()>2)
 					{
 						ion3 = (Molecule) p5Canvas.killingList.get(2);
+						bigIon= ion1.getMaxSize()>ion2.getMaxSize()?(ion1.getMaxSize()>ion3.getMaxSize()?ion1:ion3):(ion2.getMaxSize()>ion3.getMaxSize()?ion2:ion3);
 					}
+					else
+						bigIon= ion1.getMaxSize()>ion2.getMaxSize()?ion1:ion2;
+
 
 					Molecule newCompound = null;
 
@@ -1614,7 +1644,7 @@ public class Unit3 extends UnitBase {
 
 					// Actually there is only one reaction going in each frame
 					for (int i = 0; i < p5Canvas.products.size(); i++) {
-						loc = ion1.getPosition();
+						loc = bigIon.getPosition();
 						float x1 = PBox2D.scalarWorldToPixels(loc.x);
 						float y1 = p5Canvas.h * p5Canvas.canvasScale
 								- PBox2D.scalarWorldToPixels(loc.y);
@@ -1622,7 +1652,9 @@ public class Unit3 extends UnitBase {
 						String compoundName = new String(p5Canvas.products.get(i));
 						newCompound = new Molecule(newVec.x, newVec.y,
 								compoundName, box2d, p5Canvas,
-								(float) (Math.PI / 2));
+								bigIon.getAngle());
+						newCompound.setRatioKE(1 / simulation.getSpeed());
+
 						molecules.add(newCompound);
 						newCompound.body.setLinearVelocity(ion1.body
 								.getLinearVelocity());
@@ -1711,6 +1743,64 @@ public class Unit3 extends UnitBase {
 		}
 		return false;
 
+	}
+	
+	/******************************************************************
+	 * FUNCTION : reactGeneric DESCRIPTION : Function for generic raction
+	 * 
+	 * INPUTS : simulation(Simulation) OUTPUTS: None
+	 *******************************************************************/
+	public boolean reactGeneric(Simulation simulation) {
+		if (p5Canvas.killingList.isEmpty())
+			return false;
+		if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
+
+			int numToKill = p5Canvas.killingList.size();
+			Molecule[] mOld = new Molecule[numToKill];
+			for (int i = 0; i < numToKill; i++)
+				mOld[i] = (Molecule) p5Canvas.killingList.get(i);
+			// Molecule m2 = (Molecule) p5Canvas.killingList.get(1);
+
+			Molecule mNew = null;
+			Molecule mNew2 = null;
+
+			// Actually there is only one reaction going in each frame
+			for (int i = 0; i < p5Canvas.products.size(); i++) {
+				Vec2 loc = mOld[0].getPosition();
+				float x1 = PBox2D.scalarWorldToPixels(loc.x);
+				float y1 = p5Canvas.h * p5Canvas.canvasScale
+						- PBox2D.scalarWorldToPixels(loc.y);
+				Vec2 newVec = new Vec2(x1, y1);
+				mNew = new Molecule(newVec.x, newVec.y,
+						p5Canvas.products.get(i), box2d, p5Canvas,
+						(float) (Math.PI / 2));
+				
+				mNew.setRatioKE(1/simulation.getSpeed());
+				if (mNew.getName().equals("Hydrogen")) {
+					// TODO: Add max velocity restriction
+				}
+				molecules.add(mNew);
+
+				if (i == 0)
+					mNew.body.setLinearVelocity(mOld[0].body
+							.getLinearVelocity());
+
+				else {
+					mNew.body.setLinearVelocity(mOld[0].body
+							.getLinearVelocity());
+				}
+			}
+			for (int i = 0; i < numToKill; i++)
+				mOld[i].destroy();
+			p5Canvas.products.clear();
+			p5Canvas.killingList.clear();
+			int unit = p5Canvas.getUnit();
+			int sim = p5Canvas.getSim();
+			int set = p5Canvas.getSet();
+			updateCompoundNumber(unit, sim, set);
+			return true;
+		}
+		return false;
 	}
 
 	/******************************************************************
@@ -2766,12 +2856,14 @@ public class Unit3 extends UnitBase {
 		float forceX = 0;
 		float forceY = 0;
 		float scale = 0.15f;
-		float thisForceScale = 0.4f;
-		float otherForceScale = 0.6f;
+		float thisForceScale = 0.8f;
+		float otherForceScale = 1.2f;
 		float gravityCompensation = 0.2f;
 		float topBoundary = p5Canvas.h / 2;
-		float forceYCompensation = 0.05f;
-		float forceSodiumYCompensation = 0.085f;
+		float forceYCompensation = 2f;
+		float forceSodiumYCompensation = 0.1f;				
+		float attractForceScale = 15f;
+
 		String [] targetNames = setupForceTargets();
 		
 
@@ -2790,10 +2882,6 @@ public class Unit3 extends UnitBase {
 					thisMole.sumForceX[thisE] = 0;
 					thisMole.sumForceY[thisE] = 0;
 					for (int k = 0; k < molecules.size(); k++) { // Go check
-						// forces
-						// from
-						// other
-						// molecules
 						if (k == i)
 							continue;
 						otherMole = molecules.get(k);
@@ -2818,13 +2906,13 @@ public class Unit3 extends UnitBase {
 							// Add attraction force to thisMolecule
 							thisMole.sumForceX[thisE] += forceX* thisForceScale;
 							thisMole.sumForceY[thisE] += forceY
-									+ forceYCompensation* thisForceScale;
+									* thisForceScale + forceYCompensation*thisMole.getBodyMass();
 							
 							// At the same time add attraction force to other molecule
 							otherMole.sumForceX[thisE] += forceX * (-1)*otherForceScale
 									;
-							otherMole.sumForceY[thisE] += (forceY + forceYCompensation)
-									* (-1)*otherForceScale ;
+							otherMole.sumForceY[thisE] += (forceY )
+									* (-1)*otherForceScale + forceYCompensation*otherMole.getBodyMass();
 
 						}
 					}
@@ -2836,7 +2924,6 @@ public class Unit3 extends UnitBase {
 			if ( molecules.get(i).getName().equals("Silver-Bromide")
 					||molecules.get(i).getName().equals("Silver-Chloride")||molecules.get(i).getName().equals("Silver-Carbonate")
 					||molecules.get(i).getName().equals("Silver-Hydroxide")) {
-				float attractForceScale = 8f;
 				thisMole = molecules.get(i);
 				String thisName = new String(thisMole.getName());
 
@@ -2877,7 +2964,8 @@ public class Unit3 extends UnitBase {
 					}
 				}
 			}
-			if(molecules.get(i).getName().equals("Sodium-Ion")) //Add some y force to Sodium-Ion to make it floating
+			//Add some y force to Sodium-Ion to make it floating
+			if(molecules.get(i).getName().equals("Sodium-Ion")) 
 			{
 				thisMole = molecules.get(i);
 				for (int thisE = 0; thisE < thisMole.getNumElement(); thisE++) {
@@ -2986,6 +3074,8 @@ public class Unit3 extends UnitBase {
 		this.isAnchorSetup = false;
 		setupSimulations();
 		this.moleculeMassHash.clear();
+		
+		setupSpeed();
 
 		//Customization
 		if (sim == 1 && set == 2) {
@@ -3004,6 +3094,55 @@ public class Unit3 extends UnitBase {
 		
 		//Initiate Molecule mass output
 		updateMoleculeMass();
+	}
+	
+	private void setupSpeed() {
+		String name = null;
+		Molecule mole = null;
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
+		float speed = 1.0f;		
+		
+		if(sim ==1 )
+		{
+			
+			switch(set)
+			{
+			default:
+				speed = 1;
+				getSimulation(sim, set).setSpeed(speed);
+				break;
+			case 1:
+				speed = 8;
+				getSimulation(sim, set).setSpeed(speed);
+				break;
+			case 2:
+				speed = 12;
+				getSimulation(sim, set).setSpeed(speed);
+				break;
+			case 3:
+				speed = 8;
+				getSimulation(sim, set).setSpeed(speed);
+				break;				
+			case 5:
+				speed = 8;
+				getSimulation(sim, set).setSpeed(speed);
+				break;
+			case 8:
+				speed = 4;
+				getSimulation(sim, set).setSpeed(speed);
+				break;
+			case 9:
+				speed = 8;
+				getSimulation(sim, set).setSpeed(speed);
+				break;
+			}
+		}
+		else if( sim ==2)
+		{
+			speed = 1;
+			getSimulation(sim, set).setSpeed(speed);
+		}
 	}
 
 	//Set Combination index for Unit3 Sim 2

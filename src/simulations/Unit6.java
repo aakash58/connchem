@@ -323,6 +323,12 @@ public class Unit6 extends UnitBase {
 		
 		//Update equilibrium
 		updateEquilibrium();
+		
+		if(catalystAdded)
+			breakProbability = 1f;
+		else
+			breakProbability = 0.5f;
+
 
 		float conN2O4 = getConByName("Dinitrogen-Tetroxide");
 		float conNO2 = getConByName("Nitrogen-Dioxide");
@@ -583,6 +589,7 @@ public class Unit6 extends UnitBase {
 			p5Canvas.volumeMinBoundary = 20;
 			p5Canvas.getMain().tempMin=0;
 			p5Canvas.getMain().tempMax = 100;
+			p5Canvas.heatSpeed = 3;
 			break;
 		}
 		updateMoleculeCon();
@@ -627,12 +634,11 @@ public class Unit6 extends UnitBase {
 	
 	public void resetTableView(int sim, int set)
 	{
-		Main main = p5Canvas.getMain();
 		p5Canvas.setVolume(defaultVolume);
-		((TableView) main.getTableView()).setColumnName(0, "Concentration");
-		((TableView) main.getTableView()).setColumnWidth(0, 30);
-		((TableView) main.getTableView()).setColumnWidth(1, 30);
-		((TableView) main.getTableView()).setColumnWidth(2, 100);
+		((TableView) p5Canvas.getTableView()).setColumnName(0, "Concentration");
+		((TableView) p5Canvas.getTableView()).setColumnWidth(0, 30);
+		((TableView) p5Canvas.getTableView()).setColumnWidth(1, 30);
+		((TableView) p5Canvas.getTableView()).setColumnWidth(2, 100);
 	}
 
 	@Override
@@ -1069,7 +1075,10 @@ public class Unit6 extends UnitBase {
 			// Sim 2 2NO2 <--> N2O4
 			if (reactants.get(0).equals("Nitrogen-Dioxide")
 					&& reactants.get(1).equals("Nitrogen-Dioxide")) {
-				reactionProbability = 0.6f;
+				if(catalystAdded)
+					reactionProbability = 0.4f;
+				else
+				reactionProbability = 0.1f;
 				randomFloat = rand.nextFloat();
 				if (randomFloat <= reactionProbability) {
 					products.add("Dinitrogen-Tetroxide");
