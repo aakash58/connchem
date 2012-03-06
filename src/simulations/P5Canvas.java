@@ -126,6 +126,7 @@ public class P5Canvas extends PApplet {
 	public boolean isSimStarted = false; // Flag indicating if this is the first
 											// start of sim
 	public int[] heaterLimit;
+	public float heatSpeed;
 
 	public float multiplierVolume = 13f; // Multiplier from world coordinates to ml
 
@@ -145,19 +146,7 @@ public class P5Canvas extends PApplet {
 
 		setMain(parent);
 		box2d = new PBox2D(this);
-		/*
-		setUnit1(new Unit1(this, box2d));
-		setUnit2(new Unit2(this, box2d));
-		setUnit3(new Unit3(this, box2d));
-		setUnit4(new Unit4(this, box2d));
-		// waterComputation = new Water(this);
-		unitList.add(unit1);
-		unitList.add(unit2);
-		unitList.add(unit3);
-		unitList.add(unit4);
-		*/
 		unitList = new UnitList(this,box2d);
-		
 		boundaries = new Boundaries (this);
 
 	}
@@ -192,6 +181,7 @@ public class P5Canvas extends PApplet {
 		boundaries.create(x, y, w, h,currentVolume);
 
 		setupHeaterLimit();
+		heatSpeed = 1;
 		
 
 	}
@@ -492,6 +482,7 @@ public class P5Canvas extends PApplet {
 		currentVolume = getMain().defaultVolume;
 		volumeMinBoundary = 10;
 		volumeMaxBoundary = 100;
+		heatSpeed = 1;
 
 		if(products!=null)
 		products.clear();
@@ -686,7 +677,7 @@ public class P5Canvas extends PApplet {
 				// Change molecule speed base on heat
 				scale = (float) (heat - (main.heatMax - main.heatMin) / 2)
 						/ (main.heatMax - main.heatMin);
-				scale *= 0.4f;
+				scale *= (0.4f*heatSpeed);
 				scale += 1.0f;
 				Vec2 velocity = mole.getLinearVelocity();
 				velocity = velocity.mul(scale);

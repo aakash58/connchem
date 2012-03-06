@@ -902,12 +902,11 @@ public abstract class UnitBase {
 	
 	public void resetTableView(int sim, int set)
 	{
-		Main main = p5Canvas.getMain();
 		//Configure colume names and width
-		((TableView) main.getTableView()).setColumnName(0,"    #");
-		((TableView) main.getTableView()).setColumnWidth(0,10);
-		((TableView) main.getTableView()).setColumnWidth(1,40);
-		((TableView) main.getTableView()).setColumnWidth(2,120);
+		((TableView) p5Canvas.getTableView()).setColumnName(0,"    #");
+		((TableView) p5Canvas.getTableView()).setColumnWidth(0,10);
+		((TableView) p5Canvas.getTableView()).setColumnWidth(1,40);
+		((TableView) p5Canvas.getTableView()).setColumnWidth(2,120);
 	}
 /*
 	public void computeDissolved() {

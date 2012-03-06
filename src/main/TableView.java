@@ -353,6 +353,7 @@ public class TableView extends JPanel {
 				data[2].add(name);
 			}
 		
+			table.updateUI(); //We need to use updateUI() To redraw table in Unit 3 Sim2
 			this.updateTableView();
 			
 		//Make sure on rows are selected

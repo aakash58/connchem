@@ -769,6 +769,9 @@ public class Main {
 
 		}
 		
+		//Reset TableSet
+		getTableSet().reset();
+		
 		// Update Molecule Legends on left panel
 		resetDynamicPanel();
 		
@@ -1534,8 +1537,10 @@ public class Main {
 									}
 									p5Canvas.setupReactionProducts();
 									Compound.setProperties();
+									
 								}
 								started = true;
+								getP5Canvas().isSimStarted = true;
 
 								// Disable all molecule buttons on dynamic panel
 								for (Component btn : dynamicPanel
@@ -1553,6 +1558,10 @@ public class Main {
 								playBtn.setIcon(new ImageIcon(
 										Main.class
 												.getResource("/resources/png48x48/iconPause.png")));
+								//Reset canvas and tableView
+								getTableView().reset();
+								canvas.reset();
+								
 								getP5Canvas().isEnable = true;
 								timer.start();
 							}
@@ -1844,8 +1853,8 @@ public class Main {
 										}
 									}
 								}
-								tableSet.updateSet();
-								tableSet.setSelectedRow(0);
+								getTableSet().updateSet();
+								getTableSet().setSelectedRow(0);
 							}
 						});
 
