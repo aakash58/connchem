@@ -178,6 +178,7 @@ public class Unit6 extends UnitBase {
 				mNew = new Molecule(newVec.x, newVec.y,
 						p5Canvas.products.get(i), box2d, p5Canvas,
 						(float) (Math.PI / 2));
+				mNew.setRatioKE(1 / simulation.getSpeed());
 				molecules.add(mNew);
 
 				//Add upward velocity
@@ -497,9 +498,9 @@ public class Unit6 extends UnitBase {
 					for(int k =0;k<2;k++)
 					{
 						if(k%2==0)
-						newVec.x += size.x;
+						newVec.x += size.x/2;
 						else
-							newVec.x -= size.x;
+							newVec.x -= size.x/2;
 						Molecule mNew = new Molecule(newVec.x, newVec.y, nameNew, box2d,
 								p5Canvas, (float) (Math.PI / 2));
 						mNew.setRatioKE(1 / simulation.getSpeed());
@@ -563,8 +564,6 @@ public class Unit6 extends UnitBase {
 		int set = p5Canvas.getSet();
 		Main main = p5Canvas.getMain();
 		
-
-
 		// Set up speed ratio for molecules
 		setupSpeed();
 		
@@ -596,8 +595,6 @@ public class Unit6 extends UnitBase {
 	}
 
 	private void setupSpeed() {
-		String name = null;
-		Molecule mole = null;
 		int sim = p5Canvas.getSim();
 		int set = p5Canvas.getSet();
 		float speed = 1.0f;		
@@ -609,27 +606,23 @@ public class Unit6 extends UnitBase {
 			{
 			case 1:
 				speed = 4;
-				getSimulation(sim, set).setSpeed(speed);
 				break;
 			case 2:
 				speed = 8;
-				getSimulation(sim, set).setSpeed(speed);
 				break;
 			case 3:
 				speed = 4;
-				getSimulation(sim, set).setSpeed(speed);
 				break;
 			case 4:
 				speed = 8;
-				getSimulation(sim, set).setSpeed(speed);
 				break;
 			}
 		}
 		else if( sim ==2)
 		{
 			speed = 8;
-			getSimulation(sim, set).setSpeed(speed);
 		}
+		getSimulation(sim, set).setSpeed(speed);
 	}
 	
 	public void resetTableView(int sim, int set)
@@ -964,7 +957,6 @@ public class Unit6 extends UnitBase {
 
 		int sim = p5Canvas.getSim();
 		int set = p5Canvas.getSet();
-		Simulation simulation = getSimulation(sim, set);
 
 		if (o1 == null || o2 == null)
 			return;
@@ -1099,6 +1091,7 @@ public class Unit6 extends UnitBase {
 		return dis;
 	}
 	
+	//Set up output labels on the bottom of right panel
 	private void setupOutputLabels() {
 		lblConText1 = new JLabel();
 		lblConText2 = new JLabel();
@@ -1125,22 +1118,7 @@ public class Unit6 extends UnitBase {
 		Main main = p5Canvas.getMain();
 		JPanel dashboard = main.dashboard;
 		
-		lblConText1 = new JLabel();
-		lblConText2 = new JLabel();
-		lblConText3 = new JLabel();
-		lblConText4 = new JLabel();
-		lblConValue1 = new JLabel(" M");
-		lblConValue2 = new JLabel(" M");
-		lblConValue3 = new JLabel(" M");
-		lblConValue4 = new JLabel(" M");
-		lblVolumeText = new JLabel("Volume:");
-		lblVolumeValue = new JLabel(" mL");
-		lblTempText = new JLabel("Temperature:");
-		lblTempValue = new JLabel(" \u2103");
-		lblPressureText = new JLabel("Pressure:");
-		lblPressureValue = new JLabel(" kPa");
-		lblKeqText = new JLabel("Keq:");
-		lblKeqValue = new JLabel("");
+		setupOutputLabels();
 		
 		//Update keq value label
 		if(keq!=0)

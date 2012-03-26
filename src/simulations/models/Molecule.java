@@ -24,8 +24,11 @@ import Util.SVGReader;
 import static data.State.*;
 
 public class Molecule {
+	
+	public enum mState {Solid,Liquid,Gas}
 	// We need to keep track of a Body and a width and height
 	public Body body;
+	mState state;
 	private ArrayList<Fixture> fixtures;
 	private BodyDef bd;
 	private PBox2D box2d;
@@ -50,6 +53,7 @@ public class Molecule {
 	public float freezingTem;
 	public float boilingTem;
 	public float mass = 0;
+	public float enthalpy [] = new float [3];
 
 	public Vec2 force = new Vec2(0, 0);
 	public Vec2[] loc = new Vec2[20];
@@ -151,7 +155,9 @@ public class Molecule {
 		sumForceWaterY = new float[numElement];
 		freezingTem = DBinterface.getCompoundFreezingPointCelsius(name);
 		boilingTem = DBinterface.getCompoundBoilingPointCelsius(name);
-
+		
+		setEnthalpy();
+		
 		// Identify specific situation
 		if ((name.equals("Sodium-Ion") || name.equals("Potassium-Ion"))
 				&& (p5Canvas.getUnit() == 2 && p5Canvas.getSet() != 7)) {
@@ -486,6 +492,12 @@ public class Molecule {
 			pShapeH = circles[1][0] * 2;
 		}
 		return new Vec2(pShapeW, pShapeH);
+	}
+	
+	//Get size of current molecule, return as Vec2 with x representing width and y representing height
+	public Vec2 getShapeSize()
+	{
+		return new Vec2(pShapeW,pShapeH);
 	}
 
 	public int getNumElement() {
@@ -962,6 +974,41 @@ public class Molecule {
 	public int getTableIndex()
 	{
 		return this.tableIndex;
+	}
+	private void setEnthalpy()
+	{
+		enthalpy[0] = DBinterface.getEntalpy(name, "solid");
+		enthalpy[1] = DBinterface.getEntalpy(name, "liquid");
+		enthalpy[2] = DBinterface.getEntalpy(name, "gas");
+	}
+	public float getEnthalpy()
+	{
+		float enthalpyValue = 0;
+		//Check that which state is this molecule in
+		updateState();
+		switch (state)
+		{
+		case Solid:
+			enthalpyValue = enthalpy[0];
+			break;
+		case Liquid:
+			enthalpyValue = enthalpy[1];
+			break;
+		case Gas:
+			enthalpyValue = enthalpy[2];
+			break;
+		}
+			return enthalpyValue;
+	}
+	private void updateState()
+	{
+		float temp = p5Canvas.temp;
+		if(temp<this.freezingTem)
+			state = mState.Solid;
+		else if (temp>=this.boilingTem)
+			state = mState.Gas;
+		else
+			state = mState.Liquid;
 	}
 	//Check if molecule contains mouse pressed point
 	  public boolean contains(float x, float y) {

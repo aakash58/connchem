@@ -30,7 +30,7 @@ public class DBinterface {
 		
 		try{
 			Class.forName("org.sqlite.JDBC");
-			
+		
 			
 			//********************** Distribution Configuration ***************************
 			ExtractFileFromJar();
@@ -49,7 +49,7 @@ public class DBinterface {
 			dbPath = dbPath.replace("file:", "");
 			conn = DriverManager.getConnection("jdbc:sqlite:src/data/chemdb");
 			//***********************************************************************************************************
-		   	*/
+		    */
 			
 			stat = conn.createStatement();
 			
@@ -661,5 +661,20 @@ public class DBinterface {
 			//System.out.println("Reaction invalid: " + e);
 			return defaultReactProb;
 		}
+	}
+	public static float getEntalpy(String compoundName_,String state)
+	{
+		float enthalpy = 0f;
+		float defaultEnthalpy = 0f;
+		ArrayList<String> results = new ArrayList<String>();
+		String args[]= new String[2];
+		args[0] = "SELECT [enthalpy(kJ/mol)] FROM compounds C, compounds_thermo T WHERE C.id = T.compound_id AND C.name = \""+ compoundName_+"\" AND T.state = \""+state+"\"";
+		args[1] = "enthalpy(kJ/mol)";
+		results = dbConnect(args);
+		
+		if (results==null || results.isEmpty()) return defaultEnthalpy;
+		enthalpy = Float.valueOf((String) results.get(0)).floatValue();
+		return enthalpy;
+		
 	}
 }

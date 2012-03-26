@@ -1913,6 +1913,27 @@ public class Unit2 extends UnitBase{
 			DecimalFormat df = new DecimalFormat("###.##");
 			m1Mass.setText(df.format(mol) + " mol");
 		}
+		
+		public float getMolMass(String compoundName) {
+			if (compoundName.equals("Sodium-Chloride"))
+				return 58f;
+			else if (compoundName.equals("Silicon-Dioxide"))
+				return 60f;
+			else if (compoundName.equals("Calcium-Chloride"))
+				return 110f;
+			else if (compoundName.equals("Sodium-Bicarbonate"))
+				return 84f;
+			else if (compoundName.equals("Potassium-Chloride"))
+				return 74.5f;
+			else if (compoundName.equals("Glycerol"))
+				return 92f;
+			else if (compoundName.equals("Pentane"))
+				return 72;
+			else if (compoundName.equals("Acetic-Acid"))
+				return 60f;
+			else
+				return 1;
+		}
 
 		// Change 'g' to 'mol' in "Dissolved" label when "ConvertMassToMol" checkbox
 		// is selected

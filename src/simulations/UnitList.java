@@ -22,7 +22,7 @@ public class UnitList {
 		unitList[3] = new Unit4(p5Canvas,box2D);
 		unitList[4] = new Unit5(p5Canvas,box2D);
 		unitList[5] = new Unit6(p5Canvas,box2D);
-		unitList[6] = null;
+		unitList[6] = new Unit7(p5Canvas,box2D);
 		unitList[7] = null;
 		unitList[8] = null;
 		
@@ -96,6 +96,12 @@ public class UnitList {
 			unitList[unit-1].resetTableView(sim,set);
 	}
 	
+	public void customizeInterface(int unit, int sim,int set)
+	{
+		if(isExist(unit))
+			unitList[unit-1].customizeInterface(sim,set);
+	}
+	
 	public Unit2 getUnit2()
 	{
 		return (Unit2) unitList[1];
@@ -116,6 +122,10 @@ public class UnitList {
 	public Unit6 getUnit6()
 	{
 		return (Unit6)unitList[5];
+	}
+	public Unit7 getUnit7()
+	{
+		return (Unit7)unitList[6];
 	}
 	
 	private boolean isExist(int unit)

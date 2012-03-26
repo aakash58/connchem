@@ -98,6 +98,12 @@ public class Simulation {
 	{
 		return unit;
 	}
+	
+	public String [] getElements()
+	{
+		return elements;
+	}
+	
 	public SpawnStyle getSpawnStyle(String ele)
 	{
 		int index = getIndexOfElement(ele);

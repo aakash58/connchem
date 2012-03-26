@@ -444,50 +444,7 @@ public class Unit3 extends UnitBase {
 							p5Canvas);
 					State.anchors.add(anchor);
 					joint2Elements(m1, anchor, jointLen, frequency, damp);
-					/*
-					 * In horizontal direction, all molecules create a joint
-					 * connecting to its right next molecule
-					 */
-					/*
-					 * if ((i + 1) % dimension != 0 && (i != count - 1)) //
-					 * right most molecules
-					 * 
-					 * { index1 = i + startIndex; index2 = i + 1 + startIndex;
-					 * m1 = molecules.get(index1); m2 = molecules.get(index2);
-					 * joint2Elements(m1, m2, xInterval,frequency,damp);
-					 * 
-					 * 
-					 * } /* In vertical direction, all molecules create a joint
-					 * connecting to its down next molecule
-					 */
-					/*
-					 * if (((i / dimension + 1) != rowNum) && ((i + dimension) <
-					 * count)) // bottom most molecules { index1 = i +
-					 * startIndex; index2 = i + dimension + startIndex; m1 =
-					 * molecules.get(index1); m2 = molecules.get(index2);
-					 * joint2Elements(m1, m2, jointLength *
-					 * 1.4f,frequency,damp); } /* In diagonal direction, all
-					 * molecules create a joint connecting to its bottom right
-					 * molecule
-					 */
-					/*
-					 * if (((i + 1) % dimension != 0) && ((i + dimension + 1) <
-					 * count) && (i / dimension) % 2 != 0) { index1 = i +
-					 * startIndex; index2 = i + dimension + 1 + startIndex; m1 =
-					 * molecules.get(index1); m2 = molecules.get(index2);
-					 * joint2Elements(m1, m2, jointLength *
-					 * 1.4f,frequency,damp); } /* In diagonal direction, all
-					 * molecules create a joint connecting to its top right
-					 * molecule
-					 */
-					/*
-					 * if ((i - dimension + 1) >= 0 && (i + 1) % dimension != 0
-					 * && (i / dimension) % 2 != 0) { index1 = i + startIndex;
-					 * index2 = i - dimension + 1 + startIndex; m1 =
-					 * molecules.get(index1); m2 = molecules.get(index2);
-					 * joint2Elements(m1, m2, jointLength *
-					 * 1.4f,frequency,damp); }
-					 */
+		
 				}
 
 			}

@@ -103,6 +103,7 @@ public class SimpleBar extends JPanel {
 	 public void reset()
 	 {
 		 value = defaultValue;
+		 this.updateUI();
 	 }
 
 }

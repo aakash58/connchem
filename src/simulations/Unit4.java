@@ -24,6 +24,7 @@ import Util.SimpleBar;
 import data.State;
 
 import simulations.models.Boundary;
+import simulations.models.Compound;
 import simulations.models.Molecule;
 import simulations.models.Simulation;
 import simulations.models.Simulation.SpawnStyle;
@@ -33,11 +34,9 @@ public class Unit4 extends UnitBase {
 	private int collisionCount = 0;
 	private int frameCounter = 0;
 	private int computeTriggerInterval = p5Canvas.FRAME_RATE*5;
-	public float lastTemp;
-	private int lastVolume;
-	private int lastMole;
-	private float lastXDrag=0;
-	private float lastYDrag=0;
+//	private float lastXDrag=0;
+//	private float lastYDrag=0;
+	private int numMoleculePerMole = 10;
 	
 	//Parameter for trails
 	int trailFastColor = Color.RED.getRGB();
@@ -57,6 +56,10 @@ public class Unit4 extends UnitBase {
 	public JLabel lblPressureValue;
 	public JLabel lblCollisionTitle;
 	public JLabel lblCollisionValue;
+	public JLabel lblMolecule1MolText;
+	public JLabel lblMolecule2MolText;
+	public JLabel lblMolecule1MolValue;
+	public JLabel lblMolecule2MolValue;
 	public JLabel lblVolumeText;
 	public JLabel lblVolumeTitle;
 	public JLabel lblVolumeTitle2;   //for Unit4 Sim1 Set2
@@ -100,7 +103,11 @@ public class Unit4 extends UnitBase {
 		lblPressureValue = new JLabel("");
 		lblCollisionTitle = new JLabel("Collisions in last 5 sec:");
 		lblCollisionValue = new JLabel("");
-		lblVolumeText = new JLabel("V (mL)");
+		lblMolecule1MolText = new JLabel();
+		lblMolecule1MolValue = new JLabel(" mol");
+		lblMolecule2MolText = new JLabel();
+		lblMolecule2MolValue = new JLabel(" mol");
+		lblVolumeText = new JLabel("V (L)");
 		lblVolumeTitle = new JLabel("Volume of gas:");
 		lblVolumeValue = new JLabel (" mL");
 		lblVolumeTitle2 = new JLabel("Volume of gas:");
@@ -120,7 +127,7 @@ public class Unit4 extends UnitBase {
 		lblMultiplicationText1 = new JLabel("*");
 		lblMultiplicationText2 = new JLabel("*");
 		lblMultiplicationText3 = new JLabel("*");
-		barPressure = new SimpleBar(0,350,30);
+		barPressure = new SimpleBar(0,6300,30);
 		barVolume = new SimpleBar(main.minVolume,main.maxVolume,63);
 		barMol = new SimpleBar(0,50,10);
 		barTemp  = new SimpleBar(main.tempMin,main.tempMax,25);
@@ -214,15 +221,33 @@ public class Unit4 extends UnitBase {
 		barPressure.reset();
 		barVolume.reset();
 		barTemp.reset();
+		//Setup speed
+		setupSpeed();
 		
+		//Setup temperature
+				switch(p5Canvas.getSim())
+				{
+				case 2:
+					p5Canvas.temp =100;
+					break;
+				case 5:
+					p5Canvas.temp=60;
+					break;
+					default:
+						break;		
+				}
+		
+
+	}
+	//Customize Interface in Main reset after all interface have been initialized
+	public void customizeInterface(int sim, int set)
+	{
 		//Customization
 		switch(p5Canvas.getSim())
 		{
 		case 1:
 			//Heat slider control disabled
 			p5Canvas.getMain().heatSlider.setEnabled(false);
-			if(p5Canvas.getSet()==2)
-				p5Canvas.temp = 400;
 			break;
 		case 2:
 			p5Canvas.temp =100;
@@ -233,7 +258,7 @@ public class Unit4 extends UnitBase {
 		case 4:
 			if(p5Canvas.getSet()==1)
 			{
-				barPressure.setMax(800);
+				//barPressure.setMax(800);
 				p5Canvas.getMain().heatSlider.setEnabled(false);
 			}
 			else if (p5Canvas.getSet()==2)
@@ -276,6 +301,29 @@ public class Unit4 extends UnitBase {
 				break;
 		
 		}
+	}
+
+	// Set up speed ratio for molecules
+	public void setupSpeed() {
+
+		int set = p5Canvas.getSet();
+		int sim = p5Canvas.getSim();
+		float speed = 1.0f;
+		switch(sim)
+		{
+		case 1:
+			if(set==2)
+				speed =4 ;
+			break;
+		case 2:
+			speed = 8;
+			break;
+		case 5:
+			speed = 4;
+			break;
+		}
+		getSimulation(sim, set).setSpeed(speed);
+
 	}
 
 	@Override
@@ -425,6 +473,16 @@ public class Unit4 extends UnitBase {
 			if (spawnStyle == SpawnStyle.Gas) {
 				res = this.addGasMolecule(isAppEnable, compoundName, count);
 			}
+			if (res) {
+				// Connect new created molecule to table index
+				int tIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+				int lastIndex = State.molecules.size() - 1;
+				for (int i = 0; i < count; i++) {
+					State.molecules.get(lastIndex - i).setTableIndex(tIndex);
+					State.molecules.get(lastIndex - i).setRatioKE(
+							1 / simulation.getSpeed());
+				}
+			}
 		return res;
 	}
 
@@ -479,65 +537,7 @@ public class Unit4 extends UnitBase {
 		// System.out.println("Collision Saved:"+mole.getPosition());
 	}
 	
-	// For Unit4 Sim4 Set2, move top boundary when temperature changes in order
-	// to keep pressure constant
-	private void moveTopBoundary(Contact c) {
-		
-		if (!p5Canvas.isEnable || !p5Canvas.isSimStarted)
-			return;
-		Molecule mole = null;
-		Boundary boundary = null;
-	
-		// Get our objects that reference these bodies
-		Object o1 = c.m_fixtureA.m_body.getUserData();
-		Object o2 = c.m_fixtureB.m_body.getUserData();
-		if (o1 == null || o2 == null)
-			return;
 
-		String c1 = o1.getClass().getName();
-		String c2 = o2.getClass().getName();
-		// Make sure reaction only takes place between molecules and boundaries
-		if (c1.equals("simulations.models.Molecule") && o2 == p5Canvas.boundaries.getTopBoundary()) {
-			mole = (Molecule) o1;
-			boundary = (Boundary) o2;
-		} else if (o1 == p5Canvas.boundaries.getTopBoundary()
-				&& c2.equals("simulations.models.Molecule")) {
-			mole = (Molecule) o2;
-			boundary = (Boundary) o1;
-		}
-		if (mole == null || boundary == null)
-			return;
-		
-
-		float oldPressure = p5Canvas.pressure;
-
-		p5Canvas.temp = p5Canvas.getTempFromKE();
-		lastVolume = p5Canvas.currentVolume;
-		// According to below equation, volume should go up with temp-tempMin
-		// proportionally
-		// pressure = (mol* R* (temp-tempMin))/(currentVolume);
-		float ratioTemp = (p5Canvas.temp - p5Canvas.tempMin) / (lastTemp - p5Canvas.tempMin);
-		float ratioMole = (float)State.molecules.size()/lastMole;
-		p5Canvas.currentVolume= (int) Math.round(ratioTemp*ratioMole * lastVolume);
-
-		// Change volume slider
-		if (p5Canvas.currentVolume < p5Canvas.volumeMinBoundary)
-			p5Canvas.currentVolume = p5Canvas.volumeMinBoundary;
-		if (p5Canvas.currentVolume > p5Canvas.volumeMaxBoundary)
-			p5Canvas.currentVolume = p5Canvas.volumeMaxBoundary;
-
-		if(p5Canvas.currentVolume!=lastVolume)
-		{
-			p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
-			//p5Canvas.boundaries.setVolume(p5Canvas.currentVolume);
-		}
-		// Change volume label
-		//p5Canvas.setVolume(p5Canvas.currentVolume);
-		
-		lastTemp = p5Canvas.temp;
-		lastMole = State.molecules.size();
-
-	}
 	
 	//For Unit4 Sim3, count collision time between molecules and walls
 	private void countWallCollision(Contact c)
@@ -604,8 +604,8 @@ public class Unit4 extends UnitBase {
 				vec.y+=p5Canvas.yDrag;
 			}
 			
-			lastXDrag = p5Canvas.xDrag;
-			lastYDrag = p5Canvas.yDrag;
+//			lastXDrag = p5Canvas.xDrag;
+//			lastYDrag = p5Canvas.yDrag;
 		}
 	}
 	
@@ -622,11 +622,24 @@ public class Unit4 extends UnitBase {
 				if(set ==1 )
 				{
 					lblVolumeTitle.setText("Volume of Helium:");
+					lblMolecule1MolText.setText("Mole of Helium:");
+					lblMolecule1MolValue.setText(" mol");
+					dashboard.add(lblMolecule1MolText, "cell 0 2");
+					dashboard.add(lblMolecule1MolValue,"cell 1 2");
 				}
 				else if(set ==2 )
 				{
 					lblVolumeTitle.setText("Volume of Chlorine:");
 					lblVolumeTitle2.setText("Volume of Oxygen:");
+					lblMolecule1MolText.setText("Mole of Chlorine:");
+					lblMolecule1MolValue.setText(" mol");
+					lblMolecule2MolText.setText("Mole of Oxygen:");
+					lblMolecule2MolValue.setText(" mol");
+					dashboard.add(lblMolecule1MolText, "cell 0 3");
+					dashboard.add(lblMolecule1MolValue,"cell 1 3");
+					dashboard.add(lblMolecule2MolText, "cell 0 4");
+					dashboard.add(lblMolecule2MolValue,"cell 1 4");
+
 					dashboard.add(lblVolumeTitle2, "cell 0 2");
 					dashboard.add(lblVolumeValue2,"cell 1 2");
 				}
@@ -655,6 +668,7 @@ public class Unit4 extends UnitBase {
 				dashboard.add(lblCollisionValue,"cell 1 1");
 				dashboard.add(lblPressureTitle,"cell 0 2");
 				dashboard.add(lblPressureValue,"cell 1 2");
+				main.volumeLabel.setText(main.defaultVolume+ " L");
 			}
 			else if( sim ==4)
 			{
@@ -667,6 +681,7 @@ public class Unit4 extends UnitBase {
 			dashboard.add(lblPressureText, "cell 0 0"+alignStr);
 			dashboard.add(lblMultiplicationText1, "cell 1 0"+alignStr);
 			dashboard.add(lblVolumeText,"cell 2 0"+alignStr);
+			main.volumeLabel.setText(main.defaultVolume+ " L");
 
 			dashboard.add(lblEqualText,"cell 3 0"+alignStr);
 			dashboard.add(lblMolText,"cell 4 0"+alignStr); 
@@ -706,6 +721,15 @@ public class Unit4 extends UnitBase {
 		// Update lblTempValue
 		DecimalFormat myFormatter = new DecimalFormat("###.##");
 		String output = null;
+		if(lblMolecule1MolValue.isShowing())
+		{
+			lblMolecule1MolValue.setText(Float.toString(Compound.getMoleculeNum("Helium")/numMoleculePerMole)+ " mol");
+		}
+		if(lblMolecule2MolValue.isShowing())
+		{
+			lblMolecule1MolValue.setText(Float.toString(Compound.getMoleculeNum("Chlorine")/numMoleculePerMole)+ " mol");
+			lblMolecule2MolValue.setText(Float.toString(Compound.getMoleculeNum("Oxygen")/numMoleculePerMole)+ " mol");
+		}
 		if (lblVolumeValue.isShowing()) {
 			lblVolumeValue.setText(Float.toString(p5Canvas.currentVolume)
 					+ " mL");

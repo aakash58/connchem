@@ -3,25 +3,17 @@ package simulations;
 import simulations.models.*;
 
 import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
-import java.util.Stack;
 //import java.util.Timer;
 
 import processing.core.PApplet;
 import simulations.models.Boundary;
 import simulations.models.Compound;
 import simulations.models.Molecule;
-import simulations.models.Simulation;
-import simulations.models.Water;
 
-import main.Canvas;
 import main.Main;
 import main.TableView;
 
@@ -36,7 +28,6 @@ import data.YAMLinterface;
 
 import Util.ColorScales;
 import static data.State.*;
-import static simulations.models.Compound.*;
 
 public class P5Canvas extends PApplet {
 
@@ -54,7 +45,6 @@ public class P5Canvas extends PApplet {
 	public int FRAME_RATE = 30;
 
 	
-	// public Water waterComputation;
 	public boolean isEnable = false;       //Is simulation going on or stopped
 	public boolean isHidingEnabled = false;//Is molecule hidding enabled
 	public boolean isHidden = false;       //Is molecule hidding triggered
@@ -69,10 +59,11 @@ public class P5Canvas extends PApplet {
 	public float temp = 25.f;
 	//public float lastTemp;
 	public final float tempMin = -20;
+	public final float tempAbsoluteZero = -273;
 	public int heat = 0;
 	public float pressure = 0.0f;
 	public float mol = 0.0f;
-	public final float R = 8.314f / 119f; // 8.314 J*K-1*mol -1
+	public final float R = 8.314f ; // 8.314 J*K-1*mol -1
 	public final float atmToKpa = 101.325f;
 
 	// Default value of speed
@@ -112,6 +103,7 @@ public class P5Canvas extends PApplet {
 	public YAMLinterface yaml = new YAMLinterface();
 
 	public float averageKineticEnergy = 0;
+	float totalKineticEnergy = 0f;
 	public int heatMoleculeTimes = 0;
 	public int heatMoleculeMaxTimes = 10;
 	public Queue<Float> energyQueue = new LinkedList<Float>();
@@ -150,16 +142,6 @@ public class P5Canvas extends PApplet {
 		boundaries = new Boundaries (this);
 
 	}
-
-	/*
-	 * public void updateSize(Dimension d, int volume) { boolean tmp = isEnable;
-	 * isEnable = false;
-	 * 
-	 * //setBoundary(0,0,d.width,d.height); width = d.width; height = d.height;
-	 * maxH = (volume + getMain().defaultVolume)*multiplierVolume;
-	 * 
-	 * isEnable = tmp; }
-	 */
 
 	public void setup() {
 		smooth();
@@ -283,18 +265,20 @@ public class P5Canvas extends PApplet {
 		getMain().getCanvas().satCount = 0;
 
 		// Known: V-currentVolume n-mol T-temp R
-		mol = State.molecules.size();
+		mol = (float)State.molecules.size();
 
 		// Unknown: Pressure
-		// P is measured in atmosphere
+		// P is measured in kPa
 		// V is measured in Liter
 		// T is measured in Kelvin
-		pressure = (mol * R * (temp - tempMin)) / (currentVolume);
+		pressure = (mol * R * (temp - tempAbsoluteZero)) / (currentVolume);
 		// Translate pressure from atmosphere into Kpa
-		pressure *= atmToKpa;
+		//pressure *= atmToKpa;
 
 		if(getUnit()==6) //Fix temperature and pressure in Unit6
-			unitList.getUnit6().updateProperties(getSim(), getSet());
+			getUnit6().updateProperties(getSim(), getSet());
+		else if(getUnit()==7)
+			getUnit7().updateProperties(getSim(),getSet());
 	}
 	
 	//Print out properties on right panel
@@ -368,30 +352,6 @@ public class P5Canvas extends PApplet {
 		rect(0, 0, width, height);
 		popStyle();
 	}
-
-
-
-	public static float getMolMass(String compoundName) {
-		if (compoundName.equals("Sodium-Chloride"))
-			return 58f;
-		else if (compoundName.equals("Silicon-Dioxide"))
-			return 60f;
-		else if (compoundName.equals("Calcium-Chloride"))
-			return 110f;
-		else if (compoundName.equals("Sodium-Bicarbonate"))
-			return 84f;
-		else if (compoundName.equals("Potassium-Chloride"))
-			return 74.5f;
-		else if (compoundName.equals("Glycerol"))
-			return 92f;
-		else if (compoundName.equals("Pentane"))
-			return 72;
-		else if (compoundName.equals("Acetic-Acid"))
-			return 60f;
-		else
-			return 1;
-	}
-
 
 
 
@@ -519,18 +479,7 @@ public class P5Canvas extends PApplet {
 
 	}
 
-	/*
-	 * //Get current number of a certain molecule public int
-	 * getMoleculesNum(String compoundName) { int index =
-	 * Compound.names.indexOf(compoundName); int num=
-	 * Compound.getMoleculeNum(index); return num; }
-	 */
-	// Get max allowed number of molecules
-	public int getMoleculesCap(String compoundName) {
-		int index = Compound.names.indexOf(compoundName);
-		int cap = Compound.getMoleculeCap(index);
-		return cap;
-	}
+
 
 	// Remove all existing molecules, called by reset()
 	public void removeAllMolecules() {
@@ -584,12 +533,6 @@ public class P5Canvas extends PApplet {
 
 	}
 
-	/*
-	 * //Set Scale of World; values are from 0 to 100; 50 is default value
-	 * public void setScale(int value) { boolean tmp = isEnable; isEnable =
-	 * false; scale = (float) value; isEnable = tmp; }
-	 */
-
 	// Set Volume; values are from 0 to 100; 50 is default value
 	public void setVolume(int v) {
 		boolean tmp = isEnable;
@@ -603,6 +546,9 @@ public class P5Canvas extends PApplet {
 		//main.volumeSlider.setValue(currentVolume);
 		//main.volumeSlider.updateUI();
 		main.volumeLabel.setText(currentVolume + " mL");
+		if(getUnit()==4 && (getSim()==4 || getSim()==3))
+			main.volumeLabel.setText(currentVolume + " L");
+
 		boundaries.setVolume(currentVolume);
 		isEnable = tmp;
 	}
@@ -637,7 +583,6 @@ public class P5Canvas extends PApplet {
 	public void heatMolecule(Contact c) {
 		Molecule mole = null;
 		Boundary boundary = null;
-		float forceValue = 1.0f;
 		// If heater is not on, return
 		if (heat == getMain().defaultHeat)
 			return;
@@ -725,9 +670,6 @@ public class P5Canvas extends PApplet {
 					calculateKE(scale); 
 				}
 
-			
-
-
 		}
 
 	}
@@ -735,7 +677,7 @@ public class P5Canvas extends PApplet {
 	// The only function that can change kinetic energy.
 	// Should be called after all the function that changes velocity or mole.
 	private void calculateKE(float limit) {
-		float totalKineticEnergy = 0;
+		totalKineticEnergy = 0;
 		float lastAverageKE = averageKineticEnergy;
 		for (int i = 0; i < State.molecules.size(); i++) {
 			totalKineticEnergy += State.molecules.get(i).getKineticEnergy();
@@ -766,7 +708,7 @@ public class P5Canvas extends PApplet {
 		}
 	}
 	private void calculateKE() {
-		float totalKineticEnergy = 0;
+		totalKineticEnergy = 0;
 		for (int i = 0; i < State.molecules.size(); i++) {
 			totalKineticEnergy += State.molecules.get(i).getKineticEnergy();
 		}
@@ -836,6 +778,11 @@ public class P5Canvas extends PApplet {
 	public void setupReactionProducts() {
 		unitList.setupReactionProducts(unit, sim, set);
 	}
+	
+	public void customizeInterface()
+	{
+		unitList.customizeInterface(unit, sim, set);
+	}
 
 	/******************************** MOUSE EVENT ******************************/
 	public void keyPressed() {
@@ -851,7 +798,7 @@ public class P5Canvas extends PApplet {
 		 * this.cursor(Cursor.DEFAULT_CURSOR);
 		 */
 	}
-
+	@Override
 	public void mousePressed() {
 		isHidden = true;
 		xStart = mouseX;
@@ -865,7 +812,7 @@ public class P5Canvas extends PApplet {
 						* ((float) getMain().currentZoom / 100);
 				if (State.molecules.get(i).contains(mouseX / scale,
 						mouseY / scale)) {
-					// TODO: bind molecule with mouse
+					//bind molecule with mouse
 					trackedId = i;
 					startDraggingMolecule = true;
 					// System.out.println("Selected id:"+trackedId);
@@ -980,6 +927,9 @@ public class P5Canvas extends PApplet {
 	public Unit6 getUnit6()	{
 		return unitList.getUnit6();
 	}
+	public Unit7 getUnit7(){
+		return unitList.getUnit7();
+	}
 	public Main getMain() {
 		return main;
 	}
@@ -1012,7 +962,6 @@ public class P5Canvas extends PApplet {
 	{
 		return firstRun;
 	}
-	
 	/*
 	//Set restitution of molecules, in order to make them not that bouncy
 	public void setRestitutionDamp(boolean b)

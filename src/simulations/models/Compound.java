@@ -56,15 +56,24 @@ public class Compound {
 			
 		}
 	}
-	public static int getMoleculeNum(int index){
-		int num = counts.get(index);
-		//System.out.println("Molecule number is "+num);
-		return num;
+	
+	public static int getMoleculeNum(String name)
+	{
+		int index = names.indexOf(name);
+		if(index>=0)
+			return counts.get(index);
+		else
+			return 0;
 	}
-	public static int getMoleculeCap(int index){
-		int cap = caps.get(index);
-		//System.out.println("Molecule cap is "+cap);
-		return cap;
+	
+	
+	// Get max allowed number of molecules
+	public static int getMoleculesCap(String name) {
+		int index = names.indexOf(name);
+		if(index>=0)
+			return caps.get(index);
+		else
+			return 0;
 	}
 	public static boolean isIonOfCompound(String ion,String compoundName)
 	{

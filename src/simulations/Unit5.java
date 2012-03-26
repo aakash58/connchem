@@ -79,10 +79,11 @@ public class Unit5 extends UnitBase {
 	private HashMap<String, Float> moleculeConHash;
 
 	boolean catalystAdded = false;
-	float equalRatio = 0.6f; // Only 0.4 molecules in form of N2O4
+	float equalRatio = 0.4f; // Only 0.4 molecules in form of N2O4
 	float breakProbability = 0.5f; // The chance that N2O4 will break apart
 	int oldTime = 0;
 	int curTime = 0;
+	float keq = 0.1f;
 
 	public Unit5(P5Canvas parent, PBox2D box) {
 		super(parent, box);
@@ -291,7 +292,7 @@ public class Unit5 extends UnitBase {
 						- PBox2D.scalarWorldToPixels(loc.y);
 				Vec2 newVec = new Vec2(x1, y1);
 				nameNew = p5Canvas.products.get(i);
-				Vec2 size = Molecule.getShapeSize("Sodium-Acetate", p5Canvas);
+				Vec2 size = Molecule.getShapeSize("Acetate", p5Canvas);
 				if (nameNew.equals("Carbon-Dioxide")) // Add x off to
 														// Nitrogen-Dioxide
 														// molecule
@@ -522,27 +523,20 @@ public class Unit5 extends UnitBase {
 	// Reaction function for Sim 3 Set 6
 	// 2 NO2 = NO4
 	private boolean reactSim3Set6(Simulation simulation) {
-		int index = Compound.names.indexOf("Nitrogen-Dioxide");
-		int numNO2 = 0,numN2O4 = 0;
-		if(index!=-1) 
-			numNO2 = Compound.counts.get(index);
-		else numNO2 = 0;
-		index = Compound.names.indexOf("Dinitrogen-Tetroxide");
-		if(index!=-1)
-			numN2O4 = Compound.counts.get(index);
-		else numN2O4 = 0;
-		int totalNum = numNO2 / 2 + numN2O4;
-		if(totalNum==0) //Reaction has not started yet
-			return false;
+		
+		float conN2O4 = getConByName("Dinitrogen-Tetroxide");
+		float conNO2 = getConByName("Nitrogen-Dioxide");
+		float currentRatio = conN2O4/(conNO2*conNO2);
+		
 		curTime = p5Canvas.getMain().time;
-		int decomposeTime = 16;
+
+		float decomposeIntervel = 4;
 		if(catalystAdded)
-			decomposeTime = 8;
-		int decomposeNumber = (int)(equalRatio*totalNum);
-		float decomposeIntervel = (float)decomposeTime/decomposeNumber;
+			decomposeIntervel = 2;
+		boolean equilReached = false;
 		
 		if (!p5Canvas.killingList.isEmpty()) {
-			if (p5Canvas.products != null && p5Canvas.products.size() > 0 && ((float)numN2O4 / totalNum <= equalRatio)) {
+			if (p5Canvas.products != null && p5Canvas.products.size() > 0 && (currentRatio < keq)) {
 				int numToKill = p5Canvas.killingList.size();
 				Molecule[] mOld = new Molecule[numToKill];
 				for (int i = 0; i < numToKill; i++) {
@@ -574,7 +568,7 @@ public class Unit5 extends UnitBase {
 				p5Canvas.killingList.clear();
 				
 				//Update molecule number
-				index = Compound.names.indexOf("Dinitrogen-Tetroxide");
+				int index = Compound.names.indexOf("Dinitrogen-Tetroxide");
 				Compound.counts.set(index, Compound.counts.get(index)+1);
 				index = Compound.names.indexOf("Nitrogen-Dioxide");
 				Compound.counts.set(index, Compound.counts.get(index)-2);
@@ -582,28 +576,25 @@ public class Unit5 extends UnitBase {
 				return true;
 			}
 		}
-		//If has not reached equilibrium yet
-		if(curTime<=decomposeTime)
+		if(curTime!=oldTime && currentRatio>keq)
 		{
-			if(curTime%decomposeIntervel==0&& curTime!=0 &&curTime!=oldTime)
+			oldTime = curTime;
+			//If has not reached equilibrium yet
+			if(!equilReached)
 			{
-					return breakApartN2O4(simulation);
-			}
-		}
-		else //If reached equilibrium
-		{
-			// Break up N2O4 if there are too many, in order to keep equalibrium
-			if (curTime != oldTime) {
-				totalNum = numNO2 / 2 + numN2O4;
-				if (((float)numN2O4 / totalNum) > equalRatio) // If N2O4 is over numberred,
-														// break them up
+				if(curTime%decomposeIntervel==0 )
 				{
-					Random rand = new Random();
-					if (rand.nextFloat() < breakProbability) {
-						 return breakApartN2O4(simulation);
-					}
+					equilReached = true;
+					return breakApartN2O4(simulation);
 				}
-				oldTime = curTime;
+			}
+			else //If reached equilibrium
+			{
+				// Break up N2O4 if there are too many, in order to keep equalibrium
+						Random rand = new Random();
+						if (rand.nextFloat() < breakProbability) {
+							 return breakApartN2O4(simulation);
+						}				
 			}
 		}
 		return false;
@@ -630,9 +621,9 @@ public class Unit5 extends UnitBase {
 				for(int k =0;k<2;k++)
 				{
 					if(k%2==0)
-					newVec.x += size.x;
+					newVec.x += size.x/2;
 					else
-						newVec.x -= size.x;
+						newVec.x -= size.x/2;
 					Molecule mNew = new Molecule(newVec.x, newVec.y, nameNew, box2d,
 							p5Canvas, (float) (Math.PI / 2));
 					mNew.setRatioKE(1 / simulation.getSpeed());
@@ -813,16 +804,16 @@ public class Unit5 extends UnitBase {
 		//moleculeNumHash.clear();
 		moleculeConHash.clear();
 		catalystAdded = false;
-
-		// Customization
-		int set = p5Canvas.getSet();
-		int sim = p5Canvas.getSim();
-		Main main = p5Canvas.getMain();
-		p5Canvas.setVolume(60);
-		
-
 		// Set up speed ratio for molecules
 		setupSpeed();
+
+	}
+	
+	public void customizeInterface(int sim, int set)
+	{
+		// Customization
+		Main main = p5Canvas.getMain();
+		p5Canvas.setVolume(60);
 
 		switch (sim) {
 		case 1:
@@ -884,59 +875,49 @@ public class Unit5 extends UnitBase {
 
 	// Set up speed ratio for molecules
 	public void setupSpeed() {
-		String name = null;
-		Molecule mole = null;
+
 		int set = p5Canvas.getSet();
 		int sim = p5Canvas.getSim();
 		float speed = 1.0f;
 		switch (sim) {
 		case 1:
 			if (set == 1) {
-				// Sim 1 set 1
 				speed = 4;
-				getSimulation(sim, set).setSpeed(speed);
 			} else if (set == 2) {
-				// Sim 1 set 2
 				speed = 4;
-				getSimulation(sim, set).setSpeed(speed);
 			}
 			break;
 		case 2:
-			// Sim 2
 			speed = 4;
-			getSimulation(sim, set).setSpeed(speed);
 			break;
 		case 3:
-			if (set != 6) {
-				// Sim 3 set 1 - set 5
+			if (set==1||set==2||set==5) {
 				speed = 6;
-				getSimulation(3, 1).setSpeed(speed);
-				getSimulation(3, 2).setSpeed(speed);
-				getSimulation(3, 3).setSpeed(speed + 2);
-				getSimulation(3, 4).setSpeed(speed + 4);
-				getSimulation(3, 5).setSpeed(speed);
-			} else {
-				// Sim 3 set 6
+			}
+			else if(set==3||set==4)
+			{
+				speed = 8;
+			}
+			else if (set==4)
+			{
+				speed = 10;
+			}
+			else {
 				speed = 12;
-				getSimulation(sim, set).setSpeed(speed);
+				
 			}
 			break;
 		case 4:
 			if (set == 1) {
-				// Sim 4 set 1
 				speed = 2;
-				getSimulation(sim, set).setSpeed(speed);
 			} else if (set == 2) {
-				// Sim 4 set 2
 				speed = 4;
-				getSimulation(sim, set).setSpeed(speed);
 			} else {
-				// Sim 4 set 3
 				speed = 8;
-				getSimulation(4, 3).setSpeed(speed);
 			}
 			break;
 		}
+		getSimulation(sim, set).setSpeed(speed);
 	}
 
 	public void resetDashboard(int sim, int set) {
@@ -1599,7 +1580,8 @@ public class Unit5 extends UnitBase {
 			// Sim 2 CH3COOH + NaHCO3 -> CH3COONa + H2O + CO2
 			if (reactants.contains("Sodium-Bicarbonate")
 					&& reactants.contains("Acetic-Acid")) {
-				products.add("Sodium-Acetate");
+				products.add("Sodium-Ion");
+				products.add("Acetate");
 				products.add("Carbon-Dioxide");
 				products.add("Water");
 			}
@@ -1779,7 +1761,7 @@ public class Unit5 extends UnitBase {
 			}
 			else if(name.equals("Water"))
 			{
-				con =55.35f;
+				//con =55.35f;
 			}
 			else if(name.equals("Acetic-Acid")||name.equals("Sodium-Acetate")||name.equals("Carbon-Dioxide"))
 			{
