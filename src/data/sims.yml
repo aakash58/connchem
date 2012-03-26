@@ -623,7 +623,7 @@ units:
   name: "Chemical Equilibrium"
   sims:
   - sim: 1
-    name: "Undefined"
+    name: "Reversible and Irreversible Reactions"
     sets:
     - set: 1
       compounds:
@@ -655,7 +655,7 @@ units:
         qty: 10
         cap: 20
   - sim: 2
-    name: "Undefined"
+    name: "Factors Affecting Equilibrium"
     sets:
     - set: 1
       compounds:
@@ -675,12 +675,164 @@ units:
   name: "Thermodynamics"
   sims:
   - sim: 1
-    name: "Undefined"
+    name: "First Law of Thermodynamics"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Butane"
+        qty: 4
+        cap: 4
+      - compound: "Oxygen"
+        qty: 26
+        cap: 26
+  - sim: 2
+    name: "Mass, Motion and Energy"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Oxygen"
+        qty: 0
+        cap: 10
+      - compound: "Carbon-Dioxide"
+        qty: 0
+        cap: 10
+      - compound: "Nitrogen"
+        qty: 0
+        cap: 10
+  - sim: 3
+    name: "Second Law of Thermodynamic"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Butane"
+        qty: 4
+        cap: 4
+      - compound: "Oxygen"
+        qty: 26
+        cap: 26
+  - sim: 4
+    name: "Chemical Potential Energy"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Pentane"
+        qty: 5
+        cap: 5
+      - compound: "Oxygen"
+        qty: 40
+        cap: 40
+  - sim: 5
+    name: "Factors Affecting Entropy"
     sets:
     - set: 1
       compounds:
       - compound: "Water"
+        qty: 25
+        cap: 25
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 25
+        cap: 25
+    - set: 3
+      compounds:
+      - compound: "Oxygen"
+        qty: 10
+        cap: 10
+  - sim: 6
+    name: "Complexity and Entropy"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Hydrogen"
+        qty: 25
+        cap: 25
+    - set: 2
+      compounds:
+      - compound: "Methane"
+        qty: 10
+        cap: 10
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 25
+        cap: 25
+    - set: 4
+      compounds:
+      - compound: "Water"
+        qty: 25
+        cap: 25
+    - set: 5
+      compounds:
+      - compound: "Water"
+        qty: 25
+        cap: 25
+    - set: 6
+      compounds:
+      - compound: "Carbon-Dioxide"
+        qty: 10
+        cap: 10
+    - set: 7
+      compounds:
+      - compound: "Propane"
+        qty: 10
+        cap: 10
+    - set: 8
+      compounds:
+      - compound: "Pentane"
+        qty: 5
+        cap: 5
+  - sim: 7
+    name: "Hess` Law"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Hydrogen-Peroxide"
+        qty: 20
+        cap: 20
+    - set: 2
+      compounds:
+      - compound: "Propane"
+        qty: 5
+        cap: 5
+      - compound: "Oxygen"
+        qty: 25
+        cap: 25
+    - set: 3
+      compounds:
+      - compound: "Ammonia"
+        qty: 8
+        cap: 8
+      - compound: "Oxygen"
+        qty: 10
+        cap: 10
+  - sim: 8
+    name: "Endothermic and Exothermic Reaction"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Hydrogen"
+        qty: 10
+        cap: 10
+      - compound: "Oxygen"
+        qty: 5
+        cap: 5
+    - set: 2
+      compounds:
+      - compound: "Ammonium-Chloride"
+        qty: 10
+        cap: 10
+      - compound: "Water"
+        qty: 25
+        cap: 25
+    - set: 3
+      compounds:
+      - compound: "Pentane"
+        qty: 5
+        cap: 5
+      - compound: "Oxygen"
         qty: 40
+        cap: 40
 - unit: 8
   name: "Acids and Bases"
   sims:

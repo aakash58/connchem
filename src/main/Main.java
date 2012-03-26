@@ -40,7 +40,7 @@ import net.miginfocom.swing.MigLayout;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseListener;
+//import java.awt.event.MouseListener;
 
 
 import simulations.P5Canvas;
@@ -49,9 +49,10 @@ import simulations.models.Compound;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+//import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Color;
-import java.awt.Graphics2D;
+//import java.awt.Graphics2D;
 import java.awt.Image;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.Properties;
+//import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -68,17 +69,16 @@ import static data.YAMLinterface.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
-import Util.SimpleBar;
+//import Util.SimpleBar;
 
-import com.jtattoo.plaf.smart.SmartLookAndFeel;
+//import com.jtattoo.plaf.smart.SmartLookAndFeel;
 
-import data.DBinterface;
+//import data.DBinterface;
 import data.State;
-import data.YAMLinterface;
+//import data.YAMLinterface;
 
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
@@ -87,9 +87,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.image.BufferedImage;
+//import java.awt.event.ComponentAdapter;
+//import java.awt.event.ComponentEvent;
+//import java.awt.image.BufferedImage;
 
 public class Main {
 
@@ -126,7 +126,7 @@ public class Main {
 
 	/**************************** Left Panel parameters ****************************/
 	public JPanel dynamicPanel; //Panel that holes molecule icon and add button
-	public HashMap moleculeSliderMap = new HashMap<String, JSlider>();
+	public HashMap<String, JSlider> moleculeSliderMap = new HashMap<String, JSlider>();
 	private JLabel lblInput;
 	private JLabel lblInputTipR;
 	private JLabel lblInputTipL;
@@ -231,6 +231,7 @@ public class Main {
 											// Unit3 Sim1
 	private MouseAdapter btnCatalystListener;
 	private MouseAdapter btnInertListener;
+	private MouseAdapter btnSparkListener;
 	private ArrayList<Integer> btnIds = new ArrayList<Integer>(); // Button Ids
 																	// in Unit3
 																	// Sim2
@@ -527,8 +528,24 @@ public class Main {
 						buttonPanel.add(lblCatalyst, "cell 0 1, align center");
 						buttonPanel.add(btnInertGas,"cell 1 0, align center,growx");
 						buttonPanel.add(lblInertGas,"cell 1 1, align center");
-
-
+					}
+					if(getSelectedUnit()==7)
+					{
+						if(getSelectedSim()==1||getSelectedSim()==3)//Add spark button to Unit7 Sim1 and Sim3
+						{
+							JPanel buttonPanel = new JPanel();
+							buttonPanel.setLayout(new MigLayout("insets 6, gap 4","[100]20[]","[50][]"));
+							dynamicPanel.add(buttonPanel, "cell 0 " + (i+start) + ",grow");
+							
+							JButton btnSpark = new JButton();
+							JLabel lblSpark = new JLabel("Add Spark");
+							btnSpark.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Catalyst.png")));
+							//Dimension di = new Dimension(buttonPanel.getWidth(),30);
+							//btnSpark.setSize(di);
+							btnSpark.addMouseListener(btnSparkListener);
+							buttonPanel.add(btnSpark,"cell 0 0, align center, grow");
+							buttonPanel.add(lblSpark,"cell 0 1, align center");
+						}
 					}
 				}
 				
@@ -636,7 +653,7 @@ public class Main {
 		// Disable p5Canvas and stop timer
 		timer.stop();
 		
-		getP5Canvas().setEnabled(false);
+		getP5Canvas().isEnable=false;
 		
 		//Reset parameter
 		resetParameter();
@@ -659,6 +676,14 @@ public class Main {
 
 		// Reset p5Canvas
 		getP5Canvas().reset();
+		
+		// Update sliders around the center panel
+		resetCenterPanel();
+		
+		resetLeftPanel();
+
+		// Reset right panel
+		resetRightPanel();
 		
 		// Load information of new generation
 		if (!(selectedUnit == 3 && selectedSim == 2)) {
@@ -689,25 +714,17 @@ public class Main {
 						}
 					}
 				}
-				p5Canvas.setupReactionProducts();
+				getP5Canvas().setupReactionProducts();
 				Compound.setProperties();
 			}
 		}
-//		else {
-//			Compound.names.clear();
-//			Compound.counts.clear();
-//			Compound.caps.clear();
-//		}
+		//Reset table view on the panelCanvas 
+		getTableView().reset();
 		
-		// Update sliders around the center panel
-		resetCenterPanel();
+		getCanvas().reset();
 		
-		resetLeftPanel();
-
-		// Reset right panel
-		resetRightPanel();
-		
-		
+		//Customization based on requirements
+		p5Canvas.customizeInterface();
 		// getP5Canvas().isEnable =temp;
 
 		// reset timer
@@ -879,10 +896,7 @@ public class Main {
 				break;
 		}
 	
-		//Reset table view on the panelCanvas 
-		getTableView().reset();
-		
-		getCanvas().reset();
+
 
 	}
 
@@ -894,7 +908,7 @@ public class Main {
 		dashboard.setLayout(new MigLayout("", "[grow,right][100]",
 				"[][][][][][]"));
 		
-		p5Canvas.unitList.resetDashboard(selectedUnit, selectedSim, selectedSet);
+		getP5Canvas().unitList.resetDashboard(selectedUnit, selectedSim, selectedSet);
 		//dashboard.repaint();
 	}
 
@@ -1182,7 +1196,7 @@ public class Main {
 					JSlider vSlider = (JSlider) e.getSource();
 					int value = (vSlider).getValue();
 					
-					p5Canvas.setVolume(value);
+					getP5Canvas().setVolume(value);
 					
 					/*
 					p5Canvas.currentVolume = value;
@@ -1480,7 +1494,7 @@ public class Main {
 																// number
 									compoundNames.add(fixedName);
 								}
-								p5Canvas.getUnit3().setCombination(
+								getP5Canvas().getUnit3().setCombination(
 										compoundNames);
 								compoundNames.add("Water");
 								// Set up counts for graph and molecule
@@ -1636,6 +1650,13 @@ public class Main {
 				addMolecule(e,"Inert",5);
 			}
 		};
+		btnSparkListener = new MouseAdapter()
+		{
+			public void mouseClicked(MouseEvent e)
+			{
+				p5Canvas.getUnit7().addSpark();
+			}
+		};
 	}
 	
 	public void addMolecule(MouseEvent e, String compoundName,int num)
@@ -1650,8 +1671,6 @@ public class Main {
 				// cap number
 				// If yes, add molecules no more than cap
 				// number
-	
-				
 				for (Entry<String, JButton> entry : addBtns
 						.entrySet()) {
 					if (e.getComponent().equals(
@@ -1669,7 +1688,7 @@ public class Main {
 				count = num;
 			}
 
-			int cap = getP5Canvas().getMoleculesCap(
+			int cap = Compound.getMoleculesCap(
 					fixedName);
 			int currentNum = State.moleculesAdded
 					.get(fixedName);

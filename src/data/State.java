@@ -43,6 +43,10 @@ public class State {
 	public static int getCurrentSetNumber() {
 		return currentSetNumber;
 	}*/
+	public static int getCompoundNum()
+	{
+		return molecules.size();
+	}
 	public static int getCompoundNum(String compoundName)
 	{
 		int count = 0;

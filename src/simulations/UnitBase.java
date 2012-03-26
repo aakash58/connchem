@@ -47,6 +47,12 @@ public abstract class UnitBase {
 	protected final int SIMULATION_NUMBER = 25;
 	protected Simulation[] simulations;
 	protected int unitNum;
+	
+	protected int lastVolume;
+	protected int lastMole;
+	protected float lastTemp;
+
+
 
 	public UnitBase(P5Canvas parent, PBox2D box) {
 		p5Canvas = parent;
@@ -908,6 +914,83 @@ public abstract class UnitBase {
 		((TableView) p5Canvas.getTableView()).setColumnWidth(1,40);
 		((TableView) p5Canvas.getTableView()).setColumnWidth(2,120);
 	}
+	
+	//Customize Interface in Main reset after all interface have been initialized
+	public void customizeInterface(int sim, int set)
+	{
+		
+	}
+	
+	// For Unit4 Sim4 Set2, move top boundary when temperature changes in order
+	// to keep pressure constant
+	protected void moveTopBoundary(Contact c) {
+		
+		if (!p5Canvas.isEnable || !p5Canvas.isSimStarted)
+			return;
+		Molecule mole = null;
+		Boundary boundary = null;
+	
+		// Get our objects that reference these bodies
+		Object o1 = c.m_fixtureA.m_body.getUserData();
+		Object o2 = c.m_fixtureB.m_body.getUserData();
+		if (o1 == null || o2 == null)
+			return;
+
+		String c1 = o1.getClass().getName();
+		String c2 = o2.getClass().getName();
+		// Make sure reaction only takes place between molecules and boundaries
+		if (c1.equals("simulations.models.Molecule") && o2 == p5Canvas.boundaries.getTopBoundary()) {
+			mole = (Molecule) o1;
+			boundary = (Boundary) o2;
+		} else if (o1 == p5Canvas.boundaries.getTopBoundary()
+				&& c2.equals("simulations.models.Molecule")) {
+			mole = (Molecule) o2;
+			boundary = (Boundary) o1;
+		}
+		if (mole == null || boundary == null)
+			return;
+		
+
+		float oldPressure = p5Canvas.pressure;
+
+		p5Canvas.temp = p5Canvas.getTempFromKE();
+		lastVolume = p5Canvas.currentVolume;
+		// According to below equation, volume should go up with temp-tempMin
+		// proportionally
+		// pressure = (mol* R* (temp-tempMin))/(currentVolume);
+		float ratioTemp = (p5Canvas.temp - p5Canvas.tempMin) / (lastTemp - p5Canvas.tempMin);
+		float ratioMole = (float)State.molecules.size()/lastMole;
+		p5Canvas.currentVolume= (int) Math.round(ratioTemp*ratioMole * lastVolume);
+
+		// Constrain volume slider
+		if (p5Canvas.currentVolume < p5Canvas.volumeMinBoundary)
+			p5Canvas.currentVolume = p5Canvas.volumeMinBoundary;
+		if (p5Canvas.currentVolume > p5Canvas.volumeMaxBoundary)
+			p5Canvas.currentVolume = p5Canvas.volumeMaxBoundary;
+
+
+		// Change volume label
+		//p5Canvas.setVolume(p5Canvas.currentVolume);
+		
+		lastTemp = p5Canvas.temp;
+		lastMole = State.molecules.size();
+
+	}
+	
+	private void moveTopBoundaryAnimation()
+	{
+		
+		if(p5Canvas.currentVolume!=lastVolume)
+		{
+			//No animation version
+			//p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
+			
+			
+		}
+
+	}
+	
+	
 /*
 	public void computeDissolved() {
 
