@@ -60,6 +60,12 @@ public class UnitList {
 		unitList[unit - 1].reset();
 	}
 	
+	public void updateTopBoundary(int unit,int sim,int set)
+	{
+		if(isExist(unit))
+			unitList[unit -1].updateTopBoundary(sim,set);
+	}
+	
 	public void updateMolecules(int unit,int sim, int set)
 	{
 		if(isExist(unit))

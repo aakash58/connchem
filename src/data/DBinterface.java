@@ -31,7 +31,7 @@ public class DBinterface {
 		try{
 			Class.forName("org.sqlite.JDBC");
 		
-			
+			/*
 			//********************** Distribution Configuration ***************************
 			ExtractFileFromJar();
 			File dbFile = new File(destDir, dbFileName);
@@ -41,15 +41,15 @@ public class DBinterface {
 				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
 			}
 			//******************************************************************************
+			*/
 			
 			
-			/*
 			//************* Debug Configuration, please comment this block before make a release version ***********
 			String dbPath = ClassLoader.getSystemResource("data/"+dbFileName).toString();
 			dbPath = dbPath.replace("file:", "");
 			conn = DriverManager.getConnection("jdbc:sqlite:src/data/chemdb");
 			//***********************************************************************************************************
-		    */
+		    
 			
 			stat = conn.createStatement();
 			
@@ -675,6 +675,22 @@ public class DBinterface {
 		if (results==null || results.isEmpty()) return defaultEnthalpy;
 		enthalpy = Float.valueOf((String) results.get(0)).floatValue();
 		return enthalpy;
+		
+	}
+	
+	public static float getEntropy(String compoundName_,String state)
+	{
+		float entropy = 0f;
+		float defaultEntropy = 0f;
+		ArrayList<String> results = new ArrayList<String>();
+		String args[]= new String[2];
+		args[0] = "SELECT [entropy(J/mol*K)] FROM compounds C, compounds_thermo T WHERE C.id = T.compound_id AND C.name = \""+ compoundName_+"\" AND T.state = \""+state+"\"";
+		args[1] = "entropy(J/mol*K)";
+		results = dbConnect(args);
+		
+		if (results==null || results.isEmpty()||results.get(0)==null) return defaultEntropy;
+		entropy = Float.valueOf((String) results.get(0)).floatValue();
+		return entropy;
 		
 	}
 }

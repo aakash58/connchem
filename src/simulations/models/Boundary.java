@@ -31,8 +31,7 @@ public class Boundary {
 	private float yTop = 0;
 	//public static boolean isTransformed =false; //Increase or Decrease in Volume
 	private PShape baseShape = new PShape();
-	private PShape weightShape = new PShape();
-	
+	private PShape weightShape = new PShape();	
 	
 	
 	public Boundary(int _id, float xv, float yv, float wv, float hv, Boundaries parent) {
@@ -64,7 +63,7 @@ public class Boundary {
 		FixtureDef fd = new FixtureDef();
         fd.shape = polygonShape;
     	fd.density = 0f;    // No density means it won't move!
-        fd.friction = 0.3f;
+        fd.friction = 1.0f;
     	fd.restitution =1f;
         body.createFixture(fd);
         
@@ -181,7 +180,8 @@ public class Boundary {
 			width *=ratio;
 			height*=ratio;
 			//For Unit 4 Sim 4 Set 2, we use weight top boundary image instead of base image
-			if(p5Canvas.getUnit()==4 && p5Canvas.getSim()==4 &&p5Canvas.getSet()==2)
+//			if(p5Canvas.isSimSelected(4,4,2)||p5Canvas.isSimSelected(7, 1, 1)||p5Canvas.isSimSelected(7, 3,1))
+			if(boundaries.hasWeight())
 				p5Canvas.shape(weightShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
 			else
 				p5Canvas.shape(baseShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);

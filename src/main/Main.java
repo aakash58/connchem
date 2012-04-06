@@ -807,7 +807,7 @@ public class Main {
 		boxDisplayJoint.setSelected(false);
 		//Re-add checkboxes to parent panel
 		checkBoxPanel.add(boxMoleculeHiding, BorderLayout.NORTH);
-		if(this.isSimSelected(4, 2))
+		if(p5Canvas.isSimSelected(4, 2))
 		checkBoxPanel.add(boxMoleculeTracking,BorderLayout.CENTER);
 		checkBoxPanel.add(boxDisplayForce, BorderLayout.SOUTH);
 		//checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
@@ -1958,15 +1958,7 @@ public class Main {
 		this.tableView = tableView;
 	}
 	
-	public boolean isSimSelected(int unit,int sim, int set)
-	{
-		return (selectedUnit==unit && selectedSim ==sim && selectedSet ==set);
-	}
-	
-	public boolean isSimSelected(int unit,int sim)
-	{
-		return (selectedUnit==unit && selectedSim ==sim );
-	}
+
 	public int getSelectedUnit()
 	{
 		return selectedUnit;

@@ -381,6 +381,15 @@ public class TableView extends JPanel {
 				name = (String)Compound.names.get(indexOfCompound);
 				res = p5Canvas.getUnit6().getConByName(name);
 				break;
+			case 7:
+				if(p5Canvas.getSim()!=2)
+					res = Compound.counts.get(indexOfCompound);
+				else
+				{
+					name = (String)Compound.names.get(indexOfCompound);
+					res =  p5Canvas.getUnit7().getMassByName(name);	
+				}
+				break;
 			
 		}
 		return res;

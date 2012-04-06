@@ -90,7 +90,7 @@ public class Unit4 extends UnitBase {
 		unitNum = 4;
 		setupSimulations();
 		lastTemp = p5Canvas.temp;
-		lastVolume = p5Canvas.currentVolume;
+		lastVolume = (int)p5Canvas.currentVolume;
 		setupOutputLabels();
 	}
 	
@@ -204,7 +204,6 @@ public class Unit4 extends UnitBase {
 		lastTemp = p5Canvas.temp;
 		p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
 		p5Canvas.getMain().volumeSlider.setEnabled(true);
-		lastVolume = p5Canvas.currentVolume;
 		collisionPositions.clear();
 		collisionColors.clear();
 		
@@ -229,6 +228,10 @@ public class Unit4 extends UnitBase {
 				{
 				case 2:
 					p5Canvas.temp =100;
+					break;
+				case 4:
+					if(p5Canvas.getSet()==2)
+						needWeight();
 					break;
 				case 5:
 					p5Canvas.temp=60;
@@ -301,6 +304,8 @@ public class Unit4 extends UnitBase {
 				break;
 		
 		}
+		lastVolume = (int)p5Canvas.currentVolume;
+
 	}
 
 	// Set up speed ratio for molecules
@@ -583,7 +588,7 @@ public class Unit4 extends UnitBase {
 			//collisionColors.add(initialColor);
 			// State.molecules.get(trailMoleculeId).setShowTrail(true);
 		}
-		lastMole = State.molecules.size();
+		lastMole = State.getCompoundNum();
 		
 	}
 	
