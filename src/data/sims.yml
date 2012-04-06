@@ -729,11 +729,17 @@ units:
       - compound: "Water"
         qty: 25
         cap: 25
+      - compound: "Iodine"
+        qty: 5
+        cap: 5
     - set: 2
       compounds:
       - compound: "Water"
         qty: 25
         cap: 25
+      - compound: "Iodine"
+        qty: 5
+        cap: 5
     - set: 3
       compounds:
       - compound: "Oxygen"
@@ -819,9 +825,12 @@ units:
         cap: 5
     - set: 2
       compounds:
-      - compound: "Ammonium-Chloride"
-        qty: 10
-        cap: 10
+      - compound: "Acetic-Acid"
+        qty: 5
+        cap: 5
+      - compound: "Sodium-Bicarbonate"
+        qty: 5
+        cap: 5
       - compound: "Water"
         qty: 25
         cap: 25

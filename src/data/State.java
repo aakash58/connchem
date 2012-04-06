@@ -57,25 +57,62 @@ public class State {
 		}
 		return count;
 	}
+	public static ArrayList<String> getCompoundNames()
+	{
+		ArrayList<String> names = new ArrayList<String>();
+		String name = null;
+		for(Molecule mole: molecules)
+		{
+			name = new String(mole.getName());
+			if(!names.contains(name))
+				names.add(name);
+		}
+		return names;
+	}
+	
+	public static float getCompoundsMass()
+	{
+		float mass = 0f;
+		if(molecules.isEmpty()||molecules==null)
+			return mass;
+		for(Molecule mole: molecules)
+		{
+			mass+=mole.getBodyMass();
+		}
+		
+		return mass;
+	}
+	
+	public static int getMoleculeIndex(Molecule mole)
+	{
+		return molecules.indexOf(mole); 
+	}
+	
+	
+	public static Molecule getMoleculeByName(String name)
+	{
+		for(Molecule m:molecules )
+		{
+			if(m.getName().equals(name))
+			{
+				return m;
+			}
+		}
+		return null;
+	}
+	public static ArrayList<Molecule>	getMoleculesByName(String name)
+	{
+		ArrayList<Molecule> moles = new ArrayList<Molecule>();
+		for(Molecule m:molecules )
+		{
+			if(m.getName().equals(name))
+			{
+				moles.add(m);
+			}
+		}
+		return moles;
+	}
 
-	public static String getCurrentUnitName() {
-		try {
-			String output = getUnitName(currentUnitNumber);
-			return output;
-		} catch (Exception e) {
-			System.out.println("Unit Name Does Not Exist");
-		}
-		return "Default";
-	}
-	public static String getCurrentSimName() {
-		try {
-			String output = getSimName(currentUnitNumber, currentSimNumber);
-			return output;
-		} catch (Exception e) {
-			System.out.println("Simulation Name Does Not Exist");
-		}
-		return "Default";
-	}
 	
 	public static void reset()
 	{

@@ -31,6 +31,8 @@ public class Boundaries {
 	//private boolean isTransformed;
 	//public float multiplierVolume = 0.66f; // Multiplier from world coordinates to ml
 	
+	private boolean hasWeight = false; //If weight on top boundary needed
+	
 	public Boundaries(P5Canvas p5)
 	{
 		boundaries = new Boundary[boundaryNum];
@@ -91,6 +93,7 @@ public class Boundaries {
 		
 		//volumeDefault = defVolume;
 		resetVolume(currentVolume);
+		//hasWeight = false;
 	}
 	
 	public void display()
@@ -106,6 +109,16 @@ public class Boundaries {
 		//flofat yTrans = PBox2D.scalarPixelsToWorld(difVolume);
 		volume = v;
 		difVolume = (volume - volumeDefault)*p5Canvas.multiplierVolume;
+		boundaries[TOP].setY(difVolume);
+		
+	}
+	
+	public void setVolume(float v)
+	{
+		//Always move top boundary to change the volume
+		//flofat yTrans = PBox2D.scalarPixelsToWorld(difVolume);
+		volume = (int)v;
+		difVolume = (v - volumeDefault)*p5Canvas.multiplierVolume;
 		boundaries[TOP].setY(difVolume);
 		
 	}
@@ -139,6 +152,16 @@ public class Boundaries {
 	public P5Canvas getP5Canvas()
 	{
 		return p5Canvas;
+	}
+	
+	public void setHasWeight(boolean flag)
+	{
+		hasWeight = flag;
+	}
+	
+	public boolean hasWeight()
+	{
+		return hasWeight;
 	}
 
 }

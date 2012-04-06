@@ -25,7 +25,12 @@ import static data.State.*;
 
 public class Molecule {
 	
-	public enum mState {Solid,Liquid,Gas}
+	public enum mState {Solid,Liquid,Gas;
+
+	public static int valueOf(mState s) {
+		// TODO Auto-generated method stub
+		return 0;
+	}}
 	// We need to keep track of a Body and a width and height
 	public Body body;
 	mState state;
@@ -54,6 +59,7 @@ public class Molecule {
 	public float boilingTem;
 	public float mass = 0;
 	public float enthalpy [] = new float [3];
+	public float entropy [] = new float [3];
 
 	public Vec2 force = new Vec2(0, 0);
 	public Vec2[] loc = new Vec2[20];
@@ -157,6 +163,7 @@ public class Molecule {
 		boilingTem = DBinterface.getCompoundBoilingPointCelsius(name);
 		
 		setEnthalpy();
+		setEntropy();
 		
 		// Identify specific situation
 		if ((name.equals("Sodium-Ion") || name.equals("Potassium-Ion"))
@@ -946,6 +953,7 @@ public class Molecule {
 		
 	}*/
 	
+	//Multiply molecules` kinetic energy by ratio r
 	public void constrainKineticEnergy(float r)
 	{
 		float ratio = (float)Math.sqrt(r);
@@ -957,6 +965,21 @@ public class Molecule {
 		body.setAngularVelocity(angularVelocity);
 		
 	}
+	
+	//Multiply molecules` kinetic energy by ratio r
+	public void shakeMolecule(float r)
+	{
+		this.updateState();
+		if(state==mState.Solid)
+		{
+			float ratio = r;
+			float angularVelocity = body.getAngularVelocity();
+			angularVelocity*=ratio;
+			body.setAngularVelocity(angularVelocity);
+		}
+		
+	}
+	
 	public float getKineticEnergy()
 	{
 		float eRotational= 0.5f* body.getInertia()*body.getAngularVelocity()* body.getAngularVelocity();
@@ -981,6 +1004,13 @@ public class Molecule {
 		enthalpy[1] = DBinterface.getEntalpy(name, "liquid");
 		enthalpy[2] = DBinterface.getEntalpy(name, "gas");
 	}
+	
+	private void setEntropy()
+	{
+		entropy[0] = DBinterface.getEntropy(name, "solid");
+		entropy[1] = DBinterface.getEntropy(name, "liquid");
+		entropy[2] = DBinterface.getEntropy(name, "gas");
+	}
 	public float getEnthalpy()
 	{
 		float enthalpyValue = 0;
@@ -999,6 +1029,58 @@ public class Molecule {
 			break;
 		}
 			return enthalpyValue;
+	}
+	
+	
+	//Get enthalpy by state
+	public float getEnthalpy(String s)
+	{
+		float enthalpyValue = 0;
+		if(s.equals("solid"))
+			enthalpyValue = enthalpy[0];
+		else if(s.equals("liquid"))
+
+			enthalpyValue = enthalpy[1];
+		else if(s.equals("gas"))
+
+			enthalpyValue = enthalpy[2];
+		return enthalpyValue;
+	}
+	
+	//Get entropy of this system	
+	public float getEntropy()
+	{
+		float entropyValue = 0;
+		//Check that which state is this molecule in
+		updateState();
+		switch (state)
+		{
+		case Solid:
+			entropyValue = entropy[0];
+			break;
+		case Liquid:
+			entropyValue = entropy[1];
+			break;
+		case Gas:
+			entropyValue = entropy[2];
+			break;
+		}
+			return entropyValue;
+	}
+	
+	//Get entropy by state
+	public float getEntropy(String s)
+	{
+		float entropyValue = 0;
+		if(s.equals("solid"))
+			entropyValue = entropy[0];
+		else if(s.equals("liquid"))
+
+			entropyValue = entropy[1];
+		else if(s.equals("gas"))
+
+			entropyValue = entropy[2];
+		return entropyValue;
 	}
 	private void updateState()
 	{

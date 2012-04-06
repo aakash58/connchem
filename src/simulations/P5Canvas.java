@@ -124,6 +124,7 @@ public class P5Canvas extends PApplet {
 
 	private boolean firstRun = true;
 	public boolean startDraggingMolecule = false;
+	private boolean ifConstrainKE = true;
 
 
 	/******* Colors ********/
@@ -180,10 +181,8 @@ public class P5Canvas extends PApplet {
 			firstRun = false;
 
 		}
-
-		//In Unit 4 Sim 4 Set 2, update volume every frame
-		if(unit==4&& sim==4&& set==2)
-			setVolume(currentVolume);
+		
+		updateTopBoundary();
 		updateMolecules(); // update molecules which are newly created
 		updateProperties(); // Update temperature and pressure etc
 
@@ -323,6 +322,8 @@ public class P5Canvas extends PApplet {
 	// Constrain Energy. To fake that molecules` average kinetic energy does not
 	// change
 	public void constrainKineticEnergy() {
+		if(!ifConstrainKE)
+			return;
 		// First, sum up all average Energy to get total KE
 		float idealKE = State.molecules.size() * averageKineticEnergy;
 		// Second, find out the ratio of ideal stable KE to current real KE
@@ -438,11 +439,14 @@ public class P5Canvas extends PApplet {
 		//Reset parameters
 		isEnable = false;
 		isSimStarted = false;
+		ifConstrainKE = true;
 		temp = 25;
 		currentVolume = getMain().defaultVolume;
 		volumeMinBoundary = 10;
 		volumeMaxBoundary = 100;
 		heatSpeed = 1;
+		pressure = 0;
+		boundaries.setHasWeight(false);
 
 		if(products!=null)
 		products.clear();
@@ -552,6 +556,32 @@ public class P5Canvas extends PApplet {
 		boundaries.setVolume(currentVolume);
 		isEnable = tmp;
 	}
+	
+	// Set Volume
+	// Accept float value so that slider can move smoothly
+	public void setVolume(float v) {
+		boolean tmp = isEnable;
+		isEnable = false;
+		currentVolume = Math.round(v);
+		if (currentVolume < volumeMinBoundary) 
+			currentVolume = volumeMinBoundary;
+		else if(currentVolume > volumeMaxBoundary)
+			currentVolume = volumeMaxBoundary;
+		
+		//main.volumeSlider.setValue(currentVolume);
+		//main.volumeSlider.updateUI();
+		main.volumeLabel.setText(currentVolume + " mL");
+		if(getUnit()==4 && (getSim()==4 || getSim()==3))
+			main.volumeLabel.setText(currentVolume + " L");
+
+		boundaries.setVolume(v);
+		isEnable = tmp;
+	}
+	
+	private void updateTopBoundary(){
+		if(isEnable)
+			unitList.updateTopBoundary(unit,sim,set);
+	}
 
 	/******************************************************************
 	 * FUNCTION : updateMolecules DESCRIPTION : Kill molecules which have gone
@@ -608,7 +638,7 @@ public class P5Canvas extends PApplet {
 			return;
 		
 		//For Unit 4 Sim 4 Set 2, if top boundary reach top or low point we are not going to heat anymore
-		if(main.isSimSelected(4, 4, 2))
+		if(isSimSelected(4, 4, 2))
 		{
 			int midLevel = (main.heatMax - main.heatMin)/2;
 			if((currentVolume<=volumeMinBoundary && heat<midLevel) || (currentVolume>=volumeMaxBoundary && heat>midLevel))
@@ -707,7 +737,7 @@ public class P5Canvas extends PApplet {
 			
 		}
 	}
-	private void calculateKE() {
+	protected void calculateKE() {
 		totalKineticEnergy = 0;
 		for (int i = 0; i < State.molecules.size(); i++) {
 			totalKineticEnergy += State.molecules.get(i).getKineticEnergy();
@@ -726,8 +756,8 @@ public class P5Canvas extends PApplet {
 		heaterLimit[6] = 50; // +1
 		heaterLimit[7] = 75; // +2
 		heaterLimit[8] = 100; // +3
-		heaterLimit[9] = 160; // +4
-		heaterLimit[10] = 250; // +5
+		heaterLimit[9] = 180; // +4
+		heaterLimit[10] = 260; // +5
 
 	}
 
@@ -860,7 +890,7 @@ public class P5Canvas extends PApplet {
 			yDrag = (int) ((mouseY - yStart) / canvasScale);
 
 			//Enable throw molecule function in Unit 4 Sim 2
-			if (main.isSimSelected(4, 2)) {
+			if (isSimSelected(4, 2)) {
 				if (trackedId != -1) {
 					float scale = canvasScale
 							* ((float) getMain().currentZoom / 100);
@@ -971,4 +1001,19 @@ public class P5Canvas extends PApplet {
 			State.molecules.get(i).setRestitutionDamp(b);
 		}
 	}*/
+	
+	public boolean isSimSelected(int unitNum,int simNum, int setNum)
+	{
+		return (unit==unitNum && sim ==simNum && set ==setNum);
+	}
+	
+	public boolean isSimSelected(int unitNum,int simNum)
+	{
+		return (unit==unitNum && sim ==simNum );
+	}
+	
+	public void setIfConstrainKE(boolean flag)
+	{
+		ifConstrainKE = flag;
+	}
 }

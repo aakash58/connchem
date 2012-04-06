@@ -17,6 +17,8 @@ import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
 
+import Util.Integrator;
+
 import data.DBinterface;
 import data.State;
 
@@ -48,16 +50,18 @@ public abstract class UnitBase {
 	protected Simulation[] simulations;
 	protected int unitNum;
 	
-	protected int lastVolume;
+	protected float lastVolume;
 	protected int lastMole;
 	protected float lastTemp;
+	protected Integrator interpolator;
 
 
 
 	public UnitBase(P5Canvas parent, PBox2D box) {
 		p5Canvas = parent;
 		box2d = box;
-
+		interpolator = new Integrator(p5Canvas.temp);
+		interpolator.setInterpolating(true);
 	}
 
 	// Setup parameters for all simulations in this unit
@@ -925,7 +929,7 @@ public abstract class UnitBase {
 	// to keep pressure constant
 	protected void moveTopBoundary(Contact c) {
 		
-		if (!p5Canvas.isEnable || !p5Canvas.isSimStarted)
+		if (!p5Canvas.isEnable || !p5Canvas.isSimStarted|| interpolator.isTargeting())
 			return;
 		Molecule mole = null;
 		Boundary boundary = null;
@@ -954,42 +958,60 @@ public abstract class UnitBase {
 		float oldPressure = p5Canvas.pressure;
 
 		p5Canvas.temp = p5Canvas.getTempFromKE();
-		lastVolume = p5Canvas.currentVolume;
+		//lastVolume = p5Canvas.currentVolume;
 		// According to below equation, volume should go up with temp-tempMin
 		// proportionally
 		// pressure = (mol* R* (temp-tempMin))/(currentVolume);
-		float ratioTemp = (p5Canvas.temp - p5Canvas.tempMin) / (lastTemp - p5Canvas.tempMin);
+		float ratioTemp = (p5Canvas.temp - p5Canvas.tempAbsoluteZero) / (lastTemp - p5Canvas.tempAbsoluteZero);
 		float ratioMole = (float)State.molecules.size()/lastMole;
-		p5Canvas.currentVolume= (int) Math.round(ratioTemp*ratioMole * lastVolume);
-
+		
+		//float target= (int) Math.round(ratioTemp*ratioMole * lastVolume);
+		float target= ratioTemp*ratioMole * lastVolume;
+		
 		// Constrain volume slider
-		if (p5Canvas.currentVolume < p5Canvas.volumeMinBoundary)
-			p5Canvas.currentVolume = p5Canvas.volumeMinBoundary;
-		if (p5Canvas.currentVolume > p5Canvas.volumeMaxBoundary)
-			p5Canvas.currentVolume = p5Canvas.volumeMaxBoundary;
+		if (target < p5Canvas.volumeMinBoundary)
+			target = p5Canvas.volumeMinBoundary;
+		if (target > p5Canvas.volumeMaxBoundary)
+			target = p5Canvas.volumeMaxBoundary;
 
+		interpolator.set(lastVolume);
+		interpolator.target(target);
 
 		// Change volume label
 		//p5Canvas.setVolume(p5Canvas.currentVolume);
 		
 		lastTemp = p5Canvas.temp;
 		lastMole = State.molecules.size();
+		lastVolume = target;
 
 	}
 	
-	private void moveTopBoundaryAnimation()
+	public void updateTopBoundary(int sim, int set)
 	{
-		
-		if(p5Canvas.currentVolume!=lastVolume)
+		//In Unit 4 Sim 4 Set 2, update volume every frame
+		if(p5Canvas.isSimSelected(4, 4, 2) || p5Canvas.isSimSelected(7, 1,1)||p5Canvas.isSimSelected(7, 3,1)||p5Canvas.isSimSelected(7,4,1))
 		{
-			//No animation version
-			//p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
-			
-			
+			if(interpolator.isTargeting())
+			{
+				interpolator.update();
+				float value = interpolator.getValue();
+				p5Canvas.setVolume(value);	
+			}
 		}
-
 	}
 	
+
+	public float getPistonSpeed()
+	{
+		return interpolator.getVelocity();
+	}
+	public float getPistonKE()
+	{
+		float velocity = getPistonSpeed();
+		float mass = 1000f;
+		float ke = 0.5f * mass * velocity * velocity;
+		return ke;
+	}
 	
 /*
 	public void computeDissolved() {
@@ -1121,6 +1143,11 @@ public abstract class UnitBase {
 
 	public int getWater100Ml() {
 		return this.water100mL;
+	}
+	
+	public void needWeight()
+	{
+		p5Canvas.boundaries.setHasWeight(true);
 	}
 
 }

@@ -149,15 +149,21 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 		{
 		case 1:
 		case 2:
-		g.drawString("# molecules", 0, 0);
+		 g.drawString("# molecules", 0, 0);
 		break;
 		case 3:
 		case 4:
-			g.drawString("total mass", 0, 0);
+			g.drawString("total mass (g)", 0, 0);
 			break;
 		case 5:
 		case 6:
 			g.drawString("Concentration (M)", 0, 0);
+			break;
+		case 7:
+			if(p5Canvas.getSim()!=2)
+			 g.drawString("# molecules", 0, 0);
+			else
+				g.drawString("total mass (g)", 0, 0);
 			break;
 		}
 		
@@ -284,6 +290,15 @@ public class Canvas extends JPanel implements ActionListener, MouseListener, Mou
 			case 6:
 				name = (String)Compound.names.get(indexOfCompound);
 				res = p5Canvas.getUnit6().getConByName(name);
+				break;
+			case 7:
+				if(p5Canvas.getSim()!=2)
+					res = Compound.counts.get(indexOfCompound);
+				else
+				{
+					name = (String)Compound.names.get(indexOfCompound);
+					res =  p5Canvas.getUnit7().getMassByName(name);
+				}
 				break;
 		}
 		return res;

@@ -66,6 +66,17 @@ public class Compound {
 			return 0;
 	}
 	
+	public static float getMoleculeWeight(String name)
+	{
+		if(names.contains(name))
+		{
+			int index = names.indexOf(name);
+			return moleculeWeight.get(index);
+		}
+		else
+			return 0;
+	}
+	
 	
 	// Get max allowed number of molecules
 	public static int getMoleculesCap(String name) {

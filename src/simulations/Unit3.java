@@ -196,11 +196,6 @@ public class Unit3 extends UnitBase {
 			res = this.addPrecipitation(isAppEnable, compoundName, count,
 					simulation, (float) Math.PI);
 		}
-		else if (spawnStyle == SpawnStyle.SolidCube)
-		{
-			res = this.addSolidCube(isAppEnable, compoundName, count,
-					simulation);
-		}
 		else if (spawnStyle == SpawnStyle.SolidPavement) {
 			res = this.addSolidPavement(isAppEnable, compoundName, count,
 					simulation);
@@ -1283,7 +1278,9 @@ public class Unit3 extends UnitBase {
 					p5Canvas.products.clear();
 					p5Canvas.killingList.clear();
 				}
-			} else // Reaction: Silver-Ion reacts with Chlorine, generate
+			} 
+			
+			else // Reaction: Silver-Ion reacts with Chlorine, generate
 					// Silver-Chloride
 			{
 				if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
@@ -3239,13 +3236,13 @@ public class Unit3 extends UnitBase {
 	
 	public void updateMoleculeMass()
 	{
-		String name = null;
+		//String name = null;
 		float mole = 0;
 		float moleculeWeight = 0;
 		float count = 0;
 		float mass = 0;
 		for (int i =0;i<Compound.names.size();i++) {
-			name = new String(Compound.names.get(i));
+			//name = new String(Compound.names.get(i));
 			//Special cases
 
 			//General case
