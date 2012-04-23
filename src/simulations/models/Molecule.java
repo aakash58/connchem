@@ -57,6 +57,7 @@ public class Molecule {
 	public boolean isHidden = false;
 	public float freezingTem;
 	public float boilingTem;
+	private boolean enableAutoState = true;
 	public float mass = 0;
 	public float enthalpy [] = new float [3];
 	public float entropy [] = new float [3];
@@ -312,16 +313,16 @@ public class Molecule {
 			fric = 0;
 		*/
 		
-		//New setting
+		updateState();
 		//Solid case
-		if( temp<=freezingTem)
+		if( isSolid())
 		{
 			res = 0.5f;
 			fric = 0.6f;
 			setGravityScale(1.0f);
 		}
 		//Liquid case
-		else if (temp>freezingTem&&temp<boilingTem)
+		else if (isLiquid())
 		{
 			/*
 			if(restitutionDampEnable)
@@ -921,11 +922,13 @@ public class Molecule {
 	}
 
 	public boolean isSolid() {
-		float temp = p5Canvas.temp;
-		if (temp < this.freezingTem)
-			return true;
-		else
-			return false;
+		return (state == mState.Solid);
+	}
+	public boolean isLiquid(){
+		return (state ==mState.Liquid);
+	}
+	public boolean isGas(){
+		return (state ==mState.Gas);
 	}
 	public Vec2 getLinearVelocity()
 	{
@@ -938,6 +941,11 @@ public class Molecule {
 		scalar = vector.x*vector.x + vector.y*vector.y;
 		scalar = (float) Math.sqrt(scalar);
 		return scalar;
+	}
+	
+	public float getAngularVelocityScalar()
+	{
+		return body.getAngularVelocity();
 	}
 	/*
 	public void setKineticEnergy(float ke)
@@ -969,8 +977,8 @@ public class Molecule {
 	//Multiply molecules` kinetic energy by ratio r
 	public void shakeMolecule(float r)
 	{
-		this.updateState();
-		if(state==mState.Solid)
+//		this.updateState();
+//		if(state==mState.Solid)
 		{
 			float ratio = r;
 			float angularVelocity = body.getAngularVelocity();
@@ -1082,15 +1090,35 @@ public class Molecule {
 			entropyValue = entropy[2];
 		return entropyValue;
 	}
+	
+	//Update molecule state based on temperature
 	private void updateState()
 	{
-		float temp = p5Canvas.temp;
-		if(temp<this.freezingTem)
-			state = mState.Solid;
-		else if (temp>=this.boilingTem)
-			state = mState.Gas;
-		else
-			state = mState.Liquid;
+		//Only if enableAutoState is true
+		if(enableAutoState)
+		{
+			float temp = p5Canvas.temp;
+			if(temp<this.freezingTem)
+				state = mState.Solid;
+			else if (temp>=this.boilingTem)
+				state = mState.Gas;
+			else
+				state = mState.Liquid;
+		}
+	}
+	//Update molecule state manually
+	public void setState(mState st)
+	{
+		//Only if enableAutoState is true
+		if(!enableAutoState)
+		{
+			state = st;
+		}
+	}
+	
+	public mState getState()
+	{
+		return state;
 	}
 	//Check if molecule contains mouse pressed point
 	  public boolean contains(float x, float y) {
@@ -1118,6 +1146,15 @@ public class Molecule {
 	  {
 		  if( v>=0)
 			  ratioKE=v;
+	  }
+	  
+	  public void setEnableAutoStateChange(boolean flag)
+	  {
+		  this.enableAutoState = flag;
+	  }
+	  public boolean getEnableAutoStateChange()
+	  {
+		  return this.enableAutoState;
 	  }
 
 }

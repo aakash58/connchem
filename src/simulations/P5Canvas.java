@@ -264,7 +264,7 @@ public class P5Canvas extends PApplet {
 		getMain().getCanvas().satCount = 0;
 
 		// Known: V-currentVolume n-mol T-temp R
-		mol = (float)State.molecules.size();
+		mol = (float)State.getMoleculeNum();
 
 		// Unknown: Pressure
 		// P is measured in kPa
@@ -276,7 +276,7 @@ public class P5Canvas extends PApplet {
 
 		if(getUnit()==6) //Fix temperature and pressure in Unit6
 			getUnit6().updateProperties(getSim(), getSet());
-		else if(getUnit()==7)
+		else if(getUnit()==7) //Update entropy and enthalpy
 			getUnit7().updateProperties(getSim(),getSet());
 	}
 	
@@ -550,7 +550,7 @@ public class P5Canvas extends PApplet {
 		//main.volumeSlider.setValue(currentVolume);
 		//main.volumeSlider.updateUI();
 		main.volumeLabel.setText(currentVolume + " mL");
-		if(getUnit()==4 && (getSim()==4 || getSim()==3))
+		if(isSimSelected(4,4)||isSimSelected(4,3)||isSimSelected(5,3)||isSimSelected(6,2))
 			main.volumeLabel.setText(currentVolume + " L");
 
 		boundaries.setVolume(currentVolume);
@@ -571,7 +571,7 @@ public class P5Canvas extends PApplet {
 		//main.volumeSlider.setValue(currentVolume);
 		//main.volumeSlider.updateUI();
 		main.volumeLabel.setText(currentVolume + " mL");
-		if(getUnit()==4 && (getSim()==4 || getSim()==3))
+		if(isSimSelected(4,4)||isSimSelected(4,3)||isSimSelected(5,3)||isSimSelected(6,2))
 			main.volumeLabel.setText(currentVolume + " L");
 
 		boundaries.setVolume(v);

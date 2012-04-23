@@ -197,10 +197,10 @@ public class Unit5 extends UnitBase {
 		lblRText = new JLabel("R");
 		lblEqualText = new JLabel("=");
 		lblBarLabelPressure = new JLabel("P (kPa)");
-		lblBarLabelVolume = new JLabel("V (mL)");
+		lblBarLabelVolume = new JLabel("V (L)");
 		lblBarLabelMol = new JLabel("n (mol)");
 		lblBarLabelTemp = new JLabel("T (\u2103)");
-		barPressure = new SimpleBar(0, 350, 30);
+		barPressure = new SimpleBar(0, 5000, 30);
 		barVolume = new SimpleBar(main.minVolume, main.maxVolume, 63);
 		barMol = new SimpleBar(0, 50, 10);
 		barTemp = new SimpleBar(main.tempMin, main.tempMax, 25);
@@ -806,7 +806,35 @@ public class Unit5 extends UnitBase {
 		catalystAdded = false;
 		// Set up speed ratio for molecules
 		setupSpeed();
+		
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
 
+		switch (sim) {
+		case 1:
+			if (set == 1)
+				p5Canvas.temp = 125;
+			else if (set == 2)
+				p5Canvas.temp = 190;
+			break;
+		case 2:
+			break;
+		case 3:
+			if (set == 1) {
+			} else if (set == 2) {
+				p5Canvas.temp = 40;
+			} else if (set == 3) {
+				p5Canvas.temp = 60;
+			} else if (set == 4) {
+				p5Canvas.temp = 100;
+			} else if (set == 5) {
+			} else if (set == 6) {
+			}
+			break;
+		case 4:
+			break;
+		}
+		
 	}
 	
 	public void customizeInterface(int sim, int set)
@@ -857,6 +885,8 @@ public class Unit5 extends UnitBase {
 				main.heatSlider.setEnabled(false);
 				main.volumeSlider.setEnabled(false);
 			}
+			main.volumeLabel.setText(main.defaultVolume+ " L");
+
 			break;
 		case 4:
 			main.heatSlider.setEnabled(false);
@@ -884,7 +914,7 @@ public class Unit5 extends UnitBase {
 			if (set == 1) {
 				speed = 4;
 			} else if (set == 2) {
-				speed = 4;
+				speed = 8;
 			}
 			break;
 		case 2:
@@ -944,14 +974,14 @@ public class Unit5 extends UnitBase {
 		case 1:
 			if (set == 1) {
 				lblConText1.setText("[Methane]:");
-				lblConValue1.setText(" M");
+				lblConValue1.setText("16.67 M");
 				lblConText2.setText("[Oxygen]:");
-				lblConValue2.setText(" M");
+				lblConValue2.setText("16.67 M");
 				lblConText3.setText("[Carbon Dioxide]:");
-				lblConValue3.setText(" M");
+				lblConValue3.setText("0 M");
 				lblConText4.setText("[Water]:");
-				lblConValue4.setText(" M");
-				lblVolumeValue.setText(" mL");
+				lblConValue4.setText("0 M");
+				lblVolumeValue.setText("60.0 mL");
 				dashboard.add(lblConText1, "cell 0 1");
 				dashboard.add(lblConValue1, "cell 1 1");
 				dashboard.add(lblConText2, "cell 0 2");
@@ -964,12 +994,12 @@ public class Unit5 extends UnitBase {
 				dashboard.add(lblVolumeValue, "cell 1 5");
 			} else if (set == 2) {
 				lblConText1.setText("[Hydrogen Iodide]:");
-				lblConValue1.setText(" M");
+				lblConValue1.setText("16.67 M");
 				lblConText2.setText("[Hydrogen]:");
-				lblConValue2.setText(" M");
+				lblConValue2.setText("0 M");
 				lblConText3.setText("[Iodine]:");
-				lblConValue3.setText(" M");
-				lblVolumeValue.setText(" mL");
+				lblConValue3.setText("0 M");
+				lblVolumeValue.setText("60.0 mL");
 				dashboard.add(lblConText1, "cell 0 1");
 				dashboard.add(lblConValue1, "cell 1 1");
 				dashboard.add(lblConText2, "cell 0 2");
@@ -981,7 +1011,9 @@ public class Unit5 extends UnitBase {
 			}
 			break;
 		case 2:
-			lblVolumeValue.setText(" mL");
+			lblVolumeValue.setText(p5Canvas.currentVolume+" mL");
+			lblTempValue.setText("25 \u2103");
+			lblPressureValue.setText("825.86 kPa");
 			dashboard.add(lblPressureText, "cell 0 1");
 			dashboard.add(lblPressureValue, "cell 1 1");
 			dashboard.add(lblTempText, "cell 0 2");
@@ -1020,16 +1052,55 @@ public class Unit5 extends UnitBase {
 			dashboard.add(barVolume, "cell 2 2" + alignStr);
 			dashboard.add(barMol, "cell 4 2" + alignStr);
 			dashboard.add(barTemp, "cell 8 2" + alignStr);
+				switch(set)
+				{
+				case 1:
+					barPressure.setValue(825.86f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(25);
+					break;
+				case 2:
+					barPressure.setValue(867.43f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(40);
+					break;
+				case 3:
+					barPressure.setValue(922.85f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(60);
+					break;
+				case 4:
+					barPressure.setValue(1033.71f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(100);
+					break;
+				case 5:
+					barPressure.setValue(825.86f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(25);
+					break;
+				case 6:
+					barPressure.setValue(825.86f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(25);
+					break;
+				}
 			break;
 		case 4:
 			if (set == 1) {
 				lblConText1.setText("[Ammonia]:");
-				lblConValue1.setText(" M");
+				lblConValue1.setText("16.67 M");
 				lblConText2.setText("[Hydrogen]:");
-				lblConValue2.setText(" M");
+				lblConValue2.setText("0 M");
 				lblConText3.setText("[Nitrogen]:");
-				lblConValue3.setText(" M");
-				lblVolumeValue.setText(" mL");
+				lblConValue3.setText("0 M");
+				lblVolumeValue.setText(p5Canvas.currentVolume+" mL");
 				dashboard.add(lblConText1, "cell 0 1");
 				dashboard.add(lblConValue1, "cell 1 1");
 				dashboard.add(lblConText2, "cell 0 2");
@@ -1040,12 +1111,12 @@ public class Unit5 extends UnitBase {
 				dashboard.add(lblVolumeValue, "cell 1 4");
 			} else if (set == 2) {
 				lblConText1.setText("[Nitrogen-Dioxide]:");
-				lblConValue1.setText(" M");
+				lblConValue1.setText("16.67 M");
 				lblConText2.setText("[Nitric-Oxide]:");
-				lblConValue2.setText(" M");
+				lblConValue2.setText("0 M");
 				lblConText3.setText("[Oxygen]:");
-				lblConValue3.setText(" M");
-				lblVolumeValue.setText(" mL");
+				lblConValue3.setText("0 M");
+				lblVolumeValue.setText(p5Canvas.currentVolume+" mL");
 				dashboard.add(lblConText1, "cell 0 1");
 				dashboard.add(lblConValue1, "cell 1 1");
 				dashboard.add(lblConText2, "cell 0 2");
@@ -1056,14 +1127,14 @@ public class Unit5 extends UnitBase {
 				dashboard.add(lblVolumeValue, "cell 1 4");
 			} else if (set == 3) {
 				lblConText1.setText("[Carbon-Monoxide]:");
-				lblConValue1.setText(" M");
+				lblConValue1.setText("16.67 M");
 				lblConText2.setText("[Nitrogen-Dioxide]:");
-				lblConValue2.setText(" M");
+				lblConValue2.setText("16.67 M");
 				lblConText3.setText("[Carbon-Dioxide]:");
-				lblConValue3.setText(" M");
+				lblConValue3.setText("0 M");
 				lblConText4.setText("[Nitric-Oxide]:");
-				lblConValue4.setText(" M");
-				lblVolumeValue.setText(" mL");
+				lblConValue4.setText("0 M");
+				lblVolumeValue.setText(p5Canvas.currentVolume+" mL");
 				dashboard.add(lblConText1, "cell 0 1");
 				dashboard.add(lblConValue1, "cell 1 1");
 				dashboard.add(lblConText2, "cell 0 2");
@@ -1114,11 +1185,6 @@ public class Unit5 extends UnitBase {
 
 	}
 	
-	private void clearAllMoleculeForce() {
-		for (Molecule mole : State.molecules) {
-			mole.clearForce();
-		}
-	}
 	
 	//Compute force function for Sim 1 Set 1
 	private void computeForceSim1Set1()
@@ -1534,7 +1600,7 @@ public class Unit5 extends UnitBase {
 		case 1:
 			// Sim 1 set 1
 			if (reactants.contains("Methane") && reactants.contains("Oxygen")) {
-				float radius = 125;
+				float radius = 175;
 				probability = 0.6f;
 				randomFloat = rand.nextFloat();
 				if (randomFloat <= probability) {
@@ -1720,8 +1786,10 @@ public class Unit5 extends UnitBase {
 		}
 
 		if (lblVolumeValue.isShowing()) {
-			lblVolumeValue.setText(Float.toString(p5Canvas.currentVolume)
-					+ " mL");
+			
+				lblVolumeValue.setText(Float.toString(p5Canvas.currentVolume)
+						+ " mL");
+			
 		}
 		if (lblTempValue.isShowing()) {
 			output = myFormatter.format(p5Canvas.temp);

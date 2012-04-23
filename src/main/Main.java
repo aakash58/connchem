@@ -539,7 +539,7 @@ public class Main {
 							
 							JButton btnSpark = new JButton();
 							JLabel lblSpark = new JLabel("Add Spark");
-							btnSpark.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Catalyst.png")));
+							btnSpark.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Spark.png")));
 							//Dimension di = new Dimension(buttonPanel.getWidth(),30);
 							//btnSpark.setSize(di);
 							btnSpark.addMouseListener(btnSparkListener);

@@ -399,6 +399,7 @@ public class Unit6 extends UnitBase {
 	{
 		if(sim==2)
 		{
+			/*
 			//We dont change pressure unless user drag volume slider	
 			if(p5Canvas.currentVolume==defaultVolume)
 			{
@@ -409,6 +410,7 @@ public class Unit6 extends UnitBase {
 				float ratio = (float)p5Canvas.currentVolume/defaultVolume;
 				p5Canvas.pressure = defaultPressure/ratio;
 			}
+			*/
 		}
 	}
 	
@@ -570,14 +572,15 @@ public class Unit6 extends UnitBase {
 		switch(sim)
 		{
 		case 1:
-			main.heatSlider.setEnabled(false);
-			main.volumeSlider.setEnabled(false);
 			if(set==1)
 				keq=0;
 			else if (set==2)
 				keq=0.01f;
 			else if(set ==3)
+			{
 				keq=0;
+				p5Canvas.temp=105;
+			}
 			else if(set==4)
 			{
 				keq=1.1f;
@@ -592,6 +595,25 @@ public class Unit6 extends UnitBase {
 			break;
 		}
 		updateMoleculeCon();
+	}
+	
+	//Customize Interface in Main reset after all interface have been initialized
+	public void customizeInterface(int sim, int set)
+	{
+		Main main = p5Canvas.getMain();
+		//Customization
+		switch(p5Canvas.getSim())
+		{
+		case 1:
+			main.heatSlider.setEnabled(false);
+			main.volumeSlider.setEnabled(false);
+			break;
+		case 2:
+			main.volumeLabel.setText(p5Canvas.currentVolume+" L");
+			break;
+		
+		}
+
 	}
 
 	private void setupSpeed() {
@@ -637,7 +659,7 @@ public class Unit6 extends UnitBase {
 	@Override
 	public void updateOutput(int sim, int set) {
 		// Update lblTempValue
-		DecimalFormat myFormatter = new DecimalFormat("###.###");
+		DecimalFormat myFormatter = new DecimalFormat("###.##");
 		String output = null;
 		updateMoleculeCon();
 
@@ -654,6 +676,11 @@ public class Unit6 extends UnitBase {
 		if (lblVolumeValue.isShowing()) {
 			lblVolumeValue.setText(Float.toString(p5Canvas.currentVolume)
 					+ " mL");
+			if(sim==2)
+			{
+				lblVolumeValue.setText(Float.toString(p5Canvas.currentVolume)
+						+ " L");
+			}
 		}
 		if (lblTempValue.isShowing()) {
 			float temp = p5Canvas.temp;
@@ -727,7 +754,7 @@ public class Unit6 extends UnitBase {
 					x_ = centerX + 0.7f * moleWidth + i % dimension * xInterval;
 				}
 
-				centerY = p5Canvas.y + p5Canvas.h - moleHeight -rowNum * lineSpace
+				centerY = p5Canvas.y + p5Canvas.h  -rowNum * lineSpace
 						- p5Canvas.boundaries.difVolume;
 				y_ = centerY + i / dimension * lineSpace;
 				res = State.molecules.add(new Molecule(x_, y_, compoundName, box2d,
@@ -828,6 +855,7 @@ public class Unit6 extends UnitBase {
 						forceUpdated = true;
 					}
 				}
+				computeForceSim1Set1SO2();
 			}
 			else if( set ==2 )
 				computeForceSim1Set2();
@@ -849,11 +877,7 @@ public class Unit6 extends UnitBase {
 		
 	}
 
-	private void clearAllMoleculeForce() {
-		for (Molecule mole : State.molecules) {
-			mole.clearForce();
-		}
-	}
+
 	//Compute force function for Sim 1 Set 1
 	private void computeForceSim1Set1() {
 		Molecule mole = null;
@@ -865,6 +889,9 @@ public class Unit6 extends UnitBase {
 		float randYValue = 0;
 		boolean randXDir = false;
 		boolean randYDir = false;
+		float topBoundary = p5Canvas.h/4*3;
+		float gravityCompensation = 0.2f;
+		float gravityScale = 0.01f;
 
 		for (int i = 0; i < State.molecules.size(); i++) {
 			if (State.molecules.get(i).getName().equals("Sulfur")) // Only compute
@@ -882,6 +909,32 @@ public class Unit6 extends UnitBase {
 
 					mole.sumForceX[e] = randXValue;
 					mole.sumForceY[e] = randYValue;
+				}
+			}
+		}
+	}
+	
+	private void computeForceSim1Set1SO2()
+	{
+		float topBoundary = p5Canvas.h/4*3;
+		float gravityCompensation = 1f;
+		float gravityScale = 0.1f;
+		
+		// Check positions of all Gas molecules, in case they are not going
+		// to low
+		for(Molecule mole:State.getMolecules())
+		{
+			Vec2 pos = box2d.coordWorldToPixels(mole.getPosition());
+
+			if(mole.getName().equals("Sulfur-Dioxide"))
+			{
+				if (pos.y > topBoundary) {
+					for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { // Select
+																					// element
+						mole.sumForceX[thisE] += 0;
+						mole.sumForceY[thisE] += (gravityCompensation+ gravityScale*(pos.y-topBoundary));
+		
+					}
 				}
 			}
 		}
@@ -1163,6 +1216,10 @@ public class Unit6 extends UnitBase {
 			dashboard.add(lblVolumeValue,"cell 1 3");
 			dashboard.add(lblPressureText, "cell 0 4");
 			dashboard.add(lblPressureValue,"cell 1 4");
+			
+			lblTempValue.setText("25 \u2103");
+			lblVolumeValue.setText("60.0 L");
+			lblPressureValue.setText("825.86 kPa");
 			
 			break;
 		}

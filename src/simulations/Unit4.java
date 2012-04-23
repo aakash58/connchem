@@ -252,9 +252,6 @@ public class Unit4 extends UnitBase {
 			//Heat slider control disabled
 			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
-		case 2:
-			p5Canvas.temp =100;
-			break;
 		case 3:
 			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
@@ -588,7 +585,7 @@ public class Unit4 extends UnitBase {
 			//collisionColors.add(initialColor);
 			// State.molecules.get(trailMoleculeId).setShowTrail(true);
 		}
-		lastMole = State.getCompoundNum();
+		lastMole = State.getMoleculeNum();
 		
 	}
 	
