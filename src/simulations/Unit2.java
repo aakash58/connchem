@@ -1315,48 +1315,108 @@ public class Unit2 extends UnitBase{
 	}
 
 	// Unit2 Set5
-	public void computeForceAceticAcid(int index, Molecule mIndex) { // draw
-																		// background
-		float xMul = 2f;
-		for (int e = 0; e < mIndex.getNumElement(); e++) {
-			int indexCharge = mIndex.elementCharges.get(e);
-			Vec2 locIndex = mIndex.getElementLocation(e);
-			mIndex.sumForceX[e] = 0;
-			mIndex.sumForceY[e] = 0;
-			for (int i = 0; i < molecules.size(); i++) {
-				if (i == index)
-					continue;
-				Molecule m = molecules.get(i);
-				float forceX;
-				float forceY;
-				for (int e2 = 0; e2 < m.getNumElement(); e2++) {
-					Vec2 loc = m.getElementLocation(e2);
-					if (loc == null || locIndex == null)
-						continue;
-					float x = locIndex.x - loc.x;
-					float y = locIndex.y - loc.y;
-					float dis = x * x + y * y;
-					forceX = (float) ((x / Math.pow(dis, 1.5)) * 0.1);
-					forceY = (float) ((y / Math.pow(dis, 1.5)) * 0.1);
-					if ((p5Canvas.temp <= 0)
-							|| (p5Canvas.temp < mIndex.freezingTem && !m.getName()
-									.equals("Water"))) {
-						forceX *= 40;
-						forceY *= 40;
-					}
-					int charge = m.elementCharges.get(e2);
-					int mul = charge * indexCharge;
-					if (mul < 0) {
-						mIndex.sumForceX[e] += mul * forceX;
-						mIndex.sumForceY[e] += mul * forceY;
+	public void computeForceAceticAcid(int index, Molecule mIndex) { 
 
-					} else if (mul > 0) {
-						mIndex.sumForceX[e] += mul * forceX * mIndex.chargeRate;
-						mIndex.sumForceY[e] += mul * forceY * mIndex.chargeRate;
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+		float xValue = 0;
+		float yValue = 0;
+		float dis = 0;
+		float forceX = 0;
+		float forceY = 0;
+		float forceYCompensation = 0.02f;
+		float repulsiveForce = 1.5f; //How strong the repulsive force is
+		float botBoundary = p5Canvas.h/5*4;
+		float topBoundary = p5Canvas.h/2;
+		float gravityCompensation = 0.2f;
+		float gravityScale = 0.01f;
+		
+		for(Molecule moleThis : State.getMolecules())
+		{
+			Vec2 pos = box2d.coordWorldToPixels(moleThis.getPosition());
+			//Push Acetic-Acid away from each other
+			//Force only affects when molecule reach the bottom
+			if(moleThis.getName().equals("Acetic-Acid") && pos.y>botBoundary) 
+			{
+				//If there is no water around, Acetic-Acid should be sticky
+				if(getCompoundNumAround(moleThis,"Water",250)<3)
+				{
+					for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { 
+						locThis.set(moleThis.getElementLocation(thisE));
+						
+						moleThis.sumForceX[thisE] = 0;
+						moleThis.sumForceY[thisE] = 0;
+						ArrayList<Molecule> aceticAcid = State.getMoleculesByName("Acetic-Acid");
+ 						for (Molecule moleOther: aceticAcid) {
+ 							if(moleThis==moleOther)
+ 								continue;
+							locOther.set(moleOther.getPosition());
+							xValue = locThis.x - locOther.x;
+							yValue = locThis.y - locOther.y;
+							dis = (float) Math.sqrt(xValue * xValue + yValue
+							* yValue);
+							forceX = (float) ((xValue / dis) * (repulsiveForce*-1/Math.pow(dis, 2)));
+							forceY = (float) ((yValue / dis) * (repulsiveForce*-1/Math.pow(dis, 2)));
+							
+							moleThis.sumForceX[thisE] += forceX;
+							moleThis.sumForceY[thisE] += forceY;						
+							
+						}
+					}
+				}
+				else
+				{
+ 				for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { 
+							locThis.set(moleThis.getElementLocation(thisE));
+							
+							moleThis.sumForceX[thisE] = 0;
+							moleThis.sumForceY[thisE] = 0;
+							ArrayList<Molecule> aceticAcid = State.getMoleculesByName("Acetic-Acid");
+	 						for (Molecule moleOther: aceticAcid) {
+	 							if(moleThis==moleOther)
+	 								continue;
+								locOther.set(moleOther.getPosition());
+								xValue = locThis.x - locOther.x;
+								yValue = locThis.y - locOther.y;
+								dis = (float) Math.sqrt(xValue * xValue + yValue
+								* yValue);
+								forceX = (float) ((xValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
+								forceY = (float) ((yValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
+								
+								moleThis.sumForceX[thisE] += forceX;
+								//moleThis.sumForceY[thisE] += forceYCompensation+forceY;						
+							
+						}
 					}
 				}
 			}
+			
+			
 		}
+	}
+	
+	//Get the number of specific molecules around
+	private int getCompoundNumAround(Molecule moleThis, String name, int range)
+	{
+		Vec2 posThis = box2d.coordWorldToPixels(moleThis.getPosition());
+		int num = 0;
+		for(Molecule moleOther: State.getMoleculesByName(name))
+		{
+			Vec2 posOther = box2d.coordWorldToPixels(moleOther.getPosition());
+			if (range > computeDistance(posThis, posOther)) {
+				num++;
+			}
+		}
+		
+		return num;
+	}
+	
+	private float computeDistance(Vec2 v1, Vec2 v2) {
+		float dis = 0;
+		dis = (v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y);
+		dis = (float) Math.sqrt(dis);
+
+		return dis;
 	}
 
 	// Unit2 Set7
@@ -1986,7 +2046,9 @@ public class Unit2 extends UnitBase{
 				checkSpeed(i,m);
 			}
 			else if(set==5)
+			{
 				computeForceAceticAcid(i,m);
+			}
 			else if(set==7){
 				computeForceNaHCO3(i,m);
 				computeForceFromWater(i,m);	
@@ -2149,6 +2211,8 @@ public class Unit2 extends UnitBase{
 				else if (name.equals("Silver"))
 					mole.setRatioKE(1.0f/12);
 				else if (name.equals("Silicon-Dioxide"))
+					mole.setRatioKE(1.0f/4);
+				else if(name.equals("Acetic-Acid"))
 					mole.setRatioKE(1.0f/4);
 			}
 		}

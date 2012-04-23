@@ -24,8 +24,10 @@ import org.jbox2d.dynamics.contacts.Contact;
 import data.DBinterface;
 import data.State;
 
+import simulations.models.Boundary;
 import simulations.models.Compound;
 import simulations.models.Molecule;
+import simulations.models.Molecule.mState;
 import simulations.models.Simulation;
 import simulations.models.Simulation.SpawnStyle;
 
@@ -72,8 +74,13 @@ public class Unit7 extends UnitBase {
 	private JLabel lblSystemEntropyText;
 	private JLabel lblSystemEntropyValue;
 	//Sim 4
-	private JLabel lblReactantText;
-	private JLabel lblProductText;
+	private JLabel lblSubstanceText;
+	private JLabel lblKineticEnergyText;
+	private JLabel lblPotentialEnergyText;
+	private JLabel lblPentaneNameText;
+	private JLabel lblOxygenNameText;
+	private JLabel lblCarbonDioxideNameText;
+	private JLabel lblWaterNameText;
 	private JLabel lblPentanePEText;
 	private JLabel lblPentanePEValue;
 	private JLabel lblPentaneKEText;
@@ -121,13 +128,16 @@ public class Unit7 extends UnitBase {
 	private int numMoleculePerMole = 10;
 	private float averageVelocity = 0f;
 	private boolean sparkAdded;
+	private float defaultVolume=0;
+	private float defaultTemp = 0;
 	
 	private HashMap<String,Float> compoundKEHash = new HashMap<String,Float>();
 	private HashMap<String,Float> compoundPEHash = new HashMap<String,Float>();
 	private HashMap<String,Float> compoundEnthalpyHash = new HashMap<String,Float>();
 	
 	private HashMap<String, Float> moleculeMassHash; //Prepare mass value for graph
-	private boolean [] collisionMark = null;
+	private int hitCount = 0; //Count how many water molecule has been hit by chlorine
+	private String inertialGasName = null; //Gas name used in Sim 5 Set 1 and Set 2
 
 
 	/**
@@ -142,6 +152,7 @@ public class Unit7 extends UnitBase {
 		setupOutputLabels();	
 		sparkAdded = false;
 		moleculeMassHash = new HashMap<String,Float>();
+		inertialGasName=new String("Chlorine");
 		}
 
 	/* (non-Javadoc)
@@ -174,12 +185,12 @@ public class Unit7 extends UnitBase {
 		simulations[3].setupElements(elements3, spawnStyles3);
 		
 		simulations[4] = new Simulation(unitNum, 5, 1);
-		String[] elements4 = { "Water","Iodine" };
-		SpawnStyle[] spawnStyles4 = { SpawnStyle.SolidCube,SpawnStyle.Gas };
+		String[] elements4 = { "Water", "Chlorine" };
+		SpawnStyle[] spawnStyles4 = { SpawnStyle.SolidCube, SpawnStyle.Gas };
 		simulations[4].setupElements(elements4, spawnStyles4);
 		
 		simulations[5] = new Simulation(unitNum, 5, 2);
-		String[] elements5 = { "Water" ,"Iodine"};
+		String[] elements5 = { "Water" ,"Chlorine"};
 		SpawnStyle[] spawnStyles5 = { SpawnStyle.Liquid,SpawnStyle.Gas };
 		simulations[5].setupElements(elements5, spawnStyles5);		
 
@@ -298,8 +309,13 @@ public class Unit7 extends UnitBase {
 		 lblSystemEntropyText = new JLabel("Entropy of System: ");
 		 lblSystemEntropyValue = new JLabel(" kJ/K");
 		//Sim 4
-		 lblReactantText = new JLabel("Reactants");
-		 lblProductText = new JLabel("Products");
+		 lblSubstanceText = new JLabel("Substances");
+		 lblKineticEnergyText = new JLabel("K.E.");
+		 lblPotentialEnergyText = new JLabel("P.E.");
+		 lblPentaneNameText = new JLabel("Pentane");
+		 lblOxygenNameText = new JLabel("Oxygen");
+		 lblCarbonDioxideNameText = new JLabel("Carbon Dioxide");
+		 lblWaterNameText = new JLabel("Water");
 		 lblPentanePEText = new JLabel("PE Pentane: ");
 		 lblPentanePEValue = new JLabel();
 		 lblPentaneKEText = new JLabel("KE Pentane: ");
@@ -347,12 +363,11 @@ public class Unit7 extends UnitBase {
 		switch(sim)
 		{
 		case 1:
-//			lblTempValue.setText(p5Canvas.temp +" \u2103");
-//			lblVolumeValue.setText(p5Canvas.currentVolume +" mL");
-			lblThermalEnergyValue.setText("0 kJ/mol");
+			lblVolumeValue.setText("31 mL");
+			lblThermalEnergyValue.setText("2.8 kJ/mol");
 			lblChemicalPEValue.setText("-59.04 kJ");
 			lblPistonKEValue.setText("0 kJ");
-			lblSystemTotalEValue.setText("0 kJ");
+			lblSystemTotalEValue.setText("1493.76 kJ");
 				dashboard.add(lblVolumeText, "cell 0 1");
 				dashboard.add(lblVolumeValue,"cell 1 1");
 				dashboard.add(lblTempText,"cell 0 2");
@@ -386,12 +401,11 @@ public class Unit7 extends UnitBase {
 			break;
 		case 3:
 			
-//			lblTempValue.setText(p5Canvas.temp +" \u2103");
-//			lblVolumeValue.setText(p5Canvas.currentVolume +" mL");
-			lblSystemEntropyValue.setText("0 kJ/K");
+			lblVolumeValue.setText("31 mL");
+			lblSystemEntropyValue.setText("0.63 kJ/K");
 			lblChemicalPEValue.setText("-59.04 kJ");
 			lblPistonKEValue.setText("0 kJ");
-			lblThermalEnergyValue.setText("0 kJ");
+			lblThermalEnergyValue.setText("2.8 kJ");
 			
 			dashboard.add(lblTempText, "cell 0 1");
 			dashboard.add(lblTempValue,"cell 1 1");
@@ -407,56 +421,66 @@ public class Unit7 extends UnitBase {
 			dashboard.add(lblThermalEnergyValue,"cell 1 6");
 			break;
 		case 4:
-			dashboard.setLayout(new MigLayout("","[][70]10[][70]","[][][][][][][][][]"));//4*8 layout
-			dashboard.add(main.lblElapsedTimeText, "cell 0 0 2 1, align right");
-			dashboard.add(main.elapsedTime, "cell 2 0 2 1, align left");
+			
 			lblPentaneKEValue.setText("0 kJ");
-			lblPentanePEValue.setText("0 kJ");
+			lblPentanePEValue.setText("-86.75 kJ");
 			lblOxygenKEValue.setText("0 kJ");
 			lblOxygenPEValue.setText("0 kJ");
 			lblCO2KEValue.setText("0 kJ");
 			lblCO2PEValue.setText("0 kJ");
 			lblWaterKEValue.setText("0 kJ");
 			lblWaterPEValue.setText("0 kJ");
-			lblSystemTotalEValue.setText("0 kJ");
+			lblSystemTotalEValue.setText("1475.88 kJ");
 			lblHeatValue.setText("0 kJ");
-			dashboard.add(this.lblReactantText,"cell 0 1 2 1, align center");
-			dashboard.add(this.lblProductText,"cell 2 1 2 1, align center");
-			dashboard.add(this.lblPentaneKEText,"cell 0 2");
-			dashboard.add(this.lblPentaneKEValue,"cell 1 2");
-			dashboard.add(this.lblPentanePEText,"cell 0 3");
-			dashboard.add(this.lblPentanePEValue,"cell 1 3");
-			dashboard.add(this.lblOxygenKEText,"cell 0 4");
-			dashboard.add(this.lblOxygenKEValue,"cell 1 4");
-			dashboard.add(this.lblOxygenPEText,"cell 0 5");
-			dashboard.add(this.lblOxygenPEValue,"cell 1 5");
-			dashboard.add(this.lblCO2KEText,"cell 2 2");
-			dashboard.add(this.lblCO2KEValue,"cell 3 2");
-			dashboard.add(this.lblCO2PEText,"cell 2 3");
-			dashboard.add(this.lblCO2PEValue,"cell 3 3");
-			dashboard.add(this.lblWaterKEText,"cell 2 4");
-			dashboard.add(this.lblWaterKEValue,"cell 3 4");
-			dashboard.add(this.lblWaterPEText,"cell 2 5");
-			dashboard.add(this.lblWaterPEValue,"cell 3 5");
-			dashboard.add(this.lblSystemTotalEText,"cell 0 6 4 1");
-			dashboard.add(this.lblSystemTotalEValue,"cell 0 6 4 1");
-			dashboard.add(this.lblTempText,"cell 0 7 4 1");
-			dashboard.add(this.lblTempValue,"cell 0 7 4 1");
-			dashboard.add(this.lblHeatText,"cell 0 8 4 1");
-			dashboard.add(this.lblHeatValue,"cell 0 8 4 1");
+			
+			dashboard.setLayout(new MigLayout("","[]15[60]10[60]","[][][][][][][][][]"));
+			dashboard.add(main.lblElapsedTimeText, "cell 0 0 , align left");
+			dashboard.add(main.elapsedTime, "cell 1 0 2 1, align left");
+			dashboard.add(lblSubstanceText,"cell 0 1");
+			dashboard.add(this.lblKineticEnergyText,"cell 2 1 ");
+			dashboard.add(this.lblPotentialEnergyText,"cell 1 1 ");
+			dashboard.add(this.lblPentaneNameText,"cell 0 2");
+			dashboard.add(this.lblPentanePEValue,"cell 1 2");
+			dashboard.add(this.lblPentaneKEValue,"cell 2 2");
+
+			dashboard.add(this.lblOxygenNameText,"cell 0 3");
+			dashboard.add(this.lblOxygenPEValue,"cell 1 3");
+			dashboard.add(this.lblOxygenKEValue,"cell 2 3");
+
+			dashboard.add(this.lblCarbonDioxideNameText,"cell 0 4");
+			dashboard.add(this.lblCO2KEValue,"cell 2 4");
+			dashboard.add(this.lblCO2PEValue,"cell 1 4");
+
+
+			dashboard.add(this.lblWaterNameText,"cell 0 5");
+			dashboard.add(this.lblWaterKEValue,"cell 2 5");
+			dashboard.add(this.lblWaterPEValue,"cell 1 5");
+			
+			dashboard.add(this.lblSystemTotalEText,"cell 0 6 3 1");
+			dashboard.add(this.lblSystemTotalEValue,"cell 0 6 3 1");
+			dashboard.add(this.lblTempText,"cell 0 7 3 1");
+			dashboard.add(this.lblTempValue,"cell 0 7 3 1");
+			dashboard.add(this.lblHeatText,"cell 0 8 3 1");
+			dashboard.add(this.lblHeatValue,"cell 0 8 3 1");
+
 			break;
 		case 5:
 			dashboard.add(lblTempText, "cell 0 1");
 			dashboard.add(this.lblTempValue,"cell 1 1");
-			if(set ==1 || set ==2)
+			if(set ==1 )
 			{
 				lblMoleculeEntropyText.setText("Entropy of Water: ");
-				lblMolecule1EntropyValue.setText("0 J/K");
+				lblMolecule1EntropyValue.setText("102.5 J/K");
 			}
-			else
+			else if(set==2)
+			{
+				lblMoleculeEntropyText.setText("Entropy of Water: ");
+				lblMolecule1EntropyValue.setText("174.87 J/K");
+			}
+			else if(set==3)
 			{
 				lblMoleculeEntropyText.setText("Entropy of Oxygen: ");	
-				lblMolecule1EntropyValue.setText("0 J/K");
+				lblMolecule1EntropyValue.setText("205.07 J/K");
 			}
 			
 			dashboard.add(this.lblMolecule1EntropyText, "cell 0 2");
@@ -472,6 +496,24 @@ public class Unit7 extends UnitBase {
 				break;
 			case 2:
 				entropy = 186.26f;
+				break;
+			case 3:
+				entropy = 472.1f;
+				break;
+			case 4:
+				entropy = 174.87f;
+				break;
+			case 5:
+				entropy = 102.5f;
+				break;
+			case 6:
+				entropy = 213.74f;
+				break;
+			case 7:
+				entropy = 270.3f;
+				break;
+			case 8:
+				entropy = 131.74f;
 				break;
 			}
 			
@@ -510,8 +552,22 @@ public class Unit7 extends UnitBase {
 			dashboard.add(this.lblProductEnthalpyValue,"cell 1 4");
 			break;
 		case 8:
-			lblSystemEntropyValue.setText("0 kJ/K");
-			lblReactantEnthalpyValue.setText("0 J/K");
+			if(set==1)
+			{
+				lblSystemEntropyValue.setText("0.23 kJ/K");
+				lblReactantEnthalpyValue.setText("0 J/K");
+			}
+			else if (set==2)
+			{
+				lblSystemEntropyValue.setText("0.32 kJ/K");
+				lblReactantEnthalpyValue.setText("-708.4 J/K");
+			}
+			else if (set==3)
+			{
+				lblSystemEntropyValue.setText("0.95 kJ/K");
+				lblReactantEnthalpyValue.setText("-86.75 J/K");
+			}
+
 			lblProductEnthalpyValue.setText("0 J/K");
 			dashboard.add(this.lblTempText, "cell 0 1");
 			dashboard.add(this.lblTempValue, "cell 1 1");
@@ -580,10 +636,7 @@ public class Unit7 extends UnitBase {
 				reactionHappened = reactSim4Set1(simulation);
 			break;
 		case 5:
-			//if(set==1 || set ==2)
-				//reactionHappened = reactSim5Set1(simulation);
-			//else
-				//reactionHappened = reactSim5Set3(simulation);
+			constrainWaterMolecule();
 			break;
 		case 6:
 			//reactionHappened = reactSim6Set1(simulation);
@@ -810,6 +863,7 @@ public class Unit7 extends UnitBase {
 
 					p5Canvas.products.clear();
 					p5Canvas.killingList.clear();
+					updateTemperature(simulation);
 					return true;
 				}
 			}
@@ -863,10 +917,34 @@ public class Unit7 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			//updateCompoundNumber(simulation);
+			updateCompoundNumber(simulation);
+			updateTemperature(simulation);
 			return true;
 		}
 		return false;
+	}
+	
+	private void updateTemperature(Simulation simulation)
+	{
+		int tempIncrement = 0;
+		if(simulation.getSimNum()==8)
+		{
+			if(simulation.getSetNum()==1) //Exothermic
+			{
+				tempIncrement = 20;
+			}
+			else if(simulation.getSetNum()==2) //Endothermic
+			{
+				tempIncrement = -2;
+			}
+			else if(simulation.getSetNum()==3) //Exothermic
+			{
+				tempIncrement = 10;
+			}
+			
+			p5Canvas.temp+=tempIncrement;
+			p5Canvas.averageKineticEnergy = p5Canvas.getKEFromTemp();
+		}
 	}
 
 	private boolean reactSim7Set3(Simulation simulation) {
@@ -922,7 +1000,7 @@ public class Unit7 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			//updateCompoundNumber(simulation);
+			updateCompoundNumber(simulation);
 			return true;
 		}
 		return false;
@@ -981,7 +1059,7 @@ public class Unit7 extends UnitBase {
 				mOld[i].destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
-			//updateCompoundNumber(simulation);
+			updateCompoundNumber(simulation);
 			return true;
 		}
 		return false;
@@ -1090,9 +1168,27 @@ public class Unit7 extends UnitBase {
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
 			updateCompoundNumber(simulation);
+			updateTemperature(simulation);
 			return true;
 		}
 		return false;
+	}
+	
+	private void constrainWaterMolecule()
+	{
+		float keThreshold =1.4f;
+		if(p5Canvas.getSet()==2)
+			keThreshold = 1.6f;
+		float ratio =1 ;
+		for(Molecule waterMole: State.getMoleculesByName("Water"))
+		{
+			float ke = waterMole.getKineticEnergy();
+			if(ke>keThreshold)
+			{
+				ratio = keThreshold/ke;
+				waterMole.constrainKineticEnergy(ratio);
+			}
+		}
 	}
 
 	/* (non-Javadoc)
@@ -1102,23 +1198,29 @@ public class Unit7 extends UnitBase {
 	public void initialize() {		
 		
 		//Initialize
-		lastMole = State.getCompoundNum();
+		lastMole = State.getMoleculeNum();
 		initialTemp = p5Canvas.temp;
-		
+				
 		if(p5Canvas.isSimSelected(unitNum, 5, 1));
 		{
-			//Mark every molecule in State.molecules array list
-			collisionMark = new boolean [State.getCompoundNum()];
-			for(int i = 0;i<collisionMark.length;i++)
-			{
-				collisionMark[i] = false;
-			}
-			//Give Iodine huge momentum
+			//Give Chlorine huge huge momentum 
 			Vec2 velocity = null;
-			for(Molecule mole:State.getMoleculesByName("Iodine"))
+			for(Molecule mole:State.getMoleculesByName(inertialGasName))
 			{
 				velocity = mole.getLinearVelocity();
-				velocity.mulLocal(1);
+				if(p5Canvas.getSet()==1)
+					velocity.mulLocal(2.0f);
+				else if(p5Canvas.getSet()==2)
+					velocity.mulLocal(3.0f);
+			}
+			//Set water moleculet 
+			for(Molecule moleWater:State.getMoleculesByName("Water"))
+			{
+				moleWater.setEnableAutoStateChange(false);
+				if(p5Canvas.getSet()==1)
+					moleWater.setState(mState.Solid);
+				else if(p5Canvas.getSet()==2)
+					moleWater.setState(mState.Liquid);
 			}
 		}
 
@@ -1145,6 +1247,9 @@ public class Unit7 extends UnitBase {
 		systemEntropy = 0f;
 		heat =0f;
 		initialTemp = 0f;
+		hitCount=0;
+		defaultVolume = 0;
+		defaultTemp = 0;
 		
 		//Customization
 		int sim = p5Canvas.getSim();
@@ -1184,6 +1289,9 @@ public class Unit7 extends UnitBase {
 		case 7:
 			break;
 		case 8:
+			
+			if(set==3)
+				p5Canvas.heatSpeed = 4;
 			break;
 		}
 	}
@@ -1213,6 +1321,7 @@ public class Unit7 extends UnitBase {
 			break;
 
 		case 4:
+			main.volumeSlider.setEnabled(false);
 			p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume/2);
 			break;
 		case 5:
@@ -1278,13 +1387,15 @@ public class Unit7 extends UnitBase {
 			else if(set==6)
 				speed = 8;
 			else if (set==7)
-				speed =4 ;
+				speed =8 ;
 			break;
 		case 7:
 			speed=  4;
 			break;
 		case 8:
 			speed = 4;
+			if(set==2)
+				speed =2;
 			break;
 		}
 		getSimulation(sim, set).setSpeed(speed);
@@ -1423,6 +1534,7 @@ public class Unit7 extends UnitBase {
 			updateHeat();
 			break;
 		case 5:
+		
 			updateMoleculeStatus();
 			updateCompoundEntropy();
 			break;
@@ -1441,7 +1553,7 @@ public class Unit7 extends UnitBase {
 	
 	private void updateThermalEnergy ()
 	{
-		thermalEnergy = State.getCompoundNum()*p5Canvas.averageKineticEnergy;
+		thermalEnergy = State.getMoleculeNum()*p5Canvas.averageKineticEnergy;
 	}
 	
 	//Sum up enthalpy of all the molecules
@@ -1504,7 +1616,7 @@ public class Unit7 extends UnitBase {
 	private void updateAverageVelocity()
 	{
 		float totalVelocity = 0;
-		int size = State.getCompoundNum();
+		int size = State.getMoleculeNum();
 		if(size ==0)
 		{
 			averageVelocity = 0;
@@ -1512,7 +1624,18 @@ public class Unit7 extends UnitBase {
 		}
 		for(Molecule m: State.molecules)
 		{
-			totalVelocity += m.getLinearVelocityScalar();
+			//totalVelocity += (m.getLinearVelocityScalar()+m.getAngularVelocityScalar());
+			float velocity = m.getKineticEnergy()*2/m.getMoleculeMass();
+			velocity = (float)Math.sqrt(velocity);
+			
+			if(m.getName().equals("Oxygen"))
+				velocity *=1.6f;
+			else if(m.getName().equals("Nitrogen"))
+				velocity *=2.0f;
+			else if(m.getName().equals("Carbon-Dioxide"))
+				velocity *= 1.4f;
+			
+			totalVelocity += velocity;
 		}
 		averageVelocity = totalVelocity/size;
 	}
@@ -1534,6 +1657,17 @@ public class Unit7 extends UnitBase {
 			systemEntropy+=pe /numMoleculePerMole;
 		}
 		systemEntropy/=1000; //From J/K to kJ/K
+		
+		if(defaultTemp ==0)
+			defaultTemp = p5Canvas.temp;
+		
+		//Q= mc *deltaT
+		float Q = (p5Canvas.temp-defaultTemp)*0.2f;
+		
+		//deltaS = deltaQ/T
+		float deltaS = (Q-0)/p5Canvas.temp;
+		systemEntropy+=deltaS;
+		
 	}
 	
 	private void updateCompoundPE()
@@ -1550,7 +1684,7 @@ public class Unit7 extends UnitBase {
 			if(mole!=null)
 			{
 				chemicalPE = mole.getEnthalpy();
-				compoundNum = State.getCompoundNum(name);
+				compoundNum = State.getMoleculeNumByName(name);
 				chemicalPE*= ((float)compoundNum/numMoleculePerMole);
 				compoundPEHash.put(name, chemicalPE);
 			}
@@ -1603,6 +1737,7 @@ public class Unit7 extends UnitBase {
 	private void updateCompoundEntropy()
 	{
 		ArrayList<String> compoundNames = State.getCompoundNames();
+		float entropy = 0;
 		if(compoundNames==null || compoundNames.isEmpty())
 		{
 			compoundEntropy = 0;
@@ -1610,9 +1745,19 @@ public class Unit7 extends UnitBase {
 		else
 		{
 			String name = new String(compoundNames.get(0));
-			float entropy = ((Molecule)State.getMoleculeByName(name)).getEntropy();
-			int num = State.getCompoundNum(name);
-			compoundEntropy = entropy * num/this.numMoleculePerMole;
+			for(Molecule mole: State.getMoleculesByName(name))
+			{
+			   entropy += mole.getEntropy();
+			}
+			compoundEntropy = entropy /this.numMoleculePerMole;
+		}
+		
+		if(p5Canvas.getSet()==3) //In Sim 5 Set 3, entropy increases with temperature
+		{
+			if(defaultVolume ==0)
+				defaultVolume = p5Canvas.currentVolume;
+			float ratio = p5Canvas.currentVolume/defaultVolume;
+			compoundEntropy*=ratio;
 		}
 	}
 	//Update entropy of multiple compounds system
@@ -1620,32 +1765,99 @@ public class Unit7 extends UnitBase {
 	{
 		compoundEnthalpyHash.clear();
 		int compoundNum = 0;
+		int count =0;
 		float enthalpy = 0;
 		Molecule mole = null;
 		ArrayList<String> compoundNames = State.getCompoundNames();
+
+		Molecule mole1 = null;
+		Molecule mole2 = null;
+		float compoundEnthalpy1 = 0;
+		float compoundEnthalpy2 = 0;
 		
 		//If there is no compound insystem
 		if(compoundNames==null || compoundNames.isEmpty())
 		{
 			return;
 		}
-		for(String name:compoundNames)
+		if(p5Canvas.isSimSelected(unitNum, 8, 2))
 		{
-			
-			mole = State.getMoleculeByName(name);
-			if(mole!=null)
+			compoundNames = p5Canvas.getTableView().getCompoundNames();
+			for(String name: compoundNames)
 			{
-				enthalpy = mole.getEnthalpy();
-				if(name.equals("Sodium-Bicarbonate"))
-					enthalpy= mole.getEnthalpy("liquid");
-				compoundNum = State.getCompoundNum(name);
-				enthalpy*= ((float)compoundNum/numMoleculePerMole);
-				compoundEnthalpyHash.put(name, enthalpy);
-			}
-			else
-				compoundEnthalpyHash.put(name, (float) 0);
+				mole = State.getMoleculeByName(name);
+				count = (int)p5Canvas.getTableView().getCountByName(name);
+				if(name.equals("Water"))
+				{
+					//The number of water product is always the same with that of CO2
+					count = (int)p5Canvas.getTableView().getCountByName("Carbon-Dioxide"); 
+				}
+				if(count ==0)
+					compoundEnthalpyHash.put(name, (float) 0);
+				else
+				{
+					if(mole!=null)
+					{
+						compoundEnthalpy1 = State.getMoleculeByName(name).getEnthalpy();
+						if(name.equals("Sodium-Bicarbonate"))
+							compoundEnthalpy1 = State.getMoleculeByName(name).getEnthalpy("liquid");
+						enthalpy = ((float)count/numMoleculePerMole)*(compoundEnthalpy1);
+					}
+					else
+					{
+						if(name.equals("Sodium-Bicarbonate"))
+						{
+							mole1 = State.getMoleculeByName("Sodium-Ion");
+							mole2 = State.getMoleculeByName("Bicarbonate");
+						}
+						else if(name.equals("Acetic-Acid"))
+						{
+							mole1 = State.getMoleculeByName("Acetate");
+							mole2 = State.getMoleculeByName("Hydrogen-Ion");
+						}
+						else if(name.equals("Sodium-Acetate"))
+						{
+							mole1 = State.getMoleculeByName("Sodium-Ion");
+							mole2 = State.getMoleculeByName("Acetate");
+						}
+						//If both ions exist, calculate enthalpy as sum of ions
+						if(mole1!=null && mole2!=null)
+						{
+						compoundEnthalpy1 = mole1.getEnthalpy("liquid");
+						compoundEnthalpy2 = mole2.getEnthalpy("liquid");
+						enthalpy = ((float)count/numMoleculePerMole)*(compoundEnthalpy1+compoundEnthalpy2);
+						}
+						else //No ions, no such compound
+						{
+							enthalpy = 0;
+						}
 
+					}
+					compoundEnthalpyHash.put(name, enthalpy);
+
+				}
+			}
 		}
+		else
+		{
+			for(String name:compoundNames)
+			{
+				mole = State.getMoleculeByName(name);
+				if(mole!=null)
+				{
+					enthalpy = mole.getEnthalpy();
+					if(name.equals("Sodium-Bicarbonate"))
+						enthalpy= mole.getEnthalpy("liquid");
+					compoundNum = State.getMoleculeNumByName(name);
+					enthalpy*= ((float)compoundNum/numMoleculePerMole);
+					compoundEnthalpyHash.put(name, enthalpy);
+				}
+				else
+					compoundEnthalpyHash.put(name, (float) 0);
+	
+			}
+		}
+		return;
 	}
 	
 	//Get the total entropy of reactants
@@ -1742,8 +1954,8 @@ public class Unit7 extends UnitBase {
 				productName.add("Water");
 				break;
 			case 3:
-				productName.add("Pentane");
-				productName.add("Oxygen");
+				productName.add("Carbon-Dioxide");
+				productName.add("Water");
 				break;
 			}
 		}
@@ -1762,17 +1974,21 @@ public class Unit7 extends UnitBase {
 	//in order to make Iodine act like gas
 	private void updateMoleculeStatus()
 	{
-		for(Molecule mole: State.getMoleculesByName("Iodine"))
+		for(Molecule mole: State.getMoleculesByName(inertialGasName))
 		{
 			mole.setGravityScale(0f);
 		}
 	}
+	
 
 	/* (non-Javadoc)
 	 * @see simulations.UnitBase#computeForce(int, int)
 	 */
 	@Override
 	protected void computeForce(int sim, int set) {
+		
+		clearAllMoleculeForce();
+
 		switch (sim) {
 		case 1:
 		case 3:
@@ -1784,8 +2000,14 @@ public class Unit7 extends UnitBase {
 			break;
 		case 5:
 
-			averageKineticEngergy();
+			if(set==1)
+			{
+			shakeIceMolecule();
+//			maintainGasSpeed();
 			computeForceIce(sim,set);
+			}
+			else if(set==2)
+				computeForceWater(sim,set);
 			break;
 		case 6:
 			if(set==5)
@@ -1793,16 +2015,184 @@ public class Unit7 extends UnitBase {
 				averageKineticEngergy();
 				computeForceGeneric(sim,set);
 			}
+			else if(set==4)
+			{
+				computeForceGeneric(sim,set);
+			}
 			break;
+		case 7:
+			computeForceSim7Set1();
+			break;
+		case 8:
+			if(set==2)
+			computeForceSim8Set2();
+		break;
 		}
 	}
 	
-	public void computeForceIce(int sim, int set) {
+	private void computeForceSim8Set2()
+	{
+		float topBoundary = p5Canvas.h/2;
+		float gravityCompensation = 0.2f;
+		float gravityScale = 0.01f;
+		float xValue = 0 ;
+		float yValue = 0;
+		float dis = 0;
+		float forceX = 0;
+		float forceY = 0;
+		float scale = 0.075f; // How strong the attract force is
+		float forceYCompensation = 0.02f;
+		float repulsiveForce = 1.2f; //How strong the repulsive force is
+
+
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+
+		for(Molecule mole: State.getMolecules())
+		{
+			Vec2 pos = box2d.coordWorldToPixels(mole.getPosition());
+			if(mole.getName().equals("Carbon-Dioxide"))  //Give gas molecule anti-gravity force
+			{
+				for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { // Select
+										// element
+					mole.sumForceX[thisE] += 0;
+					mole.sumForceY[thisE] += gravityCompensation;
+					
+					}
+			}
+
+			else{
+				//Separate Sodium-Ion
+				if(mole.getName().equals("Sodium-Ion")) //Make sodium-Ion
+				{
+					for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { 
+								locThis.set(mole.getElementLocation(thisE));
+								mole.sumForceX[thisE] = 0;
+								mole.sumForceY[thisE] = 0;
+								ArrayList<Molecule> sodiumIons = State.getMoleculesByName("Sodium-Ion");
+		 						for (Molecule moleOther: sodiumIons) {
+		 							if(mole==moleOther)
+		 								continue;
+									locOther.set(moleOther.getPosition());
+									xValue = locThis.x - locOther.x;
+									yValue = locThis.y - locOther.y;
+									dis = (float) Math.sqrt(xValue * xValue + yValue
+									* yValue);
+									forceX = (float) ((xValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
+									forceY = (float) ((yValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
+									
+									mole.sumForceX[thisE] += forceX;
+									mole.sumForceY[thisE] += forceYCompensation+forceY;						
+								
+							}
+						}
+				}
+				//Attract Bicarbonate to Hydrogen-Ion
+				else if(mole.getName().equals("Bicarbonate"))
+				{
+					for (int thisE = 0; thisE < mole.getNumElement(); thisE++) {
+							locThis.set(mole.getElementLocation(thisE));
+							mole.sumForceX[thisE] = 0;
+							mole.sumForceY[thisE] = 0;
+						ArrayList<Molecule> hydrogenIon = State.getMoleculesByName("Hydrogen-Ion");
+						for(Molecule moleOther:hydrogenIon)
+						{
+							locOther.set(moleOther.getPosition());
+							xValue = locOther.x - locThis.x;
+							yValue = locOther.y - locThis.y;
+							dis = (float) Math.sqrt(xValue * xValue + yValue
+									* yValue);
+							forceX = (float) (xValue / dis) * scale;
+							forceY = (float) (yValue / dis) * scale+gravityCompensation*0.2f;
+
+							mole.sumForceX[thisE] += forceX;
+							mole.sumForceY[thisE] += forceY;
+						}
+						
+					}
+				}
+				//separate sodium-Ions
+				else if (mole.getName().equals("Acetate"))
+					{
+					for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { // Select
+											// element
+					
+						locThis.set(mole.getElementLocation(thisE));
+						mole.sumForceX[thisE] = 0;
+						mole.sumForceY[thisE] = 0;
+						ArrayList<Molecule> acetates = State.getMoleculesByName("Acetic-Acid");
+						acetates.addAll(State.getMoleculesByName("Acetate"));
+ 						for (Molecule moleOther: acetates) {
+ 							if(mole==moleOther)
+ 								continue;
+							locOther.set(moleOther.getPosition());
+							xValue = locThis.x - locOther.x;
+							yValue = locThis.y - locOther.y;
+							dis = (float) Math.sqrt(xValue * xValue + yValue
+							* yValue);
+							forceX = (float) ((xValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
+							forceY = (float) ((yValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
+							
+							mole.sumForceX[thisE] += forceX;
+							mole.sumForceY[thisE] += forceYCompensation*0.6;						
+						
+					}
+					
+					}
+					
+					}
+				
+				// Check positions of all liquid molecules, in case they are not going
+				// to high
+				if (pos.y < topBoundary) {
+					for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { // Select
+																					// element
+						mole.sumForceX[thisE] += 0;
+						mole.sumForceY[thisE] += (gravityCompensation+ gravityScale*(topBoundary-pos.y)) * -1;
+	
+					}
+				}
+			}
+			
+		}
+		
+	}
+	
+	private void computeForceSim7Set1()
+	{
+		float topBoundary = p5Canvas.h/2;
+		float gravityCompensation = 0.2f;
+		float gravityScale = 0.01f;
+		// Check positions of all liquid molecules, in case they are not going
+		// to high
+		for(Molecule mole:State.getMolecules())
+		{
+			Vec2 pos = box2d.coordWorldToPixels(mole.getPosition());
+
+			if(mole.getName().equals("Water"))
+			{
+				if (pos.y < topBoundary) {
+					for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { // Select
+																					// element
+						mole.sumForceX[thisE] += 0;
+						mole.sumForceY[thisE] += (gravityCompensation+ gravityScale*(topBoundary-pos.y)) * -1;
+		
+					}
+				}
+			}
+		}
+	}
+	
+	private void computeForceIce(int sim, int set) {
 		Vec2 locThis = new Vec2();
 		Vec2 locOther = new Vec2();
 		float forceX = 0;
 		float forceY = 0;
 		int index = -1;
+		float topBoundary = p5Canvas.h/2;
+		Vec2 pos = new Vec2();		
+		float gravityCompensation = 0.2f;
+		float gravityScale = 0.01f;
 		ArrayList<Molecule> molecules = State.getMoleculesByName("Water");
 
 		for (Molecule moleThis : molecules) {
@@ -1834,12 +2224,98 @@ public class Unit7 extends UnitBase {
 				{
 					
 					float gravityX=0, gravityY=0;
-					if(!collisionMark[index]){ // Solid case
+					if(moleThis.isSolid()){ // Solid case
 						gravityY = 1.05f;
 						gravityX = gravityY * 2f;
-					} else { // Liquid case
+					} else if(moleThis.isLiquid()) { // Liquid case
+//						gravityY = 0.75f;
+//						gravityX = gravityY * 0.6f;
+					}
+					
+					forceX = (-direction.x / disSquare)
+							* moleOther.getBodyMass() * moleThis.getBodyMass()
+							* gravityX;
+					forceY = (-direction.y / disSquare)
+							* moleOther.getBodyMass() * moleThis.getBodyMass()
+							* gravityY;
+
+					for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) {
+						// Water case
+							if (thisE == 2) {
+								moleThis.sumForceX[thisE] += forceX * 3000;
+								moleThis.sumForceY[thisE] += forceY * 3000;
+							}
+						
+
+					}
+				} 
+
+			}
+			// Check positions of all water molecules, in case they are not going
+			// to high
+			
+			pos = box2d.coordWorldToPixels(moleThis.getPosition());
+			if (pos.y < topBoundary) {
+				for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { // Select
+																				// element
+					moleThis.sumForceX[thisE] += 0;
+					moleThis.sumForceY[thisE] += (gravityCompensation+ gravityScale*(topBoundary-pos.y)) * -1;
+
+				}
+			}
+			
+		}
+	}
+	
+	//Force Computation function for Sim 5 Set 2
+	private void computeForceWater(int sim, int set) {
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+		float forceX = 0;
+		float forceY = 0;
+		int index = -1;
+		float topBoundary = p5Canvas.h/2;
+		Vec2 pos = new Vec2();		
+		float gravityCompensation = 0.2f;
+		float gravityScale = 0.01f;
+		ArrayList<Molecule> molecules = State.getMoleculesByName("Water");
+
+		for (Molecule moleThis : molecules) {
+
+			index = State.getMoleculeIndex(moleThis);
+			locThis = moleThis.getPosition();
+			for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { // Select
+				moleThis.sumForceX[thisE] = 0;
+				moleThis.sumForceY[thisE] = 0;
+				moleThis.sumForceWaterX[thisE] = 0;
+				moleThis.sumForceWaterY[thisE] = 0;
+			}
+
+			for (Molecule moleOther:molecules) {
+				if (moleThis==moleOther)
+					continue;
+				locOther = moleOther.getPosition();
+				
+				if (locOther == null || locThis == null)
+					continue;
+				
+				float x = locThis.x - locOther.x;
+				float y = locThis.y - locOther.y;
+				float disSquare = x * x + y * y;
+				Vec2 direction = normalizeForce(new Vec2(x, y));
+
+				//Add attractive force to same kind molecule
+				if(moleThis.getName().equals(moleOther.getName()))
+				{
+					
+					float gravityX=0, gravityY=0;
+					if(moleThis.isLiquid()) { // Liquid case
 						gravityY = 0.75f;
 						gravityX = gravityY * 0.6f;
+					}
+					else //Gas case
+					{
+						
 					}
 					forceX = (-direction.x / disSquare)
 							* moleOther.getBodyMass() * moleThis.getBodyMass()
@@ -1860,6 +2336,22 @@ public class Unit7 extends UnitBase {
 				} 
 
 			}
+			// Check positions of all water molecules, in case they are not going
+			// to high
+			
+			if (moleThis.isLiquid())
+			{
+				pos = box2d.coordWorldToPixels(moleThis.getPosition());
+				if (pos.y < topBoundary) {
+					for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { // Select
+																					// element
+						moleThis.sumForceX[thisE] += 0;
+						moleThis.sumForceY[thisE] += (gravityCompensation+ gravityScale*(topBoundary-pos.y)) * -1;
+	
+					}
+				}
+			}
+			
 		}
 	}
 	
@@ -1972,60 +2464,29 @@ public class Unit7 extends UnitBase {
 
 					}
 				}
-				//If mixture, add attractive force to both water and this molecule
-				else {
-					if(moleThis.getName().equals("Water"))
-						continue;
-					forceX =(-direction.x/disSquare)*1f;
-					forceY =(-direction.y / disSquare)*1f;
-				for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) {
-
-						// Hydrogen-Peroxide case
-						if (moleThis.getName().equals("Hydrogen-Peroxide")) {
-							if (thisE == 2 || thisE == 3) {
-								moleThis.sumForceWaterX[thisE] += forceX ;
-								moleThis.sumForceWaterY[thisE] += forceY ;
-								//Add reversed force on water
-								moleOther.sumForceWaterX[2]-=forceX;
-								moleOther.sumForceWaterY[2]-=forceY;
-
-							}
-						} else if (moleThis.getName().equals("Pentane")) 
-						{
-							if(!((sim==5&&set==1)||(sim==5&&set==5)))
-							{
-							float rate = 0.3f;
-							moleThis.sumForceWaterX[thisE] += forceX*rate ;
-							moleThis.sumForceWaterY[thisE] += forceY*rate ;
-							}
-							
-						}
-
-						else if (moleThis.getName().equals("Mercury")) {
-							//Mercury doesnt mix with water
-							
-						} else if (moleThis.getName().equals("Bromine")) {
-							moleThis.sumForceWaterX[thisE] += forceX ;
-							moleThis.sumForceWaterY[thisE] += forceY ;
-						}
-						// Silver case
-						else if (moleThis.getName().equals("Silver")) {
-							moleThis.sumForceWaterX[thisE] += forceX ;
-							moleThis.sumForceWaterY[thisE] += forceY ;
-						}
-
-						else {
-							moleThis.sumForceWaterX[thisE] += forceX ;
-							moleThis.sumForceWaterY[thisE] += forceY ;
-						}
-
-					}
-
-				} 
 
 			}
 		}
 	}
+	
+	//To make all molecules of ice shake
+	//we need to distribute the kinetic energy evenly to every molecules
+	private void shakeIceMolecule()
+	{
+		int index = - 1;
+		for(Molecule mole :State.getMoleculesByName("Water"))
+		{
+			index = State.getMoleculeIndex(mole);
+			//If water molecule has not been hit yet, stay in solid phase
+			if(mole.isSolid())
+			{
+				float ratio = 0.1f/mole.getKineticEnergy();
+				//float ratio = 1;
+				mole.shakeMolecule(ratio);
+			}
+		}
+	}
+
 	
 	//To make all molecules of ice shake
 	//we need to distribute the kinetic energy evenly to every molecules
@@ -2036,10 +2497,8 @@ public class Unit7 extends UnitBase {
 		{
 			index = State.getMoleculeIndex(mole);
 			//If water molecule has not been hit yet, stay in solid phase
-			if(!collisionMark[index])
 			{
-//			float ratio = p5Canvas.averageKineticEnergy/mole.getKineticEnergy();
-				float ratio = 1;
+			float ratio = p5Canvas.averageKineticEnergy/mole.getKineticEnergy();
 			mole.shakeMolecule(ratio);
 			}
 		}
@@ -2218,6 +2677,11 @@ public class Unit7 extends UnitBase {
 		}
 		int rowNum = count / dimension + 1;
 		int colNum = dimension;
+		if(p5Canvas.getSim()==5 && p5Canvas.getSet()==2)
+		{
+			rowNum =3 ;
+			colNum = count/rowNum+1;
+		}
 		boolean isClear = false;
 		Vec2 molePos = new Vec2(0, 0); // Molecule position parameter
 		Vec2 molePosInPix = new Vec2(0, 0);
@@ -2273,8 +2737,8 @@ public class Unit7 extends UnitBase {
 			// Add molecules into p5Canvas
 			for (int i = 0; i < count; i++) {
 
-				x_ = centerX + i % dimension * moleWidth ;
-				y_ = centerY + i / dimension * moleHeight;
+				x_ = centerX + i % colNum * moleWidth ;
+				y_ = centerY + i / colNum * moleHeight;
 
 				res = molecules.add(new Molecule(x_, y_, compoundName, box2d,
 						p5Canvas, 0));
@@ -2317,7 +2781,7 @@ public class Unit7 extends UnitBase {
 		float spacing = moleWidth;
 		float maxVelocity = 40;
 		float spaceHeight = p5Canvas.h;
-		if(p5Canvas.getSim()==3||p5Canvas.getSim()==1||p5Canvas.getSim()==4)
+		if(p5Canvas.getSim()==3||p5Canvas.getSim()==1||p5Canvas.getSim()==4||p5Canvas.isSimSelected(unitNum,8,3))
 			spaceHeight = p5Canvas.h/2;
 
 		boolean isClear = false;
@@ -2331,7 +2795,7 @@ public class Unit7 extends UnitBase {
 						* (p5Canvas.w - 2 * moleWidth);
 				y_ = (p5Canvas.y+p5Canvas.h) - (moleHeight + randY.nextFloat()
 						* (spaceHeight - 2 * moleHeight));
-				if(sim==5&&(set==1||set==2))
+				if(sim==5&&(set==1||set==2)||p5Canvas.isSimSelected(unitNum,8,3))
 					y_ = (p5Canvas.y+p5Canvas.h/2) - (moleHeight + randY.nextFloat()
 							* (p5Canvas.h/2 - 2 * moleHeight));
 				molePos.set(x_, y_);
@@ -2382,7 +2846,8 @@ public class Unit7 extends UnitBase {
 				moveTopBoundary(c);
 			break;
 		case 5:
-			//markCollision(c);
+			if(p5Canvas.getSet()==1||p5Canvas.getSet()==2)
+				markCollision(c);
 			break;
 
 		}
@@ -2664,7 +3129,7 @@ public class Unit7 extends UnitBase {
 			{
 				if(reactants.contains("Hydrogen")&&reactants.contains("Oxygen"))
 				{
-					float radius = 125;
+					float radius = 225;
 					probability = 1.0f;
 					randomFloat = rand.nextFloat();
 
@@ -2687,6 +3152,7 @@ public class Unit7 extends UnitBase {
 								products.add("Water");
 								products.add("Water");
 								p5Canvas.killingList.add(mole);
+								break;
 							}
 						}
 					}
@@ -2707,7 +3173,8 @@ public class Unit7 extends UnitBase {
 			}
 			else
 			{
-				products = this.getReactionProductsSim4(reactants, m1, m2);
+				if(p5Canvas.temp>=260)
+					products = this.getReactionProductsSim4(reactants, m1, m2);
 			}
 			break;
 		
@@ -2804,29 +3271,89 @@ public class Unit7 extends UnitBase {
 	{
 		Object o1 = c.m_fixtureA.m_body.getUserData(); 
 		Object o2 = c.m_fixtureB.m_body.getUserData();
+		Molecule waterMole = null;
 		
 		if( o1==null || o2 ==null)
 			return;
 		String s1 = o1.getClass().getName();
 		String s2 = o2.getClass().getName();
-		if(s1.equals("Molecule") && s2.equals("Molecule")) 
+		if(s1.contains("Molecule") && s2.contains("Molecule")) 
 		{
 			Molecule m1 = (Molecule)o1;
 			Molecule m2 = (Molecule)o2;
 			int index = -1;
 			
-			if(m1.getName().equals("Iodine") && m2.getName().equals("Water"))
+			if(m1.getName().equals(inertialGasName) && m2.getName().equals("Water"))
 			{
 				index = State.getMoleculeIndex(m2);
+				waterMole = m2;
 			}
-			else if(m1.getName().equals("Water")&&m2.getName().equals("Iodine"))
+			else if(m1.getName().equals("Water")&&m2.getName().equals(inertialGasName))
 			{
 				index= State.getMoleculeIndex(m1);
+				waterMole = m1;
 			}
 			
 			if(index!=-1)
-				collisionMark[index] = true;				
+			{
+//				collisionMark[index] = true;
+				if(p5Canvas.getSet()==1)
+				{
+					if(waterMole.getState()==mState.Solid)
+					{
+						hitCount++;
+						waterMole.setState(mState.Liquid);
+					}
+				}
+				else if(p5Canvas.getSet()==2)
+				{
+					if(waterMole.getState()==mState.Liquid)
+					{
+						hitCount++;
+						waterMole.setState(mState.Gas);
+					}
+				}
+				
+			}
 		}
+		else if(s1.contains("Boundary")||s2.contains("Boundary"))
+		{
+			Molecule mole = null;
+			Boundary boundary = null;
+			if (s1.contains("Molecule") && s2.contains("Boundary")) {
+				mole = (Molecule) o1;
+				boundary = (Boundary) o2;
+			} else if (s1.contains("Boundary") && s2.contains("Molecule")) {
+				mole = (Molecule) o2;
+				boundary = (Boundary) o1;
+			}
+			if(mole.getName().equals(inertialGasName)) //It is inertial gas that hit the wall
+			{
+				if(hitCount<State.getMoleculeNumByName("Water")) //Still has ice left
+				{
+						maintainGasSpeed(mole); //Speed up gas if it is slow
+				}
+				
+			}
+		}
+		
+	}
+	
+	//Maintain gas speed so that it has enough scalar speed
+	private void maintainGasSpeed(Molecule mole)
+	{
+		float velThreshold = 40;
+		if(p5Canvas.getSet()==2) //If Sim 5 Set 2
+			velThreshold = 50;
+		float ratio = 1;
+		
+			if(mole.getLinearVelocityScalar()<velThreshold)
+			{
+				ratio = velThreshold/mole.getLinearVelocityScalar();
+				ratio = (float) Math.sqrt(ratio);
+				Vec2 velocity = mole.getLinearVelocity();
+				velocity.mulLocal(ratio);
+			}
 		
 	}
 	public void addSpark()
@@ -2854,7 +3381,7 @@ public class Unit7 extends UnitBase {
 		for(String name: names)
 		{
 			mass = Compound.getMoleculeWeight(name);
-			count = State.getCompoundNum();
+			count = State.getMoleculeNumByName(name);
 			totalMass = (float)count/numMoleculePerMole * mass;
 			moleculeMassHash.put(name, totalMass);
 		}

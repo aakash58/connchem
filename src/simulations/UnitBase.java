@@ -95,6 +95,12 @@ public abstract class UnitBase {
 
 	// Compute force for molecules, not necessary for all units
 	protected abstract void computeForce(int sim, int set);
+	
+	protected void clearAllMoleculeForce() {
+		for (Molecule mole : State.molecules) {
+			mole.clearForce();
+		}
+	}
 
 	// Find particular simulation object based on its sim and set number
 	public Simulation getSimulation(int sim, int set) {
@@ -981,7 +987,7 @@ public abstract class UnitBase {
 		//p5Canvas.setVolume(p5Canvas.currentVolume);
 		
 		lastTemp = p5Canvas.temp;
-		lastMole = State.molecules.size();
+		lastMole = State.getMoleculeNum();
 		lastVolume = target;
 
 	}

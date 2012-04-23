@@ -729,7 +729,7 @@ units:
       - compound: "Water"
         qty: 25
         cap: 25
-      - compound: "Iodine"
+      - compound: "Chlorine"
         qty: 5
         cap: 5
     - set: 2
@@ -737,7 +737,7 @@ units:
       - compound: "Water"
         qty: 25
         cap: 25
-      - compound: "Iodine"
+      - compound: "Chlorine"
         qty: 5
         cap: 5
     - set: 3

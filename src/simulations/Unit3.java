@@ -1298,20 +1298,23 @@ public class Unit3 extends UnitBase {
 
 					Molecule silverChloride = null;
 
-					Vec2 loc = null;
+					Vec2 loc  = silverIon.getPosition();
+					Vec2 loc2 = chloride.getPosition();
+					float x = (loc2.x<loc.x)?loc2.x:loc.x;
+					float y = (loc2.y<loc.y)?loc2.y:loc.y;
+					
+					float x1 = PBox2D.scalarWorldToPixels(x);
+					float y1 = p5Canvas.h * p5Canvas.canvasScale
+							- PBox2D.scalarWorldToPixels(y);
+					Vec2 newVec = new Vec2(x1, y1);
 
 					// Actually there is only one reaction going in each frame
 					for (int i = 0; i < p5Canvas.products.size(); i++) {
-						loc = silverIon.getPosition();
-						float x1 = PBox2D.scalarWorldToPixels(loc.x);
-						float y1 = p5Canvas.h * p5Canvas.canvasScale
-								- PBox2D.scalarWorldToPixels(loc.y);
-						Vec2 newVec = new Vec2(x1, y1);
 
 						String compoundName = new String(p5Canvas.products.get(i)); //"Silver-Chloride"
 						silverChloride = new Molecule(newVec.x, newVec.y,
 								compoundName, box2d, p5Canvas,
-								(float) (Math.PI / 2));
+								0);
 						silverChloride.setRatioKE(1 / simulation.getSpeed());
 						molecules.add(silverChloride);
 						silverChloride.body.setLinearVelocity(silverIon.body
@@ -2233,11 +2236,6 @@ public class Unit3 extends UnitBase {
 
 	}
 
-	private void clearAllMoleculeForce() {
-		for (Molecule mole : State.molecules) {
-			mole.clearForce();
-		}
-	}
 
 	//Compute force funciton for Sim 1 Set 1
 	private void computeForceNaCl() {
@@ -2349,8 +2347,8 @@ public class Unit3 extends UnitBase {
 		Vec2 thisLoc = new Vec2(0, 0);
 		Vec2 otherLoc = new Vec2(0, 0);
 		float topBoundary = p5Canvas.h/2;
-		int silverIonNum = State.getCompoundNum("Silver-Ion");
-		int silverNitrateNum = State.getCompoundNum("Silver-Nitrate");
+		int silverIonNum = State.getMoleculeNumByName("Silver-Ion");
+		int silverNitrateNum = State.getMoleculeNumByName("Silver-Nitrate");
 
 		for (int i = 0; i < molecules.size(); i++) {
 			if (molecules.get(i).getName().equals("Silver-Ion")) // Compute
@@ -2545,18 +2543,9 @@ public class Unit3 extends UnitBase {
 					}
 
 				}
-			} else if (molecules.get(i).getName().equals("Iron-II")||molecules.get(i).getName().equals("Sulfate")) // Compute
-																		// force
-																		// for
-																		// iron-II,
-																		// in
-																		// order
-																		// to
-																		// push
-																		// them
-																		// away
-																		// from
-																		// copper
+			} 
+			//Separate Iron-II 
+			else if (molecules.get(i).getName().equals("Iron-II")||molecules.get(i).getName().equals("Sulfate")) 
 			{
 				mole = molecules.get(i);
 				for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { // Select
@@ -2625,21 +2614,17 @@ public class Unit3 extends UnitBase {
 		float forceX = 0;
 		float forceY = 0;
 		float scale = 0.15f;
-		float chlorideScale = 0.1f;
+		float chlorideScale = 0.8f;
 		float forceYCompensation = 0.05f;
 		float gravityCompensation = 0.4f;
 		float topBoundary = p5Canvas.h / 2;
 		float gravityScale = 0.01f;
+		float repulsiveForce = 1.5f;
+
 
 		for (int i = 0; i < molecules.size(); i++) {
-			if (molecules.get(i).getName().equals("Silver-Ion")) // Compute
-																	// force for
-																	// copper-ion,
-																	// in order
-																	// to
-																	// attract
-																	// them to
-																	// copper
+			//Attract silver-Ion to chloride
+			if (molecules.get(i).getName().equals("Silver-Ion")) 
 			{
 
 				thisMole = molecules.get(i);
@@ -2657,10 +2642,7 @@ public class Unit3 extends UnitBase {
 						if (k == i)
 							continue;
 						otherMole = molecules.get(k);
-						if (otherMole.getName().equals("Chloride")) // We are
-																	// looking
-																	// for
-																	// chloride
+						if (otherMole.getName().equals("Chloride")) 
 						{
 							for (int otherE = 0; otherE < otherMole
 									.getNumElement(); otherE++)
@@ -2672,20 +2654,20 @@ public class Unit3 extends UnitBase {
 							yValue = otherLoc.y - thisLoc.y;
 							dis = (float) Math.sqrt(xValue * xValue + yValue
 									* yValue);
-							forceX = (float) (xValue / dis) * scale;
-							forceY = (float) (yValue / dis) * scale;
+							forceX = (float) (xValue / dis) * scale*1.5f;
+							forceY = (float) (yValue / dis) * scale*1.5f;
 
 							// Add attraction force to sodium-Ion
 							thisMole.sumForceX[thisE] += forceX;
-							thisMole.sumForceY[thisE] += forceY
-									+ forceYCompensation;
+							thisMole.sumForceY[thisE] += forceY*4
+									+ forceYCompensation*6.0f;
 							// At the same time add attraction force to Chloride
 							// In this case, number of both Silver and Chloride
 							// elements are 1;
-							otherMole.sumForceX[thisE] += forceX * (-1)
+							otherMole.sumForceX[thisE] += forceX * (-1.5f)
 									* chlorideScale;
-							otherMole.sumForceY[thisE] += (forceY + forceYCompensation)
-									* (-1) * chlorideScale;
+							otherMole.sumForceY[thisE] += forceY
+									* (-2.0f) * chlorideScale+ forceYCompensation*3.0f;
 
 						}
 					}
@@ -2734,6 +2716,66 @@ public class Unit3 extends UnitBase {
 						}
 					}
 				}
+			}
+			//separate sodium-Ions
+			else if (molecules.get(i).getName().equals("Sodium-Ion"))
+				{
+					thisMole = molecules.get(i);
+				for (int thisE = 0; thisE < thisMole.getNumElement(); thisE++) { // Select
+										// element
+				
+					thisLoc.set(thisMole.getElementLocation(thisE));
+					thisMole.sumForceX[thisE] = 0;
+					thisMole.sumForceY[thisE] = 0;
+					for (int k = 0; k < molecules.size(); k++) { // Go check
+								// forces
+								// from
+								// other
+								// molecules
+					if (k == i)
+						continue;
+					Molecule m = molecules.get(k);
+					if (m.getName().equals("Sodium-Ion")) {
+					for (int otherE = 0; otherE < m.getNumElement(); otherE++)
+						otherLoc.set(m.getElementLocation(otherE)); //Only one element
+					
+						if (thisLoc == null || otherLoc == null)
+							continue;
+						xValue = thisLoc.x - otherLoc.x;
+						yValue = thisLoc.y - otherLoc.y;
+						dis = (float) Math.sqrt(xValue * xValue + yValue
+						* yValue);
+						forceX = (float) ((xValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
+						forceY = (float) ((yValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
+						
+						thisMole.sumForceX[thisE] += forceX;
+						thisMole.sumForceY[thisE] += forceYCompensation*0.5f+forceY;
+					
+					
+					}
+				}
+				
+				}
+				
+				}
+			//Make Nitrate floating 
+			else if(molecules.get(i).getName().equals("Silver-Nitrate"))
+			{
+				thisMole = molecules.get(i);
+				for (int thisE = 0; thisE < thisMole.getNumElement(); thisE++)
+				{
+					thisMole.sumForceY[thisE] += forceYCompensation*5f;
+				}
+
+			}
+			else if(molecules.get(i).getName().equals("Nitrate"))
+			{
+				thisMole = molecules.get(i);
+				for (int thisE = 0; thisE < thisMole.getNumElement(); thisE++)
+				{
+					thisMole.sumForceY[thisE] += forceYCompensation*2f;
+				}
+
 			}
 			// Check position of other molecules, in case they are not going too
 			// high

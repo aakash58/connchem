@@ -43,11 +43,11 @@ public class State {
 	public static int getCurrentSetNumber() {
 		return currentSetNumber;
 	}*/
-	public static int getCompoundNum()
+	public static int getMoleculeNum()
 	{
 		return molecules.size();
 	}
-	public static int getCompoundNum(String compoundName)
+	public static int getMoleculeNumByName(String compoundName)
 	{
 		int count = 0;
 		for( int i = 0 ;i<molecules.size();i++)
@@ -82,6 +82,10 @@ public class State {
 		
 		return mass;
 	}
+	public static ArrayList<Molecule> getMolecules()
+	{
+		return molecules;
+	}
 	
 	public static int getMoleculeIndex(Molecule mole)
 	{
@@ -112,6 +116,8 @@ public class State {
 		}
 		return moles;
 	}
+
+	
 
 	
 	public static void reset()

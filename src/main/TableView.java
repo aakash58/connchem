@@ -426,6 +426,14 @@ public class TableView extends JPanel {
 		return data[2].indexOf(compoundName);
 	}
 	
+	public float getCountByName(String compoundName)
+	{
+		int index = data[2].indexOf(compoundName);
+		if(index>=0 && index< data[2].size())
+			return Float.parseFloat((String)data[0].get(index));
+		else return 0;
+	}
+	
 	
 	class MyTableModel extends AbstractTableModel implements TableModelListener {
 		private String[] columnNames = {};
@@ -497,6 +505,16 @@ public class TableView extends JPanel {
 	public void setColumnName(int col, String s)
 	{
 		table.getColumnModel().getColumn(col).setHeaderValue(s);
+	}
+	
+	public ArrayList<String> getCompoundNames()
+	{
+		ArrayList<String> names = new ArrayList<String>();
+		for(int i = 0;i<data[2].size();i++)
+		{
+			names.add((String)data[2].get(i));
+		}
+		return names;
 	}
 	public void setColumnWidth(int col, int w)
 	{
