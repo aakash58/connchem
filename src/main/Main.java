@@ -72,6 +72,8 @@ import java.awt.event.MouseEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
+import Util.ColorCollection;
+
 //import Util.SimpleBar;
 
 //import com.jtattoo.plaf.smart.SmartLookAndFeel;
@@ -99,8 +101,6 @@ public class Main {
 	private int selectedSim = 4;
 	private int selectedSet = 1;
 	public boolean isWelcomed = true;
-	public Color selectedColor = new Color(200, 200, 150);
-	public Color backgroundColor = Color.LIGHT_GRAY;
 	private int sliderValue = 5;
 
 	private int minSliderValue = 1;
@@ -146,6 +146,9 @@ public class Main {
 	public JCheckBox boxMoleculeTracking;
 	public JCheckBox boxDisplayForce;
 	public JCheckBox boxDisplayJoint;
+	
+	public static final int MAX_COMPOUND_NUM = 50;
+
 	
 
 	/**************************** Central Panel parameters ****************************/
@@ -201,7 +204,7 @@ public class Main {
 	JLabel lblOutput; // output label
 	JTabbedPane tabpanelGraph;
 	JPanel panelCanvas;
-	JButton btnGraphPopup;
+	public JButton btnGraphSwitch;
 	JLabel lblSubMicroscopid;
 	JLabel lblOutputMacroscopicLevel;
 	JCheckBox cBoxHideWater;
@@ -232,6 +235,7 @@ public class Main {
 	private MouseAdapter btnCatalystListener;
 	private MouseAdapter btnInertListener;
 	private MouseAdapter btnSparkListener;
+	private ActionListener btnGraphSwitchListener;
 	private ArrayList<Integer> btnIds = new ArrayList<Integer>(); // Button Ids
 																	// in Unit3
 																	// Sim2
@@ -279,7 +283,7 @@ public class Main {
 		            
 		            // set your theme
 		            SmartLookAndFeel.setCurrentTheme(props);*/
-		            com.jtattoo.plaf.graphite.GraphiteLookAndFeel.setTheme("Blue-Large-Font", "INSERT YOUR LICENSE KEY HERE", "my company");
+		            //com.jtattoo.plaf.graphite.GraphiteLookAndFeel.setTheme("Blue-Large-Font", "INSERT YOUR LICENSE KEY HERE", "my company");
 					//UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel");
 					Main window = new Main();
 					window.mainFrame.setVisible(true);
@@ -294,6 +298,8 @@ public class Main {
 	 * Create the application.
 	 */
 	public Main() {
+		ColorCollection.setupColorGlobal();
+
 		setP5Canvas(new P5Canvas(this));
 		setTableView(new TableView(this));
 		setCanvas(new Canvas(this));
@@ -439,7 +445,7 @@ public class Main {
 							continue;
 						}
 						JPanel panel = new JPanel();
-						panel.setBackground(backgroundColor);
+						panel.setBackground(ColorCollection.getColorMainBackground());
 						panel.setLayout(new MigLayout("insets 6, gap 0",
 								"[][][69.00]", "[][]"));
 						dynamicPanel.add(panel, "cell 0 " + (i+start) + ",grow");
@@ -482,7 +488,7 @@ public class Main {
 								if(selectedUnit == 2 )
 								{
 									int mToMass = 10;
-									if(selectedSet == 4  )
+									if((selectedSim==2 &&selectedSet == 4 )||(selectedSim==3&&selectedSet==4) )
 										mToMass = 20;
 									label_1.setText(lblAddTitle + value*mToMass + "g" );
 								}
@@ -693,6 +699,7 @@ public class Main {
 //				Compound.names.clear();
 //				Compound.counts.clear();
 //				Compound.caps.clear();
+				getTableView().clearData();
 				for (int i = 0; i < a.size(); i++) {
 					String s = (String) getCompoundName(selectedUnit,
 							selectedSim, selectedSet, i);
@@ -705,7 +712,7 @@ public class Main {
 					Compound.counts.add(num);
 					Compound.caps.add(cap);
 					// Update tableview before new molecule added
-					//getTableView().updateTableView();
+					getTableView().addData(s);
 					if (num > 0) {
 						// Add initial number of molecules into p5Canvas
 						if (getP5Canvas().addMoleculeRandomly(s, num)) {
@@ -718,6 +725,10 @@ public class Main {
 				Compound.setProperties();
 			}
 		}
+		
+		//Initialize mass and consentration for simulation
+		p5Canvas.initializeSimulation();
+		
 		//Reset table view on the panelCanvas 
 		getTableView().reset();
 		
@@ -730,7 +741,10 @@ public class Main {
 		// reset timer
 		resetTimer();
 		
-
+			
+		//Add the inital data to Graph
+		canvas.addDataPerTick();
+		
 
 	}
 
@@ -741,9 +755,10 @@ public class Main {
 	{
 		tempMin = -20;
 		tempMax = 200;
+		currentZoom = defaultZoom;
 		//volumeSlider.setValue(defaultVolume);
 		pressureSlider.setValue(defaultPressure);
-		zoomSlider.setValue(defaultZoom);
+		zoomSlider.setValue(currentZoom);
 		speedSlider.setValue(defaultSpeed);
 		heatSlider.setValue(defaultHeat);
 		volumeSlider.setValue(defaultVolume);
@@ -761,7 +776,7 @@ public class Main {
 		//Change play icon to "PAUSE"
 		playBtn.setIcon(new ImageIcon(Main.class
 				.getResource("/resources/png48x48/iconPlay.png")));
-
+		
 		
 		// For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
 		if (selectedUnit == 2 && (selectedSim == 3||selectedSim==1||selectedSim==2)) {
@@ -794,7 +809,7 @@ public class Main {
 		
 		resetCheckboxPanel();
 		
-		leftPanel.validate();
+		leftPanel.updateUI();
 		
 	}
 	private void resetCheckboxPanel()
@@ -864,6 +879,7 @@ public class Main {
 		
 		//Change sub-panel: panelGraph
 		panelCanvas.removeAll();
+		btnGraphSwitch.setEnabled(false);
 		
 		switch(selectedUnit)
 		{
@@ -871,7 +887,7 @@ public class Main {
 				panelCanvas.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
 						"[235.00:n][65,grow]"));
 				panelCanvas.add(getCanvas(), "cell 0 0,grow");
-				panelCanvas.add(btnGraphPopup, "cell 1 0,aligny top");
+				panelCanvas.add(btnGraphSwitch, "cell 1 0,aligny top");
 				//Add molecule table to panelCanvas
 				panelCanvas.add(getTableView(), "cell 0 1,grow");
 			break;
@@ -882,14 +898,14 @@ public class Main {
 					panelCanvas.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
 							"[235.00:n]"));
 					panelCanvas.add(getCanvas(), "cell 0 0,grow");
-					panelCanvas.add(btnGraphPopup, "cell 1 0,aligny top");
+					panelCanvas.add(btnGraphSwitch, "cell 1 0,aligny top");
 				}
 				else
 				{
 					panelCanvas.setLayout(new MigLayout("insets 0, gap 0", "[150:n,grow][]",
 							"[235.00:n][65,grow]"));
 					panelCanvas.add(getCanvas(), "cell 0 0,grow");
-					panelCanvas.add(btnGraphPopup, "cell 1 0,aligny top");
+					panelCanvas.add(btnGraphSwitch, "cell 1 0,aligny top");
 					//Add molecule table to panelCanvas
 					panelCanvas.add(getTableView(), "cell 0 1,grow");
 				}
@@ -1039,6 +1055,25 @@ public class Main {
 	 *******************************************************************/
 	public  void resetTimer() {
 		time = 0;
+		if (this.elapsedTime !=null)
+			this.elapsedTime.setText(formatTime(0));
+	}
+	
+	//format Timer output 
+	public String formatTime(long count){
+		long s = count %60; 
+		long m = count /60;
+		String sStr =""+s;
+		String mStr =""+m;
+		if (s<10)
+			sStr = "0"+sStr;
+		if (m<1)
+			return sStr;
+		else{
+			if (m<10)
+				mStr = "0"+mStr;
+			return mStr+":"+sStr;
+		}
 	}
 
 	/******************************************************************
@@ -1323,11 +1358,12 @@ public class Main {
 				"[235.00:n][65,grow]"));
 		panelCanvas.add(getCanvas(), "cell 0 0,grow");
 
-		btnGraphPopup = new JButton("");
-		btnGraphPopup.setEnabled(false);
-		btnGraphPopup.setIcon(new ImageIcon(Main.class
+		btnGraphSwitch = new JButton("");
+		btnGraphSwitch.setEnabled(false);
+		btnGraphSwitch.setIcon(new ImageIcon(Main.class
 				.getResource("/resources/png24x24/iconZoom.png")));
-		panelCanvas.add(btnGraphPopup, "cell 1 0,aligny top");
+		btnGraphSwitch.addActionListener(btnGraphSwitchListener);
+		panelCanvas.add(btnGraphSwitch, "cell 1 0,aligny top");
 		//Add molecule table to panelCanvas
 		panelCanvas.add(getTableView(), "cell 0 1,grow");
 
@@ -1420,7 +1456,10 @@ public class Main {
 			public void actionPerformed(ActionEvent e) {
 				// System.out.print(time+"  ");
 				time++;
-				getCanvas().repaint();
+				getTableView().updateTableView();
+				getCanvas().addDataPerTick();
+				
+				elapsedTime.setText(formatTime(time));
 			}
 		});
 		timer.setInitialDelay(pause);
@@ -1461,6 +1500,7 @@ public class Main {
 		};
 	}
 
+	//Set up listener for different components.
 	private void setupComponentListener() {
 		playBtnListener = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -1657,6 +1697,11 @@ public class Main {
 				p5Canvas.getUnit7().addSpark();
 			}
 		};
+		btnGraphSwitchListener  = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getCanvas().switchGraph();
+			}
+		};
 	}
 	
 	public void addMolecule(MouseEvent e, String compoundName,int num)
@@ -1720,6 +1765,7 @@ public class Main {
 		}
 	}
 
+	//Return compoent index number under current parent
 	public int getComponentIndex(Component component) {
 		if (component != null && component.getParent() != null) {
 			Container c = component.getParent();
@@ -1731,6 +1777,7 @@ public class Main {
 
 		return -1;
 	}
+	
 
 	/******************************************************************
 	 * FUNCTION : AddInputLabel() DESCRIPTION : Add Input tips label for
@@ -1799,7 +1846,7 @@ public class Main {
 		});
 
 		menuBar.add(simMenu);
-		simMenu.setBackground(selectedColor);
+		simMenu.setBackground(ColorCollection.getColorMenu());
 
 		// populate Units (first level of sim menu)
 		final ArrayList units = getUnits();
@@ -1864,10 +1911,10 @@ public class Main {
 													+ getSimName(selectedUnit,
 															selectedSim));
 											simMenu.getItem(i).setBackground(
-													selectedColor);
+													ColorCollection.getColorMenu());
 											((JMenuItem) (subMenuArrayList[i]
 													.get(j)))
-													.setBackground(selectedColor);
+													.setBackground(ColorCollection.getColorMenu());
 
 										}
 									}

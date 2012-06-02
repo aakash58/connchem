@@ -767,4 +767,9 @@ public class Unit4 extends UnitBase {
 		
 	}
 
+	@Override
+	protected void initializeSimulation(int sim, int set) {
+		
+	}
+
 }

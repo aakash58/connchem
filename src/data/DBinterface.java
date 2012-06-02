@@ -31,7 +31,7 @@ public class DBinterface {
 		try{
 			Class.forName("org.sqlite.JDBC");
 		
-			
+			/*
 			//********************** Distribution Configuration ***************************
 			ExtractFileFromJar();
 			File dbFile = new File(destDir, dbFileName);
@@ -41,15 +41,15 @@ public class DBinterface {
 				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
 			}
 			//******************************************************************************
+			*/
 			
 			
-			/*
 			//************* Debug Configuration, please comment this block before make a release version ***********
 			String dbPath = ClassLoader.getSystemResource("data/"+dbFileName).toString();
 			dbPath = dbPath.replace("file:", "");
 			conn = DriverManager.getConnection("jdbc:sqlite:src/data/chemdb");
 			//***********************************************************************************************************
-		    */
+		    
 			
 			stat = conn.createStatement();
 			

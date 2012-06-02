@@ -23,7 +23,7 @@ public class UnitList {
 		unitList[4] = new Unit5(p5Canvas,box2D);
 		unitList[5] = new Unit6(p5Canvas,box2D);
 		unitList[6] = new Unit7(p5Canvas,box2D);
-		unitList[7] = null;
+		unitList[7] = new Unit8(p5Canvas,box2D);
 		unitList[8] = null;
 		
 	}
@@ -90,6 +90,12 @@ public class UnitList {
 			unitList[unit-1].resetDashboard(sim,set);
 	}
 	
+	public void initializeSimulation(int unit, int sim,int set)
+	{
+		if(isExist(unit))
+			unitList[unit-1].initializeSimulation(sim,set);
+	}
+	
 	public void updateOutput(int unit,int sim, int set)
 	{
 		if(isExist(unit))
@@ -132,6 +138,10 @@ public class UnitList {
 	public Unit7 getUnit7()
 	{
 		return (Unit7)unitList[6];
+	}
+	public Unit8 getUnit8()
+	{
+		return (Unit8)unitList[7];
 	}
 	
 	private boolean isExist(int unit)

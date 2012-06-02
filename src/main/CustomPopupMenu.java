@@ -27,6 +27,8 @@ import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicSeparatorUI;
 
+import Util.ColorCollection;
+
 import net.miginfocom.swing.MigLayout;
 
 public class CustomPopupMenu extends JPopupMenu implements ActionListener {
@@ -89,7 +91,7 @@ public class CustomPopupMenu extends JPopupMenu implements ActionListener {
 			CustomButton b = (CustomButton) buttonList.get(i);
 			JPanel p = (JPanel) panelList.get(i);
 			if (isDefaultSetMolecule(b.getName())){
-				p.setBackground(main.backgroundColor);
+				p.setBackground(ColorCollection.getColorMainBackground());
 				b.setStatus(CustomButton.SIMULATION_DEFAULT);
 			}
 			else{

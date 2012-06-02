@@ -4,6 +4,8 @@ import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 
+import Util.ColorCollection;
+
 import processing.core.PShape;
 
 import simulations.P5Canvas;
@@ -195,7 +197,7 @@ public class Boundary {
 			p5Canvas.fill(p5Canvas.heatRGB);
 		else
 		{
-			p5Canvas.fill(p5Canvas.boundaryColor);
+			p5Canvas.fill(ColorCollection.getColorSimBoundaryInt());
 		}
 		p5Canvas.noStroke();
 		p5Canvas.rect(pShapeW/-2 , pShapeH/-2 , pShapeW , pShapeH);	

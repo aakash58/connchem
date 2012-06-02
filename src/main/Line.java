@@ -1,4 +1,4 @@
-package main;
+/*package main;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -93,6 +93,7 @@ public class Line{
   public Point getToolTipLocation(MouseEvent e) {
       return new Point(e.getX(),e.getY());
     }
-    */
+    
   
 }
+*/

@@ -544,6 +544,7 @@ public class Unit6 extends UnitBase {
 
 	@Override
 	public void initialize() {
+		this.updateMoleculeCon();
 	}
 
 	@Override
@@ -560,6 +561,8 @@ public class Unit6 extends UnitBase {
 		keq = defaultKeq;
 		addedNO2 =0;
 		addedN2O4 =0;
+		breakProbability = 0.75f; 
+
 		
 		// Customization
 		int sim = p5Canvas.getSim();
@@ -818,7 +821,7 @@ public class Unit6 extends UnitBase {
 				//Special cases
 				if(name.equals("Sulfur"))
 				{
-					con = 0.0f;
+					con = 62.3f;
 				}
 				else if(name.equals("Water"))
 				{
@@ -1232,6 +1235,12 @@ public class Unit6 extends UnitBase {
 			return moleculeConHash.get(s);
 		else
 			return 0;
+	}
+
+	@Override
+	protected void initializeSimulation(int sim, int set) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -3319,4 +3319,9 @@ public class Unit3 extends UnitBase {
 		updateMoleculeMass();
 	}
 
+	@Override
+	protected void initializeSimulation(int sim, int set) {
+		this.updateMoleculeMass()	;	
+	}
+
 }
