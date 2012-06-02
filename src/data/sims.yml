@@ -255,21 +255,13 @@ units:
         cap: 50
     - set: 2
       compounds: 
-      - compound: "Silicon Dioxide"
-        qty: 0
-        cap: 20   
-      - compound: "Water"
-        qty: 0
-        cap: 50
-    - set: 3
-      compounds: 
       - compound: "Glycerol"
         qty: 0
         cap: 8
       - compound: "Water"
         qty: 0
         cap: 50
-    - set: 4
+    - set: 3
       compounds: 
       - compound: "Calcium-Chloride"
         qty: 0
@@ -277,7 +269,7 @@ units:
       - compound: "Water"
         qty: 0
         cap: 95
-    - set: 5
+    - set: 4
       compounds: 
       - compound: "Acetic Acid"
         qty: 0
@@ -285,7 +277,7 @@ units:
       - compound: "Water"
         qty: 0
         cap: 45 
-    - set: 6
+    - set: 5
       compounds: 
       - compound: "Pentane"
         qty: 0
@@ -293,7 +285,7 @@ units:
       - compound: "Water"
         qty: 0
         cap: 40
-    - set: 7
+    - set: 6
       compounds: 
       - compound: "Sodium Bicarbonate"
         qty: 0
@@ -851,22 +843,41 @@ units:
     - set: 1
       compounds:
       - compound: "Water"
-        qty: 40
-      - compound: "Hydrochloric Acid"
+        qty: 25
+        cap: 25
+      - compound: "Hydrochloric-Acid"
         qty: 10
-      - compound: "Sodium Hydroxide"
+        cap: 10
+    - set: 2
+      compounds:
+      - compound: "Water"
+        qty: 25
+        cap: 25
+      - compound: "Sodium-Hydroxide"
         qty: 10
+        cap: 10
+    - set: 3
+      compounds:
+      - compound: "Water"
+        qty: 25
+        cap: 25
+      - compound: "Hydrochloric-Acid"
+        qty: 10
+        cap: 10
+      - compound: "Sodium-Hydroxide"
+        qty: 10
+        cap: 10
   - sim: 2
     name: "Bronsted/Lowry or Lewis Selection"
     sets:
     - set: 1
       compounds:
-      - compound: "Water"
-        qty: 40
-      - compound: "Hydrochloric Acid"
-        qty: 10
-      - compound: "Sodium Hydroxide"
-        qty: 10
+      - compound: "Hydrochloric-Acid"
+        qty: 1
+        cap: 1
+      - compound: "Sodium-Hydroxide"
+        qty: 1
+        cap: 1
     - set: 2
       compounds:
       - compound: "Water"
@@ -898,26 +909,34 @@ units:
       compounds:
       - compound: "Water"
         qty: 25
-      - compound: "Hydrochloric Acid"
-        qty: 2
+        cap: 25
+      - compound: "Hydrochloric-Acid"
+        qty: 10
+        cap: 10
     - set: 2
       compounds:
       - compound: "Water"
         qty: 25
-      - compound: "Hydrogen Fluoride"
-        qty: 25
+        cap: 25
+      - compound: "Hydrogen-Fluoride"
+        qty: 10
+        cap: 10
     - set: 3
       compounds:
       - compound: "Water"
         qty: 25
-      - compound: "Sodium Hydroxide"
-        qty: 2
+        cap: 25
+      - compound: "Sodium-Hydroxide"
+        qty: 10
+        cap: 10
     - set: 4
       compounds:
       - compound: "Water"
-        qty: 10
+        qty: 25
+        cap: 25
       - compound: "Ammonia"
         qty: 10
+        cap: 10
   - sim: 4
     name: "Identifying Acids and Bases"
     sets:
@@ -925,39 +944,48 @@ units:
       compounds:
       - compound: "Water"
         qty: 25
-      - compound: "Acetic Acid"
-        qty: 0
+        cap: 25
+      - compound: "Acetic-Acid"
+        qty: 10
+        cap: 10
     - set: 2
       compounds:
       - compound: "Water"
         qty: 25
-      - compound: "Lithium Hydroxide"
-        qty: 0
+        cap: 25
+      - compound: "Lithium-Hydroxide"
+        qty: 10
+        cap: 10
     - set: 3
       compounds:
       - compound: "Water"
         qty: 25
-      - compound: "Acetic Acid"
-        qty: 0
+        cap: 25
+      - compound: "Methylamine"
+        qty: 10
+        cap: 10
     - set: 4
       compounds:
       - compound: "Water"
         qty: 25
-      - compound: "Hydrochloric Acid"
-        qty: 0
-      - compound: "Sodium Hydroxide"
-        qty: 0                     
+        cap: 25
+      - compound: "Nitric-Acid"
+        qty: 10
+        cap: 10                    
   - sim: 5
     name: "Neutralization Reactions"
     sets:
     - set: 1
       compounds: 
       - compound: "Water"
-        qty: 0
-      - compound: "Hydrochloric Acid"
         qty: 25
-      - compound: "Sodium Hydroxide"
-        qty: 0
+        cap: 25
+      - compound: "Hydrochloric-Acid"
+        qty: 10
+        cap: 10
+      - compound: "Sodium-Hydroxide"
+        qty: 10
+        cap: 10
   - sim: 6
     name: "Titration Curves"
     sets:
@@ -965,51 +993,30 @@ units:
       compounds:
       - compound: "Water"
         qty: 25
+        cap: 25
       - compound: "Hydrochloric Acid"
         qty: 10
+        cap: 10
       - compound: "Sodium Hydroxide"
-        qty: 10
-    - set: 2
-      compounds: 
-      - compound: "Water"
-        qty: 25
-      - compound: "Ammonia"
-        qty: 25
-      - compound: "Hydrochloric Acid"
-        qty: 25    
-    - set: 3
-      compounds: 
-      - compound: "Water"
-        qty: 25
-      - compound: "Sodium Hydroxide"
-        qty: 25
-      - compound: "Acetic Acid"
-        qty: 25
-    - set: 4
-      compounds: 
-      - compound: "Water"
-        qty: 25
-      - compound: "Ammonia"
-        qty: 25
-      - compound: "Acetic Acid"
-        qty: 25
+        qty: 0
+        cap: 10
   - sim: 7
     name: "Buffers"
     sets:
     - set: 1
       compounds: 
       - compound: "Water"
-        qty: 25
-      - compound: "Bicarbonate"
+        qty: 20
+        cap: 20
+      - compound: "Ammonia"
+        qty: 10
+        cap: 10
+      - compound: "Ammonium-Chloride"
         qty: 5
-      - compound: "Carbonate"
-        qty: 5
-      - compound: "Sodium Bicarbonate"
-        qty: 5
-      - compound: "Sodium-I"
-        qty: 5
-      - compound: "Indicator"
-        qty: 2
+        cap: 10
+      - compound: "Hydrochloric-Acid"
+        qty: 0
+        cap: 15
 - unit: 9
   name: "Nuclear"
   sims:

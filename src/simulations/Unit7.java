@@ -332,7 +332,7 @@ public class Unit7 extends UnitBase {
 		 lblWaterPEValue = new JLabel();
 		 lblWaterKEText = new JLabel("KE H2O: ");
 		 lblWaterKEValue = new JLabel();
-		 lblHeatText = new JLabel("Q: ");
+		 lblHeatText = new JLabel("q: ");
 		 lblHeatValue = new JLabel();
 		//Sim 5
 		 lblMolecule1EntropyText = new JLabel("Entropy of Water:");
@@ -927,24 +927,41 @@ public class Unit7 extends UnitBase {
 	private void updateTemperature(Simulation simulation)
 	{
 		int tempIncrement = 0;
-		if(simulation.getSimNum()==8)
+		int sim = simulation.getSimNum();
+		int set = simulation.getSetNum();
+		if(sim==7)
 		{
-			if(simulation.getSetNum()==1) //Exothermic
+			if(set==1)
+			{
+				tempIncrement = 14;
+			}
+			else if(set==2)
+			{
+				tempIncrement = 66;
+			}
+			else if(set==3)
+			{
+				tempIncrement = 50;
+			}
+		}
+		else if(sim==8)
+		{
+			if(set==1) //Exothermic
 			{
 				tempIncrement = 20;
 			}
-			else if(simulation.getSetNum()==2) //Endothermic
+			else if(set==2) //Endothermic
 			{
 				tempIncrement = -2;
 			}
-			else if(simulation.getSetNum()==3) //Exothermic
+			else if(set==3) //Exothermic
 			{
 				tempIncrement = 10;
 			}
 			
-			p5Canvas.temp+=tempIncrement;
-			p5Canvas.averageKineticEnergy = p5Canvas.getKEFromTemp();
 		}
+		p5Canvas.temp+=tempIncrement;
+		p5Canvas.averageKineticEnergy = p5Canvas.getKEFromTemp();
 	}
 
 	private boolean reactSim7Set3(Simulation simulation) {
@@ -1001,6 +1018,8 @@ public class Unit7 extends UnitBase {
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
 			updateCompoundNumber(simulation);
+			updateTemperature(simulation);
+
 			return true;
 		}
 		return false;
@@ -1060,6 +1079,8 @@ public class Unit7 extends UnitBase {
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
 			updateCompoundNumber(simulation);
+			updateTemperature(simulation);
+
 			return true;
 		}
 		return false;
@@ -1108,6 +1129,7 @@ public class Unit7 extends UnitBase {
 			int sim = p5Canvas.getSim();
 			int set = p5Canvas.getSet();
 			updateCompoundNumber(unit, sim, set);
+			updateTemperature(simulation);
 			return true;
 		}
 		return false;
@@ -2021,7 +2043,7 @@ public class Unit7 extends UnitBase {
 			}
 			break;
 		case 7:
-			computeForceSim7Set1();
+			//computeForceSim7Set1();
 			break;
 		case 8:
 			if(set==2)
@@ -2105,13 +2127,16 @@ public class Unit7 extends UnitBase {
 							forceX = (float) (xValue / dis) * scale;
 							forceY = (float) (yValue / dis) * scale+gravityCompensation*0.2f;
 
-							mole.sumForceX[thisE] += forceX;
-							mole.sumForceY[thisE] += forceY;
+							mole.sumForceX[thisE] += forceX*2;
+							mole.sumForceY[thisE] += forceY*2;
+							
+							moleOther.sumForceX[0] -= forceX;
+							moleOther.sumForceY[0] -= forceY;
 						}
 						
 					}
 				}
-				//separate sodium-Ions
+				//separate Acetate
 				else if (mole.getName().equals("Acetate"))
 					{
 					for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { // Select
@@ -2133,7 +2158,7 @@ public class Unit7 extends UnitBase {
 							forceX = (float) ((xValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
 							forceY = (float) ((yValue / dis) * (repulsiveForce/Math.pow(dis, 2)));
 							
-							mole.sumForceX[thisE] += forceX;
+							mole.sumForceX[thisE] += forceX*2;
 							mole.sumForceY[thisE] += forceYCompensation*0.6;						
 						
 					}
@@ -2157,7 +2182,7 @@ public class Unit7 extends UnitBase {
 		}
 		
 	}
-	
+	/*
 	private void computeForceSim7Set1()
 	{
 		float topBoundary = p5Canvas.h/2;
@@ -2181,7 +2206,7 @@ public class Unit7 extends UnitBase {
 				}
 			}
 		}
-	}
+	}*/
 	
 	private void computeForceIce(int sim, int set) {
 		Vec2 locThis = new Vec2();
@@ -2503,7 +2528,12 @@ public class Unit7 extends UnitBase {
 			}
 		}
 	}
-	
+	public float getMoleByName(String name)
+	{
+		int countIndex = Compound.names.indexOf(name);
+		int num = Compound.counts.get(countIndex);
+		return (float)num/numMoleculePerMole;
+	}
 	
 	//Normalize the input force
 	public Vec2 normalizeForce(Vec2 v) {
@@ -3029,7 +3059,7 @@ public class Unit7 extends UnitBase {
 			{
 				if(reactants.contains("Propane")&&reactants.contains("Oxygen"))
 				{
-					float radius = 175;
+					float radius = 450;
 					probability = 1.0f;
 					randomFloat = rand.nextFloat();
 					int oxygenTotalNum = 5 ;
@@ -3072,7 +3102,7 @@ public class Unit7 extends UnitBase {
 			{
 				if(reactants.contains("Ammonia")&&reactants.contains("Oxygen"))
 				{
-					float radius = 450;
+					float radius = 550;
 					probability = 1.0f;
 					randomFloat = rand.nextFloat();
 					int oxygenTotalNum = 5 ;
@@ -3397,15 +3427,30 @@ public class Unit7 extends UnitBase {
 	
 	public void resetTableView(int sim,int set)
 	{
-		if(sim!=2)
-			super.resetTableView(sim, set);
-		else
+			
+		if(sim==2)
 		{
 			((TableView) p5Canvas.getTableView()).setColumnName(0, "Mass");
 			((TableView) p5Canvas.getTableView()).setColumnWidth(0, 20);
 			((TableView) p5Canvas.getTableView()).setColumnWidth(1, 30);
 			((TableView) p5Canvas.getTableView()).setColumnWidth(2, 100);
 		}
+		else if(sim==8||sim==7)
+		{
+			((TableView) p5Canvas.getTableView()).setColumnName(0, "Moles");
+			((TableView) p5Canvas.getTableView()).setColumnWidth(0, 20);
+			((TableView) p5Canvas.getTableView()).setColumnWidth(1, 30);
+			((TableView) p5Canvas.getTableView()).setColumnWidth(2, 100);
+		}
+		else {
+			super.resetTableView(sim, set);
+		}
+	}
+
+	@Override
+	protected void initializeSimulation(int sim, int set) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 

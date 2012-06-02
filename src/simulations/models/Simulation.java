@@ -98,6 +98,13 @@ public class Simulation {
 	{
 		return unit;
 	}
+	public boolean isSimSelected(int unit,int sim,int set)
+	{
+		if(this.unit==unit && this.sim==sim && this.set==set)
+			return true;		
+		else
+			return false;
+	}
 	
 	public String [] getElements()
 	{

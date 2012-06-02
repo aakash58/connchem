@@ -20,6 +20,7 @@ import org.jbox2d.dynamics.joints.PrismaticJoint;
 import data.DBinterface;
 import data.State;
 
+import Util.ColorCollection;
 import Util.SVGReader;
 import static data.State.*;
 
@@ -28,7 +29,6 @@ public class Molecule {
 	public enum mState {Solid,Liquid,Gas;
 
 	public static int valueOf(mState s) {
-		// TODO Auto-generated method stub
 		return 0;
 	}}
 	// We need to keep track of a Body and a width and height
@@ -93,6 +93,8 @@ public class Molecule {
 	public PrismaticJoint compoundJoints2 = null; // is Used for Unit 2 set 7
 	public DistanceJoint otherJoints = null;
 	
+	private ElectronList electronList = null;
+	
 	//Neighbors information of this molecule, that is used to find react pairs
 	public ArrayList<Molecule> neighbors = null;
 
@@ -103,6 +105,8 @@ public class Molecule {
 	private int tableIndex = -1;
 	private float ratioKE = 1;  //ratio that used to tune molecule speed with a given energy
 							//Does not change with temperature
+	
+	private float transparency = 0.0f;  //Transparency of molecule, 1.0 means totally transparent
 
 	/******************************************************************
 	 * FUNCTION : Molecule() DESCRIPTION : Molecule Constructor
@@ -111,7 +115,12 @@ public class Molecule {
 	 * parent_ (P5Canvas), angle (float) OUTPUTS: None
 	 *******************************************************************/
 	public Molecule(float x, float y, String compoundName_, PBox2D box2d_,
-			P5Canvas parent_, float angle) {
+			P5Canvas parent_, float angle)
+	{
+		this(x,y,compoundName_,box2d_,parent_,angle,compoundName_);
+	}
+	public Molecule(float x, float y, String compoundName_, PBox2D box2d_,
+			P5Canvas parent_, float angle,String svgFileName) {
 		p5Canvas = parent_;
 		box2d = box2d_;
 		name = compoundName_;
@@ -120,7 +129,7 @@ public class Molecule {
 		// compoundJointPair = new ArrayList<Molecule>();
 		fixtures = new ArrayList<Fixture>();
 
-		String path = "resources/compoundsSvg/" + compoundName_ + ".svg";
+		String path = "resources/compoundsSvg/" + svgFileName + ".svg";
 		pShape = p5Canvas.loadShape(path);
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
@@ -188,6 +197,7 @@ public class Molecule {
 
 		setPropertyByHeat(true);
 		createBody(x, y, angle);
+		electronList = new ElectronList(this);
 	}
 
 	/******************************************************************
@@ -206,6 +216,8 @@ public class Molecule {
 		State.molecules.remove(this);
 		return res;
 	}
+	
+
 
 	/******************************************************************
 	 * FUNCTION : destroyAllJoints() DESCRIPTION : Destroy all joints that are
@@ -452,6 +464,8 @@ public class Molecule {
 				m = DBinterface.getElementMass(element);
 			}
 			float d = m / (circles[i][0] * circles[i][0] * circles[i][0]);
+			fd.filter.categoryBits = 0x0002; //All the molecules that enable collision is 2
+			fd.filter.maskBits = 0x0004;  //All the objects that should not be collided is 4
 			fd.shape = circleShape;
 			fd.density = d * mul;
 			fd.friction = fric;
@@ -524,17 +538,34 @@ public class Molecule {
 	{
 		return mass;
 	}
-	//Get position in world coordinates
+	//Get position in box2d world coordinates
 	public Vec2 getPosition() {
 		return body.getPosition();
 	}
+	//Get position in p5Canvas coordinates
+	public Vec2 getPositionInPixel()
+	{
+		return box2d.coordWorldToPixels(getPosition());
+	}
+	
 	public void setPosition(Vec2 pos,float angle)
 	{
 		body.setTransform(pos, angle);
 	}
+	
+	public void setPositionInPixel(Vec2 posInPixel)
+	{
+		Vec2 posInWorld = box2d.coordPixelsToWorld(posInPixel);
+		body.setTransform(posInWorld, body.getAngle());
+	}
 	public float getAngle()
 	{
 		return body.getAngle();
+	}
+	
+	public void setAngle(float angle)
+	{
+		body.setTransform(getPosition(), angle);
 	}
 
 	public void setRestitution(float r) {
@@ -606,6 +637,61 @@ public class Molecule {
 			yTmp = body.getPosition().y;
 		}
 		/************************** Boundary Check **************************/
+
+		boundaryCheck();
+
+		// We look at each body and get its screen position
+		Vec2 pos = box2d.getBodyPixelCoord(body);
+		// Get its angle of rotation
+		float a = body.getAngle();
+
+		/********************* Draw Bodies *******************/
+		p5Canvas.pushMatrix();
+		p5Canvas.translate(pos.x, pos.y);
+		float temp = p5Canvas.temp;
+		p5Canvas.rotate(-a);
+		p5Canvas.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH);
+		
+		//Apply transparency
+		p5Canvas.noStroke();
+		p5Canvas.fill(ColorCollection.getColorSimBackgroundInt(), transparency*255); //Background color
+		for (int i = 0; i < circles.length; i++) {
+			p5Canvas.ellipse(circles[i][1] - pShapeW / 2, circles[i][2]
+					- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);
+		}
+
+		hideMolecule();
+
+		if (name.equals("Calcium-Ion")) {
+			p5Canvas.stroke(Color.BLUE.getRGB());
+		}
+		//Draw electrons
+		electronList.display();
+		
+		p5Canvas.popMatrix();
+		// End drawing
+
+		displayForces();
+
+		displayJoints(pos );
+		
+		
+		
+		//Draw element center for testing
+		/*
+		for(int e=0;e<this.elementNames.size();e++)
+		{
+			int size = 5;
+			p5Canvas.fill(204, 102, 0);
+			Vec2 loc = new Vec2(PBox2D.vectorWorldToPixels(getElementLocation(e)));
+			p5Canvas.ellipse(loc.x,p5Canvas.h * 0.77f+loc.y,size,size);
+		}
+		*/
+
+	}
+	
+	private void boundaryCheck()
+	{
 		/* If molecules go out of boundary, reset their position */
 		/* Top boundary check, top boundary has max y value */
 		if (body.getPosition().y + PBox2D.scalarPixelsToWorld(this.minSize / 2) > p5Canvas.boundaries.getTopBoundary().body
@@ -645,27 +731,15 @@ public class Molecule {
 			if (body != null && v != null)
 				body.setTransform(v, body.getAngle());
 		}
-
-		// We look at each body and get its screen position
-		Vec2 pos = box2d.getBodyPixelCoord(body);
-		// Get its angle of rotation
-
-		float a = body.getAngle();
-
-		/********************* Draw Bodies *******************/
-		p5Canvas.pushMatrix();
-		p5Canvas.translate(pos.x, pos.y);
-		float temp = p5Canvas.temp;
-		p5Canvas.rotate(-a);
-		p5Canvas.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH);
-		// parent.noFill();
-		p5Canvas.fill(Color.GRAY.getRGB(), 240);
-
+	}
+	
+	private void hideMolecule()
+	{
+		
 		/*
 		 * If molecules are selected or deselected in tableview, render or hide
 		 * them
 		 */
-
 		if (! p5Canvas.getTableView().selectedRowsIsEmpty()) {
 
 			String [] selectedMoleculesString = p5Canvas.getTableView().getSelectedMolecule();
@@ -699,9 +773,10 @@ public class Molecule {
 							}
 						}
 					}
-					if(!contains) //If selected molecules names dont contain this name
+					if(!contains) //If selected molecules names do not contain this name
 					{
 						p5Canvas.noStroke();
+						p5Canvas.fill(ColorCollection.getColorSimBackgroundInt(), 240); //Background color
 						for (int i = 0; i < circles.length; i++) {
 							p5Canvas.ellipse(circles[i][1] - pShapeW / 2, circles[i][2]
 									- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);
@@ -717,18 +792,16 @@ public class Molecule {
 		/* If hide checkbox is selected, hide them */
 		else if (p5Canvas.isHidingEnabled && !isHidden) {
 			p5Canvas.noStroke();
+			p5Canvas.fill(ColorCollection.getColorSimBackgroundInt(), 240); //Background color
 			for (int i = 0; i < circles.length; i++) {
 				p5Canvas.ellipse(circles[i][1] - pShapeW / 2, circles[i][2]
 						- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);
 			}
 		}
-
-		if (name.equals("Calcium-Ion")) {
-			p5Canvas.stroke(Color.BLUE.getRGB());
-		}
-		p5Canvas.popMatrix();
-		// End drawing
-
+	}
+	
+	private void displayForces()
+	{
 		/* Check if it is displaying forces */
 		if (p5Canvas.isDisplayForces ) {
 			int numElement = elementNames.size();
@@ -752,7 +825,10 @@ public class Molecule {
 			}
 			//this.clearForce();
 		}
-
+	}
+	
+	private void displayJoints(Vec2 pos)
+	{
 		/* Check if it is displaying joints */
 		if (p5Canvas.isDisplayJoints) {
 			// For Unit 1 and Unit 2
@@ -789,18 +865,6 @@ public class Molecule {
 
 			}
 		}
-		
-		//Draw element center for testing
-		/*
-		for(int e=0;e<this.elementNames.size();e++)
-		{
-			int size = 5;
-			p5Canvas.fill(204, 102, 0);
-			Vec2 loc = new Vec2(PBox2D.vectorWorldToPixels(getElementLocation(e)));
-			p5Canvas.ellipse(loc.x,p5Canvas.h * 0.77f+loc.y,size,size);
-		}
-		*/
-
 	}
 
 	// This function removes the particle from the box2d world
@@ -1109,7 +1173,7 @@ public class Molecule {
 	//Update molecule state manually
 	public void setState(mState st)
 	{
-		//Only if enableAutoState is true
+		//Only if enableAutoState is false
 		if(!enableAutoState)
 		{
 			state = st;
@@ -1155,6 +1219,33 @@ public class Molecule {
 	  public boolean getEnableAutoStateChange()
 	  {
 		  return this.enableAutoState;
+	  }
+	  
+	  public void setBoillingPoint(float temp	)
+	  {
+		  this.boilingTem = temp;
+	  }
+	  public void setFreezingPoint(float temp)
+	  {
+		  this.freezingTem = temp;
+	  }
+	  
+	  public P5Canvas getP5Canvas()
+	  {
+		  return p5Canvas;
+	  }
+	  
+	  public void setTransparent(float t)
+	  {
+		  transparency = t;
+	  }
+	  
+	  public void setFixtureCatergory(int cate,int mask)
+	  {
+		  Filter filter = new Filter();
+		  filter.categoryBits = cate;
+		  filter.maskBits = mask;
+		  body.getFixtureList().setFilterData(new Filter());
 	  }
 
 }

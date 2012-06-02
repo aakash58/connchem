@@ -1853,5 +1853,11 @@ public class Unit5 extends UnitBase {
 			return 0;
 	}
 
+	@Override
+	protected void initializeSimulation(int sim, int set) {
+
+		this.updateMoleculeCon();		
+	}
+
 
 }

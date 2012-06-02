@@ -79,6 +79,7 @@ public abstract class UnitBase {
 	// Reset all parameter to initial states
 	protected abstract void reset();
 	
+	protected abstract void initializeSimulation(int sim,int set);
 	
 	//Update output labels while running
 	public abstract void updateOutput(int sim,int set);
@@ -194,6 +195,7 @@ public abstract class UnitBase {
 		Vec2 topLeft = new Vec2(centerX - borderWidthX, centerY - size.y / 2);
 		Vec2 botRight = new Vec2(centerX + numCol * size.x, centerY + numRow
 				* size.y);
+		float increY = numRow*size.y;
 		// boolean dimensionDecided = false;
 
 		boolean isClear = false;
@@ -222,13 +224,18 @@ public abstract class UnitBase {
 			}
 			if (!isClear) {
 				centerX += increX;
-				topLeft = new Vec2(centerX - borderWidthX , centerY - size.y / 2);
-				botRight = new Vec2(centerX + numCol * (size.x), centerY
+				topLeft.set(centerX - borderWidthX , centerY - size.y / 2);
+				botRight.set(centerX + numCol * (size.x), centerY
 						+ numRow * size.y);
 				// If we have gone through all available areas.
 				if (botRight.x > (p5Canvas.x + p5Canvas.w)) {
-					isClear = true; // Ready to jump out
-					res = false; // Set output bolean flag to false
+					centerX = p5Canvas.x + offsetX;
+					centerY +=increY;
+					topLeft.set(centerX - borderWidthX , centerY - size.y / 2);
+					botRight.set(centerX + numCol * (size.x), centerY
+							+ numRow * size.y);
+//					isClear = true; // Ready to jump out
+//					res = false; // Set output bolean flag to false
 					// TO DO: Show tooltip on Add button when we cant add more
 					// compounds
 				}

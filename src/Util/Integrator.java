@@ -12,7 +12,7 @@ public class Integrator {
 	private float mass = 1;
 	
 	private boolean targeting = false;
-	private boolean interpolating;
+	private boolean interpolating = true;
 	private float target;
 	
 	public Integrator(float value)
@@ -65,7 +65,7 @@ public class Integrator {
 			value = target;
 		}
 		
-		if(Math.abs(target-value)<value/100)
+		if(Math.abs((target-value)/value)<0.01)
 			setTargeting(false);
 		
 	}

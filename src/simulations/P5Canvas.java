@@ -26,6 +26,7 @@ import data.DBinterface;
 import data.State;
 import data.YAMLinterface;
 
+import Util.ColorCollection;
 import Util.ColorScales;
 import static data.State.*;
 
@@ -44,7 +45,7 @@ public class P5Canvas extends PApplet {
 	private PBox2D box2d;
 	public int FRAME_RATE = 30;
 
-	
+	//FLAGS
 	public boolean isEnable = false;       //Is simulation going on or stopped
 	public boolean isHidingEnabled = false;//Is molecule hidding enabled
 	public boolean isHidden = false;       //Is molecule hidding triggered
@@ -52,6 +53,7 @@ public class P5Canvas extends PApplet {
 	public boolean isDisplayForces = false;
 	public boolean isDisplayJoints = false;
 	public boolean isDrag = false;   //Is p5Canvas being dragged
+	public boolean isBoundaryShow = true;  //If show boundary
 
 
 	public int creationCount = 0;
@@ -127,11 +129,7 @@ public class P5Canvas extends PApplet {
 	private boolean ifConstrainKE = true;
 
 
-	/******* Colors ********/
-	public int backgroundColor = (new Color(146,146,146)).getRGB();
-	public int canvasBorderColor = Color.WHITE.getRGB();
-	public int selectBorderColor = Color.WHITE.getRGB();  //The select rect color in when molecule masking enabled
-	public int boundaryColor = Color.WHITE.getRGB();
+
 	
 
 
@@ -206,7 +204,7 @@ public class P5Canvas extends PApplet {
 
 		/* Show selected contour while user create rectangle by dragging mouse */
 		if (isHidingEnabled && isHidden) {
-			this.stroke(selectBorderColor);
+			this.stroke(ColorCollection.getColorSelectionRectInt());
 			this.noFill();
 			this.rect(xStart / canvasScale, yStart / canvasScale, (mouseX
 					/ canvasScale - xStart / canvasScale), (mouseY
@@ -214,6 +212,7 @@ public class P5Canvas extends PApplet {
 		}
 
 		// Draw boundary
+		if(isBoundaryShow)
 		boundaries.display();
 
 		/*
@@ -261,7 +260,8 @@ public class P5Canvas extends PApplet {
 			m.setPropertyByHeat(false);
 		}
 
-		getMain().getCanvas().satCount = 0;
+		
+		getUnit2().satCount = 0;
 
 		// Known: V-currentVolume n-mol T-temp R
 		mol = (float)State.getMoleculeNum();
@@ -278,6 +278,10 @@ public class P5Canvas extends PApplet {
 			getUnit6().updateProperties(getSim(), getSet());
 		else if(getUnit()==7) //Update entropy and enthalpy
 			getUnit7().updateProperties(getSim(),getSet());
+		else if(getUnit()==8)
+		{
+			getUnit8().updateProperties(getSim(),getSet());
+		}
 	}
 	
 	//Print out properties on right panel
@@ -348,8 +352,8 @@ public class P5Canvas extends PApplet {
 	private void drawBackground() { // draw background
 		pushStyle();
 		//stroke(backgroundColor);
-		fill(backgroundColor);
-		stroke(canvasBorderColor);
+		fill(ColorCollection.getColorSimBackgroundInt());
+		stroke(ColorCollection.getColorSimBorderInt());
 		rect(0, 0, width, height);
 		popStyle();
 	}
@@ -444,6 +448,7 @@ public class P5Canvas extends PApplet {
 		currentVolume = getMain().defaultVolume;
 		volumeMinBoundary = 10;
 		volumeMaxBoundary = 100;
+		isBoundaryShow = true;
 		heatSpeed = 1;
 		pressure = 0;
 		boundaries.setHasWeight(false);
@@ -481,6 +486,14 @@ public class P5Canvas extends PApplet {
 		
 		firstRun = true;
 
+	}
+	
+	
+	//Called by main when all the reset have been done
+	//in order to initialize data
+	public void initializeSimulation()
+	{		
+		unitList.initializeSimulation(unit,sim,set);
 	}
 
 
@@ -959,6 +972,9 @@ public class P5Canvas extends PApplet {
 	}
 	public Unit7 getUnit7(){
 		return unitList.getUnit7();
+	}
+	public Unit8 getUnit8(){
+		return unitList.getUnit8();
 	}
 	public Main getMain() {
 		return main;

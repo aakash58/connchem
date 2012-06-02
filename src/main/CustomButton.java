@@ -17,6 +17,8 @@ import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicButtonUI;
 
+import Util.ColorCollection;
+
 public class CustomButton extends JButton {
 
 	private JPanel	panel;
@@ -25,12 +27,13 @@ public class CustomButton extends JButton {
 	public static final int SELECTED = 2;
 	private int status= DEFAULT;
 	private String name;
-	public static final Color	MENU_HIGHLIGHT_BG_COLOR	= UIManager.getColor("MenuItem.selectionBackground");
-	public static final Color	MENU_HIGHLIGHT_FG_COLOR	= UIManager.getColor("MenuItem.selectionForeground");
-	public static final Color	MENUITEM_BG_COLOR		= UIManager.getColor("MenuItem.background");
-	public static final Color	MENUITEM_FG_COLOR		= UIManager.getColor("MenuItem.foreground");
+	public static final Color MENU_HIGHLIGHT_BG_COLOR	= UIManager.getColor("MenuItem.selectionBackground");
+	public static final Color MENU_HIGHLIGHT_FG_COLOR	= UIManager.getColor("MenuItem.selectionForeground");
+	public static final Color MENUITEM_BG_COLOR		= UIManager.getColor("MenuItem.background");
+	public static final Color MENUITEM_FG_COLOR		= UIManager.getColor("MenuItem.foreground");
 	private Main main;
 
+	
 	//  This property if set to false, will result in the checked Icon not being displayed when the button is selected
 	private boolean				displayCheck			= true;
 
@@ -91,7 +94,7 @@ public class CustomButton extends JButton {
 			return;
 		if (panel!=null){
 			if (this.getStatus()==CustomButton.SELECTED){
-				panel.setBackground(main.selectedColor);
+				panel.setBackground(ColorCollection.getColorMenu());
 				this.setForeground(CustomButton.MENUITEM_FG_COLOR);
 			}
 			else{

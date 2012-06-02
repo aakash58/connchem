@@ -13,10 +13,13 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
 
+import Util.ColorCollection;
+
 import simulations.P5Canvas;
 import simulations.models.Compound;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -31,11 +34,9 @@ import java.util.List;
 public class TableView extends JPanel {
 	public JTable table = null;
 	public boolean stopUpdating = false;
-	public final int MAXCOMPOUND = 50;
 
 	public JScrollPane scrollPane;
 	public ArrayList[] data = new ArrayList[3];
-	private int sat =222;
 	public Color[] colors; 
 	private int[] selectedRows;
 	public int colorChangingRow;
@@ -101,29 +102,20 @@ public class TableView extends JPanel {
 		
 		// Set up renderer and editor for the Favorite Color column.
 		table.setDefaultRenderer(Color.class, new ColorRenderer(true));
-		table.setDefaultEditor(Color.class, new ColorEditor(this));
+		//table.setDefaultEditor(Color.class, new ColorEditor(this));
+		
+		
 		// Add the scroll pane to this panel.
 		add(scrollPane);
-		Color c = new Color(245,245,245);
-		scrollPane.getViewport().setBackground(c);
-		table.setBackground(c);
+		scrollPane.getViewport().setBackground(ColorCollection.getColorTableViewBackground());
+		table.setBackground(ColorCollection.getColorTableViewBackground());
 		
-		colors = new Color[MAXCOMPOUND];
-		colors[0]= new Color(255,0,0,sat);
-		colors[1]= new Color(0,255,0,sat);
-		colors[2]= new Color(0,0,255,sat);
-		colors[3]= new Color(255,255,0,sat);
-		colors[4]= new Color(0,255,255,sat);
-		colors[5]= new Color(255,0 ,255,sat);
-		colors[6]= Color.PINK;
-		colors[7]= Color.ORANGE;
-		for (int i = 8;i<MAXCOMPOUND;i++){
-			colors[i] = Color.BLACK;
-		}
+		colors = ColorCollection.getColorGraphLine();
+
 		
 		
 	}
-	
+
 	//Update tableView, which is presenting molecule legends below chart
 	//Reture false if values are not ready yet
 	public boolean updateTableView(){
@@ -135,16 +127,22 @@ public class TableView extends JPanel {
 		DecimalFormat myFormatter = outputFormat(unit);
 		String output = null;
 	
-		for (int i=0; i<Compound.names.size();i++){
-			name = (String)Compound.names.get(i);
-			output = myFormatter.format(dataConversion(unit,i));
+		for(int i = 0;i<getItemNum();i++)
+		{
+			double value = dataConversion(unit, i);
+			output = myFormatter.format(value);
 			data[0].set(i, output);
 		}
+//		for (int i=0; i<Compound.names.size();i++){
+//			name = (String)Compound.names.get(i);
+//			output = myFormatter.format(dataConversion(unit,i));
+//			data[0].set(i, output);
+//		}
 
 		if (this!=null && !stopUpdating){
 			//myTable.fireTableDataChanged();
-			for (int i=0; i<Compound.names.size();i++){
-			myTable.fireTableCellUpdated(i, 0);
+			for (int i=0; i<getItemNum();i++){
+				myTable.fireTableCellUpdated(i, 0);
 			}
 		}	
 		return true;
@@ -336,10 +334,7 @@ public class TableView extends JPanel {
 		
 		p5Canvas.unitList.resetTableView(unit, sim, set);
 		
-		//Add Rows corresponding to compounds
-		data[0].clear();
-		data[1].clear();
-		data[2].clear();
+		clearData();
 		
 		String name = null;
 		DecimalFormat myFormatter = outputFormat(unit);
@@ -359,9 +354,37 @@ public class TableView extends JPanel {
 		//Make sure on rows are selected
 		clearSelection();
 	}
+	//Clear previous data
+	public void clearData()
+	{
+		//Add Rows corresponding to compounds
+		data[0].clear();
+		data[1].clear();
+		data[2].clear();
+	}
+	
+	//The first time add molecule to table view to guarantee it works well
+	//Called by Main only
+	public void addData(String compoundName)
+	{
+		int unit = p5Canvas.getUnit();
+		String output = null;
+		DecimalFormat myFormatter = outputFormat(unit);
+
+		if(!data[2].contains(compoundName)) //If no name found in table, add it
+		{
+			int i = data[2].size();
+			output = myFormatter.format(0);
+			data[0].add(output);
+			data[1].add((Color)colors[i]);
+			data[2].add(compoundName);
+		}
+	}
 	
 	private float dataConversion(int unit,int indexOfCompound)
 	{
+		if(indexOfCompound>=Compound.counts.size())
+			return 0;
 		float res=0;
 		String name = null;
 		switch(unit)
@@ -382,12 +405,20 @@ public class TableView extends JPanel {
 				res = p5Canvas.getUnit6().getConByName(name);
 				break;
 			case 7:
-				if(p5Canvas.getSim()!=2)
-					res = Compound.counts.get(indexOfCompound);
-				else
+				if(p5Canvas.getSim()==2) //Sim 2 output mass
 				{
 					name = (String)Compound.names.get(indexOfCompound);
 					res =  p5Canvas.getUnit7().getMassByName(name);	
+				}
+				else if(p5Canvas.getSim()==8||p5Canvas.getSim()==7) // Sim 8 output mole
+				{
+					name = (String)Compound.names.get(indexOfCompound);
+					res = p5Canvas.getUnit7().getMoleByName(name);
+				}
+				else //output number of molecules
+				{
+					res = Compound.counts.get(indexOfCompound);
+
 				}
 				break;
 			
@@ -398,6 +429,7 @@ public class TableView extends JPanel {
 	private DecimalFormat outputFormat(int unit)
 	{
 		DecimalFormat myFormatter = null;
+		int sim = p5Canvas.getSim();
 		switch(unit)
 		{
 		default:
@@ -407,6 +439,14 @@ public class TableView extends JPanel {
 		case 5:
 		case 6:
 			myFormatter = new DecimalFormat("###.##");
+			break;
+		case 7:
+			if(sim == 2 ) //mass
+				myFormatter = new DecimalFormat("###.#");
+			else if(sim ==8||sim==7) //mol
+				myFormatter = new DecimalFormat("###.#");
+			else 
+				myFormatter = new DecimalFormat("###");
 			break;
 			
 		}
@@ -507,6 +547,7 @@ public class TableView extends JPanel {
 		table.getColumnModel().getColumn(col).setHeaderValue(s);
 	}
 	
+	//Return the name list of compounds
 	public ArrayList<String> getCompoundNames()
 	{
 		ArrayList<String> names = new ArrayList<String>();
@@ -516,6 +557,12 @@ public class TableView extends JPanel {
 		}
 		return names;
 	}
+	
+	public int getItemNum()
+	{
+		return data[2].size();
+	}
+	 
 	public void setColumnWidth(int col, int w)
 	{
 		table.getColumnModel().getColumn(col).setPreferredWidth(w);
