@@ -12,6 +12,7 @@ public class SVGReader {
 		return names;
 	}
 	public static String processNames(String name){
+
 		if (name.contains("_"))
 			name = name.split("_")[0];
 		if (name.contains("-"))
@@ -42,10 +43,14 @@ public class SVGReader {
 				}
 				if (sText.contains("<circle id") && reachCircle) {
 					String[] values = sText.split("\"");
+					String elementName = processNames(values[1]);
+					if(!elementName.contains("Dot"))
+					{
 					xList.add(values[5]);
 					yList.add(values[7]);
 					rList.add(values[9]);
-					names.add(processNames(values[1]));
+					names.add(elementName);
+					}
 				}
 				lineCount++;
 				sText = br.readLine();

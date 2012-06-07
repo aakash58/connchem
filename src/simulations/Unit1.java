@@ -867,5 +867,10 @@ public class Unit1 extends UnitBase {
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public void updateMoleculeCountRelated(int sim, int set) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

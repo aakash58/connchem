@@ -148,6 +148,8 @@ public class Main {
 	public JCheckBox boxDisplayJoint;
 	
 	public static final int MAX_COMPOUND_NUM = 50;
+	public JButton btnBronsted;   //Unit 8 button
+	public JButton btnLewis;      //Unit 8 button
 
 	
 
@@ -232,10 +234,14 @@ public class Main {
 
 	private MouseAdapter mulBtnListener; // mouseListener used for 6 buttons in
 											// Unit3 Sim1
-	private MouseAdapter btnCatalystListener;
-	private MouseAdapter btnInertListener;
-	private MouseAdapter btnSparkListener;
+	private ActionListener btnCatalystListener;
+//	private ActionListener btnInhibitorListener;
+	private ActionListener btnInertListener;
+	private ActionListener btnSparkListener;
+	private ActionListener btnBronstedListener;
+	private ActionListener btnLewisListener;
 	private ActionListener btnGraphSwitchListener;
+	private ActionListener btnAddMoleculeListener;
 	private ArrayList<Integer> btnIds = new ArrayList<Integer>(); // Button Ids
 																	// in Unit3
 																	// Sim2
@@ -507,11 +513,7 @@ public class Main {
 														// names
 						State.moleculesAdded.put(fixedName, 0); // Initialize
 																// moleculesAdded
-						addBtn.addMouseListener(new MouseAdapter() {
-							public void mouseClicked(MouseEvent arg0) {
-								addMolecule(arg0,null,0);
-							}
-						});
+						addBtn.addActionListener(btnAddMoleculeListener);
 
 					}
 					if(getSelectedUnit()==6&&getSelectedSim()==2) //Add catalyst button and inert gas button in Unit 6 Sim 2
@@ -524,18 +526,18 @@ public class Main {
 						JLabel lblCatalyst = new JLabel("Add Catalyst");
 						btnCatalyst.setIcon(new ImageIcon(Main.class
 								.getResource("/resources/compoundsPng50/Catalyst.png")));
-						btnCatalyst.addMouseListener(btnCatalystListener);
+						btnCatalyst.addActionListener(btnCatalystListener);
 						JButton btnInertGas = new JButton();
 						JLabel lblInertGas = new JLabel("Add Inert Gas");
 						btnInertGas.setIcon(new ImageIcon(Main.class
 								.getResource("/resources/compoundsPng50/Inert.png")));
-						btnInertGas.addMouseListener(btnInertListener);
+						btnInertGas.addActionListener(btnInertListener);
 						buttonPanel.add(btnCatalyst,"cell 0 0, align center,growx");
 						buttonPanel.add(lblCatalyst, "cell 0 1, align center");
 						buttonPanel.add(btnInertGas,"cell 1 0, align center,growx");
 						buttonPanel.add(lblInertGas,"cell 1 1, align center");
 					}
-					if(getSelectedUnit()==7)
+					if(getSelectedUnit()==7)  //Add "Add Spark" button 
 					{
 						if(getSelectedSim()==1||getSelectedSim()==3)//Add spark button to Unit7 Sim1 and Sim3
 						{
@@ -548,10 +550,24 @@ public class Main {
 							btnSpark.setIcon(new ImageIcon(Main.class.getResource("/resources/compoundsPng50/Spark.png")));
 							//Dimension di = new Dimension(buttonPanel.getWidth(),30);
 							//btnSpark.setSize(di);
-							btnSpark.addMouseListener(btnSparkListener);
+							btnSpark.addActionListener(btnSparkListener);
 							buttonPanel.add(btnSpark,"cell 0 0, align center, grow");
 							buttonPanel.add(lblSpark,"cell 0 1, align center");
 						}
+					}
+					if(getSelectedUnit()==8 && getSelectedSim()==2)
+					{
+						JPanel buttonPanel = new JPanel();
+						buttonPanel.setLayout(new MigLayout("insets 6, gap 4","[grow]20[grow]", "[][]"));
+						dynamicPanel.add(buttonPanel, "cell 0 " + (i+start) + ",grow");
+						// Draw Molecule button
+						JLabel lblBronsted = new JLabel("Bronsted");
+
+						JLabel lblLewis = new JLabel("Lowry or Lewis");
+						buttonPanel.add(btnBronsted,"cell 0 0, align center,growx");
+						buttonPanel.add(lblBronsted, "cell 0 1, align center");
+						buttonPanel.add(btnLewis,"cell 1 0, align center,growx");
+						buttonPanel.add(lblLewis,"cell 1 1, align center");
 					}
 				}
 				
@@ -663,8 +679,6 @@ public class Main {
 		
 		//Reset parameter
 		resetParameter();
-		
-		
 	
 		/* Check if welcome menu showing */
 		if (isWelcomed && welcomePanel != null) {
@@ -691,6 +705,37 @@ public class Main {
 		// Reset right panel
 		resetRightPanel();
 		
+		addMolecules();
+		
+		//Initialize mass and consentration for simulation
+		p5Canvas.initializeSimulation();
+		
+		//Reset table view on the panelCanvas 
+		getTableView().reset();
+		
+		getCanvas().reset();
+		
+		//Customization based on requirements
+		p5Canvas.customizeInterface();
+		// getP5Canvas().isEnable =temp;
+
+		// reset timer
+		resetTimer();
+			
+		//Initialize molecule Count Related Value to get the right output
+		p5Canvas.updateMoleculeCountRelated();
+		getTableView().updateTableView();
+		//Add the inital data to Graph
+		canvas.addDataPerTick();
+		
+
+
+		
+
+	}
+
+	public void addMolecules()
+	{
 		// Load information of new generation
 		if (!(selectedUnit == 3 && selectedSim == 2)) {
 			ArrayList a = getSetCompounds(selectedUnit, selectedSim,
@@ -725,29 +770,7 @@ public class Main {
 				Compound.setProperties();
 			}
 		}
-		
-		//Initialize mass and consentration for simulation
-		p5Canvas.initializeSimulation();
-		
-		//Reset table view on the panelCanvas 
-		getTableView().reset();
-		
-		getCanvas().reset();
-		
-		//Customization based on requirements
-		p5Canvas.customizeInterface();
-		// getP5Canvas().isEnable =temp;
-
-		// reset timer
-		resetTimer();
-		
-			
-		//Add the inital data to Graph
-		canvas.addDataPerTick();
-		
-
 	}
-
 
 	
 	//Reset Global Parameter
@@ -1195,6 +1218,16 @@ public class Main {
 		dynamicScrollPane.setViewportView(dynamicPanel);
 		dynamicPanel.setLayout(new MigLayout("insets 4", "[200.00,grow]",
 				"[][]"));
+		
+		//Button setting for Unit 8
+		btnBronsted = new JButton();
+		btnBronsted.setIcon(new ImageIcon(Main.class
+				.getResource("/resources/compoundsPng50/Catalyst.png")));
+		btnBronsted.addActionListener(btnBronstedListener);
+		btnLewis = new JButton();
+		btnLewis.setIcon(new ImageIcon(Main.class
+				.getResource("/resources/compoundsPng50/Inert.png")));
+		btnLewis.addActionListener(btnLewisListener);
 
 		/**************************CENTER PANEL********************************/
 		centerPanel = new JPanel();
@@ -1633,9 +1666,7 @@ public class Main {
 						playBtn.setIcon(new ImageIcon(
 								Main.class
 										.getResource("/resources/png48x48/iconPause.png")));
-						if(!getP5Canvas().isSimStarted)
-							getP5Canvas().isSimStarted = true;
-						getP5Canvas().isEnable = true;
+						p5Canvas.play();
 						timer.start();
 					}
 
@@ -1676,25 +1707,49 @@ public class Main {
 			}
 		};
 		
-		btnCatalystListener = new MouseAdapter()
+		btnCatalystListener = new ActionListener()
 		{
-			public void mouseClicked(MouseEvent e)
+			public void actionPerformed(ActionEvent e)
 			{
 				addMolecule(e,"Catalyst",5);
 			}
 		};
-		btnInertListener = new MouseAdapter()
+//		btnInhibitorListener = new ActionListener()
+//		{
+//			public void actionPerformed(ActionEvent e)
+//			{
+//				getP5Canvas().getUnit5().addInhibitor();
+//			}
+//		};
+		btnInertListener = new ActionListener()
 		{
-			public void mouseClicked(MouseEvent e)
+			public void actionPerformed(ActionEvent e)
 			{
 				addMolecule(e,"Inert",5);
 			}
 		};
-		btnSparkListener = new MouseAdapter()
+		btnSparkListener = new ActionListener()
 		{
-			public void mouseClicked(MouseEvent e)
+			public void actionPerformed(ActionEvent e)
 			{
 				p5Canvas.getUnit7().addSpark();
+			}
+		};
+		
+		btnBronstedListener = new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				getP5Canvas().getUnit8().setElectronView(0);
+				reset();
+			}
+		};
+		btnLewisListener = new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				getP5Canvas().getUnit8().setElectronView(1);
+				reset();
 			}
 		};
 		btnGraphSwitchListener  = new ActionListener() {
@@ -1702,11 +1757,35 @@ public class Main {
 				getCanvas().switchGraph();
 			}
 		};
+		
+		btnAddMoleculeListener = new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{
+					addMolecule(e,null,0);
+					
+					//If the simulation has not started yet
+					//Update tableview and canvas after adding molecule
+					if(!p5Canvas.isSimStarted)
+					{
+						//update molecule count in Compound
+						p5Canvas.updateMoleculeCountRelated();
+						//update tableview and canvas
+						getTableView().updateTableView();
+						getCanvas().addDataPerTick();
+						
+						//Update pressure
+						p5Canvas.updateProperties();
+						p5Canvas.updateOutput();
+						
+					}
+			}
+		};
+		
 	}
 	
-	public void addMolecule(MouseEvent e, String compoundName,int num)
+	public void addMolecule(ActionEvent e, String compoundName,int num)
 	{
-		if (e.getComponent().isEnabled()) {
+		if (((JButton)e.getSource()).isEnabled()) {
 			
 			int count = 0;
 			String fixedName = null;
@@ -1718,7 +1797,7 @@ public class Main {
 				// number
 				for (Entry<String, JButton> entry : addBtns
 						.entrySet()) {
-					if (e.getComponent().equals(
+					if (((JButton)e.getSource()).equals(
 							entry.getValue())) {
 						fixedName = entry.getKey();
 					}
@@ -1751,7 +1830,7 @@ public class Main {
 										+ count);
 						
 					}
-					e.getComponent().setEnabled(
+					((JButton)e.getSource()).setEnabled(
 							false);
 				}
 			} else {

@@ -169,6 +169,14 @@ public class DynamicGraph extends JPanel {
 		plot.mapDatasetToRangeAxis(i, i);
 	}
 	
+	public void setRangeYAxis(float lowerBound, float upperBound)
+	{
+		for(int i = 0 ;i<dataSetSize;i++)
+		{
+			ranges[i].setRange(lowerBound,upperBound);
+		}
+	}
+	
 	public void showPlot(int index)
 	{
 		if(index>=dataSetSize)
@@ -372,9 +380,12 @@ public class DynamicGraph extends JPanel {
 				setRangeType(RangeType.POSITIVE);
 				setTickLabelFont(new Font("Garamond", Font.PLAIN, 10));
 				setLabelFont(new Font("Garamond", Font.PLAIN, 12));
+				
+//				System.out.println("getTickLabelInsets() is "+getTickLabelInsets());
+//				System.out.println("getFixedDimension() is "+getFixedDimension());
 				setLabelInsets(new RectangleInsets(0, 0, 0, -12.5)	);
 				setAutoRangeIncludesZero(true);
-				setAutoRangeMinimumSize(1.0, true);
+				setAutoRangeMinimumSize(0.5, true);
 				setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 			}
 		}
@@ -436,7 +447,7 @@ public class DynamicGraph extends JPanel {
 	            List ticks = new ArrayList();
 	            
 	            float total = (float) this.getUpperBound();
-	    		DecimalFormat myFormatter = new DecimalFormat("###.#");
+	    		DecimalFormat myFormatter = new DecimalFormat("###.##");
 	            //you'll need to have corresponding date objects around
 	            //or know how to match them up on the graph
 	                String label = myFormatter.format(total);

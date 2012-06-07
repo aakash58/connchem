@@ -569,6 +569,7 @@ public class Unit6 extends UnitBase {
 		int set = p5Canvas.getSet();
 		Main main = p5Canvas.getMain();
 		
+		
 		// Set up speed ratio for molecules
 		setupSpeed();
 		
@@ -589,13 +590,19 @@ public class Unit6 extends UnitBase {
 				keq=1.1f;
 				p5Canvas.temp = 170;
 			}
+			
+			volumeMagnifier =1000;
+			
 			break;
 		case 2:
 			p5Canvas.volumeMinBoundary = 20;
 			p5Canvas.getMain().tempMin=0;
 			p5Canvas.getMain().tempMax = 100;
 			p5Canvas.heatSpeed = 3;
+			volumeMagnifier = 1000;
+
 			break;
+
 		}
 		updateMoleculeCon();
 	}
@@ -604,15 +611,31 @@ public class Unit6 extends UnitBase {
 	public void customizeInterface(int sim, int set)
 	{
 		Main main = p5Canvas.getMain();
+		
+		//Make adjust if we show Litter instead of mL
+		int volumeMagnifier = getVolumeMagnifier()/1000;
+		if( volumeMagnifier != 0)
+		{
+				main.volumeLabel.setText(p5Canvas.currentVolume + " L");
+				lblVolumeValue.setText(p5Canvas.currentVolume +" L");
+		}
+		else
+		{
+			main.volumeLabel.setText(p5Canvas.currentVolume + " mL");
+			lblVolumeValue.setText(p5Canvas.currentVolume +" mL");	
+		}
+		
 		//Customization
 		switch(p5Canvas.getSim())
 		{
 		case 1:
 			main.heatSlider.setEnabled(false);
 			main.volumeSlider.setEnabled(false);
+			
+			main.getCanvas().setRangeYAxis(0, 0.05f);
+
 			break;
 		case 2:
-			main.volumeLabel.setText(p5Canvas.currentVolume+" L");
 			break;
 		
 		}
@@ -677,13 +700,13 @@ public class Unit6 extends UnitBase {
 		
 		//update PVT label
 		if (lblVolumeValue.isShowing()) {
-			lblVolumeValue.setText(Float.toString(p5Canvas.currentVolume)
-					+ " mL");
-			if(sim==2)
-			{
-				lblVolumeValue.setText(Float.toString(p5Canvas.currentVolume)
-						+ " L");
-			}
+
+			int volumeMagnifier = getVolumeMagnifier()/1000;
+			if( volumeMagnifier != 0)
+				lblVolumeValue.setText(p5Canvas.currentVolume + " L");
+			else
+				lblVolumeValue.setText(p5Canvas.currentVolume
+						+ " mL");
 		}
 		if (lblTempValue.isShowing()) {
 			float temp = p5Canvas.temp;
@@ -813,7 +836,7 @@ public class Unit6 extends UnitBase {
 			
 			float mole = 0;
 			float con = 0;
-			float volume = (float) p5Canvas.currentVolume / 1000;
+			float volume = (float)p5Canvas.currentVolume/1000 * getVolumeMagnifier(); 
 			String name = null;
 
 			for (int i =0;i<Compound.names.size();i++) {
@@ -1186,6 +1209,20 @@ public class Unit6 extends UnitBase {
 		else
 			lblKeqValue.setText("Infinity");
 		
+		
+		//Make adjust if we show Litter instead of mL
+		int volumeMagnifier = getVolumeMagnifier()/1000;
+		if( volumeMagnifier != 0)
+		{
+				main.volumeLabel.setText(p5Canvas.currentVolume + " L");
+				lblVolumeValue.setText(p5Canvas.currentVolume +" L");
+		}
+		else
+		{
+			main.volumeLabel.setText(p5Canvas.currentVolume + " mL");
+			lblVolumeValue.setText(p5Canvas.currentVolume +" mL");
+		}
+		
 		switch(sim)
 		{
 		case 1:
@@ -1221,7 +1258,6 @@ public class Unit6 extends UnitBase {
 			dashboard.add(lblPressureValue,"cell 1 4");
 			
 			lblTempValue.setText("25 \u2103");
-			lblVolumeValue.setText("60.0 L");
 			lblPressureValue.setText("825.86 kPa");
 			
 			break;
@@ -1239,8 +1275,15 @@ public class Unit6 extends UnitBase {
 
 	@Override
 	protected void initializeSimulation(int sim, int set) {
-		// TODO Auto-generated method stub
+
+		updateMoleculeCon();
 		
+	}
+
+	@Override
+	public void updateMoleculeCountRelated(int sim, int set) {
+
+		updateMoleculeCon();
 	}
 
 }

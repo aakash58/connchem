@@ -231,10 +231,10 @@ public class Canvas extends JPanel {
 		showGraphByIndex(indexGraph);
 	}
 	
-	//Called by 
-	public void setRange(int index,int lower,int upper)
+	//Set the minimum tick value for Y axis
+	public void setRangeYAxis(float lowerBound, float upperBound)
 	{
-		
+		this.dynamicGraph.setRangeYAxis(lowerBound, upperBound);
 	}
 	
 	//Define the data input type for different simulations 
@@ -363,68 +363,6 @@ public class Canvas extends JPanel {
 		
 	}
 
-	/**
-	 * * Adds an observation to the Õtotal memoryÕ time series. * * @param y the
-	 * total memory used.
-	 */
-	private void addTotalObservation(double y) {
-		this.total.add(count, y);
-	}
-
-	/**
-	 * * Adds an observation to the Õfree memoryÕ time series. * * @param y the
-	 * free memory.
-	 */
-	private void addFreeObservation(double y) {
-		this.free.add(count, y);
-		count++;
-	}
-	
-	class NumberAxisAd extends NumberAxis{
-		
-		public NumberAxisAd(String str)
-		{
-			super(str);
-		}
-		
-		protected void autoAdjustRange(){
-	        Plot plot = getPlot();
-	                if (plot == null) {
-	                    return;  // no plot, no data
-	                }
-	        
-	                if (plot instanceof ValueAxisPlot) {
-	                    ValueAxisPlot vap = (ValueAxisPlot) plot;
-	        
-	                    Range r = vap.getDataRange(this);
-	                    if (r == null) {
-	                        r = getDefaultAutoRange();
-	                    }
-	        
-	                    double upper = r.getUpperBound();
-	                    double lower = r.getLowerBound();
-	                    if (this.getRangeType() == RangeType.POSITIVE) {
-	                        lower = Math.max(0.0, lower);
-	                        upper = Math.max(0.0, upper);
-	                    }
-	                    else if (this.getRangeType() == RangeType.NEGATIVE) {
-	                        lower = Math.min(0.0, lower);
-	                        upper = Math.min(0.0, upper);
-	                    }
-	        
-	                    if (getAutoRangeIncludesZero()) {
-	                        lower = Math.min(lower, 0.0);
-	                        upper = Math.max(upper, 0.0);
-	                    }
-	                    double range = upper - lower;
-	                    double minRange = getAutoRangeMinimumSize();
-	                    if(range>=minRange)
-	                    	this.setAutoRangeMinimumSize(2*minRange);
-	                   
-	                }
-	                super.autoAdjustRange();
-	                }
-	}
 
 	//GetLabelString
 	//Input: index - index of graph
