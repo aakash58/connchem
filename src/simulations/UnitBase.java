@@ -54,6 +54,7 @@ public abstract class UnitBase {
 	protected int lastMole;
 	protected float lastTemp;
 	protected Integrator interpolator;
+	public int volumeMagnifier = 1;
 
 
 
@@ -1133,6 +1134,9 @@ public abstract class UnitBase {
 			}
 		}
 	}
+	
+	public abstract void updateMoleculeCountRelated(int sim,int set) ; 
+
 
 	public int getTotalNum() {
 		return num_total;
@@ -1156,6 +1160,11 @@ public abstract class UnitBase {
 
 	public int getWater100Ml() {
 		return this.water100mL;
+	}
+	
+	public int getVolumeMagnifier()
+	{
+		return volumeMagnifier;
 	}
 	
 	public void needWeight()

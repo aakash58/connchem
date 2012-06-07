@@ -21,6 +21,7 @@ import data.DBinterface;
 import data.State;
 
 import Util.ColorCollection;
+import Util.Constants;
 import Util.SVGReader;
 import static data.State.*;
 
@@ -464,8 +465,8 @@ public class Molecule {
 				m = DBinterface.getElementMass(element);
 			}
 			float d = m / (circles[i][0] * circles[i][0] * circles[i][0]);
-			fd.filter.categoryBits = 0x0002; //All the molecules that enable collision is 2
-			fd.filter.maskBits = 0x0004;  //All the objects that should not be collided is 4
+			fd.filter.categoryBits = Constants.MOLECULE_ID; //All the molecules that enable collision is 2
+			fd.filter.maskBits = Constants.MOLECULE_ID+Constants.BOUNDARY_ID;  //All the objects that should not be collided is 4
 			fd.shape = circleShape;
 			fd.density = d * mul;
 			fd.friction = fric;
@@ -1245,7 +1246,10 @@ public class Molecule {
 		  Filter filter = new Filter();
 		  filter.categoryBits = cate;
 		  filter.maskBits = mask;
-		  body.getFixtureList().setFilterData(new Filter());
+		  for(int i=0;i<fixtures.size();i++)
+		  {
+			  fixtures.get(i).setFilterData(filter);
+		  }
 	  }
 
 }

@@ -111,6 +111,28 @@ public class Simulation {
 		return elements;
 	}
 	
+	public int getElementIndex(String str)
+	{
+		for(int i = 0 ;i<elements.length;i++)
+		{
+			if(elements[i].equals(str))
+			{
+				return i;
+			}
+		}
+		
+		return -1;
+		
+	}
+	
+	public void setElementByIndex(String str, int index)
+	{
+		if(index>=0 && index<elements.length)
+		{
+			elements[index] = new String (str);
+		}
+	}
+	
 	public SpawnStyle getSpawnStyle(String ele)
 	{
 		int index = getIndexOfElement(ele);

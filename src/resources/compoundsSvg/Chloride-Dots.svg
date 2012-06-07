@@ -15,14 +15,14 @@
 	<circle fill="#221F1F" cx="41.75" cy="18.625" r="1.5"/>
 </g>
 <g id="circles">
-	<circle fill="none" cx="21.625" cy="21.625" r="16.5"/>
-	<circle fill="none" cx="1.5" cy="24.625" r="1.5"/>
-	<circle fill="none" cx="1.5" cy="18.625" r="1.5"/>
-	<circle fill="none" cx="18.625" cy="1.5" r="1.5"/>
-	<circle fill="none" cx="24.625" cy="1.5" r="1.5"/>
-	<circle fill="none" cx="18.625" cy="41.75" r="1.5"/>
-	<circle fill="none" cx="24.625" cy="41.75" r="1.5"/>
-	<circle fill="none" cx="41.75" cy="24.625" r="1.5"/>
-	<circle fill="none" cx="41.75" cy="18.625" r="1.5"/>
+	<circle id="Chlorine" fill="none" cx="21.625" cy="21.625" r="16.5"/>
+	<circle id="Dot_7_" fill="none" cx="1.5" cy="24.625" r="1.5"/>
+	<circle id="Dot_6_" fill="none" cx="1.5" cy="18.625" r="1.5"/>
+	<circle id="Dot_5_" fill="none" cx="18.625" cy="1.5" r="1.5"/>
+	<circle id="Dot_4_" fill="none" cx="24.625" cy="1.5" r="1.5"/>
+	<circle id="Dot_3_" fill="none" cx="18.625" cy="41.75" r="1.5"/>
+	<circle id="Dot_2_" fill="none" cx="24.625" cy="41.75" r="1.5"/>
+	<circle id="Dot_1_" fill="none" cx="41.75" cy="24.625" r="1.5"/>
+	<circle id="Dot" fill="none" cx="41.75" cy="18.625" r="1.5"/>
 </g>
 </svg>

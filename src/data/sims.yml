@@ -513,13 +513,13 @@ units:
         qty: 10
         cap: 10
       - compound: "Oxygen"
-        qty: 10
-        cap: 10
+        qty: 20
+        cap: 20
     - set: 2
       compounds:
       - compound: "Hydrogen Iodide"
-        qty: 10
-        cap: 10
+        qty: 20
+        cap: 20
   - sim: 2
     name: "Surface Area"
     sets:
@@ -588,6 +588,14 @@ units:
         qty: 20
         cap: 20
       - compound: "Catalyst"
+        qty: 0
+        cap: 5
+    - set: 7
+      compounds:
+      - compound: "Dinitrogen-Tetroxide"
+        qty: 20
+        cap: 20
+      - compound: "Inhibitor"
         qty: 0
         cap: 5
   - sim: 4
@@ -880,28 +888,28 @@ units:
         cap: 1
     - set: 2
       compounds:
-      - compound: "Water"
-        qty: 0
-      - compound: "Hydrochloric Acid"
-        qty: 10
+      - compound: "Hydrochloric-Acid"
+        qty: 1
+        cap: 1
       - compound: "Ammonia"
-        qty: 10
+        qty: 1
+        cap: 1
     - set: 3
       compounds:
-      - compound: "Water"
-        qty: 0
       - compound: "Cyanide"
-        qty: 10
-      - compound: "Hydrogen Bromide"
-        qty: 10
+        qty: 1
+        cap: 1
+      - compound: "Hydrogen-Bromide"
+        qty: 1
+        cap: 1
     - set: 4
       compounds:
-      - compound: "Water"
-        qty: 0
-      - compound: "Boron Trichloride"
-        qty: 10
+      - compound: "Boron-Trichloride"
+        qty: 1
+        cap: 1
       - compound: "Chloride"
-        qty: 10
+        qty: 1
+        cap: 1
   - sim: 3
     name: "Strong and Weak Acids"
     sets:

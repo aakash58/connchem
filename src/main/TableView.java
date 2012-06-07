@@ -436,9 +436,17 @@ public class TableView extends JPanel {
 			myFormatter = new DecimalFormat("###");
 			break;
 		case 3:
-		case 5:
-		case 6:
 			myFormatter = new DecimalFormat("###.##");
+			break;
+		case 6:
+			myFormatter = new DecimalFormat("###.###");
+			break;
+		case 5:
+			if(sim==2 || sim==3)
+				myFormatter = new DecimalFormat("###.###");
+			else
+				myFormatter = new DecimalFormat("###.##");
+
 			break;
 		case 7:
 			if(sim == 2 ) //mass

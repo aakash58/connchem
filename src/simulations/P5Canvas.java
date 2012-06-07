@@ -182,8 +182,10 @@ public class P5Canvas extends PApplet {
 		
 		updateTopBoundary();
 		updateMolecules(); // update molecules which are newly created
+		if (isEnable && isSimStarted)
 		updateProperties(); // Update temperature and pressure etc
 
+		if (isEnable&&isSimStarted)
 		updateOutput();
 			
 		/* Change Scale */
@@ -249,10 +251,9 @@ public class P5Canvas extends PApplet {
 	 * 
 	 * INPUTS : None OUTPUTS: None
 	 *******************************************************************/
-	private void updateProperties() {
+	public void updateProperties() {
 
-		if (!this.isEnable || !this.isSimStarted)
-			return;
+
 		temp = getTempFromKE();
 		// Update molecule status base on new temp
 		for (int i = 0; i < molecules.size(); i++) {
@@ -285,11 +286,17 @@ public class P5Canvas extends PApplet {
 	}
 	
 	//Print out properties on right panel
+	//Called by p5Canvas draw
 	public void updateOutput()
 	{
-		if (!this.isEnable || !this.isSimStarted)
-			return;
 		unitList.updateOutput(unit, sim,set);
+	}
+	
+	
+	//Update molecule count related information , e.g. concentration
+	public void updateMoleculeCountRelated()
+	{
+		unitList.updateMoleculeCountRelated(unit,sim,set);
 	}
 
 	// Calculate temp from average kinetic energy
@@ -452,6 +459,8 @@ public class P5Canvas extends PApplet {
 		heatSpeed = 1;
 		pressure = 0;
 		boundaries.setHasWeight(false);
+		setIfConstrainKE(true);
+
 
 		if(products!=null)
 		products.clear();
@@ -486,6 +495,18 @@ public class P5Canvas extends PApplet {
 		
 		firstRun = true;
 
+	}
+	
+	//Called when user click "Play button"
+	public void play()
+	{
+		if(!isSimStarted)
+			isSimStarted = true;
+		isEnable = true;
+		
+		if(getUnit()==8)
+			getUnit8().play();
+		
 	}
 	
 	
@@ -563,7 +584,8 @@ public class P5Canvas extends PApplet {
 		//main.volumeSlider.setValue(currentVolume);
 		//main.volumeSlider.updateUI();
 		main.volumeLabel.setText(currentVolume + " mL");
-		if(isSimSelected(4,4)||isSimSelected(4,3)||isSimSelected(5,3)||isSimSelected(6,2))
+		int volumeMagnifier = unitList.getVolumeMagnifier(unit)/1000;
+			if( volumeMagnifier != 0)
 			main.volumeLabel.setText(currentVolume + " L");
 
 		boundaries.setVolume(currentVolume);
@@ -584,8 +606,9 @@ public class P5Canvas extends PApplet {
 		//main.volumeSlider.setValue(currentVolume);
 		//main.volumeSlider.updateUI();
 		main.volumeLabel.setText(currentVolume + " mL");
-		if(isSimSelected(4,4)||isSimSelected(4,3)||isSimSelected(5,3)||isSimSelected(6,2))
-			main.volumeLabel.setText(currentVolume + " L");
+		int volumeMagnifier = unitList.getVolumeMagnifier(unit)/1000;
+		if( volumeMagnifier != 0)
+ 			 main.volumeLabel.setText(currentVolume*volumeMagnifier + " L");
 
 		boundaries.setVolume(v);
 		isEnable = tmp;

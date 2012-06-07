@@ -3324,4 +3324,10 @@ public class Unit3 extends UnitBase {
 		this.updateMoleculeMass()	;	
 	}
 
+	@Override
+	public void updateMoleculeCountRelated(int sim, int set) {
+
+			updateMoleculeMass();
+	}
+
 }

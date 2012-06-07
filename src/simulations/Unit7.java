@@ -3449,8 +3449,17 @@ public class Unit7 extends UnitBase {
 
 	@Override
 	protected void initializeSimulation(int sim, int set) {
-		// TODO Auto-generated method stub
-		
+
+
+		updateMoleculeMass();
+
+	}
+
+	@Override
+	public void updateMoleculeCountRelated(int sim, int set) {
+
+
+			updateMoleculeMass();
 	}
 	
 

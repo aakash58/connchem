@@ -5,6 +5,7 @@ import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 
 import Util.ColorCollection;
+import Util.Constants;
 
 import processing.core.PShape;
 
@@ -32,8 +33,9 @@ public class Boundary {
 	private float yOriginal =0; //Original y of body when created
 	private float yTop = 0;
 	//public static boolean isTransformed =false; //Increase or Decrease in Volume
-	private PShape baseShape = new PShape();
-	private PShape weightShape = new PShape();	
+	private PShape poleShape = new PShape();    //The pole that on top of base
+	private PShape baseShape = new PShape();    //piston base
+	private PShape weightShape = new PShape();	//Weight on base
 	
 	
 	public Boundary(int _id, float xv, float yv, float wv, float hv, Boundaries parent) {
@@ -67,6 +69,8 @@ public class Boundary {
     	fd.density = 0f;    // No density means it won't move!
         fd.friction = 1.0f;
     	fd.restitution =1f;
+    	fd.filter.categoryBits = Constants.BOUNDARY_ID; //All the molecules that enable collision is 2
+		fd.filter.maskBits = Constants.MOLECULE_ID+Constants.NONCOLLIDER_ID;  //All the objects that shou
         body.createFixture(fd);
         
 	//	body.setMassFromShapes();
@@ -79,8 +83,10 @@ public class Boundary {
 		{
 			String basePath = "resources/compoundsSvg/base.svg";
 			String weightPath = "resources/compoundsSvg/weight-with-base.svg";
+			String polePath = "resources/compoundsSvg/piston.svg";
 			baseShape =  p5Canvas.loadShape(basePath);
 			weightShape = p5Canvas.loadShape(weightPath);
+			poleShape = p5Canvas.loadShape(polePath);
 		}
 	}
 	
@@ -186,7 +192,11 @@ public class Boundary {
 			if(boundaries.hasWeight())
 				p5Canvas.shape(weightShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
 			else
+			{
+				float poleHeight = poleShape.getHeight();
+				p5Canvas.shape(poleShape,pShapeW/-2, pShapeH/-1.5f-(poleHeight-pShapeH),width,poleHeight);
 				p5Canvas.shape(baseShape, pShapeW/-2, pShapeH/-2-(height-pShapeH),width,height);
+			}
 		}
 		
 		//Color

@@ -114,6 +114,20 @@ public class UnitList {
 			unitList[unit-1].customizeInterface(sim,set);
 	}
 	
+	public int getVolumeMagnifier(int unit)
+	{
+		if(isExist(unit))
+			return unitList[unit-1].getVolumeMagnifier();
+		return 1;
+	}
+	
+	public void updateMoleculeCountRelated(int unit, int sim,int set)
+	{
+		if(isExist(unit))
+			unitList[unit-1].updateMoleculeCountRelated(sim,set);
+	}
+
+	
 	public Unit2 getUnit2()
 	{
 		return (Unit2) unitList[1];
