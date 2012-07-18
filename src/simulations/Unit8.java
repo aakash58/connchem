@@ -78,21 +78,29 @@ public class Unit8 extends UnitBase {
 	int oldTime = -1;
 	int curTime = -1;
 	
-//	Integrator interpolatorPos1 = new Integrator(0);
+	Integrator interpolatorPos1 = new Integrator(0);
 	Integrator interpolatorPos2 = new Integrator(0);
 	Integrator interpolatorAngle1 = new Integrator(0);
-//	Integrator interpolatorAngle2 = new Integrator(0);
+	Integrator interpolatorAngle2 = new Integrator(0);
 	Integrator interpolatorHide = new Integrator(0);
 	Integrator interpolatorShow = new Integrator(0);
 	//private float totalDist = 0;
-	private Vec2 lastPosition = new Vec2(0,0);
-	private Vec2  translateVector = new Vec2(0,0);
+	private Vec2 lastPositionFirst = new Vec2(0,0);
+	private Vec2 lastPositionSecond = new Vec2(0,0);
+	private Vec2  translateVectorFirst = new Vec2(0,0);
+	private Vec2 translateVectorSecond = new Vec2(0,0);
 //	private float minDist = 0;
 	private int electronView = 0; //If current simulation is for Lewis Law
 	private boolean hasFading = false;   //If this simulation has fading transition
 	private boolean isFading = false;    //If in fading process
-	private Molecule newMolecule = null;
+//	private Molecule newMolecule = null;
+	
+	//IonHash: used in sim2 to map hydrogen-Ion and hydrogen-Atom to hydrogen-Ion
 	private HashMap<String,String []> ionHash = new HashMap<String,String[]>();
+	
+	//New molecule list for reactions in Sim 2
+	ArrayList<Molecule> newMolecules = new ArrayList<Molecule>();
+
 	
 
 	
@@ -116,8 +124,8 @@ public class Unit8 extends UnitBase {
 		simulations[0].setupElements(elements0, spawnStyles0);
 
 		simulations[1] = new Simulation(unitNum, 1, 2);
-		String[] elements1 = { "Sodium-Ion","Hydroxide", "Water" };
-		SpawnStyle[] spawnStyles1 = { SpawnStyle.Solvent,SpawnStyle.Solvent, SpawnStyle.Solvent };
+		String[] elements1 = { "Sodium-Hydroxide", "Water" };
+		SpawnStyle[] spawnStyles1 = { SpawnStyle.Precipitation, SpawnStyle.Solvent };
 		simulations[1].setupElements(elements1, spawnStyles1);
 
 		simulations[2] = new Simulation(unitNum, 1, 3);
@@ -126,18 +134,18 @@ public class Unit8 extends UnitBase {
 		simulations[2].setupElements(elements2, spawnStyles2);
 
 		simulations[3] = new Simulation(unitNum, 2, 1);
-		String[] elements3 = { "Hydrogen-Ion","Chlorine-Ion", "Sodium-Ion","Hydroxide" };
-		SpawnStyle[] spawnStyles3 = { SpawnStyle.Gas,SpawnStyle.Gas,SpawnStyle.Gas,SpawnStyle.Gas };
+		String[] elements3 = { "Hydrogen-Chloride", "Sodium-Hydroxide" };
+		SpawnStyle[] spawnStyles3 = { SpawnStyle.Gas,SpawnStyle.Gas };
 		simulations[3].setupElements(elements3, spawnStyles3);
 		
 		simulations[4] = new Simulation(unitNum, 2, 2);
-		String[] elements4 = { "Hydrogen-Ion","Chlorine-Ion","Ammonia" };
-		SpawnStyle[] spawnStyles4 = { SpawnStyle.Gas,SpawnStyle.Gas,SpawnStyle.Gas };
+		String[] elements4 = { "Hydrogen-Chloride","Ammonia" };
+		SpawnStyle[] spawnStyles4 = { SpawnStyle.Gas,SpawnStyle.Gas};
 		simulations[4].setupElements(elements4, spawnStyles4);
 		
 		simulations[5] = new Simulation(unitNum, 2, 3);
-		String[] elements5 = { "Cyanide","Hydrogen-Ion","Bromine-Ion" };
-		SpawnStyle[] spawnStyles5 = { SpawnStyle.Gas,SpawnStyle.Gas,SpawnStyle.Gas };
+		String[] elements5 = { "Cyanide","Hydrogen-Bromide" };
+		SpawnStyle[] spawnStyles5 = { SpawnStyle.Gas,SpawnStyle.Gas};
 		simulations[5].setupElements(elements5, spawnStyles5);
 		
 		simulations[6] = new Simulation(unitNum, 2, 4);
@@ -180,34 +188,32 @@ public class Unit8 extends UnitBase {
 		SpawnStyle[] spawnStyles13 = { SpawnStyle.Solvent,SpawnStyle.Solvent};
 		simulations[13].setupElements(elements13, spawnStyles13);
 		
-		simulations[14] = new Simulation(unitNum, 4, 4);
-		String[] elements14 = { "Hydrogen-Ion","Nitrate","Water"};
-		SpawnStyle[] spawnStyles14 = { SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent};
-		simulations[14].setupElements(elements14, spawnStyles14);
+//		simulations[14] = new Simulation(unitNum, 4, 4);
+//		String[] elements14 = { "Hydrogen-Ion","Nitrate","Water"};
+//		SpawnStyle[] spawnStyles14 = { SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent};
+//		simulations[14].setupElements(elements14, spawnStyles14);
 		
-		simulations[15] = new Simulation(unitNum, 5, 1);
-		String[] elements15 = { "Hydrogen-Ion","Chlorine-Ion", "Sodium-Ion","Hydroxide","Water" };
-		SpawnStyle[] spawnStyles15 = { SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent};
-		simulations[15].setupElements(elements15, spawnStyles15);
+//		simulations[15] = new Simulation(unitNum, 5, 1);
+//		String[] elements15 = { "Hydrogen-Ion","Chlorine-Ion", "Sodium-Ion","Hydroxide","Water" };
+//		SpawnStyle[] spawnStyles15 = { SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent};
+//		simulations[15].setupElements(elements15, spawnStyles15);
 		
 		simulations[16] = new Simulation(unitNum, 6, 1);
 		String[] elements16 = { "Hydrogen-Ion","Chlorine-Ion", "Sodium-Ion","Hydroxide","Water" };
 		SpawnStyle[] spawnStyles16 = { SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent};
 		simulations[16].setupElements(elements16, spawnStyles16);
 		
-		simulations[17] = new Simulation(unitNum, 7, 1);
+		simulations[17] = new Simulation(unitNum, 5, 1);
 		String[] elements17 = { "Ammonia","Ammonium","Hydrogen-Ion","Chlorine-Ion","Water" };
 		SpawnStyle[] spawnStyles17 = { SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent};
 		simulations[17].setupElements(elements17, spawnStyles17);
 		
-		ionHash.put("Hydrogen-Ion", new String [] {"Hydrogen-Ion","Hydrogen-Atom"});
-		ionHash.put("Chlorine-Ion", new String [] {"Chlorine-Ion","Chlorine-Atom"});
-		ionHash.put("Sodium-Ion", new String [] {"Sodium-Ion","Sodium"});
-		ionHash.put("Hydroxide", new String [] {"Hydroxide","Hydroxide"});
+		ionHash.put("Hydrogen-Chloride", new String [] {"Hydrogen-Chloride","Hydrogen-Chloride"});
+		ionHash.put("Sodium-Hydroxide", new String [] {"Sodium-Hydroxide","Sodium-Hydroxide"});
 		ionHash.put("Ammonia", new String [] {"Ammonia","Ammonia"});
 		ionHash.put("Ammonium", new String [] {"Ammonium","Ammonium"});
 		ionHash.put("Cyanide", new String [] {"Cyanide","Cyanide"});
-		ionHash.put("Bromine-Ion", new String [] {"Bromine-Ion","Bromine-Atom"});
+		ionHash.put("Hydrogen-Bromide", new String [] {"Hydrogen-Bromide","Hydrogen-Bromide"});
 		ionHash.put("Boron-Trichloride", new String[] {"Boron-Trichloride","Boron-Trichloride"});
 		
 	}
@@ -276,6 +282,8 @@ public class Unit8 extends UnitBase {
 		case 1:
 			if(set==1)
 				reactionHappened = reactSim1Set1(simulation);
+			if(set==2)
+				reactionHappened = reactSim1Set2(simulation);
 			else if(set==3)
 				reactionHappened = reactSim1Set3(simulation);
 			break;
@@ -308,15 +316,15 @@ public class Unit8 extends UnitBase {
 			else if(set==4)
 				reactionHappened = reactSim4Set4(simulation);
 			break;
-		case 5:
-			if(set==1)
-				reactionHappened = reactSim1Set3(simulation);
-			break;
+//		case 5:
+//			if(set==1)
+//				reactionHappened = reactSim1Set3(simulation);
+//			break;
 		case 6:
 			if(set==1)
 				reactionHappened = reactSim1Set3(simulation);
 			break;
-		case 7:	
+		case 5:	
 			if(set==1)
 			{
 				ArrayList<String> nameString = new ArrayList<String> ();
@@ -331,7 +339,6 @@ public class Unit8 extends UnitBase {
 				}
 				else if(nameString.contains("Hydrogen-Ion")&&(nameString.contains("Hydroxide")||nameString.contains("Ammonia")))
 				reactionHappened = reactSim7Set1(simulation);
-
 			}
 			break;
 
@@ -340,17 +347,17 @@ public class Unit8 extends UnitBase {
 	//Update the position of microscope molecules for Sim 2 Set 1
 	private boolean updatePositionSim2Set1(Simulation simulation)
 	{
-		Molecule hydrogenIon = State.getMoleculeByName(ionHash.get("Hydrogen-Ion")[electronView]);
-		Molecule hydroxide = State.getMoleculeByName(ionHash.get("Hydroxide")[electronView]);
+		Molecule hydrogenIon = State.getMoleculeByName(ionHash.get("Hydrogen-Chloride")[electronView]);
+		Molecule hydroxide = State.getMoleculeByName(ionHash.get("Sodium-Hydroxide")[electronView]);
 
-		updatePositionTwoMolcules(hydroxide,hydrogenIon,"Water");
+		updatePositionTwoMolcules(hydroxide,hydrogenIon,"Water","Sodium-Chloride");
 		return true;
 	}
 	//Update the position of microscope molecules for Sim 2 Set 2
 	private boolean updatePositionSim2Set2(Simulation simulation)
 	{
 		Molecule ammonia = State.getMoleculeByName(ionHash.get("Ammonia")[electronView]);
-		Molecule hydrogen = State.getMoleculeByName(ionHash.get("Hydrogen-Ion")[electronView]);
+		Molecule hydrogen = State.getMoleculeByName(ionHash.get("Hydrogen-Chloride")[electronView]);
 
 		updatePositionTwoMolcules(ammonia,hydrogen,"Ammonium");
 		return true;
@@ -360,7 +367,7 @@ public class Unit8 extends UnitBase {
 	private boolean updatePositionSim2Set3(Simulation simulation)
 	{
 		Molecule cyanide = State.getMoleculeByName(ionHash.get("Cyanide")[electronView]);
-		Molecule hydrogen = State.getMoleculeByName(ionHash.get("Hydrogen-Ion")[electronView]);
+		Molecule hydrogen = State.getMoleculeByName(ionHash.get("Hydrogen-Bromide")[electronView]);
 
 		updatePositionTwoMolcules(cyanide,hydrogen,"Hydrogen-Cyanide");
 		return true;
@@ -376,8 +383,12 @@ public class Unit8 extends UnitBase {
 		return true;
 	}
 	
-	private void updatePositionTwoMolcules(Molecule first, Molecule second,String product)
+	private void updatePositionTwoMolcules(Molecule first, Molecule second,String ... product)
 	{
+		
+		Vec2 pos = null;
+		float angle =  0;
+		
 		if (!p5Canvas.isEnable || !p5Canvas.isSimStarted)
 			return;
 		
@@ -393,15 +404,41 @@ public class Unit8 extends UnitBase {
 //				System.out.println(" interpolatorAngle1 Stop targetting!");
 //			}
 		}
+		//Rotate the second molecule
+		if(interpolatorAngle2.isTargeting())
+		{
+			interpolatorAngle2.update();
+			float newAngle = interpolatorAngle2.getValue();
+			second.setAngle(newAngle);
+			
+//			if(!interpolatorAngle1.isTargeting())
+//			{
+//				System.out.println(" interpolatorAngle1 Stop targetting!");
+//			}
+		}
+		
+		//Move the first molecule
+		if(interpolatorPos1.isTargeting())
+		{
+			interpolatorPos1.update();
+			float currentPersentage = interpolatorPos1.getValue()/100;
+			
+			Vec2 translatePosition = new Vec2(translateVectorFirst.mul(currentPersentage));
+
+			Vec2 currentPosition = new Vec2(lastPositionFirst.add(translatePosition));
+
+			first.setPositionInPixel(currentPosition);
+
+		}
 		//Move the second molecule
 		if(interpolatorPos2.isTargeting())
 		{
 			interpolatorPos2.update();
 			float currentPersentage = interpolatorPos2.getValue()/100;
 			
-			Vec2 translatePosition = new Vec2(translateVector.mul(currentPersentage));
+			Vec2 translatePosition = new Vec2(translateVectorSecond.mul(currentPersentage));
 
-			Vec2 currentPosition = new Vec2(lastPosition.add(translatePosition));
+			Vec2 currentPosition = new Vec2(lastPositionSecond.add(translatePosition));
 
 			second.setPositionInPixel(currentPosition);
 
@@ -410,6 +447,7 @@ public class Unit8 extends UnitBase {
 //				System.out.println(" interpolatorPos2 Stop targetting!");
 //			}
 		}
+	
 		
 		if(hasFading)
 		{
@@ -424,17 +462,30 @@ public class Unit8 extends UnitBase {
 			interpolatorHide.set(0);
 			interpolatorHide.target(100);
 			
-			//Create new molecule to replace the old ones.
-			Vec2 pos = first.getPositionInPixel();
-			float angle = first.getAngle();
-			newMolecule = new Molecule(pos.x,pos.y,product,box2d,p5Canvas,angle);	
-			State.molecules.add(newMolecule);
-			newMolecule.setLinearVelocity(new Vec2(0, 0));
-			newMolecule.setEnableAutoStateChange(false);
-			newMolecule.setState(mState.Gas);
-			newMolecule.setTransparent(1.0f);
-			newMolecule.setFixtureCatergory(Constants.NONCOLLIDER_ID, Constants.BOUNDARY_ID);
-			isFading = true;
+
+			//Create new molecules
+			for(int i=0; i<product.length;i++)
+			{
+				if(i==0)
+				{
+					 pos = first.getPositionInPixel();
+					 angle = first.getAngle();
+				}
+				else if(i==1)
+				{
+					 pos = second.getPositionInPixel();
+					 angle = second.getAngle();
+				}
+				Molecule newMole = new Molecule(pos.x,pos.y,product[i],box2d,p5Canvas,angle);	
+				newMole.setLinearVelocity(new Vec2(0, 0));
+				newMole.setEnableAutoStateChange(false);
+				newMole.setState(mState.Gas);
+				newMole.setTransparent(1.0f);
+				newMole.setFixtureCatergory(Constants.NONCOLLIDER_ID, Constants.BOUNDARY_ID);
+				State.molecules.add(newMole);
+				newMolecules.add(newMole);
+				isFading = true;
+			}
 		}
 		
 		if(isFading)
@@ -446,7 +497,12 @@ public class Unit8 extends UnitBase {
 				float tran = (float)interpolatorShow.getValue()/100;
 				if(tran<0.01f)
 					tran = 0.0f;
-				newMolecule.setTransparent(tran);
+				System.out.println("Show trans is "+tran);
+
+				for(Molecule newMole:newMolecules)
+				{
+					newMole.setTransparent(tran);
+				}
 			}
 			if(interpolatorHide.isTargeting())
 			{
@@ -454,6 +510,7 @@ public class Unit8 extends UnitBase {
 				float trans = (float)interpolatorHide.getValue()/100;
 				if(trans>0.98f)
 					trans=1.0f;
+				System.out.println("Hide trans is "+trans);
 				first.setTransparent(trans);
 				second.setTransparent(trans);
 //				System.out.println("trans is "+trans);
@@ -464,6 +521,64 @@ public class Unit8 extends UnitBase {
 
 	}
 	
+	//Reaction function for sim 1 set 2
+	public boolean reactSim1Set2(Simulation simulation) {
+
+		if (!p5Canvas.killingList.isEmpty()) {
+			// If it is dissolving process
+			if (p5Canvas.killingList.get(0).getName().equals("Sodium-Hydroxide")) {
+				if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
+
+					int numToKill = p5Canvas.killingList.size();
+					Molecule[] mOld = new Molecule[numToKill];
+					Molecule dissolveCompound = null;
+					for (int i = 0; i < numToKill; i++)
+					{
+						mOld[i] = (Molecule) p5Canvas.killingList.get(i);
+						if(mOld[i].getName().equals("Sodium-Hydroxide"))
+							dissolveCompound = mOld[i];
+					}
+
+					Molecule mNew = null;
+
+					// Actually there is only one reaction going in each frame
+					for (int i = 0; i < p5Canvas.products.size(); i++) {
+						Vec2 loc = dissolveCompound.getPosition();
+						String ionName = p5Canvas.products.get(i);
+						float x1;
+						
+						int elementIndex = Compound.isIonOfElement(ionName, dissolveCompound);
+						if(elementIndex !=-1 )
+							loc.set(dissolveCompound.getElementLocation(elementIndex));
+						x1 = PBox2D.scalarWorldToPixels(loc.x);
+						float y1 = p5Canvas.h * p5Canvas.canvasScale
+								- PBox2D.scalarWorldToPixels(loc.y);
+						Vec2 newVec = new Vec2(x1, y1);
+						mNew = new Molecule(newVec.x, newVec.y,
+								ionName, box2d, p5Canvas,
+								(float) (Math.PI / 2));
+						mNew.setRatioKE(1 / simulation.getSpeed());
+
+						State.molecules.add(mNew);
+							mNew.body.setLinearVelocity(new Vec2(0,0));
+							if(ionName.equals("Sodium-Ion")||ionName.equals("Hydroxide"))
+							{
+							//Set Sodium-Ion and Hydroxide tableIndex to "Sodium-Hydroxide"
+							int tableIndex = p5Canvas.getTableView().getIndexByName("Sodium-Hydroxide");
+							mNew.setTableIndex(tableIndex);
+							}
+						
+					}
+					for (int i = 0; i < numToKill; i++)
+						mOld[i].destroy();
+
+					p5Canvas.products.clear();
+					p5Canvas.killingList.clear();
+				}
+			} 
+		}
+		return false;
+	}
 	//Reaction funciton for Sim 1 Set 3
 	private boolean reactSim1Set3(Simulation simulation)
 	{
@@ -1255,20 +1370,20 @@ public class Unit8 extends UnitBase {
 		{
 			if(set==1)
 			{
-				second = State.getMoleculeByName(ionHash.get("Hydrogen-Ion")[electronView]);
-				first  = State.getMoleculeByName(ionHash.get("Hydroxide")[electronView]);
-				initializeTwoMolcules(first	, second,(float)-Math.PI/3 ,0.6f);
+				second = State.getMoleculeByName(ionHash.get("Hydrogen-Chloride")[electronView]);
+				first  = State.getMoleculeByName(ionHash.get("Sodium-Hydroxide")[electronView]);
+				initializeTwoMolcules(first	, second,(float)Math.PI,0.6f);
 			}
 			else if(set==2)
 			{
 				first = State.getMoleculeByName(ionHash.get("Ammonia")[electronView]);
-				second  = State.getMoleculeByName(ionHash.get("Hydrogen-Ion")[electronView]);
+				second  = State.getMoleculeByName(ionHash.get("Hydrogen-Chloride")[electronView]);
 				initializeTwoMolcules(first	, second,(float)-Math.PI/2,0.525f);
 			}
 			else if(set==3)
 			{
 				first = State.getMoleculeByName(ionHash.get("Cyanide")[electronView]);
-				second  = State.getMoleculeByName(ionHash.get("Hydrogen-Ion")[electronView]);
+				second  = State.getMoleculeByName(ionHash.get("Hydrogen-Bromide")[electronView]);
 				initializeTwoMolcules(first	, second,0,0.7f);
 			}
 			else if(set==4)
@@ -1292,38 +1407,60 @@ public class Unit8 extends UnitBase {
 		Vec2 posFirst = first.getPositionInPixel();
 		Vec2 posSecond = second.getPositionInPixel();
 		float distance = computeDistance(posFirst,posSecond);
-		float angleBetween = 0;
 		
-		if(!interpolatorAngle1.isTargeting())
+		float theta = 0;
+		float angleFirst = 0 ;
+		float angleSecond = 0;
+		
+		if(!interpolatorAngle1.isTargeting() && !interpolatorAngle2.isTargeting())
 		{
+			float acosValue = (posSecond.x-posFirst.x)/distance;
+			theta = (float) Math.acos(acosValue);
+
 			if(posFirst.y>posSecond.y) //In phase I and II cos function is monotone decreasing
 			{
-				angleBetween = (float) Math.acos((posSecond.x-posFirst.x)/distance);
+				//first = - theta
+				//second = PI - theta
+				angleFirst = -theta;
+				angleSecond = (float) (Math.PI - theta);
 			}
-			else // posFirst.y < posSocne
+			else // posFirst.y < posSecond
 			{
-				angleBetween = (float) ( Math.acos((posFirst.x-posSecond.x)/distance)+Math.PI);
+				//first = theta
+				//second = PI + theta
+				angleFirst = theta;
+				angleSecond = (float) (Math.PI + theta);
 			}
-			angleBetween+=Math.PI + angle; 
-			if(angleBetween>Math.PI)
-			{
-				angleBetween-=2*Math.PI;
-			}
+//			angleBetween+=Math.PI + angle; 
+//			if(angleBetween>Math.PI)
+//			{
+//				angleBetween-=2*Math.PI;
+//			}
 			interpolatorAngle1.set(first.getAngle());
-			interpolatorAngle1.target(angleBetween);
+			interpolatorAngle1.target(angleFirst);
+			interpolatorAngle2.set(second.getAngle());
+			interpolatorAngle2.target(angleSecond);
 		}
 
-		if(!interpolatorPos2.isTargeting())
+		if(!interpolatorPos2.isTargeting() && !interpolatorPos1.isTargeting())
 		{
 			float minDist = first.getShapeSize().x*minRangeRatio;
 			if(distance>minDist)
 			{
+				
 				float ratio = (distance - minDist)/distance;
-//				totalDist = distance;
-				lastPosition.set(posSecond);
-				translateVector.set((posFirst.sub(posSecond)).mul(ratio));
+				ratio/=2;
+				lastPositionSecond.set(posSecond);
+				translateVectorSecond.set((posFirst.sub(posSecond)).mul(ratio));
+				
+				lastPositionFirst.set(posFirst);
+				translateVectorFirst.set((posSecond.sub(posFirst)).mul(ratio));
+				
+				interpolatorPos1.set(0);
+				interpolatorPos1.target(100);  // 0 - 100 %
 				interpolatorPos2.set(0);
 				interpolatorPos2.target(100);  // 0 - 100 %
+
 			}
 		}
 
@@ -1344,6 +1481,12 @@ public class Unit8 extends UnitBase {
 		interpolatorAngle1.setTargeting(false);
 		interpolatorAngle1.setAttraction(0.25f);
 		interpolatorAngle1.setDamping(0.4f);
+		interpolatorAngle2.setTargeting(false);
+		interpolatorAngle2.setAttraction(0.25f);
+		interpolatorAngle2.setDamping(0.4f);
+		interpolatorPos1.setTargeting(false);
+		interpolatorPos1.setAttraction(0.25f);
+		interpolatorPos1.setDamping(0.4f);
 		interpolatorPos2.setTargeting(false);
 		interpolatorPos2.setAttraction(0.25f);
 		interpolatorPos2.setDamping(0.4f);
@@ -1356,7 +1499,8 @@ public class Unit8 extends UnitBase {
 		interpolatorShow.setDamping(0.2f);
 		hasFading = false;
 		isFading = false;
-		newMolecule = null;
+		
+		newMolecules.clear();
 
 		// Customization
 		int sim = p5Canvas.getSim();
@@ -1377,6 +1521,7 @@ public class Unit8 extends UnitBase {
 		case 2:
 			p5Canvas.isBoundaryShow = false;
 			p5Canvas.setIfConstrainKE(false);
+			p5Canvas.setEnableDrag(false);  //Disable drag function
 			if(electronView==0)  //Bronsted Law
 			{
 				hasFading = true;
@@ -1463,6 +1608,7 @@ public class Unit8 extends UnitBase {
 		Main main = p5Canvas.getMain();
 		Simulation simulation = getSimulation(sim,set);
 		JPanel dashboard = main.dashboard;
+
 		
 		
 		switch(sim)
@@ -1557,12 +1703,12 @@ public class Unit8 extends UnitBase {
 			dashboard.add(this.lblTempText,"cell 0 4, align right");
 			dashboard.add(this.lblTempValue,"cell 1 4, align left");
 			break;
-		case 5:
-			break;
+//		case 5:
+//			break;
 		case 6:
 			main.btnGraphSwitch.setEnabled(true);
 			break;
-		case 7:
+		case 5:
 			if(set==1)
 			{
 				lblMolesCompound1Value.setText("0");
@@ -1605,13 +1751,29 @@ public class Unit8 extends UnitBase {
 			main.heatSlider.setEnabled(false);
 			main.volumeSlider.setEnabled(false);
 			main.currentZoom = 200;
-			//main.zoomSlider.setEnabled(false);
+			main.zoomSlider.setEnabled(false);
+
+			resetRightPanel(sim,set);
 			break;
 		
 		}
 
 	}
 
+	private void resetRightPanel(int sim, int set) {
+		Main main = p5Canvas.getMain();
+		main.rightPanel.removeAll();
+
+		switch(sim)
+		{
+		case 2:
+			main.rightPanel.add(main.lblOutput, "cell 0 1");
+			main.rightPanel.add(main.dashboard, "cell 0 2,growy");
+			break;
+
+		}
+
+	}
 	/* (non-Javadoc)
 	 * @see simulations.UnitBase#updateOutput(int, int)
 	 */
@@ -1760,6 +1922,8 @@ public class Unit8 extends UnitBase {
 		case 1:
 			if(set==1)
 				computeForceLiftChloride();
+			else if(set==2)
+				computeForceSim1Set2();
 			computeForceTopBoundary();
 			break;
 		case 2:
@@ -1779,14 +1943,14 @@ public class Unit8 extends UnitBase {
 		case 4:
 			computeForceTopBoundary();
 			break;
-		case 5:
-			computeForceTopBoundary();
-			break;
+//		case 5:
+//			computeForceTopBoundary();
+//			break;
 		case 6:
 			computeForceSim6Set1();
 			computeForceTopBoundary();
 			break;
-		case 7:
+		case 5:
 			computeForceSim7Set1();
 			computeForceTopBoundary();
 			break;
@@ -1825,6 +1989,75 @@ public class Unit8 extends UnitBase {
 				}
 		}		
 		
+	}
+	
+	// Foce computation for sim 1 set 2
+	private void computeForceSim1Set2() {
+		Molecule mole = null;
+		String moleName = null;
+		float repulsiveForceX = 1.0f;
+		float repulsiveForceY = 0.5f;
+		
+		float forceYCompensation = 0.01f;
+
+
+		float xValue = 0;
+		float yValue = 0;
+		float dis = 0;
+		float disSquare = 0;
+		float forceX = 0;
+		float forceY = 0;
+		Vec2 thisLoc = new Vec2(0, 0);
+		Vec2 otherLoc = new Vec2(0, 0);
+
+		for (int i = 0; i < State.getMoleculeNum(); i++) {
+			mole = State.molecules.get(i);
+			moleName = new String(mole.getName());
+
+			if (moleName.equals("Sodium-Ion")) 
+				//Force compute for NaOH, to separate Sodium-Ion from the solid
+			{
+				for (int thisE = 0; thisE < mole.getNumElement(); thisE++) {
+
+					thisLoc.set(mole.getElementLocation(thisE));
+					mole.sumForceX[thisE] = 0;
+					mole.sumForceY[thisE] = 0;
+					for (int k = 0; k < State.getMoleculeNum(); k++) {
+						//Check all other molecules
+						if (k == i)
+							continue;
+						Molecule m = State.molecules.get(k);
+						String mName = m.getName();
+						if (mName.equals("Sodium-Hydroxide")||mName.equals("Sodium-Ion")) {
+							for (int otherE = 0; otherE < m.getNumElement(); otherE++)
+							{
+								otherLoc.set(m.getElementLocation(otherE));
+								if (thisLoc == null || otherLoc == null)
+									continue;
+								xValue = thisLoc.x - otherLoc.x;
+								yValue = thisLoc.y - otherLoc.y;
+								disSquare = xValue * xValue + yValue* yValue;
+								dis = (float) Math.sqrt(disSquare);
+								xValue/=dis;
+								yValue/=dis;
+								forceX = (float) (xValue * (repulsiveForceX/disSquare));
+								forceY = (float) (yValue * (repulsiveForceY/disSquare));
+								if(forceY<0)
+									forceY*=0;
+								mole.sumForceX[thisE] += forceX;
+								//mole.sumForceY[thisE] += forceY;
+//							
+								mole.sumForceY[thisE]+=forceYCompensation; 
+							}
+
+						}
+					}
+
+				}
+
+			}
+
+		}
 	}
 	
 	private void computeForceSim3Set2()
@@ -2050,38 +2283,63 @@ public class Unit8 extends UnitBase {
 
 		int sim = p5Canvas.getSim();
 		int set = p5Canvas.getSet();
-		
-		String [] ionName = getIonsByName(compoundName);
 		Simulation simulation = getSimulation(sim, set);
-		int len = ionName.length;
-		for(int i = 0;i<len;i++)
+
+		if(simulation.getSpawnStyle(compoundName) ==SpawnStyle.Precipitation)
 		{
-			SpawnStyle spawnStyle = simulation.getSpawnStyle(ionName[i]);
-			if (spawnStyle == SpawnStyle.Solvent) {
-				res = this.addSolvent(isAppEnable, ionName[i], count, simulation);
+			res = this.addPrecipitation(isAppEnable, compoundName, count, simulation, 0);
+			if (res) {
+				// Connect new created molecule to table index
+				int tIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+				int lastIndex = State.molecules.size() - 1;
+
+				for (int i = 0; i < count; i++) {
+					//Set up table view index
+					State.molecules.get(lastIndex - i).setTableIndex(tIndex);
+					//Set up speed
+					State.molecules.get(lastIndex - i).setRatioKE(
+							1 / simulation.getSpeed());
+//					//Set up boiling point and freezing point
+//					State.molecules.get(lastIndex - i).setBoillingPoint(100);
+//					State.molecules.get(lastIndex - i).setFreezingPoint(0);
+				}
+
 			}
-			if (spawnStyle == SpawnStyle.Gas)
+		}
+		else //If compound is solvent or gas
+		{
+			String [] ionName = getIonsByName(compoundName);
+			int len = ionName.length;
+			for(int i = 0;i<len;i++)
 			{
-				res = this.addStaticMolecule(isAppEnable, ionName[i], count);
+				SpawnStyle spawnStyle = simulation.getSpawnStyle(ionName[i]);
+				if (spawnStyle == SpawnStyle.Solvent) {
+					res = this.addSolvent(isAppEnable, ionName[i], count, simulation);
+				}
+				else if (spawnStyle == SpawnStyle.Gas)
+				{
+					res = this.addStaticMolecule(isAppEnable, ionName[i], count);
+				}
+			}
+			if (res) {
+				// Connect new created molecule to table index
+				int tIndex = p5Canvas.getTableView().getIndexByName(compoundName);
+				int lastIndex = State.molecules.size() - 1;
+
+				for (int i = 0; i < len*count; i++) {
+					//Set up table view index
+					State.molecules.get(lastIndex - i).setTableIndex(tIndex);
+					//Set up speed
+					State.molecules.get(lastIndex - i).setRatioKE(
+							1 / simulation.getSpeed());
+					//Set up boiling point and freezing point
+					State.molecules.get(lastIndex - i).setBoillingPoint(100);
+					State.molecules.get(lastIndex - i).setFreezingPoint(0);
+				}
+
 			}
 		}
-		if (res) {
-			// Connect new created molecule to table index
-			int tIndex = p5Canvas.getTableView().getIndexByName(compoundName);
-			int lastIndex = State.molecules.size() - 1;
-
-			for (int i = 0; i < len*count; i++) {
-				//Set up table view index
-				State.molecules.get(lastIndex - i).setTableIndex(tIndex);
-				//Set up speed
-				State.molecules.get(lastIndex - i).setRatioKE(
-						1 / simulation.getSpeed());
-				//Set up boiling point and freezing point
-				State.molecules.get(lastIndex - i).setBoillingPoint(100);
-				State.molecules.get(lastIndex - i).setFreezingPoint(0);
-			}
-
-		}
+		
 
 		return res;	
 	}
@@ -2192,6 +2450,8 @@ public class Unit8 extends UnitBase {
 //		}
 	}
 	
+	
+	//Translate compound in yaml config file into ions
 	public String[] getIonsByName(String compound)
 	{
 		String [] res = new String [2];
@@ -2199,37 +2459,56 @@ public class Unit8 extends UnitBase {
 		if(p5Canvas.getSim()==2)
 			index = electronView;
 		
-		if(compound.equals("Hydrochloric-Acid"))
-		{
-			res[0] = new String(ionHash.get("Hydrogen-Ion")[index]);
-			res[1] = new String (ionHash.get("Chlorine-Ion")[index]);
+		if(p5Canvas.getSim()!=2)
+		{			
+			if(compound.equals("Hydrochloric-Acid"))
+			{
+				res[0] = new String("Hydrogen-Ion");
+				res[1] = new String ("Chlorine-Ion");
+			}
+			else if(compound.equals("Sodium-Hydroxide"))
+			{
+				res[0] = new String("Sodium-Ion");
+				res[1] = new String("Hydroxide");
+			}
+			else if(compound.equals("Hydrogen-Bromide"))
+			{
+				res[0] = new String("Hydrogen-Ion");
+				res[1] = new String("Bromine-Ion");
+			}
+			else if(compound.equals("Lithium-Hydroxide"))
+			{
+				res[0] = new String("Lithium-Ion");
+				res[1] = new String("Hydroxide");
+			}
+			else if(compound.equals("Nitric-Acid"))
+			{
+				res[0] = new String("Nitrate");
+				res[1] = new String("Hydrogen-Ion");
+			}
+			else if(compound.equals("Ammonium-Chloride"))
+			{
+				res[0] = new String("Ammonium");
+				res[1] = new String("Chlorine-Ion");
+			}
+			else //Copy original compound to res
+			{
+				res = new String[1];
+				if(compound.equals("Chloride"))
+				{
+					compound = new String("Chlorine-Ion");
+				}
+//				if(ionHash.containsKey(compound))
+//				{
+//					res[0] = new String(ionHash.get(compound)[index]);
+//				}
+				else
+				{
+				res[0] = new String(compound);
+				}
+			}
 		}
-		else if(compound.equals("Sodium-Hydroxide"))
-		{
-			res[0] = new String(ionHash.get("Sodium-Ion")[index]);
-			res[1] = new String(ionHash.get("Hydroxide")[index]);
-		}
-		else if(compound.equals("Hydrogen-Bromide"))
-		{
-			res[0] = new String(ionHash.get("Hydrogen-Ion")[index]);
-			res[1] = new String(ionHash.get("Bromine-Ion")[index]);
-		}
-		else if(compound.equals("Lithium-Hydroxide"))
-		{
-			res[0] = new String("Lithium-Ion");
-			res[1] = new String("Hydroxide");
-		}
-		else if(compound.equals("Nitric-Acid"))
-		{
-			res[0] = new String("Nitrate");
-			res[1] = new String("Hydrogen-Ion");
-		}
-		else if(compound.equals("Ammonium-Chloride"))
-		{
-			res[0] = new String("Ammonium");
-			res[1] = new String("Chlorine-Ion");
-		}
-		else //Copy original compound to res
+		else   //For sim 2
 		{
 			res = new String[1];
 			if(compound.equals("Chloride"))
@@ -2279,7 +2558,7 @@ public class Unit8 extends UnitBase {
 			Molecule m2 = (Molecule) o2;
 
 			// Check if both of these two molecules are reactive
-			//if (m1.getReactive() && m2.getReactive()) 
+			if (m1.getReactive() && m2.getReactive()) 
 			{
 
 				ArrayList<String> reactants = new ArrayList<String>();
@@ -2297,6 +2576,33 @@ public class Unit8 extends UnitBase {
 						p5Canvas.killingList.add(m1);
 						p5Canvas.killingList.add(m2);
 
+					}
+
+				}
+			}
+			
+			// If inreactive molecules collide
+			else if (!m1.getReactive() && !m2.getReactive()) {
+				// If one of these two molecules is a water molecule
+				// Handle dissolution
+				if ((m1.getName().equals("Water") && !m2.getName().equals(
+						"Water"))
+						|| (!m1.getName().equals("Water") && m2.getName()
+								.equals("Water"))) {
+
+					ArrayList<String> collider = new ArrayList<String>();
+					if (m1.getName().equals("Water")) {
+						collider.add(m2.getName());
+						p5Canvas.products = getDissolutionProducts(collider);
+						if (p5Canvas.products.size() > 0) {
+							p5Canvas.killingList.add(m2);
+						}
+					} else {
+						collider.add(m1.getName());
+						p5Canvas.products = getDissolutionProducts(collider);
+						if (p5Canvas.products.size() > 0) {
+							p5Canvas.killingList.add(m1);
+						}
 					}
 
 				}
@@ -2418,15 +2724,15 @@ public class Unit8 extends UnitBase {
 				}
 			}
 			break;
-		case 5:
-			if(set==1)
-			{
-				if(reactants.contains("Hydrogen-Ion")&&reactants.contains("Hydroxide"))
-				{
-					products.add("Water");
-				}
-			}
-			break;
+//		case 5:
+//			if(set==1)
+//			{
+//				if(reactants.contains("Hydrogen-Ion")&&reactants.contains("Hydroxide"))
+//				{
+//					products.add("Water");
+//				}
+//			}
+//			break;
 		case 6:
 			if(set==1)
 			{
@@ -2436,7 +2742,7 @@ public class Unit8 extends UnitBase {
 				}
 			}
 			break;
-		case 7:
+		case 5:
 			if(set==1)
 			{
 				if(reactants.contains("Ammonia") && reactants.contains("Water"))
@@ -2459,6 +2765,26 @@ public class Unit8 extends UnitBase {
 
 		}
 		return products;
+	}
+	
+	/******************************************************************
+	 * FUNCTION : getDissolutionProducts DESCRIPTION : Return elements of
+	 * reactants
+	 * 
+	 * INPUTS : reactants (Array<String>) OUTPUTS: None
+	 *******************************************************************/
+	private ArrayList<String> getDissolutionProducts(ArrayList<String> collider) {
+		ArrayList<String> products = new ArrayList<String>();
+		// Sim 1 set 2 
+		if (collider.contains("Sodium-Hydroxide")) {
+			products.add("Sodium-Ion");
+			products.add("Hydroxide");
+		}
+		else {
+			// return null;
+		}
+		return products;
+
 	}
 	
 	public float getConByName(String s) {

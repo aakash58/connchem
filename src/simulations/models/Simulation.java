@@ -125,6 +125,7 @@ public class Simulation {
 		
 	}
 	
+	//Set the name of element of the specified index
 	public void setElementByIndex(String str, int index)
 	{
 		if(index>=0 && index<elements.length)
@@ -133,11 +134,26 @@ public class Simulation {
 		}
 	}
 	
+	//Get the spawn type of the specific element
 	public SpawnStyle getSpawnStyle(String ele)
 	{
 		int index = getIndexOfElement(ele);
-		return this.elementSpawnStyles[index];
+		if(index!=-1)
+		return getSpawnStyle(index);
+		else 
+			return null;
 	}
+	
+	//Get the spawn type of the element by index
+	public SpawnStyle getSpawnStyle(int index)
+	{
+		if(index>=0 && index<this.elementSpawnStyles.length)
+		return this.elementSpawnStyles[index];
+		else
+			return null;
+	}
+	
+	
 	private int getIndexOfElement(String ele)
 	{
 		for( int i = 0;i<elements.length;i++)

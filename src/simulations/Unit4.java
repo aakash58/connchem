@@ -3,6 +3,7 @@ package simulations;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +37,9 @@ public class Unit4 extends UnitBase {
 	private int computeTriggerInterval = p5Canvas.FRAME_RATE*5;
 //	private float lastXDrag=0;
 //	private float lastYDrag=0;
-	private int numMoleculePerMole = 10;
+	private int numMoleculePerMole = 1;
+	private double actualVolumePerMole = 0.055;
+	private int celsiusToK= 273;
 	
 	//Parameter for trails
 	int trailFastColor = Color.RED.getRGB();
@@ -65,6 +68,9 @@ public class Unit4 extends UnitBase {
 	public JLabel lblVolumeTitle2;   //for Unit4 Sim1 Set2
 	public JLabel lblVolumeValue;   
 	public JLabel lblVolumeValue2; //for Unit4 Sim1 Set2
+	public JLabel lblActualVolumeTitle;
+	public JLabel lblActualVolumeValue;
+	
 	public JLabel lblEqualText;
 	public JLabel lblMolText;
 	public JLabel lblMolValue;
@@ -112,14 +118,16 @@ public class Unit4 extends UnitBase {
 		lblVolumeValue = new JLabel (" L");
 		lblVolumeTitle2 = new JLabel("Volume of gas:");
 		lblVolumeValue2 = new JLabel(" L");
+		lblActualVolumeTitle = new JLabel("Actual volume of Helium:");
+		lblActualVolumeValue = new JLabel("0.550 L");
 		lblEqualText = new JLabel("=");
 		lblMolText = new JLabel ("n (mol)");
 		lblMolValue = new JLabel ("");
 		lblRText = new JLabel ("R");
-		lblRValue = new JLabel ();
-		lblTempText = new JLabel("T (\u2103)");
+		lblRValue = new JLabel("<html><br>8.3145<br><u>L*kPa</u><br>mol*K</html>");
+		lblTempText = new JLabel("T (K)");
 		lblTempTitle = new JLabel ("Temperature:");
-		lblTempValue = new JLabel (" \u2103");
+		lblTempValue = new JLabel (" K");
 		lblKETitle = new JLabel("Kinetic Energy:");
 		lblKEValue = new JLabel(" J");
 		lblMoleTitle = new JLabel("Mole of gas:");
@@ -130,19 +138,19 @@ public class Unit4 extends UnitBase {
 		barPressure = new SimpleBar(0,6300,30);
 		barVolume = new SimpleBar(main.minVolume,main.maxVolume,63);
 		barMol = new SimpleBar(0,50,10);
-		barTemp  = new SimpleBar(main.tempMin,main.tempMax,25);
+		barTemp  = new SimpleBar(0,550,298);
 	}
 
 	@Override
 	public void setupSimulations() {
 		simulations = new Simulation[SIMULATION_NUMBER];
 
-		simulations[0] = new Simulation(unitNum, 1, 1);
+		simulations[0] = new Simulation(unitNum, 1, 2);
 		String[] elements0 = {"Helium"};
 		SpawnStyle[] spawnStyles0 = { SpawnStyle.Gas };
 		simulations[0].setupElements(elements0, spawnStyles0);
 		
-		simulations[1] = new Simulation(unitNum, 1, 2);
+		simulations[1] = new Simulation(unitNum, 1, 1);
 		String[] elements1 = { "Chlorine","Oxygen"};
 		SpawnStyle[] spawnStyles1 = { SpawnStyle.Gas,SpawnStyle.Gas };
 		simulations[1].setupElements(elements1, spawnStyles1);
@@ -157,22 +165,22 @@ public class Unit4 extends UnitBase {
 		SpawnStyle[] spawnStyles3 = { SpawnStyle.Gas };
 		simulations[3].setupElements(elements3, spawnStyles3);
 		
-		simulations[4] = new Simulation(unitNum, 4, 1);
+		simulations[4] = new Simulation(unitNum, 5, 1);
 		String[] elements4 = {"Helium"};
 		SpawnStyle[] spawnStyles4 = { SpawnStyle.Gas };
 		simulations[4].setupElements(elements4, spawnStyles4);
 		
-		simulations[5] = new Simulation(unitNum, 4, 2);
+		simulations[5] = new Simulation(unitNum, 5, 2);
 		String[] elements5 = {"Helium"};
 		SpawnStyle[] spawnStyles5 = { SpawnStyle.Gas };
 		simulations[5].setupElements(elements5, spawnStyles5);
 		
-		simulations[6] = new Simulation(unitNum, 4, 3);
+		simulations[6] = new Simulation(unitNum, 5, 3);
 		String[] elements6 = {"Helium"};
 		SpawnStyle[] spawnStyles6 = { SpawnStyle.Gas };
 		simulations[6].setupElements(elements6, spawnStyles6);
 		
-		simulations[7] = new Simulation(unitNum, 5, 1);
+		simulations[7] = new Simulation(unitNum, 4, 1);
 		String[] elements7 = {"Helium","Oxygen","Chlorine","Carbon-Dioxide"};
 		SpawnStyle[] spawnStyles7 = { SpawnStyle.Gas,SpawnStyle.Gas,SpawnStyle.Gas,SpawnStyle.Gas };
 		simulations[7].setupElements(elements7, spawnStyles7);
@@ -211,13 +219,13 @@ public class Unit4 extends UnitBase {
 		collisionCount = 0;
 		
 		//Reset output labels
-		lblVolumeValue.setText(" mL");
-		lblVolumeValue2.setText(" mL");
-		lblPressureValue.setText(" kPa");
-		lblCollisionValue.setText("");
-		lblTempValue.setText(" \u2103");
-		lblKEValue.setText(" J");
-		lblMoleValue.setText(" mol");
+//		lblVolumeValue.setText(" mL");
+//		lblVolumeValue2.setText(" mL");
+//		lblPressureValue.setText(" kPa");
+//		lblCollisionValue.setText("");
+//		lblTempValue.setText(" K");
+//		lblKEValue.setText(" J");
+//		lblMoleValue.setText(" mol");
 		
 		barMol.reset();
 		barPressure.reset();
@@ -232,15 +240,18 @@ public class Unit4 extends UnitBase {
 				case 2:
 					p5Canvas.temp =100;
 					break;
+
 				case 4:
-					if(p5Canvas.getSet()==2)
-						needWeight();
-					break;
-				case 5:
 					p5Canvas.temp=60;
 					break;
+				case 5:
+					if(p5Canvas.getSet()==2)
+						needWeight();
+					p5Canvas.heatSpeed = 2.5f;
+					break;
 					default:
-						break;		
+						break;
+					
 				}
 		
 
@@ -258,7 +269,7 @@ public class Unit4 extends UnitBase {
 		case 3:
 			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
-		case 4:
+		case 5:
 			if(p5Canvas.getSet()==1)
 			{
 				//barPressure.setMax(800);
@@ -274,9 +285,10 @@ public class Unit4 extends UnitBase {
 			else if (p5Canvas.getSet()==3)
 			{
 				p5Canvas.getMain().volumeSlider.setEnabled(false);
+				barPressure.setMax(2000);
 			}
 			break;
-		case 5:
+		case 4:
 			p5Canvas.getMain().volumeSlider.setEnabled(false);
 			p5Canvas.getMain().heatSlider.setEnabled(false);
 			
@@ -317,11 +329,18 @@ public class Unit4 extends UnitBase {
 		switch(sim)
 		{
 		case 1:
-			if(set==2)
-				speed =4 ;
+			speed = 4;
+			if(set==1)
+				speed =8 ;
 			break;
 		case 2:
 			speed = 8;
+			break;
+		case 3:
+			speed = 4;
+			break;
+		case 4:
+			speed = 4;
 			break;
 		case 5:
 			speed = 4;
@@ -383,7 +402,7 @@ public class Unit4 extends UnitBase {
 					oriPixel.set(ori);
 					desPixel.set(des);
 					// Update trail position when user is dragging
-					if (p5Canvas.isDrag) {	
+					if (p5Canvas.isDragging()) {	
 							desPixel.x += (p5Canvas.xDrag);
 							desPixel.y += (p5Canvas.yDrag);
 					}
@@ -510,12 +529,14 @@ public class Unit4 extends UnitBase {
 		case 3:
 			countWallCollision(c);
 			break;
-		case 4:
+		case 5:
 			if(p5Canvas.getSet()==2)
 				moveTopBoundary(c);
 			break;
 		}
 	}
+	
+	
 	
 	// Function that save collision point of a overwatched molecule
 	// Called by beginContact
@@ -633,23 +654,14 @@ public class Unit4 extends UnitBase {
 				dashboard.add(main.elapsedTime, "cell 1 0");
 				if(set ==1 )
 				{
-					lblVolumeTitle.setText("Volume of Helium:");
-					lblVolumeValue.setText("63 L");
-					lblMolecule1MolText.setText("Mole of Helium:");
-					lblMolecule1MolValue.setText("1.0 mol");
-					dashboard.add(lblMolecule1MolText, "cell 0 2");
-					dashboard.add(lblMolecule1MolValue,"cell 1 2");
-				}
-				else if(set ==2 )
-				{
 					lblVolumeTitle.setText("Volume of Chlorine:");
 					lblVolumeValue.setText("63 L");
 					lblVolumeTitle2.setText("Volume of Oxygen:");
 					lblVolumeValue2.setText("63 L");
 					lblMolecule1MolText.setText("Mole of Chlorine:");
-					lblMolecule1MolValue.setText("1.0 mol");
+					lblMolecule1MolValue.setText("10.0 mol");
 					lblMolecule2MolText.setText("Mole of Oxygen:");
-					lblMolecule2MolValue.setText("1.0 mol");
+					lblMolecule2MolValue.setText("10.0 mol");
 					dashboard.add(lblMolecule1MolText, "cell 0 3");
 					dashboard.add(lblMolecule1MolValue,"cell 1 3");
 					dashboard.add(lblMolecule2MolText, "cell 0 4");
@@ -658,6 +670,19 @@ public class Unit4 extends UnitBase {
 					dashboard.add(lblVolumeTitle2, "cell 0 2");
 					dashboard.add(lblVolumeValue2,"cell 1 2");
 				}
+				else if(set ==2 )
+				{
+					lblVolumeTitle.setText("Volume of Helium:");
+					lblVolumeValue.setText("63 L");
+					lblMolecule1MolText.setText("Mole of Helium:");
+					lblMolecule1MolValue.setText("10.0 mol");
+					lblActualVolumeValue.setText("0.55 L");
+					dashboard.add(lblMolecule1MolText, "cell 0 2");
+					dashboard.add(lblMolecule1MolValue,"cell 1 2");
+					dashboard.add(lblActualVolumeTitle, "cell 0 3");
+					dashboard.add(lblActualVolumeValue,"cell 1 3");
+				}
+
 				dashboard.add(lblVolumeTitle,"cell 0 1");
 				dashboard.add(lblVolumeValue,"cell 1 1");
 			}
@@ -667,7 +692,7 @@ public class Unit4 extends UnitBase {
 				dashboard.add(main.elapsedTime, "cell 1 0");
 				lblMoleTitle.setText("Mole of gas:");
 				lblMoleValue.setText("10.0 mol");
-				lblTempValue.setText("100 \u2103");
+				lblTempValue.setText("373 K");
 				lblKETitle.setText("Kinetic Energy:");
 				lblKEValue.setText("0.75 J");
 				lblVolumeTitle.setText("Volume of Bromine:");
@@ -694,7 +719,7 @@ public class Unit4 extends UnitBase {
 				lblPressureValue.setText("196.63 kPa");
 				
 			}
-			else if( sim ==4)
+			else if( sim ==5)
 			{
 			int barWidth = 40;
 			int barHeight = 120;
@@ -718,9 +743,16 @@ public class Unit4 extends UnitBase {
 			barVolume.setPreferredSize(new Dimension(barWidth,barHeight));
 			barMol.setPreferredSize(new Dimension(barWidth,barHeight));
 			barTemp.setPreferredSize(new Dimension(barWidth,barHeight));
+			
+			//Make R value font size smaller
+			Font font = lblRValue.getFont();
+			font = font.deriveFont(10.0f);	
+			lblRValue.setFont(font);
+			
 			dashboard.add(barPressure,"cell 0 2"+alignStr);
 			dashboard.add(barVolume,"cell 2 2"+alignStr);
 			dashboard.add(barMol,"cell 4 2"+alignStr);
+			dashboard.add(lblRValue,"cell 6 2,top");
 			dashboard.add(barTemp,"cell 8 2"+alignStr);
 			if(set==1)
 				barPressure.setValue(393.27f);
@@ -732,23 +764,24 @@ public class Unit4 extends UnitBase {
 			}
 			else if(set==3)
 				barPressure.setValue(393.27f);
+			
 			}
-			else if( sim ==5)
-			{
-				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
-				dashboard.add(main.elapsedTime, "cell 1 0");
-				dashboard.add(lblPressureTitle,"cell 0 2");
-				dashboard.add(lblPressureValue,"cell 1 2");
-				lblVolumeTitle.setText("Volume of Container:");
-				lblVolumeValue.setText("63 L");
-				lblPressureValue.setText("0 kPa");
-				lblTempValue.setText("25 \u2103");
-				dashboard.add(lblVolumeTitle,"cell 0 3");
-				dashboard.add(lblVolumeValue,"cell 1 3");
-				dashboard.add(lblTempTitle,"cell 0 4");
-				dashboard.add(lblTempValue,"cell 1 4");
-				
-			}
+//			else if( sim ==4)
+//			{
+//				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+//				dashboard.add(main.elapsedTime, "cell 1 0");
+//				dashboard.add(lblPressureTitle,"cell 0 2");
+//				dashboard.add(lblPressureValue,"cell 1 2");
+//				lblVolumeTitle.setText("Volume of Container:");
+//				lblVolumeValue.setText("63 L");
+//				lblPressureValue.setText("0 kPa");
+//				lblTempValue.setText("333 K");
+//				dashboard.add(lblVolumeTitle,"cell 0 3");
+//				dashboard.add(lblVolumeValue,"cell 1 3");
+//				dashboard.add(lblTempTitle,"cell 0 4");
+//				dashboard.add(lblTempValue,"cell 1 4");
+//				
+//			}
 		
 	}
 
@@ -760,13 +793,26 @@ public class Unit4 extends UnitBase {
 		String output = null;
 		if(lblMolecule1MolValue.isShowing())
 		{
-			lblMolecule1MolValue.setText(Float.toString((float)Compound.getMoleculeNum("Helium")/numMoleculePerMole)+ " mol");
+			
+			if(sim==1&&set==2)
+			{
+				output = myFormatter.format(State.getMoleculeNumByName("Helium")/numMoleculePerMole);
+				lblMolecule1MolValue.setText(output+ " mol");
+			}
+			else if(sim==1&&set==1)
+			{
+				output = myFormatter.format(State.getMoleculeNumByName("Chlorine")/numMoleculePerMole);
+				lblMolecule1MolValue.setText(output + " mol");
+			}
+
 		}
 		if(lblMolecule2MolValue.isShowing())
 		{
-			lblMolecule1MolValue.setText(Float.toString((float)Compound.getMoleculeNum("Chlorine")/numMoleculePerMole)+ " mol");
-			lblMolecule2MolValue.setText(Float.toString((float)Compound.getMoleculeNum("Oxygen")/numMoleculePerMole)+ " mol");
+			output = myFormatter.format(State.getMoleculeNumByName("Oxygen")/numMoleculePerMole);
+
+			lblMolecule2MolValue.setText(output+ " mol");
 		}
+		
 		if (lblVolumeValue.isShowing()) {
 
 			int volumeMagnifier = getVolumeMagnifier()/1000;
@@ -783,15 +829,23 @@ public class Unit4 extends UnitBase {
 						+ " mL");
 			}
 		}
+		if(lblActualVolumeValue.isShowing())
+		{
+			DecimalFormat formatter = new DecimalFormat("###.###");
+			output = formatter.format(this.actualVolumePerMole* State.getMoleculeNumByName("Helium"));
+			lblActualVolumeValue.setText(output+" L");
+		}
 		if (lblTempValue.isShowing()) {
-			output = myFormatter.format(p5Canvas.temp);
-			lblTempValue.setText(output + " \u2103");
+			//Showing temperature as K in this unit
+			output = myFormatter.format(p5Canvas.temp+celsiusToK);
+			lblTempValue.setText(output + " K");
 		}
 		if (lblKEValue.isShowing()) {
 			output = myFormatter.format(p5Canvas.averageKineticEnergy);
 			lblKEValue.setText(output + " J");
 		}
 		if (lblPressureValue.isShowing()) {
+			
 			output = myFormatter.format(p5Canvas.pressure);
 			lblPressureValue.setText(output + " kPa");
 		}
@@ -806,8 +860,9 @@ public class Unit4 extends UnitBase {
 				barPressure.setValue(p5Canvas.pressure);
 				barVolume.setValue(p5Canvas.currentVolume);
 				barMol.setValue(p5Canvas.mol);
-				barTemp.setValue(p5Canvas.temp);
+				barTemp.setValue(p5Canvas.temp+celsiusToK);
 				barPressure.getParent().repaint();
+
 			}
 		
 	}
@@ -818,9 +873,10 @@ public class Unit4 extends UnitBase {
 	}
 
 	@Override
+	//Update actual volume of gas number after customizeInterface call
 	public void updateMoleculeCountRelated(int sim, int set) {
-		// TODO Auto-generated method stub
-		
+
+		//this.updateOutput(sim, set);
 	}
 
 }

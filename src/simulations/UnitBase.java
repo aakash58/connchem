@@ -66,7 +66,7 @@ public abstract class UnitBase {
 	}
 
 	// Setup parameters for all simulations in this unit
-	public abstract void setupSimulations();
+	protected abstract void setupSimulations();
 
 	// Set up reaction products for graph showing
 	public abstract void setupReactionProducts(int sim, int set);
@@ -125,7 +125,7 @@ public abstract class UnitBase {
 	protected void applyForce(int sim, int set) {
 		for (int i = 0; i < molecules.size(); i++) {
 			Molecule mole = molecules.get(i);
-			if (mole != null && !p5Canvas.isDrag) {
+			if (mole != null && !p5Canvas.isDragging()) {
 
 				for (int e = 0; e < mole.getNumElement(); e++) {
 					mole.addForce(
@@ -1003,7 +1003,7 @@ public abstract class UnitBase {
 	public void updateTopBoundary(int sim, int set)
 	{
 		//In Unit 4 Sim 4 Set 2, update volume every frame
-		if(p5Canvas.isSimSelected(4, 4, 2) || p5Canvas.isSimSelected(7, 1,1)||p5Canvas.isSimSelected(7, 3,1)||p5Canvas.isSimSelected(7,4,1))
+		if(p5Canvas.isSimSelected(4, 5, 2) || p5Canvas.isSimSelected(7, 1,1)||p5Canvas.isSimSelected(7, 3,1)||p5Canvas.isSimSelected(7,4,1))
 		{
 			if(interpolator.isTargeting())
 			{
@@ -1171,5 +1171,7 @@ public abstract class UnitBase {
 	{
 		p5Canvas.boundaries.setHasWeight(true);
 	}
+	
+
 
 }

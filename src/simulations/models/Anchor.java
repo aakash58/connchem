@@ -70,7 +70,7 @@ public class Anchor {
 	public void setPosition(float xp, float yp)
 	{
 
-		if (p5Canvas.isDrag ) {
+		if (p5Canvas.isDragging() ) {
 			float xx = worldX + PBox2D.scalarPixelsToWorld(xp);
 			float yy = worldY - PBox2D.scalarPixelsToWorld(yp);
 			Vec2 v = new Vec2(xx, yy);

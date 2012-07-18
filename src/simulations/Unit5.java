@@ -1,5 +1,5 @@
 /**
- * 
+ * Unit5: Kinetics
  */
 package simulations;
 
@@ -129,38 +129,38 @@ public class Unit5 extends UnitBase {
 				SpawnStyle.Solvent };
 		simulations[3].setupElements(elements3, spawnStyles3);
 
-		simulations[4] = new Simulation(unitNum, 3, 1);
+		simulations[4] = new Simulation(unitNum, 3, 3);
 		String[] elements4 = { "Nitryl-Chloride", "Nitric-Oxide" };
 		SpawnStyle[] spawnStyles4 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[4].setupElements(elements4, spawnStyles4);
 		simulations[4].setSpeed(12);
 
-		simulations[5] = new Simulation(unitNum, 3, 2);
+		simulations[5] = new Simulation(unitNum, 3, 4);
 		String[] elements5 = { "Nitryl-Chloride", "Nitric-Oxide" };
 		SpawnStyle[] spawnStyles5 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[5].setupElements(elements5, spawnStyles5);
 
-		simulations[6] = new Simulation(unitNum, 3, 3);
+		simulations[6] = new Simulation(unitNum, 3, 5);
 		String[] elements6 = { "Nitryl-Chloride", "Nitric-Oxide" };
 		SpawnStyle[] spawnStyles6 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[6].setupElements(elements6, spawnStyles6);
 
-		simulations[7] = new Simulation(unitNum, 3, 4);
+		simulations[7] = new Simulation(unitNum, 3, 6);
 		String[] elements7 = { "Nitryl-Chloride", "Nitric-Oxide" };
 		SpawnStyle[] spawnStyles7 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[7].setupElements(elements7, spawnStyles7);
 
-		simulations[8] = new Simulation(unitNum, 3, 5);
+		simulations[8] = new Simulation(unitNum, 3, 7);
 		String[] elements8 = { "Nitryl-Chloride", "Nitric-Oxide" };
 		SpawnStyle[] spawnStyles8 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[8].setupElements(elements8, spawnStyles8);
 
-		simulations[9] = new Simulation(unitNum, 3, 6);
+		simulations[9] = new Simulation(unitNum, 3, 1);
 		String[] elements9 = { "Dinitrogen-Tetroxide","Catalyst" };
 		SpawnStyle[] spawnStyles9 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[9].setupElements(elements9, spawnStyles9);
 		
-		simulations[10] = new Simulation(unitNum, 3, 7);
+		simulations[10] = new Simulation(unitNum, 3, 2);
 		String[] elements10 = { "Dinitrogen-Tetroxide","Inhibitor" };
 		SpawnStyle[] spawnStyles10 = { SpawnStyle.Gas, SpawnStyle.Gas };
 		simulations[10].setupElements(elements10, spawnStyles10);
@@ -212,7 +212,7 @@ public class Unit5 extends UnitBase {
 		barPressure = new SimpleBar(0, 5000, 30);
 		barVolume = new SimpleBar(main.minVolume, main.maxVolume, 63);
 		barMol = new SimpleBar(0, 50, 10);
-		barTemp = new SimpleBar(main.tempMin, main.tempMax, 25);
+		barTemp = new SimpleBar(p5Canvas.tempMin, p5Canvas.tempMax, 25);
 	}
 
 	/*
@@ -263,12 +263,12 @@ public class Unit5 extends UnitBase {
 			break;
 		case 3:
 				
-			if(set==6)
-				reactionHappened = reactSim3Set6(simulation);
-			else if(set==7)
-				reactionHappened = reactSim3Set7(simulation);
+			if(set==1)
+				reactionHappened = reactSim3Set1(simulation);
+			else if(set==2)
+				reactionHappened = reactSim3Set2(simulation);
 			else
-				reactionHappened = reactSim3Set1to5(simulation);
+				reactionHappened = reactSim3Set3to7(simulation);
 			break;
 		case 4:
 			if (set == 1)
@@ -332,8 +332,8 @@ public class Unit5 extends UnitBase {
 		return false;
 	}
 
-	// Update function for Sim 3 set 1 - set 5
-	private boolean reactSim3Set1to5(Simulation simulation) {
+	// Update function for Sim 3 set 3 - set 7
+	private boolean reactSim3Set3to7(Simulation simulation) {
 		if (p5Canvas.killingList.isEmpty())
 			return false;
 		if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
@@ -532,9 +532,9 @@ public class Unit5 extends UnitBase {
 		return false;
 	}
 
-	// Reaction function for Sim 3 Set 6
+	// Reaction function for Sim 3 Set 1
 	// 2 NO2 = NO4
-	private boolean reactSim3Set6(Simulation simulation) {
+	private boolean reactSim3Set1(Simulation simulation) {
 		
 		if(!p5Canvas.isSimStarted) //Reaction has not started yet
 			return false;
@@ -616,9 +616,9 @@ public class Unit5 extends UnitBase {
 
 	}
 	
-	// Reaction function for Sim 3 Set 7
+	// Reaction function for Sim 3 Set 2
 	// 2 NO2 = NO4
-	private boolean reactSim3Set7(Simulation simulation) {
+	private boolean reactSim3Set2(Simulation simulation) {
 		if(!p5Canvas.isSimStarted) //Reaction has not started yet
 			return false;
 		
@@ -927,19 +927,19 @@ public class Unit5 extends UnitBase {
 		case 2:
 			break;
 		case 3:
-			if (set == 1) {
-			} else if (set == 2) {
-				p5Canvas.temp = 40;
-			} else if (set == 3) {
-				p5Canvas.temp = 60;
+			if (set == 3) {
 			} else if (set == 4) {
-				p5Canvas.temp = 100;
+				p5Canvas.temp = 40;
 			} else if (set == 5) {
+				p5Canvas.temp = 60;
+			} else if (set == 6) {
+				p5Canvas.temp = 100;
+			} else if (set == 7) {
 			} 
-			else if (set == 6) {
+			else if (set == 1) {
 				keq =80.0f;
 			}
-			else if(set==7)
+			else if(set==2)
 			{
 				keq =80.0f;
 			}
@@ -989,25 +989,25 @@ public class Unit5 extends UnitBase {
 			main.getCanvas().setRangeYAxis(0, 0.05f);
 			break;
 		case 3:
-			if (set == 1) {
-				main.heatSlider.setEnabled(false);
-				main.volumeSlider.setEnabled(false);
-			} else if (set == 2) {
-				p5Canvas.temp = 40;
-				main.heatSlider.setEnabled(false);
-				main.volumeSlider.setEnabled(false);
-			} else if (set == 3) {
-				p5Canvas.temp = 60;
+			if (set == 3) {
 				main.heatSlider.setEnabled(false);
 				main.volumeSlider.setEnabled(false);
 			} else if (set == 4) {
-				p5Canvas.temp = 100;
+				p5Canvas.temp = 40;
 				main.heatSlider.setEnabled(false);
 				main.volumeSlider.setEnabled(false);
 			} else if (set == 5) {
+				p5Canvas.temp = 60;
+				main.heatSlider.setEnabled(false);
+				main.volumeSlider.setEnabled(false);
+			} else if (set == 6) {
+				p5Canvas.temp = 100;
+				main.heatSlider.setEnabled(false);
+				main.volumeSlider.setEnabled(false);
+			} else if (set == 7) {
 				main.heatSlider.setEnabled(false);
 				p5Canvas.volumeMinBoundary = 20;
-			} else if (set == 6) {
+			} else if (set == 1) {
 				HashMap moleculeSliderMap = p5Canvas.getMain().moleculeSliderMap;
 				if (!moleculeSliderMap.isEmpty()) {
 					JSlider slider = (JSlider) moleculeSliderMap
@@ -1018,7 +1018,7 @@ public class Unit5 extends UnitBase {
 				main.heatSlider.setEnabled(false);
 				main.volumeSlider.setEnabled(false);
 			}
-			else if (set == 7) {
+			else if (set == 2) {
 				HashMap moleculeSliderMap = p5Canvas.getMain().moleculeSliderMap;
 				if (!moleculeSliderMap.isEmpty()) {
 					JSlider slider = (JSlider) moleculeSliderMap
@@ -1068,14 +1068,14 @@ public class Unit5 extends UnitBase {
 			speed = 4;
 			break;
 		case 3:
-			if (set==1||set==2||set==5) {
+			if (set==3||set==4||set==7) {
 				speed = 6;
 			}
-			else if(set==3)
+			else if(set==5)
 			{
 				speed = 8;
 			}
-			else if (set==4)
+			else if (set==6)
 			{
 				speed = 10;
 			}
@@ -1214,6 +1214,36 @@ public class Unit5 extends UnitBase {
 			dashboard.add(barTemp, "cell 8 2" + alignStr);
 				switch(set)
 				{
+				case 3:
+					barPressure.setValue(825.86f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(25);
+					break;
+				case 4:
+					barPressure.setValue(867.43f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(40);
+					break;
+				case 5:
+					barPressure.setValue(922.85f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(60);
+					break;
+				case 6:
+					barPressure.setValue(1033.71f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(100);
+					break;
+				case 7:
+					barPressure.setValue(825.86f);
+					barVolume.setValue(60);
+					barMol.setValue(20);
+					barTemp.setValue(25);
+					break;
 				case 1:
 					barPressure.setValue(825.86f);
 					barVolume.setValue(60);
@@ -1221,36 +1251,6 @@ public class Unit5 extends UnitBase {
 					barTemp.setValue(25);
 					break;
 				case 2:
-					barPressure.setValue(867.43f);
-					barVolume.setValue(60);
-					barMol.setValue(20);
-					barTemp.setValue(40);
-					break;
-				case 3:
-					barPressure.setValue(922.85f);
-					barVolume.setValue(60);
-					barMol.setValue(20);
-					barTemp.setValue(60);
-					break;
-				case 4:
-					barPressure.setValue(1033.71f);
-					barVolume.setValue(60);
-					barMol.setValue(20);
-					barTemp.setValue(100);
-					break;
-				case 5:
-					barPressure.setValue(825.86f);
-					barVolume.setValue(60);
-					barMol.setValue(20);
-					barTemp.setValue(25);
-					break;
-				case 6:
-					barPressure.setValue(825.86f);
-					barVolume.setValue(60);
-					barMol.setValue(20);
-					barTemp.setValue(25);
-					break;
-				case 7:
 					barPressure.setValue(825.86f);
 					barVolume.setValue(60);
 					barMol.setValue(20);
@@ -1820,7 +1820,7 @@ public class Unit5 extends UnitBase {
 		case 3:
 			
 			// Sim 3 set 6 N2O4(g) <-> 2NO2(g)
-			if(set==6 || set ==7)
+			if(set==1 || set ==2)
 			{
 				if (reactants.get(0).equals("Nitrogen-Dioxide")
 						&& reactants.get(1).equals("Nitrogen-Dioxide")) {

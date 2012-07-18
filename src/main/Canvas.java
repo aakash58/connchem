@@ -138,7 +138,7 @@ public class Canvas extends JPanel {
 		int unit = main.getSelectedUnit();
 		int sim = main.getSelectedSim();
 		numGraph = 1;
-		if(unit==8 && (sim==6||sim==7))
+		if(unit==8 && (sim==6||sim==5))
 			numGraph = 2;
 		indexGraph = 0;
 
@@ -164,7 +164,7 @@ public class Canvas extends JPanel {
 				labelStrings.add(new String[2]);
 				labelStrings.get(1)[0]= new String("Time (s)");
 			}
-			else if(sim==7)
+			else if(sim==5)
 			{
 				labelStrings.add(new String[2]);
 				labelStrings.get(1)[0] = new String("Time (s)");
@@ -200,7 +200,7 @@ public class Canvas extends JPanel {
 					
 					labelStrings.get(1)[1] = new String("    pH    ");
 				}
-				else if(sim==7)
+				else if(sim==5)
 					labelStrings.get(1)[1] = new String("    pH    ");
 			break;
 
@@ -401,6 +401,9 @@ public class Canvas extends JPanel {
 		int unit = p5Canvas.getUnit();
 		int sim = p5Canvas.getSim();
 		
+		float ratio = 0.01f; //The ratio which will apply to overlap value
+		double yMax = dynamicGraph.getRangeYAxis(indexGraph);
+		
 		switch(index)
 		{
 		case 0:
@@ -408,12 +411,16 @@ public class Canvas extends JPanel {
 				
 				for (int i=0; i<size;i++){
 					double value = dataConversion(index, unit, i);	
+					
+					//Make a little change to the value which is exactly the same as existing ones
+					if(dataTick.contains(value))
+						value+= yMax*ratio;
 					dataTick.add(value);
 				}
 				break;
 		case 1:
 
-			if((unit==8&&sim==6) ||(unit==8&&sim==7))
+			if((unit==8&&sim==6) ||(unit==8&&sim==5))
 			{
 				//Show Time - PH graph
 				double value = dataConversion(index,unit,0);
