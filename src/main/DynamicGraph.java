@@ -177,6 +177,12 @@ public class DynamicGraph extends JPanel {
 		}
 	}
 	
+	public double getRangeYAxis(int index)
+	{
+		return ranges[index].getRange().getUpperBound();
+		
+	}
+	
 	public void showPlot(int index)
 	{
 		if(index>=dataSetSize)

@@ -52,15 +52,17 @@ public class P5Canvas extends PApplet {
 	public boolean isTrackingEnabled = false;
 	public boolean isDisplayForces = false;
 	public boolean isDisplayJoints = false;
-	public boolean isDrag = false;   //Is p5Canvas being dragged
 	public boolean isBoundaryShow = true;  //If show boundary
+	private boolean enableDrag = true;  //If enable drag
+	private boolean isDragging = false;   //Is p5Canvas being dragged
 
 
 	public int creationCount = 0;
 	// Properties of container
 	public float temp = 25.f;
 	//public float lastTemp;
-	public final float tempMin = -20;
+	public int tempMin = -20;   //The min temperature of current simulation
+	public int tempMax = 200;   //The max temperature of current simulation
 	public final float tempAbsoluteZero = -273;
 	public int heat = 0;
 	public float pressure = 0.0f;
@@ -191,7 +193,7 @@ public class P5Canvas extends PApplet {
 		/* Change Scale */
 		this.scale(canvasScale * ((float) getMain().currentZoom / 100));
 		/* Change Time Speed */
-		if (isEnable && !isDrag) {
+		if (isEnable && ! isDragging()) {
 			if (speedRate <= 1) {
 				timeStep = speedRate * defaultTimeStep;
 			}
@@ -452,6 +454,8 @@ public class P5Canvas extends PApplet {
 		isSimStarted = false;
 		ifConstrainKE = true;
 		temp = 25;
+		tempMin = -20;
+		tempMax = 200;
 		currentVolume = getMain().defaultVolume;
 		volumeMinBoundary = 10;
 		volumeMaxBoundary = 100;
@@ -460,6 +464,7 @@ public class P5Canvas extends PApplet {
 		pressure = 0;
 		boundaries.setHasWeight(false);
 		setIfConstrainKE(true);
+		setEnableDrag(true);
 
 
 		if(products!=null)
@@ -693,7 +698,7 @@ public class P5Canvas extends PApplet {
 				Vec2 velocity = mole.getLinearVelocity();
 				velocity = velocity.mul(scale);
 				
-				//Heat always go faster than freezing,
+				//Heating always go faster than freezing,
 				//So we add time limit to heat process
 				if(scale>1) 
 				{
@@ -822,15 +827,15 @@ public class P5Canvas extends PApplet {
 			}
 			break;
 		case 6:
-			if(getSim()==2) //Min = 0, Max = 100
+			if(getSim()==2) //Min = 0, Max = 220
 			{
 				if (scale < 0) // Set up minimum limit
 				{
-					if (t < 0)
+					if (t < tempMin)
 						res = true;
 				} else if (scale > 0) // Set up maximum limit
 				{
-					if (t > 100)
+					if (t > tempMax)
 						res = true;
 				}
 			}
@@ -890,7 +895,7 @@ public class P5Canvas extends PApplet {
 
 	public void mouseReleased() {
 		isHidden = false;
-		isDrag = false;
+		isDragging = false;
 		
 		unitList.getUnit4().mouseReleased();
 		
@@ -919,6 +924,7 @@ public class P5Canvas extends PApplet {
 		if (isHidingEnabled) {
 
 		} else {
+			if(this.getEnableDrag()){
 
 			int xTmp = xDrag;
 			int yTmp = yDrag;
@@ -950,7 +956,7 @@ public class P5Canvas extends PApplet {
 				} else // Drag the canvas
 				{
 					// Dragging all molecules
-					isDrag = true;
+					isDragging = true;
 					// Reseting boundaries position
 					boundaries.moveBoundary(xDrag - xTmp, yDrag - yTmp);
 					
@@ -959,13 +965,13 @@ public class P5Canvas extends PApplet {
 					// dragging
 			{
 				// Dragging all molecules
-				isDrag = true;
+				isDragging = true;
 				// Reseting boundaries position
 				boundaries.moveBoundary(xDrag - xTmp, yDrag - yTmp);
 
 			}
 			// TODO: reset anchors
-
+		}
 		}
 	}
 
@@ -978,6 +984,7 @@ public class P5Canvas extends PApplet {
 	public void preSolve(Contact c, Manifold m) {
 	}
 
+	/********************************* Get and Set functions *************************************/
 	public Unit2 getUnit2() {
 		return unitList.getUnit2();
 	}
@@ -1054,5 +1061,17 @@ public class P5Canvas extends PApplet {
 	public void setIfConstrainKE(boolean flag)
 	{
 		ifConstrainKE = flag;
+	}
+	public void setEnableDrag(boolean flag)
+	{
+		enableDrag = flag;
+	}
+	public boolean getEnableDrag()
+	{
+		return enableDrag;
+	}
+	public boolean isDragging()
+	{
+		return isDragging;
 	}
 }

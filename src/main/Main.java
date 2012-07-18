@@ -189,8 +189,7 @@ public class Main {
 	public JLabel canvasControlLabel_main_heat;
 	public JSlider heatSlider = new JSlider(heatMin, heatMax, defaultHeat);
 	//Temp is output. Used for simple bar
-	public int tempMin = -20;
-	public int tempMax = 200;
+
 	
 	public JLabel lblPlaceHolder;
 	
@@ -203,9 +202,9 @@ public class Main {
 
 	/***************************** Right Panel Parameter ***********************************/
 	public JPanel rightPanel; // Right panel container
-	JLabel lblOutput; // output label
-	JTabbedPane tabpanelGraph;
-	JPanel panelCanvas;
+	public JLabel lblOutput; // output label
+	public JTabbedPane tabpanelGraph;
+	private JPanel panelCanvas;
 	public JButton btnGraphSwitch;
 	JLabel lblSubMicroscopid;
 	JLabel lblOutputMacroscopicLevel;
@@ -561,9 +560,9 @@ public class Main {
 						buttonPanel.setLayout(new MigLayout("insets 6, gap 4","[grow]20[grow]", "[][]"));
 						dynamicPanel.add(buttonPanel, "cell 0 " + (i+start) + ",grow");
 						// Draw Molecule button
-						JLabel lblBronsted = new JLabel("Bronsted");
+						JLabel lblBronsted = new JLabel("<html>Bronsted<br>/Lowry</html>");
 
-						JLabel lblLewis = new JLabel("Lowry or Lewis");
+						JLabel lblLewis = new JLabel("Lewis");
 						buttonPanel.add(btnBronsted,"cell 0 0, align center,growx");
 						buttonPanel.add(lblBronsted, "cell 0 1, align center");
 						buttonPanel.add(btnLewis,"cell 1 0, align center,growx");
@@ -776,8 +775,7 @@ public class Main {
 	//Reset Global Parameter
 	public void resetParameter()
 	{
-		tempMin = -20;
-		tempMax = 200;
+
 		currentZoom = defaultZoom;
 		//volumeSlider.setValue(defaultVolume);
 		pressureSlider.setValue(defaultPressure);

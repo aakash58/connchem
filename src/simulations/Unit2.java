@@ -2394,7 +2394,7 @@ public class Unit2 extends UnitBase{
 		{
 			for (int i = 0; i < molecules.size(); i++) {
 				Molecule m = molecules.get(i);
-				if (m!=null && !p5Canvas.isDrag){
+				if (m!=null && !p5Canvas.isDragging()){
 					if (!m.getName().equals("Water") ){
 						applyForceUnit2(i,m);
 					}

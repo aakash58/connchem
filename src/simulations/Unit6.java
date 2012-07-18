@@ -1,3 +1,6 @@
+/*
+ * Unit 6: Chemical Equilibrium
+ */
 package simulations;
 
 import static data.State.molecules;
@@ -28,14 +31,14 @@ import simulations.models.Simulation.SpawnStyle;
 public class Unit6 extends UnitBase {
 	
 	// Output labels
-	private JLabel lblConText1; // Concentration output
-	private JLabel lblConValue1;
-	private JLabel lblConText2;
-	private JLabel lblConValue2;
-	private JLabel lblConText3;
-	private JLabel lblConValue3;
-	private JLabel lblConText4;
-	private JLabel lblConValue4;
+//	private JLabel lblConText1; // Concentration output
+//	private JLabel lblConValue1;
+//	private JLabel lblConText2;
+//	private JLabel lblConValue2;
+//	private JLabel lblConText3;
+//	private JLabel lblConValue3;
+//	private JLabel lblConText4;
+//	private JLabel lblConValue4;
 
 	private JLabel lblVolumeText;
 	private JLabel lblVolumeValue;
@@ -54,7 +57,8 @@ public class Unit6 extends UnitBase {
 	float keq = 0.01f;
 	float defaultKeq =0.01f;
 	float reactionProbability =0.6f;  //Probability of reaction in Sim 2
-	float breakProbability = 0.75f; // The chance that N2O4 will break apart
+//	float breakProbability = 0.75f; // The chance that N2O4 will break apart
+	float reactProbability =0.5f;
 	int oldTime = -1;
 	int curTime = -1;
 	boolean forceUpdated = false;
@@ -64,6 +68,10 @@ public class Unit6 extends UnitBase {
 	float defaultPressure = 101.33f;
 	int defaultVolume = 60;
 	float defaultTemp = 25;
+	
+	//Keq change setting based on temp
+	private int [] tempArray = {0,25,77,127,220};
+	private float [] keqArray = {10.8967f,8.918f,6.4430f,5.1045f,3.68f};
 
 	public Unit6(P5Canvas parent, PBox2D box) {
 		super(parent, box);
@@ -150,6 +158,11 @@ public class Unit6 extends UnitBase {
 			reactionHappened = reactSim1Set2(simulation);
 			break;
 		}
+		
+		if(reactionHappened)
+		{
+			updateMoleculeCon();
+		}
 	}
 	
 	private boolean reactSim1Set1(Simulation simulation)
@@ -203,9 +216,15 @@ public class Unit6 extends UnitBase {
 		if(!p5Canvas.isSimStarted) //Reaction has not started yet
 			return false;
 		
+		Random rand = new Random();
+		if (rand.nextFloat() > reactProbability) {
+			 return false;
+		}
+		
 		float conPCl3 = getConByName("Phosphorus-Trichloride");
 		float conPCl5 = getConByName("Phosphorus-Pentachloride");
-		float currentRatio = conPCl5/(conPCl3*conPCl3);
+		float conCl2 = getConByName("Chlorine");
+		float currentRatio = conPCl5/(conPCl3*conCl2);
 		
 		if (p5Canvas.products != null && p5Canvas.products.size() > 0 && currentRatio<keq) {
 
@@ -248,21 +267,20 @@ public class Unit6 extends UnitBase {
 			p5Canvas.killingList.clear();
 
 			updateCompoundNumber(simulation);
-			return true;
-		}
-		// Break up PCl5 if there are too many, in order to keep equalibrium
-		if (curTime != oldTime) {
 			
+			updateMoleculeCon();  //Update Molecule Concentration for break apart check
+		}
+
+		 conPCl3 = getConByName("Phosphorus-Trichloride");
+		 conPCl5 = getConByName("Phosphorus-Pentachloride");
+		 conCl2 = getConByName("Chlorine");
+		 currentRatio = conPCl5/(conPCl3*conCl2);
+		
 			if (currentRatio>keq) // If PCl5 is over numberred,break them up			
 				{
-				Random rand = new Random();
-				if (rand.nextFloat() < breakProbability) {
 					 return breakApartN2O4(simulation);
 				}
-			}
-			oldTime = curTime;
-		}
-		return false;
+		return true;
 	}
 
 	private boolean reactSim1Set3(Simulation simulation) {
@@ -325,18 +343,24 @@ public class Unit6 extends UnitBase {
 		//Update equilibrium
 		updateEquilibrium();
 		
-		if(catalystAdded)
-			breakProbability = 1f;
+		if(catalystAdded)  //Speed up reaction by increasing chance
+			reactProbability = 1.0f;
 		else
-			breakProbability = 0.5f;
+			reactProbability =0.05f;
+		
+		Random rand = new Random();
+		if (rand.nextFloat() > reactProbability) {
+			 return false;
+		}
 
 
+		//2NO2 == N2O4
 		float conN2O4 = getConByName("Dinitrogen-Tetroxide");
 		float conNO2 = getConByName("Nitrogen-Dioxide");
 		float currentRatio = conN2O4/(conNO2*conNO2);
 		
 		if (!p5Canvas.killingList.isEmpty()) {
-			if (p5Canvas.products != null && p5Canvas.products.size() > 0 && (currentRatio < keq)) {
+			if (p5Canvas.products != null && p5Canvas.products.size() > 0 && (currentRatio <= keq)) {
 				int numToKill = p5Canvas.killingList.size();
 				Molecule[] mOld = new Molecule[numToKill];
 				for (int i = 0; i < numToKill; i++) {
@@ -372,28 +396,33 @@ public class Unit6 extends UnitBase {
 				Compound.counts.set(index, Compound.counts.get(index)+1);
 				index = Compound.names.indexOf("Nitrogen-Dioxide");
 				Compound.counts.set(index, Compound.counts.get(index)-2);
-				
-				return true;
+
+				updateMoleculeCon();
 			}
 		}
-
+		
+		 conN2O4 = getConByName("Dinitrogen-Tetroxide");
+		 conNO2 = getConByName("Nitrogen-Dioxide");
+		 currentRatio = conN2O4/(conNO2*conNO2);
 		
 			// Break up N2O4 if there are too many, in order to keep equalibrium
-			if (curTime != oldTime) {
+//			if (curTime != oldTime) {
 				//totalNum = (float)numNO2 / 2 + numN2O4;
 				if (currentRatio>keq) // If N2O4 is over numberred,
 														// break them up
 				{
-					Random rand = new Random();
-					if (rand.nextFloat() < breakProbability) {
+//					Random rand = new Random();
+//					if (rand.nextFloat() < breakProbability) {
 						 return breakApartN2O4(simulation);
-					}
+//					}
 				}
-				oldTime = curTime;
-			}
+//				oldTime = curTime;
+//			}
 		
-		return false;
+		return true;
 	}
+	
+	
 	
 	public void updateProperties(int sim,int set)
 	{
@@ -418,29 +447,31 @@ public class Unit6 extends UnitBase {
 	private void updateEquilibrium()
 	{
 		
+		
 		//Temperatur modifier
 		float temp =  p5Canvas.temp;
-		//The min Keq is 0.005 at 100 celcius degree
-		float minKeq = 0.005f;
-		//The max Keq is 0.15 at 0 celcius degree
-		float maxKeq = 0.15f;
-		float minTemp = 0;
-		float maxTemp = 100;
-	
-		//Increase from 0.1 to 0.15 linearly
-		if(p5Canvas.temp<=25)
+		
+		float slope = 0;
+		int length = tempArray.length;
+		float keqRes = 0 ;
+		
+		//We check the tempSetting here, go over all the elements in tempArray 
+		//and keqArray, and get the keq number based on linear interpolation
+		
+		if(temp<tempArray[0])
+			keq = keqArray[0];
+		else if(temp>= tempArray[length-1])
+			keq = keqArray[length-1];
+		
+		for(int i = 0 ;i<tempArray.length-1;i++)
 		{
-			float ratio =(defaultKeq-maxKeq) /(defaultTemp-minTemp);
-			keq = maxKeq + ratio*(temp - minTemp);
-			if(keq>maxKeq)
-				keq = maxKeq;
-		}
-		else //Decrease from 0.1 to 0.005 linearly
-		{
-			float ratio = (defaultKeq-minKeq)/(defaultTemp-maxTemp);
-			keq = minKeq + ratio* (temp- maxTemp);
-			if(keq<minKeq)
-				keq = minKeq;
+			if(temp>=tempArray[i]&&temp<tempArray[i+1])
+			{
+				slope = (keqArray[i+1]-keqArray[i])/(tempArray[i+1]-tempArray[i]);
+				keqRes = keqArray[i]+slope*(temp-tempArray[i]);
+				keq = keqRes;
+				System.out.println("Keq = "+keq);
+			}
 		}
 		//Catalyst and Inert gas do nothing to equilibrium
 	}
@@ -464,7 +495,7 @@ public class Unit6 extends UnitBase {
 			nameReactant = "Nitrogen-Dioxide";
 			nameProduct = "Dinitrogen-Tetroxide";
 		}
-		int index =-1;
+//		int index =-1;
 		for (int i = 0; i < State.molecules.size(); i++) {
 			mole = State.molecules.get(i);
 			if (mole.getName().equals(nameProduct)) {
@@ -531,10 +562,10 @@ public class Unit6 extends UnitBase {
 				}
 				else
 				{
-				Compound.counts.set(indexProduct, Compound.counts.get(indexProduct)-1);
-				Compound.counts.set(indexReactant, Compound.counts.get(indexReactant)+2);
+					Compound.counts.set(indexProduct, Compound.counts.get(indexProduct)-1);
+					Compound.counts.set(indexReactant, Compound.counts.get(indexReactant)+2);
 				}
-				oldTime = curTime;
+//				oldTime = curTime;
 				return true;
 			}
 		}
@@ -557,11 +588,11 @@ public class Unit6 extends UnitBase {
 		curTime = 0;
 		oldTime = 0;
 		forceUpdated = false;
-		defaultKeq =0.01f;
+		defaultKeq = 8.92f;
 		keq = defaultKeq;
 		addedNO2 =0;
 		addedN2O4 =0;
-		breakProbability = 0.75f; 
+		reactProbability = 0.5f; 
 
 		
 		// Customization
@@ -587,8 +618,10 @@ public class Unit6 extends UnitBase {
 			}
 			else if(set==4)
 			{
-				keq=1.1f;
+				keq=20f;
 				p5Canvas.temp = 170;
+				reactProbability = 0.05f; 
+
 			}
 			
 			volumeMagnifier =1000;
@@ -596,10 +629,11 @@ public class Unit6 extends UnitBase {
 			break;
 		case 2:
 			p5Canvas.volumeMinBoundary = 20;
-			p5Canvas.getMain().tempMin=0;
-			p5Canvas.getMain().tempMax = 100;
-			p5Canvas.heatSpeed = 3;
+			p5Canvas.tempMin=0;
+			p5Canvas.tempMax = 220;
+			p5Canvas.heatSpeed = 5;
 			volumeMagnifier = 1000;
+			
 
 			break;
 
@@ -636,6 +670,10 @@ public class Unit6 extends UnitBase {
 
 			break;
 		case 2:
+			
+			//Set the range for Y axis
+			main.getCanvas().setRangeYAxis(0, 0.10f);
+			
 			break;
 		
 		}
@@ -687,13 +725,21 @@ public class Unit6 extends UnitBase {
 		// Update lblTempValue
 		DecimalFormat myFormatter = new DecimalFormat("###.##");
 		String output = null;
-		updateMoleculeCon();
+//		updateMoleculeCon();
 
 		//Update keq value label
 		if(keq!=0)
 		{
-			output = myFormatter.format(keq);
-			lblKeqValue.setText(output);
+			if(sim==1&&set==4)
+			{
+				lblKeqValue.setText("0.5");
+			}
+			else
+			{
+				output = myFormatter.format(keq);
+				lblKeqValue.setText(output);
+			}
+			
 		}
 		else
 			lblKeqValue.setText("Infinity");
@@ -710,10 +756,10 @@ public class Unit6 extends UnitBase {
 		}
 		if (lblTempValue.isShowing()) {
 			float temp = p5Canvas.temp;
-			if(temp<=0)
-				temp =0;
-			else if( temp>=100)
-				temp =100;
+			if(temp<=p5Canvas.tempMin)
+				temp =p5Canvas.tempMin;
+			else if( temp>=p5Canvas.tempMax)
+				temp = p5Canvas.tempMax;
 			output = myFormatter.format(temp);
 			lblTempValue.setText(output + " \u2103");
 		}
@@ -846,10 +892,10 @@ public class Unit6 extends UnitBase {
 				{
 					con = 62.3f;
 				}
-				else if(name.equals("Water"))
-				{
-					con =55.35f;
-				}
+//				else if(name.equals("Water"))  //Water is gas in Sim 1
+//				{
+//					con =55.35f;
+//				}
 				else  //General case
 				{
 				mole = (float) Compound.counts.get(i) / numMoleculePerMole;
@@ -883,23 +929,80 @@ public class Unit6 extends UnitBase {
 				}
 				computeForceSim1Set1SO2();
 			}
-			else if( set ==2 )
-				computeForceSim1Set2();
+//			else if( set ==2 )
+//				computeForceSim1Set2();
+			else if(set ==3)
+				computeForceSim1Set3();
 			break;
 		case 2:
-			computeForceSim2();
+//			computeForceSim2();
 			break;
 
 		}
 	}
 	
-	private void computeForceSim2() {
-		// TODO Auto-generated method stub
-		
-	}
+//	private void computeForceSim2() {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
-	private void computeForceSim1Set2() {
-		// TODO Auto-generated method stub
+//	private void computeForceSim1Set2() {
+//		// TODO Auto-generated method stub
+//		
+//	}
+	
+	private void computeForceSim1Set3() {
+		
+		float gravityCompensation = 0.05f;
+		float topBoundary = p5Canvas.h/2;
+		float gravityScale = 0.01f;
+		float xValue = 0 ;
+		float yValue = 0;
+		float dis = 0;
+		float forceX = 0;
+		float forceY = 0;
+		float scale = 0.075f; // How strong the attract force is
+		float forceYCompensation = 0.02f;
+		float repulsiveForce = 1.2f; //How strong the repulsive force is
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+		
+		//There are still many oxygen left, this function does not affect
+		if(State.getMoleculeNumByName("Oxygen")>2)
+			return;
+//		float topBoundary = p5Canvas.h/4*3;
+//		float gravityCompensation = 0.2f;
+//		float gravityScale = 0.01f;
+
+		for (Molecule moleHydro: State.getMoleculesByName("Hydrogen")) {
+	
+			
+				
+					for (int thisE = 0; thisE < moleHydro.getNumElement(); thisE++) {
+							locThis.set(moleHydro.getElementLocation(thisE));
+							moleHydro.sumForceX[thisE] = 0;
+							moleHydro.sumForceY[thisE] = 0;
+						ArrayList<Molecule> oxygenIon = State.getMoleculesByName("Oxygen");
+						for(Molecule moleOxy:oxygenIon)
+						{
+							locOther.set(moleOxy.getPosition());
+							xValue = locOther.x - locThis.x;
+							yValue = locOther.y - locThis.y;
+							dis = (float) Math.sqrt(xValue * xValue + yValue
+									* yValue);
+							forceX = (float) (xValue / dis) * scale;
+							forceY = (float) (yValue / dis) * scale+gravityCompensation*0.2f;
+
+							moleHydro.sumForceX[thisE] += forceX*2;
+							moleHydro.sumForceY[thisE] += forceY*2;
+
+						}
+						
+					}
+				
+			
+			
+		}
 		
 	}
 
@@ -915,9 +1018,9 @@ public class Unit6 extends UnitBase {
 		float randYValue = 0;
 		boolean randXDir = false;
 		boolean randYDir = false;
-		float topBoundary = p5Canvas.h/4*3;
-		float gravityCompensation = 0.2f;
-		float gravityScale = 0.01f;
+//		float topBoundary = p5Canvas.h/4*3;
+//		float gravityCompensation = 0.2f;
+//		float gravityScale = 0.01f;
 
 		for (int i = 0; i < State.molecules.size(); i++) {
 			if (State.molecules.get(i).getName().equals("Sulfur")) // Only compute
@@ -1109,7 +1212,7 @@ public class Unit6 extends UnitBase {
 			//Sim 1 Set 3 2H2 + O2 --> 2H2O
 			else if(reactants.contains("Hydrogen") && reactants.contains("Oxygen"))
 			{
-				float radius = 125;
+				float radius = 150;
 				probability = 1.0f;
 				randomFloat = rand.nextFloat();
 				if (randomFloat <= probability) {
@@ -1172,14 +1275,14 @@ public class Unit6 extends UnitBase {
 	
 	//Set up output labels on the bottom of right panel
 	private void setupOutputLabels() {
-		lblConText1 = new JLabel();
-		lblConText2 = new JLabel();
-		lblConText3 = new JLabel();
-		lblConText4 = new JLabel();
-		lblConText1 = new JLabel(" M");
-		lblConText2 = new JLabel(" M");
-		lblConText3 = new JLabel(" M");
-		lblConText4 = new JLabel(" M");
+//		lblConText1 = new JLabel();
+//		lblConText2 = new JLabel();
+//		lblConText3 = new JLabel();
+//		lblConText4 = new JLabel();
+//		lblConText1 = new JLabel(" M");
+//		lblConText2 = new JLabel(" M");
+//		lblConText3 = new JLabel(" M");
+//		lblConText4 = new JLabel(" M");
 		lblVolumeText = new JLabel("Volume:");
 		lblVolumeValue = new JLabel(" mL");
 		lblTempText = new JLabel("Temperature:");
@@ -1202,9 +1305,16 @@ public class Unit6 extends UnitBase {
 		//Update keq value label
 		if(keq!=0)
 		{
+			if(sim==1&&set==4)
+			{
+				lblKeqValue.setText("0.5");
+			}
+			else
+			{
 			DecimalFormat myFormatter = new DecimalFormat("###.###");
 			String output = myFormatter.format(keq);
 			lblKeqValue.setText(output);
+			}
 		}
 		else
 			lblKeqValue.setText("Infinity");

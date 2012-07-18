@@ -2452,7 +2452,9 @@ public class Unit3 extends UnitBase {
 							if(m.getName().equals("Nitrate"))
 								mole.sumForceY[thisE]+=sulfateforceYCompensation; 
 
+							
 						}
+						
 					}
 
 				}

@@ -437,19 +437,19 @@ units:
   - sim: 1
     name: "Physical Properties of Air"
     sets:
-    - set: 1
+    - set: 2
       compounds: 
       - compound: "Helium"
         qty: 10
-        cap: 50
-    - set: 2
+        cap: 25
+    - set: 1
       compounds: 
       - compound: "Chlorine"
         qty: 10
-        cap: 50
+        cap: 25
       - compound: "Oxygen"
         qty: 10
-        cap: 15
+        cap: 25
   - sim: 2
     name: "Kinetic Molecular Theory"
     sets:
@@ -457,7 +457,7 @@ units:
       compounds: 
       - compound: "Bromine"
         qty: 10
-        cap: 50
+        cap: 25
   - sim: 3
     name: "Pressure"
     sets:
@@ -467,6 +467,23 @@ units:
         qty: 5
         cap: 25
   - sim: 4
+    name: "Partial Pressure"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Helium"
+        qty: 0
+        cap: 8
+      - compound: "Oxygen"
+        qty: 0
+        cap: 6
+      - compound: "Chlorine"
+        qty: 0
+        cap: 8
+      - compound: "Carbon-Dioxide"
+        qty: 0
+        cap: 5
+  - sim: 5
     name: "Gas Law"
     sets:
     - set: 1
@@ -484,23 +501,6 @@ units:
       - compound: "Helium"
         qty: 10
         cap: 25
-  - sim: 5
-    name: "Partial Pressure"
-    sets:
-    - set: 1
-      compounds: 
-      - compound: "Helium"
-        qty: 0
-        cap: 8
-      - compound: "Oxygen"
-        qty: 0
-        cap: 6
-      - compound: "Chlorine"
-        qty: 0
-        cap: 8
-      - compound: "Carbon-Dioxide"
-        qty: 0
-        cap: 5
 - unit: 5
   name: "Kinetics"
   sims:
@@ -542,22 +542,6 @@ units:
   - sim: 3
     name: "Factors Affecting Rate"
     sets:
-    - set: 1
-      compounds:
-      - compound: "Nitryl-Chloride"
-        qty: 10
-        cap: 10
-      - compound: "Nitric-Oxide"
-        qty: 10
-        cap: 20
-    - set: 2
-      compounds:
-      - compound: "Nitryl-Chloride"
-        qty: 10
-        cap: 10
-      - compound: "Nitric-Oxide"
-        qty: 10
-        cap: 10
     - set: 3
       compounds:
       - compound: "Nitryl-Chloride"
@@ -565,7 +549,7 @@ units:
         cap: 10
       - compound: "Nitric-Oxide"
         qty: 10
-        cap: 10
+        cap: 20
     - set: 4
       compounds:
       - compound: "Nitryl-Chloride"
@@ -584,13 +568,29 @@ units:
         cap: 10
     - set: 6
       compounds:
+      - compound: "Nitryl-Chloride"
+        qty: 10
+        cap: 10
+      - compound: "Nitric-Oxide"
+        qty: 10
+        cap: 10
+    - set: 7
+      compounds:
+      - compound: "Nitryl-Chloride"
+        qty: 10
+        cap: 10
+      - compound: "Nitric-Oxide"
+        qty: 10
+        cap: 10
+    - set: 1
+      compounds:
       - compound: "Dinitrogen-Tetroxide"
         qty: 20
         cap: 20
       - compound: "Catalyst"
         qty: 0
         cap: 5
-    - set: 7
+    - set: 2
       compounds:
       - compound: "Dinitrogen-Tetroxide"
         qty: 20
@@ -644,8 +644,8 @@ units:
         qty: 20
         cap: 20
       - compound: "Oxygen"
-        qty: 20
-        cap: 20
+        qty: 10
+        cap: 10
     - set: 4
       compounds:
       - compound: "Phosphorus-Trichloride"
@@ -846,7 +846,7 @@ units:
   name: "Acids and Bases"
   sims:
   - sim: 1
-    name: "pH"
+    name: "Arrhenius Theory"
     sets:
     - set: 1
       compounds:
@@ -880,7 +880,7 @@ units:
     sets:
     - set: 1
       compounds:
-      - compound: "Hydrochloric-Acid"
+      - compound: "Hydrogen-Chloride"
         qty: 1
         cap: 1
       - compound: "Sodium-Hydroxide"
@@ -888,7 +888,7 @@ units:
         cap: 1
     - set: 2
       compounds:
-      - compound: "Hydrochloric-Acid"
+      - compound: "Hydrogen-Chloride"
         qty: 1
         cap: 1
       - compound: "Ammonia"
@@ -972,43 +972,7 @@ units:
       - compound: "Methylamine"
         qty: 10
         cap: 10
-    - set: 4
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 25
-      - compound: "Nitric-Acid"
-        qty: 10
-        cap: 10                    
   - sim: 5
-    name: "Neutralization Reactions"
-    sets:
-    - set: 1
-      compounds: 
-      - compound: "Water"
-        qty: 25
-        cap: 25
-      - compound: "Hydrochloric-Acid"
-        qty: 10
-        cap: 10
-      - compound: "Sodium-Hydroxide"
-        qty: 10
-        cap: 10
-  - sim: 6
-    name: "Titration Curves"
-    sets:
-    - set: 1
-      compounds:
-      - compound: "Water"
-        qty: 25
-        cap: 25
-      - compound: "Hydrochloric Acid"
-        qty: 10
-        cap: 10
-      - compound: "Sodium Hydroxide"
-        qty: 0
-        cap: 10
-  - sim: 7
     name: "Buffers"
     sets:
     - set: 1
@@ -1024,14 +988,90 @@ units:
         cap: 10
       - compound: "Hydrochloric-Acid"
         qty: 0
-        cap: 15
+        cap: 15                  
+  - sim: 6
+    name: "Titration Curves"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 25
+        cap: 25
+      - compound: "Hydrochloric Acid"
+        qty: 10
+        cap: 10
+      - compound: "Sodium Hydroxide"
+        qty: 0
+        cap: 10
 - unit: 9
   name: "Nuclear"
   sims:
   - sim: 1
+    name: "Subatomic Level"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Helium"
+        qty: 0
+        cap: 1
+      - compound: "Carbon"
+        qty: 0
+        cap: 1
+      - compound: "Aluminum"
+        qty: 0
+        cap: 1
+      - compound: "Potassium"
+        qty: 0
+        cap: 1
+    - set: 2
+      compounds:
+      - compound: "Helium"
+        qty: 0
+        cap: 1
+  - sim: 2
+    name: "Fission Reaction"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Uranium-235"
+        qty: 0
+        cap: 1
+      - compound: "Cesium-137"
+        qty: 0
+        cap: 1
+  - sim: 3
+    name: "Fusion Reaction"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "H-1"
+        qty: 0
+        cap: 1
+      - compound: "H-2"
+        qty: 0
+        cap: 1
+      - compound: "He-3"
+        qty: 0
+        cap: 1
+      - compound: "He-4"
+        qty: 0
+        cap: 1
+      - compound: "Be-8"
+        qty: 0
+        cap: 1        
+  - sim: 4
     name: "Undefined"
     sets:
     - set: 1
       compounds:
       - compound: "Water"
-        qty: 40
+        qty: 1
+        cap: 1
+  - sim: 5
+    name: "Undefined"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Water"
+        qty: 1
+        cap: 1

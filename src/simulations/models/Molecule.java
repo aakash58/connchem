@@ -627,7 +627,7 @@ public class Molecule {
 		// body.applyForce(new Vec2(0,-yyy), body.getPosition());
 
 		//Update molecule positions
-		if (p5Canvas.isDrag ) {
+		if (p5Canvas.isDragging() ) {
 			float xx = xTmp + PBox2D.scalarPixelsToWorld(p5Canvas.xDrag);
 			float yy = yTmp - PBox2D.scalarPixelsToWorld(p5Canvas.yDrag);
 			Vec2 v = new Vec2(xx, yy);
@@ -654,8 +654,9 @@ public class Molecule {
 		p5Canvas.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH);
 		
 		//Apply transparency
-		p5Canvas.noStroke();
-		p5Canvas.fill(ColorCollection.getColorSimBackgroundInt(), transparency*255); //Background color
+		p5Canvas.stroke(ColorCollection.getColorSimBackgroundInt(),transparency*255f);
+		p5Canvas.strokeWeight(2.0f);
+		p5Canvas.fill(ColorCollection.getColorSimBackgroundInt(), transparency*255f); //Background color
 		for (int i = 0; i < circles.length; i++) {
 			p5Canvas.ellipse(circles[i][1] - pShapeW / 2, circles[i][2]
 					- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);

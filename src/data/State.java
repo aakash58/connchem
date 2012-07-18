@@ -43,6 +43,7 @@ public class State {
 	public static int getCurrentSetNumber() {
 		return currentSetNumber;
 	}*/
+	//Return the number of molecules in simulation
 	public static int getMoleculeNum()
 	{
 		return molecules.size();
