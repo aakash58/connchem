@@ -3,7 +3,9 @@ package simulations;
 import simulations.models.*;
 
 import java.awt.Color;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
@@ -515,6 +517,11 @@ public class P5Canvas extends PApplet {
 	}
 	
 	
+	public void resetDynamicPanel()
+	{
+		unitList.resetDynamicPanel(unit, sim, set);
+	}
+	
 	//Called by main when all the reset have been done
 	//in order to initialize data
 	public void initializeSimulation()
@@ -589,9 +596,14 @@ public class P5Canvas extends PApplet {
 		//main.volumeSlider.setValue(currentVolume);
 		//main.volumeSlider.updateUI();
 		main.volumeLabel.setText(currentVolume + " mL");
-		int volumeMagnifier = unitList.getVolumeMagnifier(unit)/1000;
+		float volumeMagnifier = unitList.getVolumeMagnifier(unit)/1000;
 			if( volumeMagnifier != 0)
-			main.volumeLabel.setText(currentVolume + " L");
+			{
+				float outputVolume = currentVolume*volumeMagnifier;
+				DecimalFormat formatter = new DecimalFormat("###.#");
+				String output = formatter.format(outputVolume);
+			main.volumeLabel.setText(output + " L");
+			}
 
 		boundaries.setVolume(currentVolume);
 		isEnable = tmp;
@@ -611,10 +623,14 @@ public class P5Canvas extends PApplet {
 		//main.volumeSlider.setValue(currentVolume);
 		//main.volumeSlider.updateUI();
 		main.volumeLabel.setText(currentVolume + " mL");
-		int volumeMagnifier = unitList.getVolumeMagnifier(unit)/1000;
+		float volumeMagnifier = unitList.getVolumeMagnifier(unit)/1000;
 		if( volumeMagnifier != 0)
- 			 main.volumeLabel.setText(currentVolume*volumeMagnifier + " L");
-
+		{
+			float outputVolume = currentVolume*volumeMagnifier;
+			DecimalFormat formatter = new DecimalFormat("###.#");
+			String output = formatter.format(outputVolume);
+			main.volumeLabel.setText(output + " L");
+		}
 		boundaries.setVolume(v);
 		isEnable = tmp;
 	}
@@ -985,6 +1001,11 @@ public class P5Canvas extends PApplet {
 	}
 
 	/********************************* Get and Set functions *************************************/
+	
+	public UnitList getUnitList()
+	{
+		return unitList;
+	}
 	public Unit2 getUnit2() {
 		return unitList.getUnit2();
 	}
@@ -1048,6 +1069,11 @@ public class P5Canvas extends PApplet {
 		}
 	}*/
 	
+	//Get molecule density which is specified in each unit
+	public float getMoleculeDensity(String moleName)
+	{
+		return unitList.getMoleculeDensity(unit,sim,set,moleName);
+	}
 	public boolean isSimSelected(int unitNum,int simNum, int setNum)
 	{
 		return (unit==unitNum && sim ==simNum && set ==setNum);

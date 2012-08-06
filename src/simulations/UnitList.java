@@ -84,6 +84,12 @@ public class UnitList {
 		unitList[unit-1].setupReactionProducts(sim, set);
 	}
 	
+	public void resetDynamicPanel(int unit, int sim, int set) 
+	{
+		if(isExist(unit))
+			unitList[unit-1].resetDynamicPanel(sim, set);
+	}
+	
 	public void resetDashboard(int unit,int sim, int set)
 	{
 		if(isExist(unit))
@@ -114,7 +120,7 @@ public class UnitList {
 			unitList[unit-1].customizeInterface(sim,set);
 	}
 	
-	public int getVolumeMagnifier(int unit)
+	public float getVolumeMagnifier(int unit)
 	{
 		if(isExist(unit))
 			return unitList[unit-1].getVolumeMagnifier();
@@ -125,6 +131,13 @@ public class UnitList {
 	{
 		if(isExist(unit))
 			unitList[unit-1].updateMoleculeCountRelated(sim,set);
+	}
+	
+	public float getMoleculeDensity(int unit, int sim, int set, String moleName)
+	{
+		if(isExist(unit))
+			return unitList[unit-1].getMoleculeDensity(sim,set,moleName);
+		else return 1;
 	}
 
 	

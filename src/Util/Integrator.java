@@ -11,8 +11,9 @@ public class Integrator {
 	private float force =0;
 	private float mass = 1;
 	
-	private boolean targeting = false;
-	private boolean interpolating = true;
+	private boolean targeting = false;  //If integrator is targeting the goal
+	
+	private boolean interpolating = true;  //If integrator is enabled
 	private float target;
 	
 	public Integrator(float value)
@@ -99,9 +100,19 @@ public class Integrator {
 	{
 		return vel;
 	}
+	public float getTarget()
+	{
+		return target;
+	}
 	
 	public void setInterpolating(boolean b)
 	{
 		interpolating = b;
+	}
+	
+	public void reset()
+	{
+		setTargeting(false);
+		value = target = 0;
 	}
 }

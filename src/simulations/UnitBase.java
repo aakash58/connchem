@@ -54,7 +54,9 @@ public abstract class UnitBase {
 	protected int lastMole;
 	protected float lastTemp;
 	protected Integrator interpolator;
-	public int volumeMagnifier = 1;
+	public float volumeMagnifier = 1f;
+	protected final int celsiusToK= 273;
+
 
 
 
@@ -939,6 +941,11 @@ public abstract class UnitBase {
 		
 	}
 	
+	public void resetDynamicPanel(int sim, int set) 
+	{
+		
+	}
+	
 	// For Unit4 Sim4 Set2, move top boundary when temperature changes in order
 	// to keep pressure constant
 	protected void moveTopBoundary(Contact c) {
@@ -1000,10 +1007,13 @@ public abstract class UnitBase {
 
 	}
 	
+
+	
+	
 	public void updateTopBoundary(int sim, int set)
 	{
 		//In Unit 4 Sim 4 Set 2, update volume every frame
-		if(p5Canvas.isSimSelected(4, 5, 2) || p5Canvas.isSimSelected(7, 1,1)||p5Canvas.isSimSelected(7, 3,1)||p5Canvas.isSimSelected(7,4,1))
+		if(p5Canvas.boundaries.hasWeight())
 		{
 			if(interpolator.isTargeting())
 			{
@@ -1135,6 +1145,12 @@ public abstract class UnitBase {
 		}
 	}
 	
+	public float getMoleculeDensity(int sim,int set, String moleName)
+	{
+		return getSimulation(sim, set).getElementDensity(moleName);
+	}
+	public abstract void setMoleculeDensity();
+	
 	public abstract void updateMoleculeCountRelated(int sim,int set) ; 
 
 
@@ -1162,7 +1178,7 @@ public abstract class UnitBase {
 		return this.water100mL;
 	}
 	
-	public int getVolumeMagnifier()
+	public float getVolumeMagnifier()
 	{
 		return volumeMagnifier;
 	}

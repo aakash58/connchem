@@ -207,6 +207,8 @@ public class Unit9 extends UnitBase {
 		sliderWeakForce.setPaintTicks(true);
 		sliderWeakForce.setMinorTickSpacing(1);
 		sliderWeakForce.addChangeListener(SliderWeakForceListener);
+		
+
 
 	}
 
@@ -441,7 +443,7 @@ public class Unit9 extends UnitBase {
 		}
 	}
 
-	private void resetDynamicPanel(int sim, int set) {
+	public void resetDynamicPanel(int sim, int set) {
 
 		Main main = p5Canvas.getMain();
 		// Reset dynamic panel
@@ -1048,6 +1050,12 @@ public class Unit9 extends UnitBase {
 			return atomicNum;
 		}
 
+	}
+
+	@Override
+	public void setMoleculeDensity() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

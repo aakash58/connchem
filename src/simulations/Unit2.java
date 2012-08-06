@@ -2589,4 +2589,10 @@ public class Unit2 extends UnitBase{
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		public void setMoleculeDensity() {
+			// TODO Auto-generated method stub
+			
+		}
 }

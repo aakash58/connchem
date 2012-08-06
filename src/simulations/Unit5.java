@@ -194,7 +194,7 @@ public class Unit5 extends UnitBase {
 		lblVolumeText = new JLabel("Volume:");
 		lblVolumeValue = new JLabel(" mL");
 		lblTempText = new JLabel("Temperature:");
-		lblTempValue = new JLabel(" \u2103");
+		lblTempValue = new JLabel(" K");
 		lblPressureText = new JLabel("Pressure:");
 		lblPressureValue = new JLabel(" kPa");
 
@@ -208,11 +208,11 @@ public class Unit5 extends UnitBase {
 		lblBarLabelPressure = new JLabel("P (kPa)");
 		lblBarLabelVolume = new JLabel("V (L)");
 		lblBarLabelMol = new JLabel("n (mol)");
-		lblBarLabelTemp = new JLabel("T (\u2103)");
+		lblBarLabelTemp = new JLabel("T (K)");
 		barPressure = new SimpleBar(0, 5000, 30);
 		barVolume = new SimpleBar(main.minVolume, main.maxVolume, 63);
 		barMol = new SimpleBar(0, 50, 10);
-		barTemp = new SimpleBar(p5Canvas.tempMin, p5Canvas.tempMax, 25);
+		barTemp = new SimpleBar(0,550,298);
 	}
 
 	/*
@@ -959,7 +959,7 @@ public class Unit5 extends UnitBase {
 		p5Canvas.setVolume(60);
 	
 		//Make adjust if we show Litter instead of mL
-		int volumeMagnifier = getVolumeMagnifier()/1000;
+		float volumeMagnifier = getVolumeMagnifier()/1000;
 		if( volumeMagnifier != 0)
 		{
 				main.volumeLabel.setText(p5Canvas.currentVolume + " L");
@@ -1118,11 +1118,11 @@ public class Unit5 extends UnitBase {
 		lblPressureValue = new JLabel(" kPa");
 		
 		//Set up labels
-		lblTempValue.setText((int)p5Canvas.temp +" \u2103");
+		lblTempValue.setText((int)p5Canvas.temp +celsiusToK+" K");
 		lblPressureValue.setText(p5Canvas.pressure+ " kPa");
 		
 		//Make adjust if we show Litter instead of mL
-		int volumeMagnifier = getVolumeMagnifier()/1000;
+		float volumeMagnifier = getVolumeMagnifier()/1000;
 		if( volumeMagnifier != 0)
 		{
 				main.volumeLabel.setText(p5Canvas.currentVolume + " L");
@@ -1218,43 +1218,43 @@ public class Unit5 extends UnitBase {
 					barPressure.setValue(825.86f);
 					barVolume.setValue(60);
 					barMol.setValue(20);
-					barTemp.setValue(25);
+					barTemp.setValue(25+celsiusToK);
 					break;
 				case 4:
 					barPressure.setValue(867.43f);
 					barVolume.setValue(60);
 					barMol.setValue(20);
-					barTemp.setValue(40);
+					barTemp.setValue(40+celsiusToK);
 					break;
 				case 5:
 					barPressure.setValue(922.85f);
 					barVolume.setValue(60);
 					barMol.setValue(20);
-					barTemp.setValue(60);
+					barTemp.setValue(60+celsiusToK);
 					break;
 				case 6:
 					barPressure.setValue(1033.71f);
 					barVolume.setValue(60);
 					barMol.setValue(20);
-					barTemp.setValue(100);
+					barTemp.setValue(100+celsiusToK);
 					break;
 				case 7:
 					barPressure.setValue(825.86f);
 					barVolume.setValue(60);
 					barMol.setValue(20);
-					barTemp.setValue(25);
+					barTemp.setValue(25+celsiusToK);
 					break;
 				case 1:
 					barPressure.setValue(825.86f);
 					barVolume.setValue(60);
 					barMol.setValue(20);
-					barTemp.setValue(25);
+					barTemp.setValue(25+celsiusToK);
 					break;
 				case 2:
 					barPressure.setValue(825.86f);
 					barVolume.setValue(60);
 					barMol.setValue(20);
-					barTemp.setValue(25);
+					barTemp.setValue(25+celsiusToK);
 					break;
 				}
 			break;
@@ -1910,17 +1910,19 @@ public class Unit5 extends UnitBase {
 				lblConValue4.setText(output + " M");
 
 			} else if (set == 2) {
-
+				
 				output = myFormatter.format(getConByName("Hydrogen-Iodide"));
 				lblConValue1.setText(output + " M");
 				output = myFormatter.format(getConByName("Hydrogen"));
 				lblConValue2.setText(output + " M");
 				output = myFormatter.format(getConByName("Iodine"));
 				lblConValue3.setText(output + " M");
+				
 			}
 			break;
 
 		case 4:
+			
 			myFormatter = new DecimalFormat("###.##");
 			int magnifier = 1000;
 			if (set == 1) {
@@ -1947,6 +1949,7 @@ public class Unit5 extends UnitBase {
 				lblConValue3.setText(output + " M");
 				output = myFormatter.format(getConByName("Nitric-Oxide")*magnifier);
 				lblConValue4.setText(output + " M");
+				
 			}
 			break;
 		default:
@@ -1957,7 +1960,7 @@ public class Unit5 extends UnitBase {
 		if (lblVolumeValue.isShowing()) {
 			
 
-				int volumeMagnifier = getVolumeMagnifier()/1000;
+				float volumeMagnifier = getVolumeMagnifier()/1000;
 				if( volumeMagnifier != 0)
 					lblVolumeValue.setText(p5Canvas.currentVolume + " L");
 				else
@@ -1966,21 +1969,23 @@ public class Unit5 extends UnitBase {
 
 		}
 		if (lblTempValue.isShowing()) {
-			output = myFormatter.format(p5Canvas.temp);
-			lblTempValue.setText(output + " \u2103");
+			output = myFormatter.format(p5Canvas.temp+celsiusToK);
+			lblTempValue.setText(output + " K");
 		}
 
 		if (lblPressureValue.isShowing()) {
+			myFormatter = new DecimalFormat("###.##");
 			output = myFormatter.format(p5Canvas.pressure);
 			lblPressureValue.setText(output + " kPa");
 		}
 		// Update bars
 		if (barPressure != null)
+	
 			if (barPressure.isShowing()) {
 				barPressure.setValue(p5Canvas.pressure);
 				barVolume.setValue(p5Canvas.currentVolume);
 				barMol.setValue(p5Canvas.mol);
-				barTemp.setValue(p5Canvas.temp);
+				barTemp.setValue(p5Canvas.temp+celsiusToK);
 				barPressure.getParent().repaint();
 			}
 
@@ -2041,6 +2046,12 @@ public class Unit5 extends UnitBase {
 	@Override
 	public void updateMoleculeCountRelated(int sim, int set) {
 		this.updateMoleculeCon();		
+		
+	}
+
+	@Override
+	public void setMoleculeDensity() {
+		// TODO Auto-generated method stub
 		
 	}
 
