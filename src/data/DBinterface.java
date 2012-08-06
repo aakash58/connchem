@@ -30,7 +30,7 @@ public class DBinterface {
 		
 		try{
 			Class.forName("org.sqlite.JDBC");
-		
+	
 			/*
 			//********************** Distribution Configuration ***************************
 			ExtractFileFromJar();

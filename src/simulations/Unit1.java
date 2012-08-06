@@ -60,11 +60,17 @@ public class Unit1 extends UnitBase {
 
 	@Override
 	public void updateMolecules(int sim, int set) {
-		// TODO Auto-generated method stub
-		reactH202();
+		Simulation simulation = new Simulation(unitNum,sim,set);
+
+		switch(sim)
+		{
+		case 4:
+			reactH202(simulation);
+		break;
+		}
 	}
 
-	private void reactH202() {
+	private void reactH202(Simulation simulation) {
 		if (p5Canvas.products != null && p5Canvas.products.size() > 0) {
 			Molecule m1 = (Molecule) p5Canvas.killingList.get(0);
 			Molecule m2 = (Molecule) p5Canvas.killingList.get(1);
@@ -92,6 +98,7 @@ public class Unit1 extends UnitBase {
 			m2.destroy();
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
+			this.updateCompoundNumber(simulation);
 		}
 	}
 
@@ -106,12 +113,8 @@ public class Unit1 extends UnitBase {
 
 		switch (p5Canvas.getSim()) {
 		case 1:
-			// We dont need heat slider in Sim 1
-			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
 		case 2:
-			// We dont need heat slider in Sim 2
-			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
 		case 3:
 			// p5Canvas.setRestitutionDamp(true);
@@ -120,10 +123,33 @@ public class Unit1 extends UnitBase {
 			// p5Canvas.setRatioKE(4.0f); // Hydrogen-Peroxide
 			break;
 		case 5:
-			// We dont need heat slider in Sim 5
-			p5Canvas.getMain().heatSlider.setEnabled(false);
 			break;
 		}
+
+	}
+	
+	//Customize Interface in Main reset after all interface have been initialized
+	public void customizeInterface(int sim, int set)
+	{
+		//Customization
+		switch(p5Canvas.getSim())
+		{
+		case 1:
+			break;
+		case 2:
+			p5Canvas.getMain().heatSlider.setEnabled(false);
+			break;
+		case 3:
+			break;
+		case 4:
+				break;
+		case 5:
+			p5Canvas.getMain().heatSlider.setEnabled(false);
+
+			break;
+		
+		}
+
 
 	}
 
@@ -133,6 +159,8 @@ public class Unit1 extends UnitBase {
 
 	@Override
 	protected void computeForce(int sim, int set) {
+		
+		this.clearAllMoleculeForce();
 
 		switch (sim) {
 		case 1:
@@ -146,17 +174,26 @@ public class Unit1 extends UnitBase {
 			else
 				computeForceGeneric(sim,set);
 			break;
+
 		case 5:
 			computeForceGeneric(sim,set);
-			if(set==1)  //Bromine and water
-				addForceBromine(sim,set);
-			else if (set ==4) //Pentane and water
-				addForcePentane(sim,set);
-			else if( set==5)
-				addForceBromine(sim,set);
-			else if( set==6)
-				addForceBromine(sim,set);
-				addForcePentane(sim,set);
+			if(set==1) 	{//Bromine and water
+				computeForceBromine(sim,set);
+				computeForceTopBoundary();
+				}
+			else if (set ==4) { //Pentane and water
+				computeForcePentane(sim,set);
+			}
+			else if( set==5) {
+				computeForceBromine(sim,set);
+			}
+			else if( set==6) {
+				
+				computeForceBromine(sim,set);
+				computeForcePentane(sim,set);
+				computeForceTopBoundary();
+
+			}
 
 			break;
 
@@ -242,14 +279,7 @@ public class Unit1 extends UnitBase {
 									moleThis.sumForceY[thisE] += forceY * 1200;
 								}
 							}
-						} else if (moleThis.getName().equals("Pentane")) // No
-																			// force
-																			// applied
-																			// on
-																			// Pentane
-						{
-							
-						}
+						} 
 
 						else if (moleThis.getName().equals("Mercury")) {
 							moleThis.sumForceX[thisE] += forceX * 200;
@@ -294,11 +324,11 @@ public class Unit1 extends UnitBase {
 							}
 						} else if (moleThis.getName().equals("Pentane")) 
 						{
-							if(!((sim==5&&set==1)||(sim==5&&set==5)))
+							if(!((sim==5&&set==4)||(sim==5&&set==6)))
 							{
 							float rate = 0.3f;
-							moleThis.sumForceWaterX[thisE] += forceX*rate ;
-							moleThis.sumForceWaterY[thisE] += forceY*rate ;
+							//moleThis.sumForceWaterX[thisE] += forceX*rate ;
+							//moleThis.sumForceWaterY[thisE] += forceY*rate ;
 							}
 							
 						}
@@ -307,8 +337,15 @@ public class Unit1 extends UnitBase {
 							//Mercury doesnt mix with water
 							
 						} else if (moleThis.getName().equals("Bromine")) {
-							moleThis.sumForceWaterX[thisE] += forceX ;
+							moleThis.sumForceWaterX[thisE] += forceX*0.2 ;
 							moleThis.sumForceWaterY[thisE] += forceY ;
+							//Double the force when at the bottom
+							if(box2d.coordWorldToPixels(locThis).y > 2*p5Canvas.h/3)
+							{
+								moleThis.sumForceWaterX[thisE] += forceX*1 ;
+								moleThis.sumForceWaterY[thisE] += forceY*1 ;
+								
+							}
 						}
 						// Silver case
 						else if (moleThis.getName().equals("Silver")) {
@@ -376,21 +413,100 @@ public class Unit1 extends UnitBase {
 		}
 	}
 	
+	//Compute force for Bromine in Sim 5 set 1 and set 6
+	public void computeForceBromine(int sim, int set)
+	{
+		
+		float topBoundary = 2*p5Canvas.h/3;
+		float gravityCompensation = 0.5f;
+		float forceRepulsive = 2.5f;
+		float distSquare = 0f;
+ 
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+
+		//First remove the force that ComputeForceGeneration added
+		for(Molecule mole:State.getMoleculesByName("Bromine"))
+		{
+			if(mole.getPositionInPixel().y>topBoundary)
+			{
+				//mole.clearForce();
+				locThis.set(mole.getPosition());
+				
+				//Add some up force
+				for(int e =0;e<mole.getNumElement();e++)
+				{
+					mole.sumForceY[e]+=gravityCompensation;
+				
+					//Add repulsive force if there are any other bromine around
+					for( Molecule moleOther:State.getMoleculesByName("Bromine"))
+					{
+						if(moleOther !=mole)
+						{
+							
+								locOther.set(moleOther.getPosition());
+								Vec2 vecDiff = locThis.sub(locOther);
+								distSquare = vecDiff.x* vecDiff.x + vecDiff.y* vecDiff.y;
+								vecDiff = normalizeForce(vecDiff);
+								mole.sumForceX[e]+= 1f/distSquare*vecDiff.x * forceRepulsive*2;
+								mole.sumForceY[e]+= 1f/distSquare*vecDiff.y * forceRepulsive;
+							
+						}
+					}
+				}
+			}
+			
+		}
+		
+		
+		
+	}
+	
+	private void computeForceTopBoundary()
+	{
+			float topBoundary = p5Canvas.h/2;
+			float gravityCompensation = 0.2f;
+			float gravityScale = 0.01f;
+			// Check positions of all liquid molecules, in case they are not going
+			// to high
+			for(Molecule mole:State.getMolecules())
+			{
+				Vec2 pos = box2d.coordWorldToPixels(mole.getPosition());
+
+//				if(mole.getName().equals("Water"))
+				{
+					if (pos.y < topBoundary && mole.getLinearVelocity().y>0) {
+						for (int thisE = 0; thisE < mole.getNumElement(); thisE++) { // Select
+																						// element
+							mole.sumForceX[thisE] += 0;
+							mole.sumForceY[thisE] += (gravityCompensation+ gravityScale*(topBoundary-pos.y)) * -1;
+			
+						}
+					}
+				}
+			}
+	}
+	
 	//Add some up forces to pentane so that they will always be on top of water
-	public void addForcePentane(int sim, int set)
+	public void computeForcePentane(int sim, int set)
 	{
 		Molecule moleThis = null;
-		Molecule moleOther = null;
-		float gravityCompensation = 0.040f;
+		float gravityCompensation = 0.010f;
+		float topBoundary = 2*p5Canvas.h/3;
+		float forceRepulsive = 0.25f;
+		float distSquare = 0f;
+
 		//float diffY=0.0f;
 		
 		float forceYTop =0.002f;
-		float forceYBot =0.07f;
+		float forceYBot =0.05f;
 		if(sim==5&&set==6)
 		{
-			gravityCompensation = 0.075f;
-			forceYTop =  0.02f;
-			forceYBot =0.07f;
+			gravityCompensation = 0.010f;
+			forceYTop =  0.01f;
+			forceYBot =0.08f;
+			 forceRepulsive = 0.8f;
+
 		}
 		Vec2 locThis = new Vec2();
 		Vec2 locOther = new Vec2();
@@ -399,17 +515,18 @@ public class Unit1 extends UnitBase {
 			moleThis = State.molecules.get(i);
 			if(moleThis.getName().equals("Pentane"))
 			{
-				
+
+					
 				for(int e=0;e<moleThis.getNumElement();e++)
 				{
 					locThis.set(moleThis.getElementLocation(e));
-					moleThis.sumForceY[e] += gravityCompensation;
-			
-						for(int k =0;k<State.molecules.size();k++)
+					moleThis.sumForceY[e] += gravityCompensation; //Add gravity compensation to Pentane
+					if(moleThis.getPositionInPixel().y > topBoundary) //There is no force is Pentane is above 2h/3
+					{	
+						//Add up force if it is beneath water
+						for( Molecule moleOther:State.getMoleculesByName("Water"))
 						{	
-							moleOther = State.molecules.get(k);
-							if(moleOther.getName().equals("Water"))
-							{
+							
 								locOther.set(moleOther.getPosition());
 								if( Math.abs(locThis.x-locOther.x)<10)
 								{
@@ -423,11 +540,28 @@ public class Unit1 extends UnitBase {
 									}
 									
 								}
+							
+						}
+						//Add repulsive force if there are any other pentane around
+						for( Molecule moleOther:State.getMoleculesByName("Pentane"))
+						{
+							if(moleOther !=moleThis)
+							{
+								
+									locOther.set(moleOther.getPosition());
+									Vec2 vecDiff = locThis.sub(locOther);
+									distSquare = vecDiff.x* vecDiff.x + vecDiff.y* vecDiff.y;
+									vecDiff = normalizeForce(vecDiff);
+									moleThis.sumForceX[e]+= 1f/distSquare*vecDiff.x * forceRepulsive*2;
+									//moleThis.sumForceY[e]+= 1f/distSquare*vecDiff.y * forceRepulsive;
+								
 							}
 						}
+				}
 					
 					
 				}
+			
 			}
 		}
 	}
@@ -654,12 +788,17 @@ public class Unit1 extends UnitBase {
 	{
 		String name = null;
 		Molecule mole = null;
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
 		for(int i =0;i<State.molecules.size();i++)
 		{
 			mole = State.molecules.get(i);
 			name = new String(mole.getName());
 			if(name.equals("Water"))
-				;
+			{
+				if((sim==5 && set==1)|| (sim==5 && set==6))
+					mole.setRatioKE(1.0f/1.5f);
+			}
 			else if (name.equals("Hydrogen-Peroxide"))
 				mole.setRatioKE(0.25f);
 			else if (name.equals("Pentane"))
@@ -845,11 +984,29 @@ public class Unit1 extends UnitBase {
 	{
 		super.resetDashboard(sim,set);
 		JPanel dashboard = p5Canvas.getMain().dashboard;
-		if(sim==3||sim==4)
+		lblTempValue.setText("25 \u2103");
+		switch(sim)
 		{
+		case 1:
 			dashboard.add(lblTempTitle," cell 0 1, alignx right");
 			dashboard.add(lblTempValue,"cell 1 1");
+			break;
+		case 2:
+			break;
+		case 3:
+			dashboard.add(lblTempTitle," cell 0 1, alignx right");
+			dashboard.add(lblTempValue,"cell 1 1");
+			break;
+		case 4:
+			dashboard.add(lblTempTitle," cell 0 1, alignx right");
+			dashboard.add(lblTempValue,"cell 1 1");
+			break;
+		case 5:
+			break;
+			default:
+				break;
 		}
+
 	}
 	@Override
 	public void updateOutput(int sim, int set) {
@@ -869,6 +1026,11 @@ public class Unit1 extends UnitBase {
 	}
 	@Override
 	public void updateMoleculeCountRelated(int sim, int set) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void setMoleculeDensity() {
 		// TODO Auto-generated method stub
 		
 	}

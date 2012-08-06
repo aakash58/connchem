@@ -3332,4 +3332,10 @@ public class Unit3 extends UnitBase {
 			updateMoleculeMass();
 	}
 
+	@Override
+	public void setMoleculeDensity() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -4,14 +4,19 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
+
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.Timer;
 
 import main.Main;
 import net.miginfocom.swing.MigLayout;
@@ -39,7 +44,6 @@ public class Unit4 extends UnitBase {
 //	private float lastYDrag=0;
 	private int numMoleculePerMole = 1;
 	private double actualVolumePerMole = 0.055;
-	private int celsiusToK= 273;
 	
 	//Parameter for trails
 	int trailFastColor = Color.RED.getRGB();
@@ -90,6 +94,21 @@ public class Unit4 extends UnitBase {
 	public SimpleBar barVolume;
 	public SimpleBar barMol;
 	public SimpleBar barTemp;
+	
+	
+	public JButton btnRealGas;
+	public JButton btnIdealGas;
+	public JLabel lblRealGas;
+	public JLabel lblIdealGas;
+	//Attraction value for real gas
+	float attraction = 0.0f;
+	boolean attractionEnabled = false;
+	ActionListener btnRealGasListener;
+	ActionListener btnIdealGasListener;
+	float defaultVolume;
+	float compressedVolume;
+	float volumeIncrement;
+
 
 	public Unit4(P5Canvas parent, PBox2D box) {
 		super(parent, box);
@@ -97,7 +116,9 @@ public class Unit4 extends UnitBase {
 		setupSimulations();
 		lastTemp = p5Canvas.temp;
 		lastVolume = (int)p5Canvas.currentVolume;
+		setupListeners();
 		setupOutputLabels();
+
 	}
 	
 	private void setupOutputLabels()
@@ -139,6 +160,13 @@ public class Unit4 extends UnitBase {
 		barVolume = new SimpleBar(main.minVolume,main.maxVolume,63);
 		barMol = new SimpleBar(0,50,10);
 		barTemp  = new SimpleBar(0,550,298);
+		
+		btnRealGas = new JButton();
+		btnIdealGas = new JButton();
+		lblRealGas =new JLabel("Real Gas");
+		lblIdealGas = new JLabel("Ideal Gas");
+		btnRealGas.addActionListener(btnRealGasListener);
+		btnIdealGas.addActionListener(btnIdealGasListener);
 	}
 
 	@Override
@@ -185,7 +213,50 @@ public class Unit4 extends UnitBase {
 		SpawnStyle[] spawnStyles7 = { SpawnStyle.Gas,SpawnStyle.Gas,SpawnStyle.Gas,SpawnStyle.Gas };
 		simulations[7].setupElements(elements7, spawnStyles7);
 		
+		simulations[8] = new Simulation(unitNum, 6, 1);
+		String[] elements8 = {"Ammonia"};
+		SpawnStyle[] spawnStyles8 = { SpawnStyle.Gas };
+		simulations[8].setupElements(elements8, spawnStyles8);
+				
+	}
+	
+	private void setupListeners()
+	{
+		btnRealGasListener = new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				attractionEnabled  = true;
+				
+				//Set up a timer that push down weight 3 sec after hit real gas button
+				if(p5Canvas.currentVolume>compressedVolume)
+				{
+					// Set up timer, start immediately
+					Timer timer = new Timer(1000,  new ActionListener(){
+						public void actionPerformed(ActionEvent e)
+						{
+							interpolator.setDamping(0.1f);
+							interpolator.setAttraction(0.1f);
+							interpolator.set(p5Canvas.currentVolume);
+							interpolator.target(compressedVolume);
+						}
+					});
+					
+					timer.setInitialDelay(2500);
+					timer.setRepeats(false);
+					timer.start();
+
+				}
+				
+			}
+		};
 		
+		btnIdealGasListener = new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				attractionEnabled = false;
+
+			}
+		};
 	}
 
 	@Override
@@ -201,31 +272,40 @@ public class Unit4 extends UnitBase {
 				frameCounter = 0;
 				collisionCount = 0;
 			}
+			
+			//Update attraction based on temp and pressure
+			if(sim==6 && set==1)
+			{
+				//If real gas, update attraction
+				if(attractionEnabled)
+				{
+					attraction  = 0.1f;
+				}
+				else //If ideal gas, set attraction to 0
+				{
+					attraction =0.0f;
+				}
+			}
 		}
 	}
 
 	@Override
-	protected void reset() {
-		setupSimulations();
-		
+	protected void reset() {		
 		
 		//Reset Parameters
 		lastTemp = p5Canvas.temp;
 		p5Canvas.getMain().volumeSlider.setValue(p5Canvas.currentVolume);
 		p5Canvas.getMain().volumeSlider.setEnabled(true);
+		interpolator.setDamping(0.3f);
+		interpolator.setAttraction(0.1f);
+		interpolator.reset();
 		collisionPositions.clear();
 		collisionColors.clear();
 		volumeMagnifier =1000;
 		collisionCount = 0;
+		attraction = 0.0f;
+		attractionEnabled = false;
 		
-		//Reset output labels
-//		lblVolumeValue.setText(" mL");
-//		lblVolumeValue2.setText(" mL");
-//		lblPressureValue.setText(" kPa");
-//		lblCollisionValue.setText("");
-//		lblTempValue.setText(" K");
-//		lblKEValue.setText(" J");
-//		lblMoleValue.setText(" mol");
 		
 		barMol.reset();
 		barPressure.reset();
@@ -234,8 +314,11 @@ public class Unit4 extends UnitBase {
 		//Setup speed
 		setupSpeed();
 		
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
+		
 		//Setup temperature
-				switch(p5Canvas.getSim())
+				switch(sim)
 				{
 				case 2:
 					p5Canvas.temp =100;
@@ -245,10 +328,21 @@ public class Unit4 extends UnitBase {
 					p5Canvas.temp=60;
 					break;
 				case 5:
-					if(p5Canvas.getSet()==2)
+					if(set==2)
 						needWeight();
 					p5Canvas.heatSpeed = 2.5f;
 					break;
+				case 6:
+					if(set==1)
+					{	
+						needWeight();
+						defaultVolume = p5Canvas.currentVolume;
+						compressedVolume = 2*defaultVolume/3;
+						volumeIncrement = (defaultVolume-compressedVolume)/6;
+						interpolator.setDamping(0.1f);
+						interpolator.setAttraction(0.08f);
+						
+					}
 					default:
 						break;
 					
@@ -256,6 +350,26 @@ public class Unit4 extends UnitBase {
 		
 
 	}
+	
+	
+	//Add components to the dynamicPanel of the left panel
+	
+	public void resetDynamicPanel(int sim, int set) 
+	{
+		if(sim==6 && set==1)
+		{
+		JPanel dynamicPanel = p5Canvas.getMain().dynamicPanel;
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new MigLayout("insets 6, gap 4","[grow]20[grow]", "[][]"));
+		dynamicPanel.add(buttonPanel,"cell 0 3, grow ");
+		// Draw Molecule button
+		buttonPanel.add(btnIdealGas,"cell 0 0, align center,growx");
+		buttonPanel.add(lblIdealGas, "cell 0 1, align center");
+		buttonPanel.add(btnRealGas,"cell 1 0, align center,growx");
+		buttonPanel.add(lblRealGas,"cell 1 1, align center");
+		}
+	}
+	
 	//Customize Interface in Main reset after all interface have been initialized
 	public void customizeInterface(int sim, int set)
 	{
@@ -312,6 +426,9 @@ public class Unit4 extends UnitBase {
 			p5Canvas.temp=60;
 			
 			break;
+		case 6:
+			p5Canvas.getMain().heatSlider.setEnabled(false);
+			p5Canvas.getMain().volumeSlider.setEnabled(false);
 			default:
 				break;
 		
@@ -345,6 +462,9 @@ public class Unit4 extends UnitBase {
 		case 5:
 			speed = 4;
 			break;
+		case 6:
+			speed = 6;
+			break;
 		}
 		getSimulation(sim, set).setSpeed(speed);
 
@@ -352,8 +472,62 @@ public class Unit4 extends UnitBase {
 
 	@Override
 	protected void computeForce(int sim, int set) {
+		clearAllMoleculeForce();
+
+		switch (sim)
+		{
+		case 6:
+				if(set==1)
+				{
+					computeForceSim6Set1();
+				}
+			break;
+			default:
+				break;
+		}
 
 		
+	}
+	
+	private void computeForceSim6Set1()
+	{
+		float forceX = 0.0f;
+		float forceY =0.0f;
+		
+		Vec2 center = new Vec2();
+		Vec2 molePos = new Vec2();
+		Vec2 distance = new Vec2();
+		int numMole = State.getMoleculeNum();
+		
+		//Get the summation of all pos vectors
+		for(Molecule mole: State.getMolecules())
+		{
+			molePos.set(mole.getPosition());
+			center.addLocal(molePos);
+		}
+		
+		//Average the sum
+		center.mulLocal(1.0f/numMole);
+		
+		//Add force to each molecule
+		for(Molecule mole : State.getMolecules())
+		{
+			molePos.set(mole.getPosition());
+			distance.set(center.sub(molePos));
+			Vec2 direction = normalizeForce(distance);
+			forceX = direction.x*attraction;
+			forceY = direction.y *attraction;
+
+			for(int i = 0;i<mole.getNumElement();i++)
+			{
+				mole.sumForceX[i]+=forceX;
+				mole.sumForceY[i]+=forceY;
+			}
+		}
+	}
+	public Vec2 normalizeForce(Vec2 v) {
+		float dis = (float) Math.sqrt(v.x * v.x + v.y * v.y);
+		return new Vec2(v.x / dis, v.y / dis);
 	}
 
 
@@ -533,7 +707,65 @@ public class Unit4 extends UnitBase {
 			if(p5Canvas.getSet()==2)
 				moveTopBoundary(c);
 			break;
+		case 6:
+			if(p5Canvas.getSet()==1)
+				interpolateTopBoundary(c);
+			break;
 		}
+	}
+	
+	private void interpolateTopBoundary(Contact c)
+	{
+		if (!p5Canvas.isEnable || !p5Canvas.isSimStarted)
+			return;
+		Molecule mole = null;
+		Boundary boundary = null;
+	
+		// Get our objects that reference these bodies
+		Object o1 = c.m_fixtureA.m_body.getUserData();
+		Object o2 = c.m_fixtureB.m_body.getUserData();
+		if (o1 == null || o2 == null)
+			return;
+
+		String c1 = o1.getClass().getName();
+		String c2 = o2.getClass().getName();
+		// Make sure reaction only takes place between molecules and boundaries
+		if (c1.equals("simulations.models.Molecule") && o2 == p5Canvas.boundaries.getTopBoundary()) {
+			mole = (Molecule) o1;
+			boundary = (Boundary) o2;
+		} else if (o1 == p5Canvas.boundaries.getTopBoundary()
+				&& c2.equals("simulations.models.Molecule")) {
+			mole = (Molecule) o2;
+			boundary = (Boundary) o1;
+		}
+		if (mole == null || boundary == null)
+			return;
+		
+			float currentVolume = p5Canvas.currentVolume;
+			float target = 0f;
+
+			if(!this.attractionEnabled)
+			{
+				if(currentVolume<defaultVolume-1)
+				{
+
+					
+					target = currentVolume + volumeIncrement;
+					if(target >= defaultVolume)
+					{
+						target = defaultVolume;
+					}
+					
+					interpolator.setDamping(0.3f);
+					interpolator.setAttraction(0.15f);
+					interpolator.set(currentVolume);
+					interpolator.target(target);
+				}
+			}
+
+			
+
+
 	}
 	
 	
@@ -642,7 +874,7 @@ public class Unit4 extends UnitBase {
 		JPanel dashboard = main.dashboard;
 			String alignStr = new String(", align center");
 			
-			int volumeMagnifier = getVolumeMagnifier()/1000;
+			float volumeMagnifier = getVolumeMagnifier()/1000;
 				if( volumeMagnifier != 0)
 					main.volumeLabel.setText(p5Canvas.currentVolume + " L");
 				else
@@ -719,6 +951,17 @@ public class Unit4 extends UnitBase {
 				lblPressureValue.setText("196.63 kPa");
 				
 			}
+			else if( sim==4)
+			{
+				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(main.elapsedTime, "cell 1 0");
+				dashboard.add(lblPressureTitle,"cell 0 1");
+				dashboard.add(lblPressureValue,"cell 1 1");
+				dashboard.add(lblTempTitle,"cell 0 2");
+				dashboard.add(lblTempValue,"cell 1 2");
+				lblPressureValue.setText("0 kPa"); 
+
+			}
 			else if( sim ==5)
 			{
 			int barWidth = 40;
@@ -766,22 +1009,28 @@ public class Unit4 extends UnitBase {
 				barPressure.setValue(393.27f);
 			
 			}
-//			else if( sim ==4)
-//			{
-//				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
-//				dashboard.add(main.elapsedTime, "cell 1 0");
-//				dashboard.add(lblPressureTitle,"cell 0 2");
-//				dashboard.add(lblPressureValue,"cell 1 2");
-//				lblVolumeTitle.setText("Volume of Container:");
-//				lblVolumeValue.setText("63 L");
-//				lblPressureValue.setText("0 kPa");
-//				lblTempValue.setText("333 K");
-//				dashboard.add(lblVolumeTitle,"cell 0 3");
-//				dashboard.add(lblVolumeValue,"cell 1 3");
-//				dashboard.add(lblTempTitle,"cell 0 4");
-//				dashboard.add(lblTempValue,"cell 1 4");
-//				
-//			}
+			else if(sim==6)
+			{
+				dashboard.add(main.lblElapsedTimeText, "flowx,cell 0 0,alignx right");
+				dashboard.add(main.elapsedTime, "cell 1 0");
+
+					lblVolumeTitle.setText("Volume of Ammonia:");
+					lblVolumeValue.setText("63 L");
+//					lblMolecule1MolText.setText("Mole of Ammonia:");
+//					lblMolecule1MolValue.setText("20.0 mol");
+					lblTempValue.setText("298 K");
+//					lblPressureValue.setText("786.53 kPa");
+					
+					dashboard.add(lblVolumeTitle,"cell 0 1");
+					dashboard.add(lblVolumeValue,"cell 1 1");
+//					dashboard.add(lblMolecule1MolText, "cell 0 2");
+//					dashboard.add(lblMolecule1MolValue,"cell 1 2");
+
+					dashboard.add(lblTempTitle,"cell 0 2");
+					dashboard.add(lblTempValue,"cell 1 2");
+//					dashboard.add(lblPressureTitle,"cell 0 3");
+//					dashboard.add(lblPressureValue,"cell 1 3");
+			}
 		
 	}
 
@@ -804,6 +1053,11 @@ public class Unit4 extends UnitBase {
 				output = myFormatter.format(State.getMoleculeNumByName("Chlorine")/numMoleculePerMole);
 				lblMolecule1MolValue.setText(output + " mol");
 			}
+			else if( sim==6 &&set==1)
+			{
+				output = myFormatter.format(State.getMoleculeNumByName("Helium")/numMoleculePerMole);
+				lblMolecule1MolValue.setText(output+ " mol");
+			}
 
 		}
 		if(lblMolecule2MolValue.isShowing())
@@ -815,7 +1069,7 @@ public class Unit4 extends UnitBase {
 		
 		if (lblVolumeValue.isShowing()) {
 
-			int volumeMagnifier = getVolumeMagnifier()/1000;
+			float volumeMagnifier = getVolumeMagnifier()/1000;
 			if( volumeMagnifier != 0)
 				{
 				lblVolumeValue.setText(p5Canvas.currentVolume + " L");
@@ -877,6 +1131,12 @@ public class Unit4 extends UnitBase {
 	public void updateMoleculeCountRelated(int sim, int set) {
 
 		//this.updateOutput(sim, set);
+	}
+
+	@Override
+	public void setMoleculeDensity() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

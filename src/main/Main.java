@@ -629,6 +629,9 @@ public class Main {
 					}
 				}
 			}
+			
+			p5Canvas.resetDynamicPanel();
+			
 		}
 	}
 	
@@ -1730,7 +1733,8 @@ public class Main {
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				p5Canvas.getUnit7().addSpark();
+				if(p5Canvas.isEnable)
+					p5Canvas.getUnit7().addSpark();
 			}
 		};
 		

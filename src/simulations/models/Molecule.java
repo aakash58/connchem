@@ -946,7 +946,11 @@ public class Molecule {
 			mul = 2.5f;
 		else if (name.equals("Helium"))
 			mul = 4.0f;
+		
+		//mul = p5Canvas.getMoleculeDensity(getName());
 		return mul;
+		
+		
 	}
 	
 	//Set scale that gravity will apply on body

@@ -1257,6 +1257,7 @@ public class Unit7 extends UnitBase {
 		sparkAdded = false;
 		interpolator.setDamping(0.3f);
 		interpolator.setAttraction(0.1f);
+		interpolator.reset();
 		this.compoundKEHash.clear();
 		this.compoundPEHash.clear();
 		this.compoundEnthalpyHash.clear();
@@ -1644,7 +1645,7 @@ public class Unit7 extends UnitBase {
 			averageVelocity = 0;
 			return ;
 		}
-		for(Molecule m: State.molecules)
+		for(Molecule m: State.getMolecules())
 		{
 			//totalVelocity += (m.getLinearVelocityScalar()+m.getAngularVelocityScalar());
 			float velocity = m.getKineticEnergy()*2/m.getMoleculeMass();
@@ -3388,17 +3389,20 @@ public class Unit7 extends UnitBase {
 	}
 	public void addSpark()
 	{
-		sparkAdded = true;
-		
-		//Speed up molecules
-		//Ratio is set from 5 to 8
-		float ratio = 9;
-		for(Molecule m:State.molecules)
+		if(!sparkAdded)
 		{
-			m.constrainKineticEnergy(ratio);
+			sparkAdded = true;
+			
+			//Speed up molecules
+			//Ratio is set from 5 to 8
+			float ratio = 9;
+			for(Molecule m:State.molecules)
+			{
+				m.constrainKineticEnergy(ratio);
+			}
+			p5Canvas.calculateKE();
+			p5Canvas.temp = p5Canvas.getTempFromKE();
 		}
-		p5Canvas.calculateKE();
-		p5Canvas.temp = p5Canvas.getTempFromKE();
 
 	}
 	
@@ -3460,6 +3464,12 @@ public class Unit7 extends UnitBase {
 
 
 			updateMoleculeMass();
+	}
+
+	@Override
+	public void setMoleculeDensity() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 

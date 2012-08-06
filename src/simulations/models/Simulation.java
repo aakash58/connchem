@@ -29,13 +29,14 @@ public class Simulation {
 	private int unit;
 	private int sim;
 	private int set;
-	private int elementNum;
+//	private int elementNum;
 	private final int MAX_ELEMENT_NUM = 25;
-	private String [] elements;
-	private SpawnStyle [] elementSpawnStyles;
+	private String [] elements;   //The compounds which will show in the sim
+	private SpawnStyle [] elementSpawnStyles;    //The style that the compound spawn
 	private float distanceBetweenMolecule;
 	private int anchorNum = 0;
-	private Vec2 anchorPos[];
+	private Vec2 anchorPos[];     //The position of anchors
+	private float [] elementDensity;
 	
 	private float speed =1.0f; //Molecule speed moditifier for simulation
 	
@@ -50,6 +51,11 @@ public class Simulation {
 		this.set = set;
 		elements = new String [MAX_ELEMENT_NUM];
 		elementSpawnStyles =  new SpawnStyle[MAX_ELEMENT_NUM];
+		elementDensity = new float [MAX_ELEMENT_NUM];
+		for(int i = 0;i<MAX_ELEMENT_NUM;i++)
+		{
+			elementDensity[i] =1;
+		}
 	}
 	public Simulation(int unit, int sim, int set,int elementNum)
 	{
@@ -58,11 +64,49 @@ public class Simulation {
 		this.set = set;
 		elements = new String [elementNum];
 		elementSpawnStyles =  new SpawnStyle[elementNum];
+		elementDensity = new float [elementNum];
+		
+		for(int i = 0;i<elementNum;i++)
+		{
+			elementDensity[i] =1;
+		}
 	}
 	public void setupElements(String []ele, SpawnStyle [] style)
 	{
 		elements = ele;
 		elementSpawnStyles = style;
+	}
+	public void setupElementDensity(float [] den)
+	{
+		if(den!=null)
+		{
+			if(den.length==elements.length)
+			{
+				elementDensity = den;
+			}
+		}
+	}
+	public void setupElementDensity(String moleName,float den)
+	{
+		for(int i = 0;i<elements.length;i++)
+		{
+			if(elements[i].equals(moleName))
+			{
+				elementDensity[i]= den;
+			}
+		}
+	}
+	
+	public float getElementDensity(String moleName)
+	{
+		for(int i = 0;i<elements.length;i++)
+		{
+			if(elements[i].equals(moleName))
+			{
+				return elementDensity[i];
+			}
+		}
+		return 1; //If not find a particular, return 1 means does not change the density
 	}
 	public void setupAnchors( int num, Vec2 [] aPos)
 	{

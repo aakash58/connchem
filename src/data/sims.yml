@@ -59,7 +59,7 @@ units:
         cap: 95
     - set: 2
       compounds:
-      - compound: "Hydrogen Peroxide"
+      - compound: "Hydrogen-Peroxide"
         qty: 20
         cap: 40
     - set: 3
@@ -102,7 +102,7 @@ units:
       compounds:
       - compound: "Hydrogen Peroxide"
         qty: 20
-        cap: 50
+        cap: 40
   - sim: 5
     name: "Mixtures"
     controls:
@@ -113,15 +113,15 @@ units:
       compounds:
       - compound: "Water"
         qty: 30
-        cap: 60
+        cap: 40
       - compound: "Bromine"
         qty: 8
         cap: 16
     - set: 2
       compounds:
       - compound: "Water"
-        qty: 30
-        cap: 60
+        qty: 25
+        cap: 40
       - compound: "Mercury"
         qty: 20
         cap: 40
@@ -129,7 +129,7 @@ units:
       compounds:
       - compound: "Water"
         qty: 25
-        cap: 60
+        cap: 40
       - compound: "Hydrogen Peroxide"
         qty: 15
         cap: 30
@@ -137,7 +137,7 @@ units:
       compounds:
       - compound: "Water"
         qty: 30
-        cap: 60
+        cap: 40
       - compound: "Pentane"
         qty: 4
         cap: 8
@@ -145,7 +145,7 @@ units:
       compounds:
       - compound: "Water"
         qty: 30
-        cap: 50
+        cap: 40
       - compound: "Bromine"
         qty: 4
         cap: 6
@@ -156,12 +156,12 @@ units:
       compounds:
       - compound: "Water"
         qty: 30
-        cap: 50
+        cap: 40
+      - compound: "Pentane"
+        qty: 4
+        cap: 6
       - compound: "Bromine"
         qty: 6
-        cap: 6
-      - compound: "Pentane"
-        qty: 2
         cap: 6
 - unit: 2
   name: "Solutions"
@@ -501,6 +501,14 @@ units:
       - compound: "Helium"
         qty: 10
         cap: 25
+  - sim: 6
+    name: "Real vs Ideal Gas"
+    sets:
+    - set: 1
+      compounds: 
+      - compound: "Ammonia"
+        qty: 20
+        cap: 20
 - unit: 5
   name: "Kinetics"
   sims:
@@ -953,7 +961,7 @@ units:
       - compound: "Water"
         qty: 25
         cap: 25
-      - compound: "Acetic-Acid"
+      - compound: "Nitric-Acid"
         qty: 10
         cap: 10
     - set: 2
@@ -970,6 +978,14 @@ units:
         qty: 25
         cap: 25
       - compound: "Methylamine"
+        qty: 10
+        cap: 10
+    - set: 4
+      compounds:
+      - compound: "Water"
+        qty: 25
+        cap: 25
+      - compound: "Acetic-Acid"
         qty: 10
         cap: 10
   - sim: 5
