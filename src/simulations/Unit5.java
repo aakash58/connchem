@@ -2031,6 +2031,23 @@ public class Unit5 extends UnitBase {
 		else
 			return 0;
 	}
+	
+	
+	//Function that return the specific data to Canvas
+	public float getDataGraph(int sim,int set,int indexOfGraph, int indexOfCompound)
+	{
+	    String name = (String)Compound.names.get(indexOfCompound);
+		return getConByName(name);
+
+	}
+	
+	//Function to return the specific data to TableView
+	public float getDataTableView(int sim, int set, int indexOfCompound) {
+
+	    String name = (String)Compound.names.get(indexOfCompound);
+		float res = getConByName(name);
+		return res;
+	}
 
 	@Override
 	protected void initializeSimulation(int sim, int set) {

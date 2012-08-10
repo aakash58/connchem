@@ -3308,12 +3308,28 @@ public class Unit3 extends UnitBase {
 			return 0;
 	}
 	
+	
+	
+	//Function that return the specific data to Canvas
+	public float getDataGraph(int sim,int set,int indexOfGraph, int indexOfCompound)
+	{
+		String name = (String)Compound.names.get(indexOfCompound);
+		return getMassByName(name);
+
+	}
+	
+	//Function to return the specific data to TableView
+	public float getDataTableView(int sim, int set, int indexOfCompound) {
+		return super.getDataTableView(sim, set, indexOfCompound);
+	}
 
 	@Override
 	public void initialize() {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
 
 	@Override
 	public void updateOutput(int sim, int set) {

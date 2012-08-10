@@ -628,58 +628,6 @@ units:
         qty: 10
         cap: 10
 - unit: 6
-  name: "Chemical Equilibrium"
-  sims:
-  - sim: 1
-    name: "Reversible and Irreversible Reactions"
-    sets:
-    - set: 1
-      compounds:
-      - compound: "Sulfur"
-        qty: 22
-        cap: 22
-      - compound: "Oxygen"
-        qty: 10
-        cap: 20
-    - set: 2
-      compounds:
-      - compound: "Nitrogen-Dioxide"
-        qty: 20
-        cap: 20
-    - set: 3
-      compounds:
-      - compound: "Hydrogen"
-        qty: 20
-        cap: 20
-      - compound: "Oxygen"
-        qty: 10
-        cap: 10
-    - set: 4
-      compounds:
-      - compound: "Phosphorus-Trichloride"
-        qty: 10
-        cap: 10
-      - compound: "Chlorine"
-        qty: 10
-        cap: 20
-  - sim: 2
-    name: "Factors Affecting Equilibrium"
-    sets:
-    - set: 1
-      compounds:
-      - compound: "Nitrogen-Dioxide"
-        qty: 20
-        cap: 40
-      - compound: "Dinitrogen-Tetroxide"
-        qty: 0
-        cap: 20
-      - compound: "Catalyst"
-        qty: 0
-        cap: 5
-      - compound: "Inert"
-        qty: 0
-        cap: 5 
-- unit: 7
   name: "Thermodynamics"
   sims:
   - sim: 1
@@ -850,6 +798,58 @@ units:
       - compound: "Oxygen"
         qty: 40
         cap: 40
+- unit: 7
+  name: "Chemical Equilibrium"
+  sims:
+  - sim: 1
+    name: "Reversible and Irreversible Reactions"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Sulfur"
+        qty: 22
+        cap: 22
+      - compound: "Oxygen"
+        qty: 10
+        cap: 20
+    - set: 2
+      compounds:
+      - compound: "Nitrogen-Dioxide"
+        qty: 20
+        cap: 20
+    - set: 3
+      compounds:
+      - compound: "Hydrogen"
+        qty: 20
+        cap: 20
+      - compound: "Oxygen"
+        qty: 10
+        cap: 10
+    - set: 4
+      compounds:
+      - compound: "Phosphorus-Trichloride"
+        qty: 10
+        cap: 10
+      - compound: "Chlorine"
+        qty: 10
+        cap: 20
+  - sim: 2
+    name: "Factors Affecting Equilibrium"
+    sets:
+    - set: 1
+      compounds:
+      - compound: "Nitrogen-Dioxide"
+        qty: 20
+        cap: 40
+      - compound: "Dinitrogen-Tetroxide"
+        qty: 0
+        cap: 20
+      - compound: "Catalyst"
+        qty: 0
+        cap: 5
+      - compound: "Inert"
+        qty: 0
+        cap: 5
 - unit: 8
   name: "Acids and Bases"
   sims:

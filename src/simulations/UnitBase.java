@@ -54,9 +54,8 @@ public abstract class UnitBase {
 	protected int lastMole;
 	protected float lastTemp;
 	protected Integrator interpolator;
-	public float volumeMagnifier = 1f;
+	public float volumeMagnifier =0f;
 	protected final int celsiusToK= 273;
-
 
 
 
@@ -995,9 +994,13 @@ public abstract class UnitBase {
 		if (target > p5Canvas.volumeMaxBoundary)
 			target = p5Canvas.volumeMaxBoundary;
 
+		//If lastVolume and target are too close
+		if(Math.round(lastVolume)==Math.round(target))
+			return;
+		
 		interpolator.set(lastVolume);
 		interpolator.target(target);
-
+		
 		// Change volume label
 		//p5Canvas.setVolume(p5Canvas.currentVolume);
 		
@@ -1083,6 +1086,17 @@ public abstract class UnitBase {
 
 	}
 */
+	//Function that return the specific data to Canvas
+	public float getDataGraph(int sim, int set, int indexOfGraph,
+			int indexOfCompound) {
+		return (float)Compound.counts.get(indexOfCompound);
+	}
+	
+	//Function to return the specific data to TableView
+	public float getDataTableView(int sim, int set, int indexOfCompound) {
+		return (float)Compound.counts.get(indexOfCompound);
+	}
+	
 	public int numDissolved_atSaturation() {
 		int num = Math.round(computeSat() / molToMass());
 		return num;
@@ -1183,11 +1197,14 @@ public abstract class UnitBase {
 		return volumeMagnifier;
 	}
 	
+
+	
 	public void needWeight()
 	{
 		p5Canvas.boundaries.setHasWeight(true);
 	}
-	
+
+
 
 
 }

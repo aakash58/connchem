@@ -127,6 +127,24 @@ public class UnitList {
 		return 1;
 	}
 	
+	public float getDataGraph(int unit, int sim,int set,int indexOfGraph, int indexOfCompound)
+	{
+		float res =0;
+		if(isExist(unit))
+			res = unitList[unit-1].getDataGraph(sim, set, indexOfGraph, indexOfCompound);
+		return res;
+	}
+	
+	public float getDataTableView(int unit, int sim,int set,int indexOfCompound)
+	{
+		float res = 0 ;
+		if(isExist(unit))
+		{
+			res = unitList[unit-1].getDataTableView(sim,set,indexOfCompound);
+		}
+		return res;
+	}
+	
 	public void updateMoleculeCountRelated(int unit, int sim,int set)
 	{
 		if(isExist(unit))
