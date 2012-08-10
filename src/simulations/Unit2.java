@@ -2577,6 +2577,18 @@ public class Unit2 extends UnitBase{
 			// Dissolution function used in Unit 2
 			computeDissolved();
 		}
+		
+		//Function that return the specific data to Canvas
+		public float getDataGraph(int sim,int set,int indexOfGraph, int indexOfCompound)
+		{
+			return super.getDataGraph(sim, set, indexOfGraph, indexOfCompound);
+
+		}
+		
+		//Function to return the specific data to TableView
+		public float getDataTableView(int sim, int set, int indexOfCompound) {
+			return super.getDataTableView(sim, set, indexOfCompound);
+		}
 
 		@Override
 		protected void initializeSimulation(int sim, int set) {

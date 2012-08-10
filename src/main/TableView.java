@@ -386,43 +386,44 @@ public class TableView extends JPanel {
 		if(indexOfCompound>=Compound.counts.size())
 			return 0;
 		float res=0;
-		String name = null;
-		switch(unit)
-		{
-			default:
-				res = Compound.counts.get(indexOfCompound);
-				break;
-//			case 3:
-//				name = (String)Compound.names.get(indexOfCompound);
-//				res =  p5Canvas.getUnit3().getMassByName(name);
+		res = p5Canvas.getDataTableView(indexOfCompound);
+//		String name = null;
+//		switch(unit)
+//		{
+//			default:
+//				res = Compound.counts.get(indexOfCompound);
 //				break;
-			case 5:
-			    name = (String)Compound.names.get(indexOfCompound);
-				res = p5Canvas.getUnit5().getConByName(name);
-				break;
-			case 6:
-				name = (String)Compound.names.get(indexOfCompound);
-				res = p5Canvas.getUnit6().getConByName(name);
-				break;
-			case 7:
-				if(p5Canvas.getSim()==2) //Sim 2 output mass
-				{
-					name = (String)Compound.names.get(indexOfCompound);
-					res =  p5Canvas.getUnit7().getMassByName(name);	
-				}
-				else if(p5Canvas.getSim()==8||p5Canvas.getSim()==7) // Sim 8 output mole
-				{
-					name = (String)Compound.names.get(indexOfCompound);
-					res = p5Canvas.getUnit7().getMoleByName(name);
-				}
-				else //output number of molecules
-				{
-					res = Compound.counts.get(indexOfCompound);
-
-				}
-				break;
-			
-		}
+////			case 3:
+////				name = (String)Compound.names.get(indexOfCompound);
+////				res =  p5Canvas.getUnit3().getMassByName(name);
+////				break;
+//			case 5:
+//			    name = (String)Compound.names.get(indexOfCompound);
+//				res = p5Canvas.getUnit5().getConByName(name);
+//				break;
+//			case 6:
+//				name = (String)Compound.names.get(indexOfCompound);
+//				res = p5Canvas.getUnit6().getConByName(name);
+//				break;
+//			case 7:
+//				if(p5Canvas.getSim()==2) //Sim 2 output mass
+//				{
+//					name = (String)Compound.names.get(indexOfCompound);
+//					res =  p5Canvas.getUnit7().getMassByName(name);	
+//				}
+//				else if(p5Canvas.getSim()==8||p5Canvas.getSim()==7) // Sim 8 output mole
+//				{
+//					name = (String)Compound.names.get(indexOfCompound);
+//					res = p5Canvas.getUnit7().getMoleByName(name);
+//				}
+//				else //output number of molecules
+//				{
+//					res = Compound.counts.get(indexOfCompound);
+//
+//				}
+//				break;
+//			
+//		}
 		return res;
 	}
 	
@@ -438,7 +439,7 @@ public class TableView extends JPanel {
 		case 3:
 			myFormatter = new DecimalFormat("###.##");
 			break;
-		case 6:
+		case 7:
 			myFormatter = new DecimalFormat("###.###");
 			break;
 		case 5:
@@ -448,7 +449,7 @@ public class TableView extends JPanel {
 				myFormatter = new DecimalFormat("###.##");
 
 			break;
-		case 7:
+		case 6:
 			if(sim == 2 ) //mass
 				myFormatter = new DecimalFormat("###.#");
 			else if(sim ==8||sim==7) //mol

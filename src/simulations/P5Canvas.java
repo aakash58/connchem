@@ -842,7 +842,7 @@ public class P5Canvas extends PApplet {
 					res = true;
 			}
 			break;
-		case 6:
+		case 7:
 			if(getSim()==2) //Min = 0, Max = 220
 			{
 				if (scale < 0) // Set up minimum limit
@@ -1001,6 +1001,16 @@ public class P5Canvas extends PApplet {
 	}
 
 	/********************************* Get and Set functions *************************************/
+	
+	public float getDataGraph(int indexOfGraph, int indexOfCompound)
+	{
+		return unitList.getDataGraph(unit,sim,set,indexOfGraph,indexOfCompound);
+	}
+	
+	public float getDataTableView(int indexOfCompound)
+	{
+		return unitList.getDataTableView(unit,sim,set,indexOfCompound);
+	}
 	
 	public UnitList getUnitList()
 	{

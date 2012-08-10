@@ -1120,6 +1120,18 @@ public class Unit4 extends UnitBase {
 			}
 		
 	}
+	
+	//Function that return the specific data to Canvas
+	public float getDataGraph(int sim,int set,int indexOfGraph, int indexOfCompound)
+	{
+		return super.getDataGraph(sim, set, indexOfGraph, indexOfCompound);
+
+	}
+	
+	//Function to return the specific data to TableView
+	public float getDataTableView(int sim, int set, int indexOfCompound) {
+		return super.getDataTableView(sim, set, indexOfCompound);
+	}
 
 	@Override
 	protected void initializeSimulation(int sim, int set) {

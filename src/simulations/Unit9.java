@@ -1051,6 +1051,13 @@ public class Unit9 extends UnitBase {
 		}
 
 	}
+	
+	//Function that return the specific data to Canvas
+	public float getDataGraph(int sim,int set,int indexOfGraph, int indexOfCompound)
+	{
+		return super.getDataGraph(sim, set, indexOfGraph, indexOfCompound);
+
+	}
 
 	@Override
 	public void setMoleculeDensity() {

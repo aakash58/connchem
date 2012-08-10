@@ -240,69 +240,72 @@ public class Canvas extends JPanel {
 	//Define the data input type for different simulations 
 	private float dataConversion(int index, int unit,int indexOfCompound)
 	{
-		float res=0;
-		String name = null;
-		int sim = p5Canvas.getSim();
-		switch(unit)
-		{
-			default:
-				res = Compound.counts.get(indexOfCompound);
-				break;
-			case 3:
-				name = (String)Compound.names.get(indexOfCompound);
-				res =  p5Canvas.getUnit3().getMassByName(name);
-				break;
-			case 5:
-				res = Float.parseFloat((String) tableView.data[0].get(indexOfCompound));
-				break;
-			case 6:
-				name = (String)Compound.names.get(indexOfCompound);
-				res = p5Canvas.getUnit6().getConByName(name);
-				break;
-			case 7:
-				if(sim==2)
-				{
-					name = (String)Compound.names.get(indexOfCompound);
-					res =  p5Canvas.getUnit7().getMassByName(name);
-				}
-//				else if(sim==8){
+		
+		float res = p5Canvas.getDataGraph(index,indexOfCompound);
+		
+//		float res=0;
+//		String name = null;
+//		int sim = p5Canvas.getSim();
+//		switch(unit)
+//		{
+//			default:
+//				res = Compound.counts.get(indexOfCompound);
+//				break;
+//			case 3:
+//				name = (String)Compound.names.get(indexOfCompound);
+//				res =  p5Canvas.getUnit3().getMassByName(name);
+//				break;
+//			case 5:
+//				res = Float.parseFloat((String) tableView.data[0].get(indexOfCompound));
+//				break;
+//			case 6:
+//				name = (String)Compound.names.get(indexOfCompound);
+//				res = p5Canvas.getUnit6().getConByName(name);
+//				break;
+//			case 7:
+//				if(sim==2)
+//				{
 //					name = (String)Compound.names.get(indexOfCompound);
-//					res =  p5Canvas.getUnit7().getMoleByName(name);
+//					res =  p5Canvas.getUnit7().getMassByName(name);
 //				}
-				else 
-				{
-					res = Compound.counts.get(indexOfCompound);
-				}
-				break;
-			case 8:
-				if(sim==6)
-				{
-					if(index==0)
-					{
-						res = Compound.counts.get(indexOfCompound);
-					}
-					else if(index==1)
-					{
-						res= p5Canvas.getUnit8().getPH();
-					}
-				}
-				else if(sim==7)
-				{
-					if(index==0)
-					{
-						res = Compound.counts.get(indexOfCompound);
-					}
-					else if(index==1)
-					{
-						res= p5Canvas.getUnit8().getPH();
-					}
-				}
-				else
-				{
-					res = Compound.counts.get(indexOfCompound);
-				}
-				break;
-		}
+////				else if(sim==8){
+////					name = (String)Compound.names.get(indexOfCompound);
+////					res =  p5Canvas.getUnit7().getMoleByName(name);
+////				}
+//				else 
+//				{
+//					res = Compound.counts.get(indexOfCompound);
+//				}
+//				break;
+//			case 8:
+//				if(sim==6)
+//				{
+//					if(index==0)
+//					{
+//						res = Compound.counts.get(indexOfCompound);
+//					}
+//					else if(index==1)
+//					{
+//						res= p5Canvas.getUnit8().getPH();
+//					}
+//				}
+//				else if(sim==7)
+//				{
+//					if(index==0)
+//					{
+//						res = Compound.counts.get(indexOfCompound);
+//					}
+//					else if(index==1)
+//					{
+//						res= p5Canvas.getUnit8().getPH();
+//					}
+//				}
+//				else
+//				{
+//					res = Compound.counts.get(indexOfCompound);
+//				}
+//				break;
+//		}
 		return res;
 	}
 	

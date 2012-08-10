@@ -414,7 +414,7 @@ public class Main {
 					dynamicScrollPane
 							.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 					int start =0;
-					if(selectedUnit==4||(selectedUnit==6&&selectedSim==2))
+					if(selectedUnit==4||(selectedUnit==7&&selectedSim==2))
 					{
 						JPanel volumePanel = new JPanel();
 						//volumePanel.setBackground(backgroundColor);
@@ -444,7 +444,7 @@ public class Main {
 						String cName = getCompoundName(selectedUnit,
 								selectedSim, selectedSet, i);
 						final String fixedName = cName.replace(" ", "-");
-						if(getSelectedUnit()==6&&getSelectedSim()==2 && (fixedName.equals("Catalyst")||fixedName.equals("Inert")))
+						if(getSelectedUnit()==7&&getSelectedSim()==2 && (fixedName.equals("Catalyst")||fixedName.equals("Inert")))
 						{
 							State.moleculesAdded.put(fixedName, 0); // Initialize
 							continue;
@@ -515,7 +515,7 @@ public class Main {
 						addBtn.addActionListener(btnAddMoleculeListener);
 
 					}
-					if(getSelectedUnit()==6&&getSelectedSim()==2) //Add catalyst button and inert gas button in Unit 6 Sim 2
+					if(getSelectedUnit()==7&&getSelectedSim()==2) //Add catalyst button and inert gas button in Unit 6 Sim 2
 					{
 						JPanel buttonPanel = new JPanel();
 						buttonPanel.setLayout(new MigLayout("insets 6, gap 4","[grow]20[grow]", "[][]"));
@@ -536,7 +536,7 @@ public class Main {
 						buttonPanel.add(btnInertGas,"cell 1 0, align center,growx");
 						buttonPanel.add(lblInertGas,"cell 1 1, align center");
 					}
-					if(getSelectedUnit()==7)  //Add "Add Spark" button 
+					if(getSelectedUnit()==6)  //Add "Add Spark" button 
 					{
 						if(getSelectedSim()==1||getSelectedSim()==3)//Add spark button to Unit7 Sim1 and Sim3
 						{
@@ -1000,7 +1000,7 @@ public class Main {
 			case 4:
 				setupCentralStyle2();
 				break;
-			case 6:
+			case 7:
 				if(selectedSim==1)
 				 setupCentralStyle1();
 				else
@@ -1734,7 +1734,13 @@ public class Main {
 			public void actionPerformed(ActionEvent e)
 			{
 				if(p5Canvas.isEnable)
-					p5Canvas.getUnit7().addSpark();
+				{
+					if(((JButton)e.getSource()).isEnabled())
+					{
+					p5Canvas.getUnit6().addSpark();
+					((JButton)e.getSource()).setEnabled(false);
+					}
+				}
 			}
 		};
 		

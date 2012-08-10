@@ -3221,6 +3221,39 @@ public class Unit8 extends UnitBase {
 		else
 			return 0;
 	}
+	
+	//Function that return the specific data to Canvas
+	public float getDataGraph(int sim,int set,int indexOfGraph, int indexOfCompound)
+	{
+		if(sim==6)
+		{
+			if(indexOfGraph==0)
+			{
+				return super.getDataGraph(sim, set, indexOfGraph, indexOfCompound);
+			}
+			else if(indexOfGraph==1)
+			{
+				return getPH();
+			}
+		}
+		else if(sim==7)
+		{
+			if(indexOfGraph==0)
+			{
+				return super.getDataGraph(sim, set, indexOfGraph, indexOfCompound);
+			}
+			else if(indexOfGraph==1)
+			{
+				return getPH();
+			}
+		}
+		else
+		{
+			return super.getDataGraph(sim, set, indexOfGraph, indexOfCompound);
+		}
+		return 0;
+
+	}
 
 	//Last step of reset
 	protected void initializeSimulation(int sim, int set) {
