@@ -1097,6 +1097,18 @@ public abstract class UnitBase {
 		return (float)Compound.counts.get(indexOfCompound);
 	}
 	
+	//Function to return the correct compound name on the 2nd column of TableView
+	public ArrayList<String> getNameTableView(int sim, int set)
+	{
+		ArrayList<String> res = new ArrayList<String>();
+		for(int i = 0;i<Compound.names.size();i++)
+		{
+			res.add((String)Compound.names.get(i));
+		}
+		
+		return res;
+	}
+	
 	public int numDissolved_atSaturation() {
 		int num = Math.round(computeSat() / molToMass());
 		return num;

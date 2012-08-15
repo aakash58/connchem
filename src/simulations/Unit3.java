@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Random;
 
 
+import main.Main;
+
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.DistanceJoint;
@@ -127,7 +129,36 @@ public class Unit3 extends UnitBase {
 
 	}
 
-	
+	//Customize Interface in Main reset after all interface have been initialized
+	public void customizeInterface(int sim, int set)
+	{
+		
+		Main main = p5Canvas.getMain();
+		Simulation simulation = getSimulation(sim,set);
+		String elements [];
+		
+		if(sim==1)
+		{
+			switch(set)
+			{
+
+			case 2:
+			case 5:
+			case 7:
+				main.getCanvas().setYAxisLabeInset(0, -17);
+				break;
+			case 9: 
+				main.getCanvas().setYAxisLabeInset(0, -12);
+				break;
+				default:
+					main.getCanvas().setYAxisLabeInset(0, -16);
+					break;
+			}
+		}
+		
+
+
+	}
 
 	@Override
 	public void updateMolecules(int sim, int set) {

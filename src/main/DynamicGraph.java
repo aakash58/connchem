@@ -273,9 +273,10 @@ public class DynamicGraph extends JPanel {
 	public void initializeRenderer()
 	{
 		renderer = new XYLineAndShapeRenderer(true, false);
-		  StandardXYToolTipGenerator ttg = new StandardXYToolTipGenerator(
-		            "{0}: {2}, {1}s", NumberFormat.getInstance(), NumberFormat.getInstance());
+//		  StandardXYToolTipGenerator ttg = new StandardXYToolTipGenerator(
+//		            "{0}: {2}, {1}s", NumberFormat.getInstance(), NumberFormat.getInstance());
 		  
+		toolTipGenerator ttg = new toolTipGenerator();
 		for(int i = 0 ;i< canvas.getColorLineNum();i++)
 		{
 			renderer.setSeriesPaint(i, canvas.getColorLine(i));
@@ -331,12 +332,43 @@ public class DynamicGraph extends JPanel {
 		}
 	}
 	
+	public void setYAxisLabeInset(int index,float inset)
+	{
+		if(index<dataSetSize)
+		ranges[index].setLabelInsets(new RectangleInsets(0, 0, 0, inset)	);
+	}
+	
+	public void setYAxisTickLabeInset(int index,float inset)
+	{
+		if(index<dataSetSize)
+		ranges[index].setTickLabelInsets(new RectangleInsets(0, 0, 0, inset)	);
+	}
+	
+	
+	
 	class toolTipGenerator implements XYToolTipGenerator
 	{
 		public String generateToolTip(XYDataset dataset, int series, int item)
 		{
 			String res;
-			res = new String(canvas.getDataNames(series)+":"+dataset.getYValue(series,item)+" at "+dataset.getX(series, item)+"sec");
+			ArrayList<String> nameList = canvas.getDataNames(canvas.getCurrentIndex());
+			String name= new String();
+			if(nameList!=null) {
+				if(series<nameList.size())
+					name = nameList.get(series);
+			}
+			double value = dataset.getYValue(series,item);
+			double range = DynamicGraph.this.getRangeYAxis(0);
+			DecimalFormat df;
+			if(range<100)
+			df = new DecimalFormat("###.##");
+			else if(range>=100&&range<1000)
+				df = new DecimalFormat("###.#");
+			else
+				df = new DecimalFormat("####");
+
+			String strYValue = df.format(value); 
+			res = new String(name+":"+strYValue+" at "+dataset.getX(series, item)+" s");
 			return res;
 		}
 	}
@@ -454,6 +486,10 @@ public class DynamicGraph extends JPanel {
 	            
 	            float total = (float) this.getUpperBound();
 	    		DecimalFormat myFormatter = new DecimalFormat("###.##");
+	    		if(total>=100&&total<1000)
+	    			myFormatter= new DecimalFormat("###.#");
+	    		else if(total>=1000)
+	    			myFormatter= new DecimalFormat("####");
 	            //you'll need to have corresponding date objects around
 	            //or know how to match them up on the graph
 	                String label = myFormatter.format(total);
@@ -461,8 +497,6 @@ public class DynamicGraph extends JPanel {
 	                ticks.add(tick);                    
 	            return ticks;
 	        }
-	      
-	 
 	    
 	}
 	

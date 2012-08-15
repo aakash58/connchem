@@ -1,5 +1,5 @@
 /*
- * Unit 7: Thermodynamics
+ * Unit 7: Chemical Equilibrium
  */
 package simulations;
 
@@ -55,6 +55,7 @@ public class Unit7 extends UnitBase {
 	boolean catalystAdded = false;
 	boolean inertAdded = false;
 	float keq = 0.01f;
+	float keqOutput = 0;       //The parameter to how keq on the screen
 	float defaultKeq =0.01f;
 	float reactionProbability =0.6f;  //Probability of reaction in Sim 2
 //	float breakProbability = 0.75f; // The chance that N2O4 will break apart
@@ -346,7 +347,7 @@ public class Unit7 extends UnitBase {
 		if(catalystAdded)  //Speed up reaction by increasing chance
 			reactProbability = 1.0f;
 		else
-			reactProbability =0.1f;
+			reactProbability =0.6f;
 		
 		Random rand = new Random();
 		if (rand.nextFloat() > reactProbability) {
@@ -360,6 +361,7 @@ public class Unit7 extends UnitBase {
 		float conN2O4 = getConByName("Dinitrogen-Tetroxide");
 		float conNO2 = getConByName("Nitrogen-Dioxide");
 		float currentRatio = conN2O4/(conNO2*conNO2);
+//		System.out.println("Current ratio is "+currentRation);
 		
 		if (!p5Canvas.killingList.isEmpty()) {
 			if (p5Canvas.products != null && p5Canvas.products.size() > 0 && (currentRatio <= keq)) {
@@ -438,7 +440,7 @@ public class Unit7 extends UnitBase {
 		if(catalystAdded)  //Speed up reaction by increasing chance
 			reactProbability = 1.0f;
 		else
-			reactProbability =0.5f;
+			reactProbability =0.6f;
 		
 		Random rand = new Random();
 		if (rand.nextFloat() > reactProbability) {
@@ -657,6 +659,15 @@ public class Unit7 extends UnitBase {
 					Compound.counts.set(indexProduct, Compound.counts.get(indexProduct)-1);
 					Compound.counts.set(indexReactant, Compound.counts.get(indexReactant)+2);
 				}
+				
+				updateMoleculeCon();
+				 float conN2O4 = getConByName("Dinitrogen-Tetroxide");
+				 conN2O4 = Math.round(conN2O4*1000)/1000f;
+				 float conNO2 = getConByName("Nitrogen-Dioxide");
+				 conNO2 = Math.round(conNO2*1000)/1000f;
+				 float currentRatio = conN2O4/(conNO2*conNO2);
+				 //System.out.println("Current Ratio is "+currentRatio);
+				 keqOutput = currentRatio;
 //				oldTime = curTime;
 				return true;
 			}
@@ -682,6 +693,7 @@ public class Unit7 extends UnitBase {
 		forceUpdated = false;
 		defaultKeq = 8.92f;
 		keq = defaultKeq;
+		keqOutput = 0;
 		addedNO2 =0;
 		addedN2O4 =0;
 		reactProbability = 0.5f; 
@@ -819,7 +831,7 @@ public class Unit7 extends UnitBase {
 //		updateMoleculeCon();
 
 		//Update keq value label
-		if(keq!=0)
+		if(keqOutput!=0)
 		{
 			if(sim==1&&set==4)
 			{
@@ -827,7 +839,7 @@ public class Unit7 extends UnitBase {
 			}
 			else
 			{
-				output = myFormatter.format(keq);
+				output = myFormatter.format(keqOutput);
 				lblKeqValue.setText(output);
 			}
 			
@@ -1393,23 +1405,7 @@ public class Unit7 extends UnitBase {
 		
 		setupOutputLabels();
 		
-		//Update keq value label
-		if(keq!=0)
-		{
-			if(sim==1&&set==4)
-			{
-				lblKeqValue.setText("0.5");
-			}
-			else
-			{
-			DecimalFormat myFormatter = new DecimalFormat("###.###");
-			String output = myFormatter.format(keq);
-			lblKeqValue.setText(output);
-			}
-		}
-		else
-			lblKeqValue.setText("Infinity");
-		
+
 		
 		//Make adjust if we show Litter instead of mL
 		float volumeMagnifier = getVolumeMagnifier()/1000;
@@ -1429,26 +1425,35 @@ public class Unit7 extends UnitBase {
 		case 1:
 			if(set==1)
 			{
+				keqOutput = 0;
 				dashboard.add(lblKeqText,"cell 0 1");
 				dashboard.add(lblKeqValue,"cell 1 1");
 			}
 			else if( set==2)
 			{
+				keqOutput = 4.12f;
+
 				dashboard.add(lblKeqText,"cell 0 1");
 				dashboard.add(lblKeqValue,"cell 1 1");
 			}
 			else if( set ==3 )
 			{
+				keqOutput = 0;
+
 				dashboard.add(lblKeqText,"cell 0 1");
 				dashboard.add(lblKeqValue,"cell 1 1");
 			}
 			else
 			{
+				keqOutput = 0.5f;
+
 				dashboard.add(lblKeqText,"cell 0 1");
 				dashboard.add(lblKeqValue,"cell 1 1");
 			}
 			break;
 		case 2:
+			keqOutput = 4.12f;
+
 			dashboard.add(lblKeqText,"cell 0 1");
 			dashboard.add(lblKeqValue,"cell 1 1");
 			dashboard.add(lblTempText, "cell 0 2");
@@ -1463,6 +1468,19 @@ public class Unit7 extends UnitBase {
 			
 			break;
 		}
+		
+		//Update keq value label
+		if(keqOutput!=0)
+		{
+			
+			DecimalFormat myFormatter = new DecimalFormat("###.###");
+			String output = myFormatter.format(keqOutput);
+			lblKeqValue.setText(output);
+			
+		}
+		else
+			lblKeqValue.setText("Infinity");
+		
 		dashboard.repaint();
 	}
 	

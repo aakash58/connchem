@@ -800,7 +800,7 @@ public class Main {
 		//Change play icon to "PAUSE"
 		playBtn.setIcon(new ImageIcon(Main.class
 				.getResource("/resources/png48x48/iconPlay.png")));
-		
+		cBoxHideWater.setSelected(false);
 		
 		// For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
 		if (selectedUnit == 2 && (selectedSim == 3||selectedSim==1||selectedSim==2)) {

@@ -1,5 +1,5 @@
 /**
- * Unit 6: Chemical Equilibrium
+ * Unit 6: Thermodynamics
  */
 package simulations;
 

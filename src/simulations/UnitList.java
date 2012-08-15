@@ -1,5 +1,7 @@
 package simulations;
 
+import java.util.ArrayList;
+
 import org.jbox2d.dynamics.contacts.Contact;
 
 public class UnitList {
@@ -132,6 +134,16 @@ public class UnitList {
 		float res =0;
 		if(isExist(unit))
 			res = unitList[unit-1].getDataGraph(sim, set, indexOfGraph, indexOfCompound);
+		return res;
+	}
+	
+	public ArrayList<String> getNameTableView(int unit, int sim,int set)
+	{
+		ArrayList<String> res = null;
+		if(isExist(unit))
+		{
+			res = unitList[unit-1].getNameTableView(sim,set);
+		}
 		return res;
 	}
 	

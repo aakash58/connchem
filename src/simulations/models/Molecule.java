@@ -619,6 +619,16 @@ public class Molecule {
 			s = s.getNext();
 		}
 	}
+	
+	
+	//Move molecule with a specified vector
+	public void move(float xVec, float yVec)
+	{
+		Vec2 move = box2d.vectorPixelsToWorld(new Vec2(xVec,yVec));
+		Vec2 pos = new Vec2(body.getPosition());
+		pos.addLocal(move);
+		body.setTransform(pos, body.getAngle());
+	}
 
 	public void display() {
 		// float yyy = (2+body.getPosition().y)/90;
@@ -626,14 +636,16 @@ public class Molecule {
 		// if (P5Canvas.temp<100)
 		// body.applyForce(new Vec2(0,-yyy), body.getPosition());
 
-		//Update molecule positions
-		if (p5Canvas.isDragging() ) {
-			float xx = xTmp + PBox2D.scalarPixelsToWorld(p5Canvas.xDrag);
-			float yy = yTmp - PBox2D.scalarPixelsToWorld(p5Canvas.yDrag);
-			Vec2 v = new Vec2(xx, yy);
-			body.setTransform(v, body.getAngle());
-			body.setAngularVelocity(0);
-		} else {
+//		//Update molecule positions
+//		if (p5Canvas.isDragging() ) {
+//			float xx = xTmp + PBox2D.scalarPixelsToWorld(p5Canvas.xDrag);
+//			float yy = yTmp - PBox2D.scalarPixelsToWorld(p5Canvas.yDrag);
+//			Vec2 v = new Vec2(xx, yy);
+//			body.setTransform(v, body.getAngle());
+//			body.setAngularVelocity(0);
+//		}
+//		else 
+		{
 			xTmp = body.getPosition().x;
 			yTmp = body.getPosition().y;
 		}

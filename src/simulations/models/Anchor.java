@@ -81,5 +81,14 @@ public class Anchor {
 			worldY = body.getPosition().y;
 		}
 	}
+	
+	//Move anchors with a specified vector
+	public void move(float xVec, float yVec)
+	{
+		Vec2 move = box2d.vectorPixelsToWorld(new Vec2(xVec,yVec));
+		Vec2 pos = new Vec2(body.getPosition());
+		pos.addLocal(move);
+		body.setTransform(pos, body.getAngle());
+	}
 
 }

@@ -336,12 +336,14 @@ public class TableView extends JPanel {
 		
 		clearData();
 		
-		String name = null;
 		DecimalFormat myFormatter = outputFormat(unit);
 		String output = null;
+		String name = null;
 		
-			for (int i=0; i<Compound.names.size();i++){
-				name = (String)Compound.names.get(i);
+		ArrayList<String> names = p5Canvas.getNameTableView();
+		
+		for(int i =0;i<names.size();i++){
+				name = new String(names.get(i));
 				output = myFormatter.format(dataConversion(unit,i));
 				data[0].add(output);
 				data[1].add((Color)colors[i]);
