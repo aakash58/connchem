@@ -975,7 +975,8 @@ public class P5Canvas extends PApplet {
 					isDragging = true;
 					// Reseting boundaries position
 					boundaries.moveBoundary(xDrag - xTmp, yDrag - yTmp);
-					
+					moveAllMolecules(xDrag - xTmp, yDrag - yTmp);
+					moveAllAnchors(xDrag - xTmp, yDrag - yTmp);
 				}
 			} else // Drag the whole canvas, everything on the canvas moves with
 					// dragging
@@ -984,10 +985,29 @@ public class P5Canvas extends PApplet {
 				isDragging = true;
 				// Reseting boundaries position
 				boundaries.moveBoundary(xDrag - xTmp, yDrag - yTmp);
-
+				moveAllMolecules(xDrag - xTmp, yDrag - yTmp);
+				moveAllAnchors(xDrag - xTmp, yDrag - yTmp);
 			}
 			// TODO: reset anchors
 		}
+		}
+	}
+	
+	//Move molecule with a specified vector
+	private void moveAllMolecules(float xVec,float yVec)
+	{
+		for(Molecule mole: State.getMolecules())
+		{
+			mole.move(xVec,yVec);
+		}
+	}
+	
+	//Move Anchors with a specified vector
+	private void moveAllAnchors(float xVec,float yVec)
+	{
+		for(Anchor anchor: State.getAnchors())
+		{
+			anchor.move(xVec, yVec);
 		}
 	}
 
@@ -1005,6 +1025,11 @@ public class P5Canvas extends PApplet {
 	public float getDataGraph(int indexOfGraph, int indexOfCompound)
 	{
 		return unitList.getDataGraph(unit,sim,set,indexOfGraph,indexOfCompound);
+	}
+	
+	public ArrayList<String> getNameTableView()
+	{
+		return unitList.getNameTableView(unit,sim,set);
 	}
 	
 	public float getDataTableView(int indexOfCompound)

@@ -28,7 +28,7 @@ units:
   name: "Modeling Matter"
   sims:
   - sim: 1
-    name: "Making Scientific Observations"
+    name: "Making Scientific Observations with a Model"
     sets:
     - set: 1
       compounds:
@@ -167,7 +167,7 @@ units:
   name: "Solutions"
   sims:
   - sim: 1
-    name: "Introduction"
+    name: "Introduction to Solutions"
     controls:
     - control: "heat slider"
       state: "off"
@@ -435,7 +435,7 @@ units:
   name: "Gas Laws"
   sims:
   - sim: 1
-    name: "Physical Properties of Air"
+    name: "Physical Properties of Gases"
     sets:
     - set: 2
       compounds: 
@@ -884,7 +884,7 @@ units:
         qty: 10
         cap: 10
   - sim: 2
-    name: "Bronsted/Lowry or Lewis Selection"
+    name: "Bronsted/Lowry and Lewis Theories"
     sets:
     - set: 1
       compounds:
@@ -1076,7 +1076,7 @@ units:
         qty: 0
         cap: 1        
   - sim: 4
-    name: "Undefined"
+    name: "Ionizing Radiation"
     sets:
     - set: 1
       compounds:
@@ -1084,7 +1084,7 @@ units:
         qty: 1
         cap: 1
   - sim: 5
-    name: "Undefined"
+    name: "Radioactive Decay"
     sets:
     - set: 1
       compounds:

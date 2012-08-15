@@ -182,10 +182,10 @@ public class Canvas extends JPanel {
 			labelStrings.get(0)[1] = new String("total mass (g)");
 			break;
 		case 5:
-		case 6:
+		case 7:
 			labelStrings.get(0)[1] = new String("Concentration (M)");
 			break;
-		case 7:
+		case 6:
 			if(sim==2)
 				labelStrings.get(0)[1] = new String("total mass (g)");
 			else if(p5Canvas.getSim()==8||p5Canvas.getSim()==7)
@@ -452,8 +452,21 @@ public class Canvas extends JPanel {
 		return nameList;
 	}
 	
+	public void setYAxisLabeInset(int index,float inset)
+	{
+		dynamicGraph.setYAxisLabeInset(index, inset);
+	}
+	
+	public void setYAxisTickLabeInset(int index,float inset)
+	{
+		dynamicGraph.setYAxisTickLabeInset(index, inset);
+	}
 	
 	
+	public int getCurrentIndex()
+	{
+		return indexGraph;
+	}
 
 	
 	public Main getMain(){

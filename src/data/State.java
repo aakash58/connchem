@@ -88,6 +88,11 @@ public class State {
 		return molecules;
 	}
 	
+	public static ArrayList<Anchor> getAnchors()
+	{
+		return anchors;
+	}
+	
 	public static int getMoleculeIndex(Molecule mole)
 	{
 		return molecules.indexOf(mole); 
