@@ -110,6 +110,15 @@ public class State {
 		}
 		return null;
 	}
+	public static Molecule getMoleculeByIndex(int index)
+	{
+		float size = molecules.size();
+		if(index>=0 && index<size)
+		{
+			return molecules.get(index);
+		}
+		return null;
+	}
 	public static ArrayList<Molecule>	getMoleculesByName(String name)
 	{
 		ArrayList<Molecule> moles = new ArrayList<Molecule>();
@@ -122,6 +131,8 @@ public class State {
 		}
 		return moles;
 	}
+	
+	
 
 	
 

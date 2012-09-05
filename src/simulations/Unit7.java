@@ -104,9 +104,8 @@ public class Unit7 extends UnitBase {
 		simulations[2].setupElements(elements2, spawnStyles2);
 
 		simulations[3] = new Simulation(unitNum, 1, 4);
-		String[] elements3 = { "Phosphorus-Trichloride", "Chlorine" };
-		SpawnStyle[] spawnStyles3 = { SpawnStyle.Gas,
-				SpawnStyle.Gas };
+		String[] elements3 = { "Phosphorus-Pentachloride"};
+		SpawnStyle[] spawnStyles3 = { SpawnStyle.Gas };
 		simulations[3].setupElements(elements3, spawnStyles3);
 		
 		simulations[4] = new Simulation(unitNum, 2, 1);
@@ -217,14 +216,15 @@ public class Unit7 extends UnitBase {
 		if(!p5Canvas.isSimStarted) //Reaction has not started yet
 			return false;
 		
+		float smallDecimal = 0.000001f;
 		Random rand = new Random();
 		if (rand.nextFloat() > reactProbability) {
 			 return false;
 		}
 		
-		float conPCl3 = getConByName("Phosphorus-Trichloride");
-		float conPCl5 = getConByName("Phosphorus-Pentachloride");
-		float conCl2 = getConByName("Chlorine");
+		float conPCl3 = getConByName("Phosphorus-Trichloride")+smallDecimal;  //Plus small number to avoid 0
+		float conPCl5 = getConByName("Phosphorus-Pentachloride")+smallDecimal;
+		float conCl2 = getConByName("Chlorine")+smallDecimal;
 		float currentRatio = conPCl5/(conPCl3*conCl2);
 		
 		if (p5Canvas.products != null && p5Canvas.products.size() > 0 && currentRatio<keq) {
@@ -267,14 +267,20 @@ public class Unit7 extends UnitBase {
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
 
-			updateCompoundNumber(simulation);
+			//updateCompoundNumber(simulation);
+			int indexReactant = Compound.names.indexOf("Phosphorus-Pentachloride");
+			Compound.counts.set(indexReactant, Compound.counts.get(indexReactant)+1);
+			int indexProduct = Compound.names.indexOf("Phosphorus-Trichloride");
+			Compound.counts.set(indexProduct, Compound.counts.get(indexProduct)-1);
+			int indexProduct2 = Compound.names.indexOf("Chlorine");
+			Compound.counts.set(indexProduct2, Compound.counts.get(indexProduct2)-1);
 			
 			updateMoleculeCon();  //Update Molecule Concentration for break apart check
 		}
 
-		 conPCl3 = getConByName("Phosphorus-Trichloride");
-		 conPCl5 = getConByName("Phosphorus-Pentachloride");
-		 conCl2 = getConByName("Chlorine");
+		 conPCl3 = getConByName("Phosphorus-Trichloride")+smallDecimal;
+		 conPCl5 = getConByName("Phosphorus-Pentachloride")+smallDecimal;
+		 conCl2 = getConByName("Chlorine")+smallDecimal;
 		 currentRatio = conPCl5/(conPCl3*conCl2);
 		
 			if (currentRatio>keq) // If PCl5 is over numberred,break them up			
@@ -577,6 +583,10 @@ public class Unit7 extends UnitBase {
 		String nameReactant = null;
 		String nameReactant2 = null;
 		String nameProduct = null;
+		float conReactant = 0;
+		float conReactant2 = 0;
+		float conProduct = 0;
+		float currentRatio = 0;
 		if(simulation.getSetNum()==4)//PCl3+Cl2<-->PCl5
 		{
 			nameReactant = "Phosphorus-Trichloride";
@@ -661,11 +671,23 @@ public class Unit7 extends UnitBase {
 				}
 				
 				updateMoleculeCon();
-				 float conN2O4 = getConByName("Dinitrogen-Tetroxide");
-				 conN2O4 = Math.round(conN2O4*1000)/1000f;
-				 float conNO2 = getConByName("Nitrogen-Dioxide");
-				 conNO2 = Math.round(conNO2*1000)/1000f;
-				 float currentRatio = conN2O4/(conNO2*conNO2);
+				
+				
+				  conProduct = getConByName(nameProduct);
+				  conProduct = Math.round(conProduct*1000)/1000f;
+				  conReactant = getConByName(nameReactant);
+				  conReactant = Math.round(conReactant*1000)/1000f;
+				  if(nameReactant2!=null)  //PCl5 <--> PCl3 + Cl2
+				  {
+					  conReactant2 = getConByName(nameReactant2);
+					  conReactant2 = Math.round(conReactant2*1000)/1000f;
+					  currentRatio = (conReactant* conReactant2) / conProduct;
+				  }
+				  else  //2NO2 <--> N2O4
+				  {
+					  currentRatio = conProduct/(conReactant*conReactant);
+				  }
+				  
 				 //System.out.println("Current Ratio is "+currentRatio);
 				 keqOutput = currentRatio;
 //				oldTime = curTime;
@@ -749,6 +771,7 @@ public class Unit7 extends UnitBase {
 	{
 		Main main = p5Canvas.getMain();
 		
+		
 		//Make adjust if we show Litter instead of mL
 		float volumeMagnifier = getVolumeMagnifier()/1000;
 		if( volumeMagnifier != 0)
@@ -770,7 +793,10 @@ public class Unit7 extends UnitBase {
 			main.volumeSlider.setEnabled(false);
 			
 			main.getCanvas().setRangeYAxis(0, 0.05f);
-
+			if(set==1)
+			{
+				main.boxDisplayForce.setEnabled(false);
+			}
 			break;
 		case 2:
 			
@@ -782,6 +808,7 @@ public class Unit7 extends UnitBase {
 		}
 
 	}
+	
 
 	private void setupSpeed() {
 		int sim = p5Canvas.getSim();
@@ -833,11 +860,11 @@ public class Unit7 extends UnitBase {
 		//Update keq value label
 		if(keqOutput!=0)
 		{
-			if(sim==1&&set==4)
-			{
-				lblKeqValue.setText("0.5");
-			}
-			else
+//			if(sim==1&&set==4)
+//			{
+//				lblKeqValue.setText("0.5");
+//			}
+//			else
 			{
 				output = myFormatter.format(keqOutput);
 				lblKeqValue.setText(output);

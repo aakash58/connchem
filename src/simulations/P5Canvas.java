@@ -130,7 +130,8 @@ public class P5Canvas extends PApplet {
 
 	private boolean firstRun = true;
 	public boolean startDraggingMolecule = false;
-	private boolean ifConstrainKE = true;
+	private boolean ifConstrainKE = true;	//If the sim wants to control Kinetic Energy.
+	public float KEregulation = 2f;
 
 
 
@@ -167,6 +168,8 @@ public class P5Canvas extends PApplet {
 
 		setupHeaterLimit();
 		heatSpeed = 1;
+		
+		
 		
 
 	}
@@ -260,8 +263,7 @@ public class P5Canvas extends PApplet {
 
 		temp = getTempFromKE();
 		// Update molecule status base on new temp
-		for (int i = 0; i < molecules.size(); i++) {
-			Molecule m = molecules.get(i);
+		for (Molecule m: State.getMolecules()) {
 			m.setPropertyByHeat(false);
 		}
 
@@ -339,20 +341,25 @@ public class P5Canvas extends PApplet {
 	public void constrainKineticEnergy() {
 		if(!ifConstrainKE)
 			return;
+		//Check if sim wants to control kinetic energy by itself
+		if(unitList.constrainKineticEnergy(unit,sim,set,averageKineticEnergy))
+			return;
 		// First, sum up all average Energy to get total KE
 		float idealKE = State.molecules.size() * averageKineticEnergy;
 		// Second, find out the ratio of ideal stable KE to current real KE
 		float currentKE = 0;
-		for (int i = 0; i < State.molecules.size(); i++) {
-			currentKE += State.molecules.get(i).getKineticEnergy();
+		for (Molecule mole: State.getMolecules()) {
+			float ke = mole.getKineticEnergy();
+			currentKE += ke;
+
 		}
 		
 		float ratio = idealKE / currentKE;
 		// Third, each molecule`s KE multiplied with ratio
-		for (int i = 0; i < State.molecules.size(); i++) {
+		for (Molecule mole: State.getMolecules()) {
 			//Not apply to those whose energy is below average too much
-			if(State.molecules.get(i).getKineticEnergy()>(averageKineticEnergy/1.25f))
-			State.molecules.get(i).constrainKineticEnergy(ratio);
+			if(mole.getKineticEnergy()>(averageKineticEnergy/1.25f))
+				mole.constrainKineticEnergy(ratio);
 		}
 
 	}
@@ -522,6 +529,10 @@ public class P5Canvas extends PApplet {
 		unitList.resetDynamicPanel(unit, sim, set);
 	}
 	
+	public void resetCheckboxPanel()
+	{
+		unitList.resetCheckboxPanel(unit, sim, set);
+	}
 	//Called by main when all the reset have been done
 	//in order to initialize data
 	public void initializeSimulation()
@@ -704,7 +715,7 @@ public class P5Canvas extends PApplet {
 
 		// If temp has not reached max, keep heating.
 		if (!reachHeatLimit(temp)) {
-			float scale = 1f;
+				float scale = 1f;
 				curTime = getMain().time;
 				// Change molecule speed base on heat
 				scale = (float) (heat - (main.heatMax - main.heatMin) / 2)
@@ -1134,5 +1145,9 @@ public class P5Canvas extends PApplet {
 	public boolean isDragging()
 	{
 		return isDragging;
+	}
+	public Boundaries getBoundaries()
+	{
+		return boundaries;
 	}
 }

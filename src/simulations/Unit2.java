@@ -35,6 +35,7 @@ import simulations.models.Boundary;
 import simulations.models.Compound;
 import simulations.models.DistanceJointWrap;
 import simulations.models.Molecule;
+import simulations.models.Simulation;
 import simulations.models.Water;
 
 import static simulations.P5Canvas.*;
@@ -81,9 +82,9 @@ public class Unit2 extends UnitBase{
 	private void setupOutputLabels()
 	{
 		//Initialzie labels for Unit 2
-		m1Label = new JLabel("Compound Mass:");
+		m1Label = new JLabel("Mass Solute Added:");
 		m1Mass = new JLabel("0 g");
-		m1MassLabel = new JLabel("Dissolved:");
+		m1MassLabel = new JLabel("Mass Dissolved Solute:");
 		//dashboard.add(m1MassLabel, "cell 0 2,alignx right");
 		m1Disolved = new JLabel("0 g");
 		satLabel = new JLabel("Saturation:");
@@ -114,6 +115,28 @@ public class Unit2 extends UnitBase{
 		});
 	}
 
+	
+	//Customize Interface in Main reset after all interface have been initialized
+	public void customizeInterface(int sim, int set)
+	{
+		
+		Main main = p5Canvas.getMain();
+		//Simulation simulation = getSimulation(sim,set);
+		//String elements [];
+		
+		switch(sim)
+		{
+		case 1:
+			//Disable heat siler
+				main.heatSlider.setEnabled(false);
+			break;
+			default:
+				break;
+		}
+		
+
+
+	}
 
 	/******************************************************************
 	 * FUNCTION : add2Ions DESCRIPTION : Specific function used to add NaCl2,
@@ -1782,6 +1805,8 @@ public class Unit2 extends UnitBase{
 				
 			}
 		}
+		
+		updateMoleculeCount(sim, set);
 			
 		
 	}
@@ -1909,12 +1934,25 @@ public class Unit2 extends UnitBase{
 		int NaIndex = names.indexOf("Sodium-Ion");
 		int ClIndex = names.indexOf("Chlorine-Ion");
 		int NaClIndex = names.indexOf("Sodium-Chloride");
+		int tNaClIndex = p5Canvas.getTableView().getIndexByName("Sodium Chloride");
+		int tNaIndex = p5Canvas.getTableView().getIndexByName("Sodium Ion");
+		int tClIndex = p5Canvas.getTableView().getIndexByName("Chloride");
 		int NaClCount =0;
-		for (int i=0; i<State.molecules.size();i++){
-			Molecule m = (Molecule) State.molecules.get(i);
-			if (m.getName().equals("Sodium-Ion") && m.compoundJ>=0){
+		
+		for(Molecule cloride:State.getMoleculesByName("Chlorine-Ion"))
+		{
+			cloride.setTableIndex(tClIndex);
+		}
+		for (Molecule sodium: State.getMoleculesByName("Sodium-Ion")){
+				if(sodium.compoundJ>=0)
+				{
 				NaClCount++;
-			}
+				sodium.setTableIndex(tNaClIndex);
+				((Molecule)State.molecules.get(sodium.compoundJ)).setTableIndex(tNaClIndex);
+				}
+				else
+					sodium.setTableIndex(tNaIndex);
+			
 		}
 		Compound.counts.set(NaIndex,getTotalNum()-NaClCount);
 		Compound.counts.set(ClIndex,getTotalNum()-NaClCount);
@@ -1927,12 +1965,25 @@ public class Unit2 extends UnitBase{
 		int CaIndex = names.indexOf("Calcium-Ion");
 		int ClIndex = names.indexOf("Chlorine-Ion");
 		int CaClIndex = names.indexOf("Calcium-Chloride");
+		int tCaIndex = p5Canvas.getTableView().getIndexByName("Calcium Ion");
+		int tClIndex = p5Canvas.getTableView().getIndexByName("Chloride");
+		int tCaClIndex = p5Canvas.getTableView().getIndexByName("Calcium Chloride");
+		
 		int CaClCount =0;
-		for (int i=0; i<State.molecules.size();i++){
-			Molecule m = (Molecule) State.molecules.get(i);
-			if (m.getName().equals("Calcium-Ion") && m.compoundJ>=0){
+		for (Molecule cloride: State.getMoleculesByName("Chlorine-Ion"))
+			cloride.setTableIndex(tClIndex);
+		for (Molecule calcium: State.getMoleculesByName("Calcium-Ion")){
+			if (calcium.compoundJ>=0){
 				CaClCount++;
+				calcium.setTableIndex(tCaClIndex);
+				Molecule cl = State.molecules.get(calcium.compoundJ);
+				cl.setTableIndex(tCaClIndex);
+				if(cl.compoundJ>=0)
+					((Molecule)State.molecules.get(cl.compoundJ)).setTableIndex(tCaClIndex);
+
 			}
+			else
+				calcium.setTableIndex(tCaIndex);
 		}
 		Compound.counts.set(CaIndex,getTotalNum()-CaClCount);
 		Compound.counts.set(ClIndex,2*(getTotalNum()-CaClCount));
@@ -1943,11 +1994,23 @@ public class Unit2 extends UnitBase{
 		int NaIndex = names.indexOf("Sodium-Ion");
 		int HCO3Index = names.indexOf("Bicarbonate");
 		int NaHCO3Index = names.indexOf("Sodium-Bicarbonate");
+		int tNaIndex =  p5Canvas.getTableView().getIndexByName("Sodium Ion");
+		int tHCO3Index = p5Canvas.getTableView().getIndexByName("Bicarbonate");
+		int tNaHCO3Index = p5Canvas.getTableView().getIndexByName("Sodium Bicarbonate");
 		int NaHCO3Count =0;
-		for (int i=0; i<State.molecules.size();i++){
-			Molecule m = (Molecule) State.molecules.get(i);
-			if (m.getName().equals("Sodium-Ion") && m.compoundJ>=0){
+		for(Molecule bicarbonate: State.getMoleculesByName("Bicarbonate"))
+		{
+			bicarbonate.setTableIndex(tHCO3Index);
+		}
+		for (Molecule sodium: State.getMoleculesByName("Sodium-Ion")){
+			if (sodium.compoundJ>=0){
 				NaHCO3Count++;
+				sodium.setTableIndex(tNaHCO3Index);
+				((Molecule)State.molecules.get(sodium.compoundJ)).setTableIndex(tNaHCO3Index);
+			}
+			else
+			{
+				sodium.setTableIndex(tNaIndex);
 			}
 		}
 		Compound.counts.set(NaIndex,getTotalNum()-NaHCO3Count);
@@ -1961,11 +2024,27 @@ public class Unit2 extends UnitBase{
 		if (KIndex<0) return;
 		int ClIndex = names.indexOf("Chlorine-Ion");
 		int KClIndex = names.indexOf("Potassium-Chloride");
+		
+		int tKIndex = p5Canvas.getTableView().getIndexByName("Potassium Ion");
+		int tClIndex = p5Canvas.getTableView().getIndexByName("Chloride");
+		int tKClIndex = p5Canvas.getTableView().getIndexByName("Potassium Chloride");
+		
 		int KClCount =0;
-		for (int i=0; i<State.molecules.size();i++){
-			Molecule m = (Molecule) State.molecules.get(i);
-			if (m.getName().equals("Potassium-Ion") && m.compoundJ>=0){
+		
+		for(Molecule chloride: State.getMoleculesByName("Chlorine-Ion"))
+		{
+			chloride.setTableIndex(tClIndex);
+		}
+		for(Molecule potassium: State.getMoleculesByName("Potassium-Ion"))
+		{
+			if (potassium.compoundJ>=0){
 				KClCount++;
+				potassium.setTableIndex(tKClIndex);
+				((Molecule)State.molecules.get(potassium.compoundJ)).setTableIndex(tKClIndex);
+			}
+			else
+			{
+				potassium.setTableIndex(tKIndex);
 			}
 		}
 		Compound.counts.set(KIndex, getTotalNum()-KClCount);
@@ -2123,12 +2202,11 @@ public class Unit2 extends UnitBase{
 					&& count > 0) {
 				addTotalMolecules(count);
 				DecimalFormat df = new DecimalFormat("###.#");
-				// In Unit 2, ALL SETS, the output monitor for the amount added
-				// should be "amount added".
-				if (p5Canvas.getUnit() == 2)
-					m1Label.setText("Amount Added:");
-				else
-					m1Label.setText(compoundName + ":");
+
+//				if (p5Canvas.getUnit() == 2)
+//					m1Label.setText("Amount Added:");
+//				else
+//					m1Label.setText(compoundName + ":");
 				float total = getTotalNum() * getMolToMass();
 				m1Mass.setText(df.format(total) + " g");
 				if (isConvertMol) {
@@ -2243,6 +2321,33 @@ public class Unit2 extends UnitBase{
 			if(sim==1)
 			{
 				molMass = 58f;
+			}
+			else if(sim==2)
+			{
+				switch(set)
+				{
+				case 1:
+					molMass = 58f;
+					break;
+				case 2:
+					molMass = 60f;
+					break;
+				case 3:
+					molMass = 92f;
+					break;
+				case 4:
+					molMass = 110f;
+					break;
+				case 5:
+					molMass = 60f;
+					break;
+				case 6:
+					molMass = 72f;
+					break;
+				case 7:
+					molMass = 84f;
+					break;
+				}
 			}
 			else if(sim==3)
 			{
@@ -2517,6 +2622,22 @@ public class Unit2 extends UnitBase{
 				soluteVolume.setText("");
 				m1MassLabel.setText("Dissolved Solute:");
 				break;
+				
+			case 4:
+				dashboard.add(cBoxConvert, "cell 0 1");
+				dashboard.add(m1Label, "cell 0 2,alignx right");
+				dashboard.add(m1Mass, "cell 1 2");
+				dashboard.add(m1MassLabel, "cell 0 3,alignx right");
+				dashboard.add(m1Disolved, "cell 1 3");
+				// dashboard.add(satLabel, "cell 0 3,alignx right");
+				// dashboard.add(satMass, "cell 1 3");
+				dashboard.add(solventLabel, "cell 0 4,alignx right");
+				dashboard.add(waterVolume, "cell 1 4");
+				dashboard.add(solutionLabel, "cell 0 5,alignx right");
+				dashboard.add(soluteVolume, "cell 1 5");
+				dashboard.add(lblTempText,"cell 0 6, alignx right");
+				dashboard.add(lblTempValue,"cell 1 6");
+				break;
 		
 
 			}
@@ -2576,6 +2697,14 @@ public class Unit2 extends UnitBase{
 			
 			// Dissolution function used in Unit 2
 			computeDissolved();
+			
+			DecimalFormat df = new DecimalFormat("###.#");
+			String output ;
+			if(lblTempValue.isShowing())
+			{
+				output = df.format(p5Canvas.temp);
+				lblTempValue.setText(output+ " \u2103");
+			}
 		}
 		
 		//Function that return the specific data to Canvas
@@ -2588,6 +2717,20 @@ public class Unit2 extends UnitBase{
 		//Function to return the specific data to TableView
 		public float getDataTableView(int sim, int set, int indexOfCompound) {
 			return super.getDataTableView(sim, set, indexOfCompound);
+		}
+		
+		//Function to return the correct compound name on the 3rd column of TableView
+		public ArrayList<String> getNameTableView(int sim, int set)
+		{
+			ArrayList<String> res = super.getNameTableView(sim, set);
+
+					int index = res.indexOf("Chlorine Ion");
+					if(index>=0 && index<res.size())
+					{
+						res.set(index, "Chloride");
+					}
+
+					return res;
 		}
 
 		@Override

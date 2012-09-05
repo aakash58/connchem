@@ -30,12 +30,14 @@ public class Boundary {
 	private int id =-1;
 	//private int volumeSliderValue;
 	//private int volumeSliderDefaultValue;
-	private float yOriginal =0; //Original y of body when created
+	private float yOriginal =0; //Original y of body when .d
 	private float yTop = 0;
 	//public static boolean isTransformed =false; //Increase or Decrease in Volume
 	private PShape poleShape = new PShape();    //The pole that on top of base
 	private PShape baseShape = new PShape();    //piston base
 	private PShape weightShape = new PShape();	//Weight on base
+	private Fixture fixture = null;
+	public float defaultFriction=0.0f;
 	
 	
 	public Boundary(int _id, float xv, float yv, float wv, float hv, Boundaries parent) {
@@ -71,7 +73,7 @@ public class Boundary {
     	fd.restitution =1f;
     	fd.filter.categoryBits = Constants.BOUNDARY_ID; //All the molecules that enable collision is 2
 		fd.filter.maskBits = Constants.MOLECULE_ID+Constants.NONCOLLIDER_ID;  //All the objects that shou
-        body.createFixture(fd);
+        fixture = body.createFixture(fd);
         
 	//	body.setMassFromShapes();
 		body.setUserData(this);
@@ -226,5 +228,20 @@ public class Boundary {
 		if(this.body!=null)
 			box2d.destroyBody(body);
 		body.m_world =null;
+	}
+	
+	public void setFriction(float friction)
+	{
+		fixture.setFriction(friction);
+	}
+	
+	public float getFriction()
+	{
+		return fixture.getFriction();
+	}
+	
+	public Vec2 getLinearVelocity()
+	{
+		return body.getLinearVelocity();
 	}
 }

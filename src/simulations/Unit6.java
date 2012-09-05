@@ -363,9 +363,14 @@ public class Unit6 extends UnitBase {
 		JPanel dashboard = main.dashboard;
 		
 		//setupOutputLabels();
-		lblTempValue.setText(p5Canvas.temp +" \u2103");
+		DecimalFormat df = new DecimalFormat("###.#");
+		String output = df.format(p5Canvas.temp);
+		lblTempValue.setText(output +" \u2103");
 		lblVolumeValue.setText(p5Canvas.currentVolume +" mL");
 		lblPressureValue.setText(p5Canvas.pressure+ " kPa");
+		 lblTempText.setText("Temperature: ");
+		 lblVolumeText.setText("Volume: " );
+
 		
 		switch(sim)
 		{
@@ -472,20 +477,28 @@ public class Unit6 extends UnitBase {
 
 			break;
 		case 5:
-			dashboard.add(lblTempText, "cell 0 1");
-			dashboard.add(this.lblTempValue,"cell 1 1");
+			
 			if(set ==1 )
 			{
+				dashboard.add(lblTempText, "cell 0 1");
+				dashboard.add(this.lblTempValue,"cell 1 1");
+				lblTempText.setText("Temperature of System: ");
 				lblMoleculeEntropyText.setText("Entropy of Water: ");
 				lblMolecule1EntropyValue.setText("102.5 J/K");
 			}
 			else if(set==2)
 			{
+				dashboard.add(lblTempText, "cell 0 1");
+				dashboard.add(this.lblTempValue,"cell 1 1");
+				lblTempText.setText("Temperature of System: ");
 				lblMoleculeEntropyText.setText("Entropy of Water: ");
 				lblMolecule1EntropyValue.setText("174.87 J/K");
 			}
 			else if(set==3)
 			{
+				dashboard.add(lblVolumeText, "cell 0 1");
+				dashboard.add(lblVolumeValue,"cell 1 1");
+				lblVolumeText.setText("Volume of Oxygen: ");
 				lblMoleculeEntropyText.setText("Entropy of Oxygen: ");	
 				lblMolecule1EntropyValue.setText("205.07 J/K");
 			}
@@ -1450,6 +1463,7 @@ public class Unit6 extends UnitBase {
 					+ " mL");
 		}
 		if (lblTempValue.isShowing()) {
+			myFormatter = new DecimalFormat("###.#");
 			output = myFormatter.format(p5Canvas.temp);
 			lblTempValue.setText(output + " \u2103");
 //			if(sim==5)

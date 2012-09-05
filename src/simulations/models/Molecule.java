@@ -1056,6 +1056,12 @@ public class Molecule {
 		
 	}
 	
+	public void setKineticEnergy(float energy)
+	{
+		float ratio = getKineticEnergy()/energy;
+		constrainKineticEnergy(ratio);
+	}
+	
 	//Multiply molecules` kinetic energy by ratio r
 	public void shakeMolecule(float r)
 	{
