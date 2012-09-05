@@ -1,5 +1,6 @@
 package simulations;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -43,7 +44,7 @@ public class Unit4 extends UnitBase {
 //	private float lastXDrag=0;
 //	private float lastYDrag=0;
 	private int numMoleculePerMole = 1;
-	private double actualVolumePerMole = 0.055;
+	private double actualVolumePerMole = 0.0272;
 	
 	//Parameter for trails
 	int trailFastColor = Color.RED.getRGB();
@@ -139,7 +140,7 @@ public class Unit4 extends UnitBase {
 		lblVolumeValue = new JLabel (" L");
 		lblVolumeTitle2 = new JLabel("Volume of gas:");
 		lblVolumeValue2 = new JLabel(" L");
-		lblActualVolumeTitle = new JLabel("Actual volume of Helium:");
+		lblActualVolumeTitle = new JLabel("Atomic volume of Helium:");
 		lblActualVolumeValue = new JLabel("0.550 L");
 		lblEqualText = new JLabel("=");
 		lblMolText = new JLabel ("n (mol)");
@@ -367,6 +368,15 @@ public class Unit4 extends UnitBase {
 		buttonPanel.add(lblIdealGas, "cell 0 1, align center");
 		buttonPanel.add(btnRealGas,"cell 1 0, align center,growx");
 		buttonPanel.add(lblRealGas,"cell 1 1, align center");
+		}
+	}
+	
+	public void resetCheckboxPanel(int sim, int set) 
+	{
+		Main main = p5Canvas.getMain();
+		if(sim==2)
+		{
+			main.checkBoxPanel.add(main.boxMoleculeTracking,BorderLayout.CENTER);
 		}
 	}
 	
@@ -908,7 +918,7 @@ public class Unit4 extends UnitBase {
 					lblVolumeValue.setText("63 L");
 					lblMolecule1MolText.setText("Mole of Helium:");
 					lblMolecule1MolValue.setText("10.0 mol");
-					lblActualVolumeValue.setText("0.55 L");
+					lblActualVolumeValue.setText("0.272 L");
 					dashboard.add(lblMolecule1MolText, "cell 0 2");
 					dashboard.add(lblMolecule1MolValue,"cell 1 2");
 					dashboard.add(lblActualVolumeTitle, "cell 0 3");
@@ -1086,7 +1096,7 @@ public class Unit4 extends UnitBase {
 		if(lblActualVolumeValue.isShowing())
 		{
 			DecimalFormat formatter = new DecimalFormat("###.###");
-			output = formatter.format(this.actualVolumePerMole* State.getMoleculeNumByName("Helium"));
+			output = formatter.format(this.actualVolumePerMole* State.getMoleculeNumByName("Helium")/this.numMoleculePerMole);
 			lblActualVolumeValue.setText(output+" L");
 		}
 		if (lblTempValue.isShowing()) {

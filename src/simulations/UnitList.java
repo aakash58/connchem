@@ -91,6 +91,11 @@ public class UnitList {
 		if(isExist(unit))
 			unitList[unit-1].resetDynamicPanel(sim, set);
 	}
+	public void resetCheckboxPanel(int unit, int sim, int set)
+	{
+		if(isExist(unit))
+			unitList[unit-1].resetCheckboxPanel(sim, set);
+	}
 	
 	public void resetDashboard(int unit,int sim, int set)
 	{
@@ -168,6 +173,13 @@ public class UnitList {
 		if(isExist(unit))
 			return unitList[unit-1].getMoleculeDensity(sim,set,moleName);
 		else return 1;
+	}
+	
+	public boolean constrainKineticEnergy(int unit,int sim,int set,float averageKE)
+	{
+		if(isExist(unit))
+			return unitList[unit-1].constrainKineticEnergy(sim,set,averageKE);
+		else return false;
 	}
 
 	

@@ -165,7 +165,7 @@ public class Settings {
 	 * relative linear velocity below this threshold will be treated as
 	 * inelastic.
 	 */
-	public static float velocityThreshold = 1.0f;
+	public static float velocityThreshold = 0.001f;
 	
 	/**
 	 * The maximum linear position correction used when solving constraints.

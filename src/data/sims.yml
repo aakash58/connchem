@@ -342,7 +342,10 @@ units:
       - compound: "Copper"
         qty: 4
         cap: 4
-      - compound: "Silver Nitrate"
+      - compound: "Silver-Ion"
+        qty: 8
+        cap: 8
+      - compound: "Nitrate"
         qty: 8
         cap: 8
       - compound: "Water"
@@ -361,7 +364,10 @@ units:
       - compound: "Iron"
         qty: 5
         cap: 5
-      - compound: "Copper-II-Sulfate"
+      - compound: "Copper-II"
+        qty: 5
+        cap: 5
+      - compound: "Sulfate"
         qty: 5
         cap: 5
       - compound: "Water"
@@ -396,10 +402,13 @@ units:
         cap: 15
     - set: 10
       compounds:
-      - compound: "Sodium Chloride"
+      - compound: "Sodium-Chloride"
         qty: 5
         cap: 5
-      - compound: "Silver Nitrate"
+      - compound: "Silver-Ion"
+        qty: 5
+        cap: 5
+      - compound: "Nitrate"
         qty: 5
         cap: 5
       - compound: "Water"
@@ -494,7 +503,7 @@ units:
     - set: 2
       compounds: 
       - compound: "Helium"
-        qty: 15
+        qty: 1
         cap: 25
     - set: 3
       compounds: 
@@ -827,12 +836,9 @@ units:
         cap: 10
     - set: 4
       compounds:
-      - compound: "Phosphorus-Trichloride"
+      - compound: "Phosphorus-Pentachloride"
         qty: 10
         cap: 10
-      - compound: "Chlorine"
-        qty: 10
-        cap: 20
   - sim: 2
     name: "Factors Affecting Equilibrium"
     sets:

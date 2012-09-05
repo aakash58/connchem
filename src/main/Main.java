@@ -141,7 +141,7 @@ public class Main {
 																				// every
 																				// compound
 	//Check box parameter
-	private JPanel checkBoxPanel;
+	public JPanel checkBoxPanel;
 	public JCheckBox boxMoleculeHiding;
 	public JCheckBox boxMoleculeTracking;
 	public JCheckBox boxDisplayForce;
@@ -162,7 +162,7 @@ public class Main {
 	public int minVolume = 0;
 	public int maxVolume = 100;
 	public int defaultVolume = 63;
-	private JLabel canvasControlLabel_main_volume;
+	private JLabel lblVolumeText;
 
 	// Pressure slider used to replace Volume Slider in Unit 2
 	public JSlider pressureSlider = new JSlider(0, 10, 1);
@@ -208,7 +208,7 @@ public class Main {
 	public JButton btnGraphSwitch;
 	JLabel lblSubMicroscopid;
 	JLabel lblOutputMacroscopicLevel;
-	JCheckBox cBoxHideWater;
+	public JCheckBox cBoxHideWater;
 	ItemListener cBoxHideWaterListener;
 	public JPanel dashboard; // Subpanel on right side showing parameter values
 
@@ -425,7 +425,7 @@ public class Main {
 						volumeSlider.setOrientation(SwingConstants.HORIZONTAL);
 						volumeSlider.setEnabled(true);
 						volumePanel.add(volumeSlider,"cell 1 0,grow");
-						volumePanel.add(canvasControlLabel_main_volume,"cell 0 0,align left");
+						volumePanel.add(lblVolumeText,"cell 0 0,align left");
 						JPanel heatPanel = new JPanel();
 						heatPanel.setLayout(new MigLayout("insets 0, gap 0",
 								"[78][][85]", "[50]"));
@@ -800,10 +800,9 @@ public class Main {
 		//Change play icon to "PAUSE"
 		playBtn.setIcon(new ImageIcon(Main.class
 				.getResource("/resources/png48x48/iconPlay.png")));
-		cBoxHideWater.setSelected(false);
 		
 		// For UNIT 2, Sim 3, ALL SETS, add input tip below Input title
-		if (selectedUnit == 2 && (selectedSim == 3||selectedSim==1||selectedSim==2)) {
+		if (selectedUnit == 2 && (selectedSim == 3||selectedSim==2)) {
 			leftPanel.add(lblInputTipL,
 					"cell 0 1,gaptop 5,gapleft 5,alignx left,width 45::");
 			leftPanel.add(lblInputTipR, "cell 0 1,gaptop 5,alignx right");
@@ -841,14 +840,22 @@ public class Main {
 		checkBoxPanel.removeAll();
 		//Reset selected value
 		boxMoleculeHiding.setSelected(false);
+		boxMoleculeHiding.setEnabled(true);
 		boxMoleculeTracking.setSelected(false);
+		boxMoleculeTracking.setEnabled(true);
 		boxDisplayForce.setSelected(false);
+		boxDisplayForce.setEnabled(true);
 		boxDisplayJoint.setSelected(false);
+		boxDisplayJoint.setEnabled(true);
+		cBoxHideWater.setSelected(false);
+		cBoxHideWater.setEnabled(true);
 		//Re-add checkboxes to parent panel
 		checkBoxPanel.add(boxMoleculeHiding, BorderLayout.NORTH);
-		if(p5Canvas.isSimSelected(4, 2))
-		checkBoxPanel.add(boxMoleculeTracking,BorderLayout.CENTER);
 		checkBoxPanel.add(boxDisplayForce, BorderLayout.SOUTH);
+		p5Canvas.resetCheckboxPanel();
+//		if(p5Canvas.isSimSelected(4, 2))
+//			checkBoxPanel.add(boxMoleculeTracking,BorderLayout.CENTER);
+		
 		//checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
 		checkBoxPanel.repaint();
 	}
@@ -870,10 +877,10 @@ public class Main {
 			rightPanel.add(tabpanelGraph, "cell 0 2,grow");
 			rightPanel.add(dashboard, "cell 0 4,growy");
 
-			if ((selectedSim == 1 && (selectedSet == 4 || selectedSet == 6
-					|| selectedSet == 7 || selectedSet == 10))
-					|| selectedSim == 2)
-				rightPanel.add(cBoxHideWater, "cell 0 3");
+//			if ((selectedSim == 1 && (selectedSet == 4 || selectedSet == 6
+//					|| selectedSet == 7 || selectedSet == 10))
+//					|| selectedSim == 2)
+//				rightPanel.add(cBoxHideWater, "cell 0 3");
 
 		break;
 		case 2: 
@@ -1018,7 +1025,7 @@ public class Main {
 		//Add Volume Slider
 		clPanel.add(volumeLabel, "cell 0 0,alignx right");
 		clPanel.add(volumeSlider, "cell 0 1,alignx right");
-		clPanel.add(canvasControlLabel_main_volume,
+		clPanel.add(lblVolumeText,
 				"cell 0 2, alignx center");
 	//Add Zoom Slider
 		clPanel.add(zoomLabel, "cell 0 4,alignx right");
@@ -1278,7 +1285,7 @@ public class Main {
 				}
 			}
 		});
-		canvasControlLabel_main_volume = new JLabel("Volume");
+		lblVolumeText = new JLabel("<html>Container<br>Volume</html>");
 
 		// Set up Pressure Slide
 		//getP5Canvas().setPressure(defaultPressure);

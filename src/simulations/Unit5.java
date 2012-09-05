@@ -955,6 +955,7 @@ public class Unit5 extends UnitBase {
 		// Customization
 		Main main = p5Canvas.getMain();
 		
+		resetRightPanel(sim,set);
 		//Set volume
 		p5Canvas.setVolume(60);
 	
@@ -1040,6 +1041,24 @@ public class Unit5 extends UnitBase {
 			main.volumeSlider.setEnabled(false);
 			break;
 		}
+	}
+	
+	private void resetRightPanel (int sim, int set) {
+		Main main = p5Canvas.getMain();
+
+		switch(sim)
+		{
+		case 1:
+			if(set==1 || set==2){
+				main.rightPanel.removeAll();
+				main.rightPanel.add(main.lblOutput, "cell 0 1");
+				main.rightPanel.add(main.dashboard, "cell 0 2,growy");
+			}
+		break;
+			default:
+				break;
+		}
+
 	}
 	
 	public void resetTableView(int sim,int set)
@@ -1137,13 +1156,13 @@ public class Unit5 extends UnitBase {
 		switch (sim) {
 		case 1:
 			if (set == 1) {
-				lblConText1.setText("[Methane]:");
+				lblConText1.setText("Methane:");
 				lblConValue1.setText("0.017 M");
-				lblConText2.setText("[Oxygen]:");
+				lblConText2.setText("Oxygen:");
 				lblConValue2.setText("0.033 M");
-				lblConText3.setText("[Carbon Dioxide]:");
+				lblConText3.setText("Carbon Dioxide:");
 				lblConValue3.setText("0 M");
-				lblConText4.setText("[Water]:");
+				lblConText4.setText("Water:");
 				lblConValue4.setText("0 M");
 				dashboard.add(lblConText1, "cell 0 1");
 				dashboard.add(lblConValue1, "cell 1 1");
@@ -1156,11 +1175,11 @@ public class Unit5 extends UnitBase {
 				dashboard.add(lblVolumeText, "cell 0 5");
 				dashboard.add(lblVolumeValue, "cell 1 5");
 			} else if (set == 2) {
-				lblConText1.setText("[Hydrogen Iodide]:");
+				lblConText1.setText("Hydrogen Iodide:");
 				lblConValue1.setText("0.033 M");
-				lblConText2.setText("[Hydrogen]:");
+				lblConText2.setText("Hydrogen:");
 				lblConValue2.setText("0 M");
-				lblConText3.setText("[Iodine]:");
+				lblConText3.setText("Iodine:");
 				lblConValue3.setText("0 M");
 				dashboard.add(lblConText1, "cell 0 1");
 				dashboard.add(lblConValue1, "cell 1 1");

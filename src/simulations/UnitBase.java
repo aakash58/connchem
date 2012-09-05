@@ -945,11 +945,16 @@ public abstract class UnitBase {
 		
 	}
 	
+	public void resetCheckboxPanel(int sim, int set) 
+	{
+		
+	}
+	
 	// For Unit4 Sim4 Set2, move top boundary when temperature changes in order
 	// to keep pressure constant
 	protected void moveTopBoundary(Contact c) {
 		
-		if (!p5Canvas.isEnable || !p5Canvas.isSimStarted|| interpolator.isTargeting())
+		if (!p5Canvas.isEnable || !p5Canvas.isSimStarted)
 			return;
 		Molecule mole = null;
 		Boundary boundary = null;
@@ -973,40 +978,59 @@ public abstract class UnitBase {
 		}
 		if (mole == null || boundary == null)
 			return;
+			if(!interpolator.isTargeting())
+			{
+	
+				float oldPressure = p5Canvas.pressure;
 		
-
-		float oldPressure = p5Canvas.pressure;
-
-		p5Canvas.temp = p5Canvas.getTempFromKE();
-		//lastVolume = p5Canvas.currentVolume;
-		// According to below equation, volume should go up with temp-tempMin
-		// proportionally
-		// pressure = (mol* R* (temp-tempMin))/(currentVolume);
-		float ratioTemp = (p5Canvas.temp - p5Canvas.tempAbsoluteZero) / (lastTemp - p5Canvas.tempAbsoluteZero);
-		float ratioMole = (float)State.molecules.size()/lastMole;
+				p5Canvas.temp = p5Canvas.getTempFromKE();
+				//lastVolume = p5Canvas.currentVolume;
+				// According to below equation, volume should go up with temp-tempMin
+				// proportionally
+				// pressure = (mol* R* (temp-tempMin))/(currentVolume);
+				float ratioTemp = (p5Canvas.temp - p5Canvas.tempAbsoluteZero) / (lastTemp - p5Canvas.tempAbsoluteZero);
+				float ratioMole = (float)State.molecules.size()/lastMole;
+				
+				//float target= (int) Math.round(ratioTemp*ratioMole * lastVolume);
+				float target= ratioTemp*ratioMole * lastVolume;
+				
+				// Constrain volume slider
+				if (target < p5Canvas.volumeMinBoundary)
+					target = p5Canvas.volumeMinBoundary;
+				if (target > p5Canvas.volumeMaxBoundary)
+					target = p5Canvas.volumeMaxBoundary;
 		
-		//float target= (int) Math.round(ratioTemp*ratioMole * lastVolume);
-		float target= ratioTemp*ratioMole * lastVolume;
-		
-		// Constrain volume slider
-		if (target < p5Canvas.volumeMinBoundary)
-			target = p5Canvas.volumeMinBoundary;
-		if (target > p5Canvas.volumeMaxBoundary)
-			target = p5Canvas.volumeMaxBoundary;
-
-		//If lastVolume and target are too close
-		if(Math.round(lastVolume)==Math.round(target))
-			return;
-		
-		interpolator.set(lastVolume);
-		interpolator.target(target);
-		
-		// Change volume label
-		//p5Canvas.setVolume(p5Canvas.currentVolume);
-		
-		lastTemp = p5Canvas.temp;
-		lastMole = State.getMoleculeNum();
-		lastVolume = target;
+				//If lastVolume and target are too close
+				if(Math.round(lastVolume)==Math.round(target))
+					return;
+				
+				interpolator.set(lastVolume);
+				interpolator.target(target);
+				
+				// Change volume label
+				//p5Canvas.setVolume(p5Canvas.currentVolume);
+				
+				lastTemp = p5Canvas.temp;
+				lastMole = State.getMoleculeNum();
+				lastVolume = target;
+			}
+			else
+			{
+				//If top boundary is moving, change velocity of molecule
+				Vec2 velocity = mole.getLinearVelocity();
+				velocity.y*=-1;
+				float boundaryVel = this.getPistonSpeed()*10000;
+				if(boundaryVel<0) //top boundary moving down
+				{
+					if(Math.abs(velocity.y)<Math.abs(boundaryVel))
+					{
+						
+						mole.sumForceY[0]=-100;
+					}
+				}
+//				mole.body.setAwake(true);
+				mole.setLinearVelocity(velocity);
+			}
 
 	}
 	
@@ -1020,11 +1044,21 @@ public abstract class UnitBase {
 		{
 			if(interpolator.isTargeting())
 			{
+				p5Canvas.getBoundaries().getTopBoundary().setFriction(0.0f);
 				interpolator.update();
 				float value = interpolator.getValue();
 				p5Canvas.setVolume(value);	
 			}
+			else
+			{
+				if(p5Canvas.getBoundaries().getTopBoundary().getFriction()==0.0f)
+				{
+					float defaultFriction = p5Canvas.getBoundaries().getTopBoundary().defaultFriction;
+					p5Canvas.getBoundaries().getTopBoundary().setFriction(defaultFriction);
+				}
+			}
 		}
+//		System.out.println("Friction is "+p5Canvas.getBoundaries().getTopBoundary().getFriction());
 	}
 	
 
@@ -1038,6 +1072,12 @@ public abstract class UnitBase {
 		float mass = 1000f;
 		float ke = 0.5f * mass * velocity * velocity;
 		return ke;
+	}
+	
+	//Constrain the kinetic energy of molecules by sim itself
+	public boolean constrainKineticEnergy(int sim,int set,float averageKE)
+	{
+		return false;
 	}
 	
 /*
@@ -1097,13 +1137,16 @@ public abstract class UnitBase {
 		return (float)Compound.counts.get(indexOfCompound);
 	}
 	
-	//Function to return the correct compound name on the 2nd column of TableView
+	//Function to return the correct compound name on the 3rd column of TableView
 	public ArrayList<String> getNameTableView(int sim, int set)
 	{
 		ArrayList<String> res = new ArrayList<String>();
+		String name;
 		for(int i = 0;i<Compound.names.size();i++)
 		{
-			res.add((String)Compound.names.get(i));
+			name = new String((String)Compound.names.get(i));
+			name = name.replace("-", " ");
+			res.add(name);
 		}
 		
 		return res;

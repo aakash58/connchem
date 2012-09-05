@@ -4,7 +4,7 @@ import static data.State.molecules;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.HashMap;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -12,13 +12,15 @@ import javax.swing.JPanel;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
 
+import Util.MathFunction;
+
+import data.DBinterface;
 import data.State;
 
-import simulations.models.Boundary;
 import simulations.models.Compound;
 import simulations.models.Molecule;
 import simulations.models.Simulation;
-import simulations.models.Water;
+import simulations.models.Molecule.mState;
 import simulations.models.Simulation.SpawnStyle;
 
 public class Unit1 extends UnitBase {
@@ -26,6 +28,11 @@ public class Unit1 extends UnitBase {
 	
 	private JLabel lblTempTitle;
 	private JLabel lblTempValue;
+	private JLabel lblActualVolumeTitle;
+	private JLabel lblActualVolumeValue;
+	private int numMoleculePerMole = 10;
+	
+	private HashMap<String,Float> compoundDensity;
 
 	public Unit1(P5Canvas parent, PBox2D box) {
 		super(parent, box);
@@ -34,11 +41,14 @@ public class Unit1 extends UnitBase {
 		setupSimulations();
 		// waterComputation = new Water(p5Canvas);
 		setupOutputLabels();
+		compoundDensity = new HashMap<String,Float>();
 	}
 	private void setupOutputLabels()
 	{
 		lblTempTitle = new JLabel ("Temperature:");
 		lblTempValue = new JLabel (" \u2103");
+		lblActualVolumeTitle = new JLabel("Volume:");
+		lblActualVolumeValue = new JLabel();
 	}
 
 	@Override
@@ -107,6 +117,7 @@ public class Unit1 extends UnitBase {
 
 		//Reset temperature
 		p5Canvas.temp = 25;
+		compoundDensity.clear();
 		
 		//Reset output Labels
 		lblTempValue.setText(" \u2103");
@@ -165,12 +176,16 @@ public class Unit1 extends UnitBase {
 		switch (sim) {
 		case 1:
 		case 3:
-		case 4:
 			computeForceGeneric(sim,set);
+			break;
+		case 4:
+			computeForceSim4Set1(sim,set);
 			break;
 		case 2:
 			if (set == 7)
 				computeForceSiO2();
+			else if( set==6)
+				computeForceSilver();
 			else
 				computeForceGeneric(sim,set);
 			break;
@@ -202,17 +217,16 @@ public class Unit1 extends UnitBase {
 	}
 
 	public void computeForceGeneric(int sim, int set) {
-		Molecule moleThis = null;
+		//Molecule moleThis = null;
 		Vec2 locThis = new Vec2();
-		Molecule moleOther = null;
+		//Molecule moleOther = null;
 		Vec2 locOther = new Vec2();
 		float forceX = 0;
 		float forceY = 0;
 		// float scale = 3000;
 
-		for (int i = 0; i < State.molecules.size(); i++) {
+		for (Molecule moleThis: State.getMolecules()) {
 
-			moleThis = State.molecules.get(i);
 			locThis = moleThis.getPosition();
 			for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { // Select
 				moleThis.sumForceX[thisE] = 0;
@@ -221,9 +235,8 @@ public class Unit1 extends UnitBase {
 				moleThis.sumForceWaterY[thisE] = 0;
 			}
 
-			for (int k = 0; k < State.molecules.size(); k++) {
-				moleOther = State.molecules.get(k);
-				if (k == i
+			for (Molecule moleOther: State.getMolecules()) {
+				if (moleThis==moleOther
 						|| (!moleThis.getName().equals(moleOther.getName()) && !moleOther
 								.getName().equals("Water")))
 					// Only have forces on the same kind of molecule
@@ -235,7 +248,7 @@ public class Unit1 extends UnitBase {
 				float x = locThis.x - locOther.x;
 				float y = locThis.y - locOther.y;
 				float disSquare = x * x + y * y;
-				Vec2 direction = normalizeForce(new Vec2(x, y));
+				Vec2 direction = MathFunction.normalizeForce(new Vec2(x, y));
 
 				//Add attractive force to same kind molecule
 				if(moleThis.getName().equals(moleOther.getName()))
@@ -282,12 +295,12 @@ public class Unit1 extends UnitBase {
 						} 
 
 						else if (moleThis.getName().equals("Mercury")) {
-							moleThis.sumForceX[thisE] += forceX * 200;
-							moleThis.sumForceY[thisE] += forceY * 250;
+							moleThis.sumForceX[thisE] += forceX * 300;
+							moleThis.sumForceY[thisE] += forceY * 300;
 						} else if (moleThis.getName().equals("Bromine")) {
 							if(!((sim==5&&set==1)||(sim==5&&set==5)))
 							{
-							moleThis.sumForceX[thisE] += forceX * 50;
+							moleThis.sumForceX[thisE] += forceX * 100;
 							moleThis.sumForceY[thisE] += forceY * 100;
 							}
 						}
@@ -365,6 +378,181 @@ public class Unit1 extends UnitBase {
 			}
 		}
 	}
+	
+	
+	public void computeForceSilver() {
+		Vec2 locThis = new Vec2();
+		Vec2 locOther = new Vec2();
+		float forceX = 0;
+		float forceY = 0;
+		float scale = 4f;
+
+		for (Molecule moleThis: State.getMolecules()) {
+
+			locThis = moleThis.getPosition();
+			for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) {
+				moleThis.sumForceX[thisE] = 0;
+				moleThis.sumForceY[thisE] = 0;
+				moleThis.sumForceWaterX[thisE] = 0;
+				moleThis.sumForceWaterY[thisE] = 0;
+			}
+
+			for (Molecule moleOther: State.getMolecules()) {
+				if (moleThis==moleOther)
+					continue;
+				locOther = moleOther.getPosition();
+				if (locOther == null || locThis == null)
+					continue;
+				
+				float x = locThis.x - locOther.x;
+				float y = locThis.y - locOther.y;
+				float disSquare = x * x + y * y;
+				Vec2 direction = MathFunction.normalizeForce(new Vec2(x, y));
+
+				//Add attractive force to same kind molecule
+				if(moleThis.getName().equals(moleOther.getName()))
+				{
+					
+					float fTemp = moleThis.freezingTem;
+					float bTemp = moleThis.boilingTem;
+					float gravityX, gravityY;
+					if (p5Canvas.temp >= bTemp) { // Gas case
+						gravityX = 0;
+						gravityY = 0;
+					} else if (p5Canvas.temp <= fTemp) { // Solid case
+						gravityY = (bTemp - p5Canvas.temp) / (bTemp - fTemp);
+						gravityX = gravityY * 2f;
+					} else { // Liquid case
+						gravityY = (bTemp - p5Canvas.temp) / (bTemp - fTemp);
+						gravityX = gravityY * 0.6f;
+					}
+					forceX = (-direction.x * disSquare)
+							* moleOther.getBodyMass() * moleThis.getBodyMass()
+							* gravityX;
+					forceY = (-direction.y * disSquare)
+							* moleOther.getBodyMass() * moleThis.getBodyMass()
+							* gravityY;
+
+					for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) {
+						// Silver case
+							moleThis.sumForceX[thisE] += forceX*scale ;
+							moleThis.sumForceY[thisE] += forceY*scale ;
+					}
+				}
+
+			}
+		}
+	}
+	
+	public void computeForceSim4Set1(int sim, int set) {
+		//Molecule moleThis = null;
+		Vec2 locThis = new Vec2();
+		//Molecule moleOther = null;
+		Vec2 locOther = new Vec2();
+		float forceX = 0;
+		float forceY = 0;
+		// float scale = 3000;
+
+		for (Molecule moleThis: State.getMolecules()) {
+
+			locThis = moleThis.getPosition();
+			for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) { // Select
+				moleThis.sumForceX[thisE] = 0;
+				moleThis.sumForceY[thisE] = 0;
+				moleThis.sumForceWaterX[thisE] = 0;
+				moleThis.sumForceWaterY[thisE] = 0;
+			}
+
+			for (Molecule moleOther: State.getMolecules()) {
+				if (moleThis==moleOther
+						|| (!moleThis.getName().equals(moleOther.getName()) && !moleOther
+								.getName().equals("Water")))
+					// Only have forces on the same kind of molecule
+					continue;
+				locOther = moleOther.getPosition();
+				if (locOther == null || locThis == null)
+					continue;
+				
+				float x = locThis.x - locOther.x;
+				float y = locThis.y - locOther.y;
+				float disSquare = x * x + y * y;
+				Vec2 direction = MathFunction.normalizeForce(new Vec2(x, y));
+
+				//Add attractive force to H2O2 and H2O
+				if(moleThis.getName().equals(moleOther.getName()))
+				{
+					float fTemp = moleThis.freezingTem;
+					float bTemp = moleThis.boilingTem;
+					float gravityX, gravityY;
+					if (p5Canvas.temp >= bTemp) { // Gas case
+						gravityX = 0;
+						gravityY = 0;
+					} else if (p5Canvas.temp <= fTemp) { // Solid case
+						gravityY = (bTemp - p5Canvas.temp) / (bTemp - fTemp);
+						gravityX = gravityY * 2f;
+					} else { // Liquid case
+						gravityY = (bTemp - p5Canvas.temp) / (bTemp - fTemp);
+						gravityX = gravityY * 0.6f;
+					}
+					forceX = (-direction.x / disSquare)
+							* moleOther.getBodyMass() * moleThis.getBodyMass()
+							* gravityX;
+					forceY = (-direction.y / disSquare)
+							* moleOther.getBodyMass() * moleThis.getBodyMass()
+							* gravityY;
+
+					for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) {
+
+						// Water case
+						if (moleThis.getName().equals("Water")) {
+							if (thisE == 2) {
+								moleThis.sumForceX[thisE] += forceX * 3000;
+								moleThis.sumForceY[thisE] += forceY * 3000;
+							}
+						}
+						// Hydrogen-Peroxide case
+						else if (moleThis.getName().equals("Hydrogen-Peroxide")) {
+							if(!((sim==5&&set==3)||(sim==5&&set==5) ))
+							{
+								if (thisE == 2 || thisE == 3) {
+									moleThis.sumForceX[thisE] += forceX * 1200;
+									moleThis.sumForceY[thisE] += forceY * 1200;
+								}
+							}
+						} 
+
+
+					}
+				}
+				//If mixture, add attractive force to both water and this molecule
+				else {
+					if(moleThis.getName().equals("Water"))
+						continue;
+					forceX =(-direction.x/disSquare)*1f;
+					forceY =(-direction.y / disSquare)*1f;
+				for (int thisE = 0; thisE < moleThis.getNumElement(); thisE++) {
+
+						// Hydrogen-Peroxide case
+						if (moleThis.getName().equals("Hydrogen-Peroxide")) {
+							if (thisE == 2 || thisE == 3) {
+								moleThis.sumForceWaterX[thisE] += forceX ;
+								moleThis.sumForceWaterY[thisE] += forceY ;
+								//Add reversed force on water
+								moleOther.sumForceWaterX[2]-=forceX;
+								moleOther.sumForceWaterY[2]-=forceY;
+
+							}
+						} 
+
+					}
+
+				} 
+
+			}
+		}
+	}
+	
+	
 	//Add some up forces to bromine so that they wont stay at the bottom
 	//Add repulsive force for Sim 5 set 6
 	public void addForceBromine(int sim, int set)
@@ -401,7 +589,7 @@ public class Unit1 extends UnitBase {
 							{
 								locOther = moleOther.getPosition();
 								Vec2 vecDiff = locThis.sub(locOther);
-								vecDiff = normalizeForce(vecDiff);
+								vecDiff = MathFunction.normalizeForce(vecDiff);
 								moleThis.sumForceX[element]+= vecDiff.x * forceRepulsive;
 								moleThis.sumForceY[element]+= vecDiff.y * forceRepulsive;
 							} 
@@ -447,7 +635,7 @@ public class Unit1 extends UnitBase {
 								locOther.set(moleOther.getPosition());
 								Vec2 vecDiff = locThis.sub(locOther);
 								distSquare = vecDiff.x* vecDiff.x + vecDiff.y* vecDiff.y;
-								vecDiff = normalizeForce(vecDiff);
+								vecDiff = MathFunction.normalizeForce(vecDiff);
 								mole.sumForceX[e]+= 1f/distSquare*vecDiff.x * forceRepulsive*2;
 								mole.sumForceY[e]+= 1f/distSquare*vecDiff.y * forceRepulsive;
 							
@@ -551,7 +739,7 @@ public class Unit1 extends UnitBase {
 									locOther.set(moleOther.getPosition());
 									Vec2 vecDiff = locThis.sub(locOther);
 									distSquare = vecDiff.x* vecDiff.x + vecDiff.y* vecDiff.y;
-									vecDiff = normalizeForce(vecDiff);
+									vecDiff = MathFunction.normalizeForce(vecDiff);
 									moleThis.sumForceX[e]+= 1f/distSquare*vecDiff.x * forceRepulsive*2;
 									//moleThis.sumForceY[e]+= 1f/distSquare*vecDiff.y * forceRepulsive;
 								
@@ -570,11 +758,11 @@ public class Unit1 extends UnitBase {
 		super.applyForce(sim, set);
 	}
 
-	//Normalize the input force
-	public Vec2 normalizeForce(Vec2 v) {
-		float dis = (float) Math.sqrt(v.x * v.x + v.y * v.y);
-		return new Vec2(v.x / dis, v.y / dis);
-	}
+//	//Normalize the input force
+//	public Vec2 normalizeForce(Vec2 v) {
+//		float dis = (float) Math.sqrt(v.x * v.x + v.y * v.y);
+//		return new Vec2(v.x / dis, v.y / dis);
+//	}
 
 	@Override
 	public boolean addMolecules(boolean isAppEnable, String compoundName,
@@ -992,6 +1180,8 @@ public class Unit1 extends UnitBase {
 			dashboard.add(lblTempValue,"cell 1 1");
 			break;
 		case 2:
+			dashboard.add(lblActualVolumeTitle,"cell 0 1, alignx right");
+			dashboard.add(lblActualVolumeValue,"cell 1 1");
 			break;
 		case 3:
 			dashboard.add(lblTempTitle," cell 0 1, alignx right");
@@ -1018,6 +1208,27 @@ public class Unit1 extends UnitBase {
 			lblTempValue.setText(output + " \u2103");
 		}
 		
+		if(lblActualVolumeValue.isShowing()){
+			Molecule mole = State.getMoleculeByIndex(0);
+			String name = mole.getName();
+			if(name!=null)
+			{
+				float mass = State.getCompoundsMass()/numMoleculePerMole*1000; //Get total mass of sim
+				float density = 0;
+				if(compoundDensity.containsKey(name))
+					density = compoundDensity.get(name);
+				else
+				{
+					density = DBinterface.getCompoundDensity(name);
+					compoundDensity.put(name, density);
+				}
+				float volume = mass/density;
+				myFormatter.applyPattern("###.#");
+				output = myFormatter.format(volume);
+				lblActualVolumeValue.setText(output+" mL");
+			}
+		}
+		
 	}
 	
 	//Function that return the specific data to Canvas
@@ -1030,6 +1241,64 @@ public class Unit1 extends UnitBase {
 	//Function to return the specific data to TableView
 	public float getDataTableView(int sim, int set, int indexOfCompound) {
 		return super.getDataTableView(sim, set, indexOfCompound);
+	}
+	
+	//Function to return the correct compound name on the 3rd column of TableView
+	public ArrayList<String> getNameTableView(int sim, int set)
+	{
+		ArrayList<String> res = super.getNameTableView(sim, set);
+		
+		switch(sim){
+		case 2:
+			if(set==2)
+			{
+				if(res.contains("Oxygen"))
+					res.remove("Oxygen");
+				if(res.contains("Water"))
+					res.remove("Water");
+			}
+			break;
+			default:
+				break;
+		}
+
+		
+		return res;
+	}
+	
+	
+	//Constrain the kinetic energy of molecules by sim itself
+	public boolean constrainKineticEnergy(int sim,int set,float averageKE)
+	{
+		// First, sum up all average Energy to get total KE
+		float idealKE = 0;
+		// Second, find out the ratio of ideal stable KE to current real KE
+		float currentKE = 0;
+		int countNum = 0;
+		
+		for (Molecule mole: State.getMolecules()) {
+			if(p5Canvas.temp>=0 || mole.getState() != mState.Gas)
+			{
+				float ke = mole.getKineticEnergy();
+				currentKE += ke;
+				countNum++;
+			}
+		}
+		
+		idealKE = countNum * averageKE;
+		float ratio = idealKE / currentKE;
+		// Third, each molecule`s KE multiplied with ratio
+		for (Molecule mole: State.getMolecules()) {
+			//Not apply to those whose energy is above average too much
+//			if(mole.getKineticEnergy()<(averageKE*1.25f))
+			 if( p5Canvas.temp>=0 || mole.getState() != mState.Gas )
+			 {
+				mole.constrainKineticEnergy(ratio);
+			 }
+		}
+		
+		//After 
+		return true;
 	}
 	
 	@Override
