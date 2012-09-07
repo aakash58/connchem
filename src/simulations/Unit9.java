@@ -32,7 +32,10 @@ import data.State;
 import data.YAMLinterface;
 
 import Util.Integrator;
+import Util.MathFunction;
 
+import simulations.models.Anchor;
+import simulations.models.DistanceJointWrap;
 import simulations.models.Molecule;
 import simulations.models.Molecule.mState;
 import simulations.models.Simulation;
@@ -80,11 +83,15 @@ public class Unit9 extends UnitBase {
 												// corresponding name
 	private boolean strongForceSwitch;
 	private boolean weakForceSwitch;
+	
+	public static int stepCount = 0;  //Count p5Canvas step
+	public int shakeIteration = 3;
+
 
 	// Listeners
 	ActionListener moleculeBtnListener;
 	ChangeListener sliderStrongForceListener;
-	ChangeListener SliderWeakForceListener;
+	ChangeListener sliderWeakForceListener;
 
 	public Unit9(P5Canvas parent, PBox2D box) {
 		super(parent, box);
@@ -191,9 +198,9 @@ public class Unit9 extends UnitBase {
 		lblMassText = new JLabel("Mass Number:");
 		lblMassValue = new JLabel("");
 
-		sliderStrongForce = new JSlider(0, 1, 0);
+		sliderStrongForce = new JSlider(0, 1, 1);
 		sliderStrongForce.setName("Strong Force");
-		sliderWeakForce = new JSlider(0, 1, 0);
+		sliderWeakForce = new JSlider(0, 1, 1);
 		sliderWeakForce.setName("Weak Force");
 		lblStrongForce = new JLabel("Strong Force");
 		lblWeakForce = new JLabel("Weak Force");
@@ -206,7 +213,7 @@ public class Unit9 extends UnitBase {
 		sliderWeakForce.setSnapToTicks(true);
 		sliderWeakForce.setPaintTicks(true);
 		sliderWeakForce.setMinorTickSpacing(1);
-		sliderWeakForce.addChangeListener(SliderWeakForceListener);
+		sliderWeakForce.addChangeListener(sliderWeakForceListener);
 		
 
 
@@ -241,13 +248,15 @@ public class Unit9 extends UnitBase {
 		sliderStrongForceListener = new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int value = ((JSlider) e.getSource()).getValue();
-				String name = ((JSlider) e.getSource()).getName();
+					strongForceSwitch = value == 0 ? false : true;				
+			}
 
-				if (name.equals("Strong Force")) {
-					strongForceSwitch = value == 0 ? false : true;
-				} else if (name.equals("Weak Force")) {
+		};
+		
+		sliderWeakForceListener = new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int value = ((JSlider) e.getSource()).getValue();
 					weakForceSwitch = value == 0 ? false : true;
-				}
 			}
 
 		};
@@ -256,20 +265,36 @@ public class Unit9 extends UnitBase {
 	// Function that set up the nuclear structure, that is, what the alignment
 	// of proton and neutron
 	private void setupNuclearStructure() {
-		// Helium - 4
-		int massNum = 4;
 		float x = 0;
 		float y = 0;
 		int column = 0;
 		int row = 0;
-		Vec2[] heliumStructure = new Vec2[massNum];
-		Vec2 protonSize = Molecule.getShapeSize("Proton", p5Canvas);
+		float padding = 0.2f;
+		
+		// Helium - 4
+		int massNum = 4;
+		Vec2[] heliumQuarkStructure = new Vec2[massNum];
+		Vec2 protonSize = Molecule.getShapeSize("Proton-Quark", p5Canvas);
+		float width = protonSize.x * (1+padding);
+		float height = protonSize.y * (1+padding);
 		for (int i = 0; i < massNum; i++) {
-			x = protonSize.x / 2 * (i / 2 == 0 ? -1 : 1);
-			y = protonSize.y * ((i % 2) + -0.5f * (i / 2));
+			x = width / 2 * (i / 2 == 0 ? -1 : 1);
+			y = height * ((i % 2) + -0.5f * (i / 2));
+			heliumQuarkStructure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("Helium-Quark", heliumQuarkStructure);
+		
+		Vec2[] heliumStructure = new Vec2[massNum];
+		protonSize = Molecule.getShapeSize("Proton", p5Canvas);
+		width = protonSize.x * (1+padding);
+		height = protonSize.y * (1+padding);
+		for (int i = 0; i < massNum; i++) {
+			x = width / 2 * (i / 2 == 0 ? -1 : 1);
+			y = height * ((i % 2) + -0.5f * (i / 2));
 			heliumStructure[i] = new Vec2(x, y);
 		}
 		nuclearStructure.put("Helium", heliumStructure);
+		
 		// Carbon - 14
 		massNum = 14;
 		Vec2[] carbonStructure = new Vec2[massNum];
@@ -290,8 +315,8 @@ public class Unit9 extends UnitBase {
 				column = 2;
 				row = i - 12;
 			}
-			x = protonSize.x * column;
-			y = protonSize.y * (row + (column % 2 == 0 ? -0.5f : 0.0f));
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? -0.5f : 0.0f));
 			carbonStructure[i] = new Vec2(x, y);
 		}
 		nuclearStructure.put("Carbon", carbonStructure);
@@ -316,11 +341,11 @@ public class Unit9 extends UnitBase {
 				column = 2;
 				row = i - 23;
 			}
-			x = protonSize.x * column;
-			y = protonSize.y
+			x = width * column;
+			y = height
 					* (row + (column % 2 == 0 ? -0.25f * column : 0.0f));
 			if (column == 0)
-				y -= protonSize.y * 0.25f;
+				y -= height * 0.25f;
 			aluminumStructure[i] = new Vec2(x, y);
 		}
 		nuclearStructure.put("Aluminum", aluminumStructure);
@@ -354,8 +379,8 @@ public class Unit9 extends UnitBase {
 				row = i - 37;
 				column = 3;
 			}
-			x = protonSize.x * column;
-			y = protonSize.y * (row + (column % 2 == 0 ? -0.5f : 0.0f));
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? -0.5f : 0.0f));
 			potassiumStructure[i] = new Vec2(x, y);
 
 		}
@@ -373,23 +398,23 @@ public class Unit9 extends UnitBase {
 		nuclearStructure.put("H-1", h1);
 		massNum = 2;
 		Vec2[] h2 = new Vec2[massNum];
-		h2[0] = new Vec2(protonSize.x*0.5f,protonSize.y*0.5f);
-		h2[1] = new Vec2(protonSize.x*-0.5f,protonSize.y*-0.5f);
+		h2[0] = new Vec2(width*0.5f,height*0.5f);
+		h2[1] = new Vec2(width*-0.5f,height*-0.5f);
 		nuclearStructure.put("H-2", h2);
 		
 		massNum = 3;
 		Vec2[] he3 = new Vec2[massNum];
-		he3[0] = new Vec2(0,protonSize.y*-1);
-		he3[1] = new Vec2(0,protonSize.y);
-		he3[2] = new Vec2(protonSize.x,0);
+		he3[0] = new Vec2(0,height*-1);
+		he3[1] = new Vec2(0,height);
+		he3[2] = new Vec2(width,0);
 		nuclearStructure.put("He-3", he3);
 		
 		massNum = 4;
 		Vec2[] he4 = new Vec2[massNum];
 		he4[0] =  new Vec2(0,0);
-		he4[1] = new Vec2(protonSize.x,protonSize.y*-0.5f);
-		he4[2] = new Vec2(0,protonSize.y);
-		he4[3] = new Vec2(protonSize.x,protonSize.y*0.5f);
+		he4[1] = new Vec2(width,height*-0.5f);
+		he4[2] = new Vec2(0,height);
+		he4[3] = new Vec2(width,height*0.5f);
 		nuclearStructure.put("He-4", he4);
 		
 		massNum = 8 ;
@@ -568,7 +593,10 @@ public class Unit9 extends UnitBase {
 
 		switch (sim) {
 		case 1:
-
+			if(set==1)
+			shakeMolecules(sim,set);
+			else if(set==2)
+				shakeMoleculesWithQuark(sim,set);
 			break;
 		case 2:
 
@@ -589,7 +617,110 @@ public class Unit9 extends UnitBase {
 			break;
 
 		}
+		
+		stepCount++;
 
+	}
+	
+	//Simulate molecule vibration
+	private void shakeMolecules(int sim, int set)
+	{
+		if(stepCount%shakeIteration !=0)
+			return;
+		Random impulseValueGenerator = new Random();
+		double impulseValueMax = 6;
+		Random impulseDirGenerator = new Random();
+		double impulseDirXMax = 2;
+		double impulseDirYMax = 2;
+		double increment = 0.2;
+		
+		double impulseValue = impulseValueGenerator.nextDouble()*impulseValueMax;
+		double impulseDirX = impulseDirXMax* impulseDirGenerator.nextDouble()-1;
+		double impulseDirY = impulseDirYMax* impulseDirGenerator.nextDouble()-1;
+		
+
+		//Vec2 impulseDir = new Vec2((float)impulseDirX, (float)impulseDirY);
+		Vec2 impulse = new Vec2();
+		Vec2 jointVec = new Vec2();
+		Vec2 velocity = new Vec2();
+		DistanceJointWrap dj ;
+		
+		for(int i = 0; i<State.getMoleculeNum();i++)
+		{
+			Molecule mole = State.getMoleculeByIndex(i);
+			//Set up increment to make impulse different
+			impulseDirX = (impulseDirX+impulseDirXMax*i*increment)%impulseDirXMax;
+			impulseDirY = (impulseDirY+impulseDirYMax*i*increment)%impulseDirYMax;
+			impulseValue = (impulseValue+ impulseValueMax*i*increment) %impulseValueMax;
+			impulse.set((float)(impulseDirX* impulseValue),(float)(impulseDirY*impulseValue));
+			
+			//Check current velocity, to see if molecule is rotating around anchor
+			if(mole.compoundJoint.size()>0)
+			{
+				dj= mole.compoundJoint.get(0);
+				//System.out.println("Joint Length:"+ MathFunction.computeDistance(dj.getBodyA().getPosition(),dj.getBodyB().getPosition()));
+				jointVec.set(dj.getBodyB().getPosition().sub( dj.getBodyA().getPosition()) );
+				velocity = mole.getLinearVelocity();
+				float dot = Vec2.dot(velocity, jointVec);
+				float velocityNorm = MathFunction.norm(velocity);
+				if(velocityNorm>6)   //Velocity is perpendicular to the joint
+				{	
+					impulse.set(MathFunction.normalizeForce(velocity).mulLocal((float)(-1*impulseValue)));          //Flip it
+				}
+				mole.applyLinearImpulse(impulse, mole.getPosition());
+			}
+		}
+			
+	}
+	
+	//Molecule vibration simulation for Sim 1 Set 2
+	private void shakeMoleculesWithQuark(int sim, int set)
+	{
+		if(stepCount%shakeIteration !=0)
+			return;
+		Random impulseValueGenerator = new Random();
+		double impulseValueMax = 6;
+		Random impulseDirGenerator = new Random();
+		double impulseDirXMax = 2;
+		double impulseDirYMax = 2;
+		double increment = 0.2;
+		
+		double impulseValue = impulseValueGenerator.nextDouble()*impulseValueMax;
+		double impulseDirX = impulseDirXMax* impulseDirGenerator.nextDouble()-1;
+		double impulseDirY = impulseDirYMax* impulseDirGenerator.nextDouble()-1;
+		
+
+		//Vec2 impulseDir = new Vec2((float)impulseDirX, (float)impulseDirY);
+		Vec2 impulse = new Vec2();
+		Vec2 jointVec = new Vec2();
+		Vec2 velocity = new Vec2();
+		DistanceJointWrap dj ;
+		
+		for(int i = 0; i<State.getMoleculeNum();i++)
+		{
+			Molecule mole = State.getMoleculeByIndex(i);
+			//Set up increment to make impulse different
+			impulseDirX = (impulseDirX+impulseDirXMax*i*increment)%impulseDirXMax;
+			impulseDirY = (impulseDirY+impulseDirYMax*i*increment)%impulseDirYMax;
+			impulseValue = (impulseValue+ impulseValueMax*i*increment) %impulseValueMax;
+			impulse.set((float)(impulseDirX* impulseValue),(float)(impulseDirY*impulseValue));
+			
+			//Check current velocity, to see if molecule is rotating around anchor
+			if(mole.compoundJoint.size()>0)
+			{
+				dj= mole.compoundJoint.get(0);
+				//System.out.println("Joint Length:"+ MathFunction.computeDistance(dj.getBodyA().getPosition(),dj.getBodyB().getPosition()));
+				jointVec.set(dj.getBodyB().getPosition().sub( dj.getBodyA().getPosition()) );
+				velocity = mole.getLinearVelocity();
+				float velocityNorm = MathFunction.norm(velocity);
+				if(velocityNorm>12)   //Velocity is perpendicular to the joint
+				{	
+					impulse.set(MathFunction.normalizeForce(velocity).mulLocal((float)(-1*impulseValue)));          //Flip it
+				}
+				mole.applyLinearImpulse(impulse, mole.getPosition());
+			}
+		}
+			
 	}
 
 	/*
@@ -632,9 +763,19 @@ public class Unit9 extends UnitBase {
 
 		int sim = p5Canvas.getSim();
 		int set = p5Canvas.getSet();
+		protonName = new String("Proton");
+		neutronName = new String("Neutron");
 
 		switch (sim) {
 		case 1:
+			if(set==2)
+			{
+				protonName = new String("Proton-Quark");
+				neutronName = new String("Neutron-Quark");
+
+				sliderStrongForce.setValue(1);
+				sliderWeakForce.setValue(1);
+			}
 			break;
 		case 2:
 			break;
@@ -858,12 +999,13 @@ public class Unit9 extends UnitBase {
 		float moleWidth = size.x;
 		float moleHeight = size.y;
 
-		Random probRand = new Random();
 
 		float spacing = moleWidth;
-		float maxVelocity = 40;
+
 
 		boolean isClear = false;
+		int startIndex = State.molecules.size(); // Start index of this group in
+		// molecules arraylist
 
 		// Using fixed position and fixed Number
 
@@ -873,6 +1015,8 @@ public class Unit9 extends UnitBase {
 
 		boolean createProton = false; // If proton is going to be created
 		Vec2[] structure = nuclearStructure.get(compoundName);
+		if(p5Canvas.getSim()==1 && p5Canvas.getSet()==2)
+			structure = nuclearStructure.get("Helium-Quark");
 		int len = structure.length;
 		
 		Molecule newMole =  null;
@@ -904,9 +1048,10 @@ public class Unit9 extends UnitBase {
 
 				// read preset position
 				Vec2 pos = structure[i];
-
+				String elementName = createProton ? protonName : neutronName;
+				//System.out.println(elementName);
 				newMole = new Molecule(x_ + pos.x, y_ + pos.y,
-						createProton ? protonName : neutronName, box2d,
+						elementName, box2d,
 						p5Canvas, 0);
 
 				// newMole.setGravityScale(0f);
@@ -917,9 +1062,34 @@ public class Unit9 extends UnitBase {
 			float velocityX = 0;
 			float velocityY = 0;
 			newMole.setLinearVelocity(new Vec2(velocityX, velocityY));
+			//Set the state to gas so there is no gravitivity
 			newMole.setEnableAutoStateChange(false);
 			newMole.setState(mState.Gas);
+			//Set use png file when draw molecule
+			newMole.setImage(elementName);
 			}
+			
+			/* Add joint for solid molecules */
+			//if (count > 1) 
+			
+				int index1 = 0;
+				Molecule m1 = null;
+				float frequency = 15;
+				float damp = 0.4f;
+				float jointLen = 0.25f;
+
+				for ( int i = 0; i < len; i++) {
+
+					/* For every molecule, create a anchor to fix its position */
+					index1 = i + startIndex;
+					m1 = State.molecules.get(index1);
+					Vec2 m1Pos = box2d.coordWorldToPixels(m1.getPosition());
+					Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
+							p5Canvas);
+					State.anchors.add(anchor);
+					joint2Elements(m1, anchor, jointLen, frequency, damp);
+				}
+				
 			}
 			else //There is no predefined structure. Load original SVG file
 			{

@@ -3,6 +3,7 @@
  */
 package simulations.models;
 
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
@@ -103,6 +104,11 @@ public class DistanceJointWrap {
 	public float getLength()
 	{
 		return length;
+	}
+	
+	
+	public void getReactionForce(float inv_dt, Vec2 argOut) {
+		dj.getReactionForce(inv_dt, argOut);
 	}
 	
 	public float getFrequency()

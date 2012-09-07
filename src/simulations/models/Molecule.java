@@ -48,7 +48,8 @@ public class Molecule {
 	private String name;
 	public float fric;
 	public float res;
-	private float scale = 1;
+	private float shapeScale = 1;    //The scale parameter that changes the shape size
+	private float displayScale = 1;  //The scale parameter that changes the display size
 
 	private float xTmp;   //Temporary x to save x position while dragging, in world coordinates
 	private float yTmp;   //Temporary x to save x position while dragging, in world coordinates
@@ -94,7 +95,7 @@ public class Molecule {
 	public PrismaticJoint compoundJoints2 = null; // is Used for Unit 2 set 7
 	public DistanceJoint otherJoints = null;
 	
-	private ElectronList electronList = null;
+	//private ElectronList electronList = null;
 	
 	//Neighbors information of this molecule, that is used to find react pairs
 	public ArrayList<Molecule> neighbors = null;
@@ -108,6 +109,8 @@ public class Molecule {
 							//Does not change with temperature
 	
 	private float transparency = 0.0f;  //Transparency of molecule, 1.0 means totally transparent
+	private boolean displayPng = false; //If use png pictures
+	private PImage pngSource = null;
 
 	/******************************************************************
 	 * FUNCTION : Molecule() DESCRIPTION : Molecule Constructor
@@ -198,7 +201,7 @@ public class Molecule {
 
 		setPropertyByHeat(true);
 		createBody(x, y, angle);
-		electronList = new ElectronList(this);
+		//electronList = new ElectronList(this);
 	}
 
 	/******************************************************************
@@ -383,39 +386,44 @@ public class Molecule {
 			chargeRate = 0.98f;
 			fric = 1;
 			res = 0.3f;
-			scale = 1.2f;
+			shapeScale = 1.2f;
 		} else if (name.equals("Glycerol")) {
 			chargeRate = 0.9f;
-			scale = 1.1f;
+			shapeScale = 1.1f;
 		} else if (name.equals("Acetic-Acid")) {
 			chargeRate = 0.85f;
-			scale = 1.1f;
+			shapeScale = 1.1f;
 		} else if (name.equals("Bicarbonate")) {
 			chargeRate = 0.88f;
 			fric = 1;
 			res = 0.0f;
-			scale = 1.1f;
+			shapeScale = 1.1f;
 		} else if (name.equals("Potassium-Ion")) {
 			chargeRate = 0.93f;
 			fric = 1;
 			res = 0.55f;
 		}
+		
 		}
 
-		if (!isInitial) {
+		if (!isInitial) {   //If this is not initialization
 			setRestitution(res);
 			setFriction(fric);
 			if (name.equals("Water"))
-				
 			{   
 				if(temp < 100)
-					scale = 1 + (100 - temp) / 300f;
+					shapeScale = 1 + (100 - temp) / 300f;
 				else
-					scale = 1f;
+					shapeScale = 1f;
 					//Enlarge molecule shape size to make them not close to each other
 					setRadius(1.25f);
 			}
 		}
+		else  //If this is initialization
+		{
+
+		}
+		
 	}
 
 	/******************************************************************
@@ -451,7 +459,7 @@ public class Molecule {
 					- pShapeH / 2);
 			circleShape.m_p.set(box2d.vectorPixelsToWorld(offset));
 			circleShape.m_radius = PBox2D.scalarPixelsToWorld(circles[i][0])
-					* scale;
+					* shapeScale;
 
 			float m = 1;
 			String element = null;
@@ -610,6 +618,12 @@ public class Molecule {
 		loc[e] = l;
 		body.applyForce(force, l);
 	}
+	
+	// Add linear impulse to molecule
+	public void applyLinearImpulse(Vec2 impulse, Vec2 point)
+	{
+		body.applyLinearImpulse(impulse, point);
+	}
 
 	public void setRadius(float scale) {
 		Fixture s = body.getFixtureList();
@@ -659,20 +673,7 @@ public class Molecule {
 		float a = body.getAngle();
 
 		/********************* Draw Bodies *******************/
-		p5Canvas.pushMatrix();
-		p5Canvas.translate(pos.x, pos.y);
-		float temp = p5Canvas.temp;
-		p5Canvas.rotate(-a);
-		p5Canvas.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH);
-		
-		//Apply transparency
-		p5Canvas.stroke(ColorCollection.getColorSimBackgroundInt(),transparency*255f);
-		p5Canvas.strokeWeight(2.0f);
-		p5Canvas.fill(ColorCollection.getColorSimBackgroundInt(), transparency*255f); //Background color
-		for (int i = 0; i < circles.length; i++) {
-			p5Canvas.ellipse(circles[i][1] - pShapeW / 2, circles[i][2]
-					- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);
-		}
+		drawBody(pos, a);
 
 		hideMolecule();
 
@@ -680,7 +681,7 @@ public class Molecule {
 			p5Canvas.stroke(Color.BLUE.getRGB());
 		}
 		//Draw electrons
-		electronList.display();
+		//electronList.display();
 		
 		p5Canvas.popMatrix();
 		// End drawing
@@ -702,6 +703,31 @@ public class Molecule {
 		}
 		*/
 
+	}
+	
+	private void drawBody(Vec2 pos, float a)
+	{
+		p5Canvas.pushMatrix();
+		p5Canvas.translate(pos.x, pos.y);
+		p5Canvas.rotate(-a);
+		if(!displayPng)  //If not using png file
+		{
+			p5Canvas.shape(pShape, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH);
+			
+			//Apply transparency
+			p5Canvas.stroke(ColorCollection.getColorSimBackgroundInt(),transparency*255f);
+			p5Canvas.strokeWeight(2.0f);
+			p5Canvas.fill(ColorCollection.getColorSimBackgroundInt(), transparency*255f); //Background color
+			for (int i = 0; i < circles.length; i++) {
+				p5Canvas.ellipse(circles[i][1] - pShapeW / 2, circles[i][2]
+						- pShapeH / 2, circles[i][0] * 2, circles[i][0] * 2);
+			}
+			
+		}
+		else  //If using png file
+		{
+			p5Canvas.image(pngSource, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH);
+		}
 	}
 	
 	private void boundaryCheck()
@@ -1272,6 +1298,16 @@ public class Molecule {
 		  for(int i=0;i<fixtures.size();i++)
 		  {
 			  fixtures.get(i).setFilterData(filter);
+		  }
+	  }
+	  
+	  public void setImage(String compoundName)
+	  {
+		  if(compoundName!=null)
+		  {
+		  pngSource = p5Canvas.loadImage("resources/compoundsPng50/" + compoundName + ".png");
+		  if(pngSource!=null)
+			  displayPng = true;
 		  }
 	  }
 
