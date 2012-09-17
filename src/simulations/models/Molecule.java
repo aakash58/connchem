@@ -111,6 +111,7 @@ public class Molecule {
 	private float transparency = 0.0f;  //Transparency of molecule, 1.0 means totally transparent
 	private boolean displayPng = false; //If use png pictures
 	private PImage pngSource = null;
+	private String pngSourceName = new String();
 
 	/******************************************************************
 	 * FUNCTION : Molecule() DESCRIPTION : Molecule Constructor
@@ -134,9 +135,18 @@ public class Molecule {
 		fixtures = new ArrayList<Fixture>();
 
 		String path = "resources/compoundsSvg/" + svgFileName + ".svg";
+		try{
 		pShape = p5Canvas.loadShape(path);
 		pShapeW = pShape.width;
 		pShapeH = pShape.height;
+		}
+		catch(Exception ex)
+		{
+			pShape =null;
+			pShapeW = 0;
+			pShapeH=0;
+		}
+		
 		minSize = Math.min(pShapeW, pShapeH);
 		setMaxSize(Math.max(pShapeW, pShapeH));
 		polarity = p5Canvas.db.getCompoundPolarity(compoundName_);
@@ -474,7 +484,7 @@ public class Molecule {
 			}
 			float d = m / (circles[i][0] * circles[i][0] * circles[i][0]);
 			fd.filter.categoryBits = Constants.MOLECULE_ID; //All the molecules that enable collision is 2
-			fd.filter.maskBits = Constants.MOLECULE_ID+Constants.BOUNDARY_ID;  //All the objects that should not be collided is 4
+			fd.filter.maskBits = Constants.MOLECULE_ID+Constants.BOUNDARY_ID+Constants.MOLE_NOTBOUND_ID;  //All the objects that should not be collided is 4
 			fd.shape = circleShape;
 			fd.density = d * mul;
 			fd.friction = fric;
@@ -732,6 +742,11 @@ public class Molecule {
 	
 	private void boundaryCheck()
 	{
+		if(fixtures.size()>0)
+		{
+		int catergory = fixtures.get(0).getFilterData().categoryBits;
+		if(((catergory & Constants.MOLE_NOTBOUND_ID)==0) && catergory!=Constants.NOCOLLIDER)
+		{
 		/* If molecules go out of boundary, reset their position */
 		/* Top boundary check, top boundary has max y value */
 		if (body.getPosition().y + PBox2D.scalarPixelsToWorld(this.minSize / 2) > p5Canvas.boundaries.getTopBoundary().body
@@ -770,6 +785,8 @@ public class Molecule {
 					body.getPosition().y);
 			if (body != null && v != null)
 				body.setTransform(v, body.getAngle());
+		}
+		}
 		}
 	}
 	
@@ -1290,10 +1307,13 @@ public class Molecule {
 		  transparency = t;
 	  }
 	  
+	  //Decide which object this one collides with
+	  //The first parameter is the category of this one
+	  //The second parameter is the mask
 	  public void setFixtureCatergory(int cate,int mask)
 	  {
 		  Filter filter = new Filter();
-		  filter.categoryBits = cate;
+		filter.categoryBits = cate;
 		  filter.maskBits = mask;
 		  for(int i=0;i<fixtures.size();i++)
 		  {
@@ -1305,10 +1325,17 @@ public class Molecule {
 	  {
 		  if(compoundName!=null)
 		  {
-		  pngSource = p5Canvas.loadImage("resources/compoundsPng50/" + compoundName + ".png");
+			  pngSourceName = new String(compoundName);
+			  pngSource = p5Canvas.loadImage("resources/compoundsPng50/" + pngSourceName + ".png");
 		  if(pngSource!=null)
 			  displayPng = true;
 		  }
 	  }
+	  
+	  public String getImageName()
+	  {
+		  return pngSourceName;
+	  }
+	  
 
 }

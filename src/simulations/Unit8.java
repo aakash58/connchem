@@ -511,7 +511,7 @@ public class Unit8 extends UnitBase {
 				newMole.setEnableAutoStateChange(false);
 				newMole.setState(mState.Gas);
 				newMole.setTransparent(1.0f);
-				newMole.setFixtureCatergory(Constants.NONCOLLIDER_ID, Constants.BOUNDARY_ID);
+				newMole.setFixtureCatergory(Constants.NOTMOLE_BOUND_ID, Constants.BOUNDARY_ID);
 				State.molecules.add(newMole);
 				newMolecules.add(newMole);
 				isFading = true;

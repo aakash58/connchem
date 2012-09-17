@@ -116,6 +116,8 @@ public class Canvas extends JPanel {
 
 	
 	public void reset(){
+		if(this.isEnabled())
+		{
 
 		setupGraphNum();
 		setupLabels();
@@ -129,6 +131,7 @@ public class Canvas extends JPanel {
 		setPaintLineEnable(true);
 
 		this.repaint();
+		}
 	}
 	
 
