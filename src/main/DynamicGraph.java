@@ -227,7 +227,7 @@ public class DynamicGraph extends JPanel {
 			{
 				//Get column names from canvas
 				ArrayList<String> compoundNames = canvas.getDataNames(index);
-			
+				
 				for(String name:compoundNames)
 				{
 					XYSeries data = new XYSeries(name);

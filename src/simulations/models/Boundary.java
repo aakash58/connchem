@@ -72,7 +72,7 @@ public class Boundary {
         fd.friction = 1.0f;
     	fd.restitution =1f;
     	fd.filter.categoryBits = Constants.BOUNDARY_ID; //All the molecules that enable collision is 2
-		fd.filter.maskBits = Constants.MOLECULE_ID+Constants.NONCOLLIDER_ID;  //All the objects that shou
+		fd.filter.maskBits = Constants.MOLECULE_ID+Constants.NOTMOLE_BOUND_ID;  //All the objects that shou
         fixture = body.createFixture(fd);
         
 	//	body.setMassFromShapes();

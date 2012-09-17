@@ -474,6 +474,8 @@ public class P5Canvas extends PApplet {
 		boundaries.setHasWeight(false);
 		setIfConstrainKE(true);
 		setEnableDrag(true);
+		main.getCanvas().setEnabled(true);
+
 
 
 		if(products!=null)
@@ -520,6 +522,8 @@ public class P5Canvas extends PApplet {
 		
 		if(getUnit()==8)
 			getUnit8().play();
+		else if(getUnit()==9)
+			getUnit9().play();
 		
 	}
 	
@@ -1072,6 +1076,9 @@ public class P5Canvas extends PApplet {
 	}
 	public Unit8 getUnit8(){
 		return unitList.getUnit8();
+	}
+	public Unit9 getUnit9(){
+		return unitList.getUnit9();
 	}
 	public Main getMain() {
 		return main;
