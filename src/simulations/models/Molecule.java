@@ -112,6 +112,7 @@ public class Molecule {
 	private boolean displayPng = false; //If use png pictures
 	private PImage pngSource = null;
 	private String pngSourceName = new String();
+	private String parentName = new String();
 
 	/******************************************************************
 	 * FUNCTION : Molecule() DESCRIPTION : Molecule Constructor
@@ -1335,6 +1336,16 @@ public class Molecule {
 	  public String getImageName()
 	  {
 		  return pngSourceName;
+	  }
+	  
+	  public void setParentName(String str)
+	  {
+		  parentName = new String(str);
+	  }
+	  
+	  public String getParentName()
+	  {
+		  return parentName;
 	  }
 	  
 
