@@ -559,6 +559,25 @@ public class P5Canvas extends PApplet {
 
 		isEnable = tmp;
 	}
+	
+	// Remove all existing molecules in a certain area
+	public void removeAllMolecules(Vec2 topLeft, Vec2 botRight) {
+		boolean tmp = isEnable;
+		isEnable = false;
+
+		for (int i = molecules.size()-1; i >=0; i--) {
+			Molecule m = (Molecule) molecules.get(i);
+			Vec2 pos = m.getPositionInPixel();
+			if (pos.x > topLeft.x && pos.x < botRight.x && pos.y > topLeft.y
+					&& pos.y < botRight.y) 
+			{
+				State.molecules.remove(m);
+				m.destroy();
+			}
+		}
+
+		isEnable = tmp;
+	}
 
 	// Remove existing anchors, called by reset()
 	public void removeAllAnchors() {
@@ -573,6 +592,8 @@ public class P5Canvas extends PApplet {
 
 		isEnable = tmp;
 	}
+	
+	
 
 	// Set Speed of Simulation; values are from 0 to 100; 100 is default value
 	public void setSpeed(float speed) {

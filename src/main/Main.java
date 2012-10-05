@@ -460,9 +460,19 @@ public class Main {
 						//Add Compound Name label
 						JLabel label = new JLabel(cName);
 						// Repaint molecules icon
-						ImageIcon icon = new ImageIcon(Main.class.getResource("/resources/compoundsPng50/"+ fixedName + ".png"));
-						//icon = scaleImageIcon(icon, 40, 30);
-						label.setIcon(icon);
+							String location = new String ("/resources/compoundsPng50/"+ fixedName + ".png");
+							URL url = Main.class.getResource(location);
+							if (url==null) {
+							  label.setText(cName);
+							} 
+							else
+							{
+								ImageIcon icon = new ImageIcon(url);
+								//icon = scaleImageIcon(icon, 40, 30);
+								if(icon!=null)
+									label.setIcon(icon);
+							}
+						
 						panel.add(label, "cell 0 0 3 1,growx");
 
 						// Add Slider label

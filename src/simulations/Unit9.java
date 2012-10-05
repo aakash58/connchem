@@ -126,6 +126,13 @@ public class Unit9 extends UnitBase {
 	private boolean simStarted = false; //If play button is clicked
 	private boolean nuclearSelected = false; //If user has already click nuclear button
 	
+	//Unit 3 parameter
+	//private ArrayList<String> fusionReactants;
+	private int numSelected = 0;
+	private final int numSelectedMax = 2;
+	private boolean reactionHappened;  //If fusion has happened in Sim 3
+	private int reactStep = -1 ;       //When the radiation is going to happen
+	
 	//Joint parameters
 	float frequency = 15;
 	float damp = 0.4f;
@@ -149,6 +156,7 @@ public class Unit9 extends UnitBase {
 		nuclearStructure = new HashMap<String, Vec2[]>();
 		buttonMap = new HashMap<JButton, String>();
 		buttonRef = new ArrayList<JButton>();
+		//fusionReactants = new ArrayList<String>();
 
 		// moleculeConHash = new HashMap<String, Float>();
 		setupSimulations();
@@ -186,14 +194,34 @@ public class Unit9 extends UnitBase {
 		simulations[2].setupElements(elements2, spawnStyles2);
 
 		simulations[3] = new Simulation(unitNum, 4, 1);
-		String[] elements3 = { "Water" };
+		String[] elements3 = { "Am-241" };
 		SpawnStyle[] spawnStyles3 = { SpawnStyle.Gas };
 		simulations[3].setupElements(elements3, spawnStyles3);
+		
+		simulations[6] = new Simulation(unitNum, 4, 2);
+		String[] elements6 = { "H-3" };
+		SpawnStyle[] spawnStyles6 = { SpawnStyle.Gas };
+		simulations[6].setupElements(elements6, spawnStyles6);
+		
+		simulations[7] = new Simulation(unitNum, 4, 3);
+		String[] elements7 = { "H-3" };
+		SpawnStyle[] spawnStyles7 = { SpawnStyle.Gas };
+		simulations[7].setupElements(elements7, spawnStyles7);
 
 		simulations[4] = new Simulation(unitNum, 5, 1);
-		String[] elements4 = { "Water" };
+		String[] elements4 = { "Be-11" };
 		SpawnStyle[] spawnStyles4 = { SpawnStyle.Gas };
 		simulations[4].setupElements(elements4, spawnStyles4);
+		
+		simulations[8] = new Simulation(unitNum, 5, 2);
+		String[] elements8 = { "F-21" };
+		SpawnStyle[] spawnStyles8 = { SpawnStyle.Gas };
+		simulations[8].setupElements(elements8, spawnStyles8);
+		
+		simulations[9] = new Simulation(unitNum, 5, 3);
+		String[] elements9 = { "N-16" };
+		SpawnStyle[] spawnStyles9 = { SpawnStyle.Gas };
+		simulations[9].setupElements(elements9, spawnStyles9);
 
 		simulations[5] = new Simulation(unitNum, 1, 2);
 		String[] elements5 = { "Helium" };
@@ -216,6 +244,9 @@ public class Unit9 extends UnitBase {
 		IDMap[2].add("He-4");
 		IDMap[2].add("Be-8");
 		IDMap[3] = new ArrayList<String>();
+		IDMap[3].add("Am-241");
+		IDMap[3].add("H-3");
+		IDMap[3].add("H-3");
 		IDMap[4] = new ArrayList<String>();
 		
 		setupFissionProduction();
@@ -252,7 +283,7 @@ public class Unit9 extends UnitBase {
 		for(int i =0;i<fissionNum;i++)
 		{
 			for(int j =2;j<fissionElementNum;j++)
-				fissionProduction[i][j] = new String("Neutron");
+				fissionProduction[i][j] = new String("Neutron-Small");
 		}
 
 		
@@ -322,31 +353,94 @@ public class Unit9 extends UnitBase {
 			public void actionPerformed(ActionEvent e) {
 
 				JButton buttonPressed = (JButton) e.getSource();
+				JButton btnPlay = p5Canvas.getMain().playBtn;
 
 				// if (!p5Canvas.isSimStarted) // Before simulation started user
 				// can change
 				// selections, but after simulation started they
 				// cant
 				{
+					int sim = p5Canvas.getSim();
+					int set = p5Canvas.getSet();
 					String compoundName = buttonMap.get(buttonPressed);
-					currentSimulationID = IDMap[p5Canvas.getSim() - 1]
+					if(sim!=3)  //General case
+					{
+					currentSimulationID = IDMap[sim - 1]
 							.indexOf(compoundName);
 
 					// Clear existing molecules on canvas and draw new one
 					p5Canvas.removeAllMolecules();
+					
 
 					addMolecules(p5Canvas.isEnable, compoundName, 1);
+					
 
-					initializeSimulation(p5Canvas.getSim(), p5Canvas.getSet());
+					Unit9.this.resetDashboard(sim, p5Canvas.getSet());
+					initializeSimulation(sim, p5Canvas.getSet());
 					
 					nuclearSelected = true;
+					btnPlay.setEnabled(true);
+					//Handle sim 2 slider set
+						if(sim==1 && set==2)
+						{
+							if( simStarted)
+							{
+								Unit9.this.sliderStrongForce.setEnabled(true);
+								Unit9.this.sliderWeakForce.setEnabled(true);
+								Unit9.this.btnShoot.setEnabled(true);
+							}
+							
 
-					if( simStarted)
-					{
-						Unit9.this.sliderStrongForce.setEnabled(true);
-						Unit9.this.sliderWeakForce.setEnabled(true);
-						Unit9.this.btnShoot.setEnabled(true);
+						}
+						else if(sim==2)
+						{
+							isHit = false;
+							firstHit = false;
+							if(simStarted)
+								Unit9.this.btnShoot.setEnabled(true);
+							if(set==1)
+							{
+								lblMassValue.setText("235");
+								lblNeutronValue.setText("143");
+								lblProtonValue.setText("92");
+								lblAtomicValue.setText("92");
+							}
+							else if(set==2)
+							{
+								lblMassValue.setText("137");
+								lblNeutronValue.setText("82");
+								lblProtonValue.setText("55");
+								lblAtomicValue.setText("55");
+							}
+						}
 					}
+					else //if sim 3 selected, multipul button selection allowed
+					{
+							
+							if(numSelected<2)
+							{
+								numSelected++;
+								addMolecules(p5Canvas.isEnable, compoundName, 1);
+							}
+							else
+							{
+								float width = Unit9.this.p5Canvas.w;
+								float height = Unit9.this.p5Canvas.h;
+								p5Canvas.removeAllMolecules(new Vec2(width/2,0), new Vec2(width,height));
+								//fusionReactants.remove(fusionReactants.size()-1);
+								//fusionReactants.add(compoundName);
+								addMolecules(p5Canvas.isEnable, compoundName, 1);
+							}
+							
+							if(numSelected==2)
+							{
+								btnPlay.setEnabled(true);
+							}
+						
+					
+					}
+					
+					
 				}
 
 			}
@@ -416,8 +510,79 @@ public class Unit9 extends UnitBase {
 		}
 		nuclearStructure.put("Helium-Quark", heliumQuarkStructure);
 		
+		//H-1
+		massNum = 1;
+		Vec2[] h1Structure = new Vec2[massNum];
+		h1Structure[0] = new Vec2(0,0);
+		nuclearStructure.put("H-1", h1Structure);
+		
+		//H-2
+		massNum = 2;
+		Vec2[] h2Structure = new Vec2[massNum];
+//		protonSize = Molecule.getShapeSize("Proton", p5Canvas);
+//		width = protonSize.x * (1+padding);
+//		height = protonSize.y * (1+padding);
+		h2Structure[0] = new Vec2(0,0);
+		h2Structure[1] = new Vec2(width*0.5f,height*-0.5f);
+		nuclearStructure.put("H-2", h2Structure);
+		
+		massNum = 3;
+		Vec2[] he3Structure = new Vec2[massNum];
+		he3Structure[1] = new Vec2(0,-height/2);   //neutron
+		he3Structure[0] = new Vec2(-width/3,0);    //proton
+		he3Structure[2] = new Vec2(width/3,0);     //proton
+		nuclearStructure.put("He-3", he3Structure);
+		
+		massNum = 3;
+		Vec2[] h3Structure = new Vec2[massNum];
+		h3Structure[1] = new Vec2(0,-height/2);   //neutron
+		h3Structure[0] = new Vec2(-width/3,0);    //proton
+		h3Structure[2] = new Vec2(width/3,0);     //proton
+		nuclearStructure.put("H-3", h3Structure);
+		
+		massNum = 4;
+		Vec2[] he4Structure = new Vec2[massNum];
+		protonSize = Molecule.getShapeSize("Proton", p5Canvas);
+		padding = 0.2f;
+		width = protonSize.x * (1+padding);
+		height = protonSize.y * (1+padding);
+		for (int i = 0; i < massNum; i++) {
+			x = width / 2 * (i / 2 == 0 ? -1 : 1);
+			y = height * ((i % 2) + -0.5f * (i / 2));
+			he4Structure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("He-4", he4Structure);
+		
+		massNum = 8;
+		Vec2[] be8Structure = new Vec2[massNum];
+
+		for (int i = 0; i < massNum; i++) {
+			if(i<2)
+			{
+				column = -1;
+				row = i-0;
+			}
+			else if(i<5)
+			{
+				column = 0 ;
+				row = i-3;
+			}
+			else if(i<8)
+			{
+				column = 1;
+				row = i - 6;
+			}
+			
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? -0.5f : 0.0f));
+			be8Structure[i] = new Vec2(x,y);
+		}
+		nuclearStructure.put("Be-8", be8Structure);
+		
+		massNum = 4;
 		Vec2[] heliumStructure = new Vec2[massNum];
 		protonSize = Molecule.getShapeSize("Proton", p5Canvas);
+		padding = 0.2f;
 		width = protonSize.x * (1+padding);
 		height = protonSize.y * (1+padding);
 		for (int i = 0; i < massNum; i++) {
@@ -426,6 +591,83 @@ public class Unit9 extends UnitBase {
 			heliumStructure[i] = new Vec2(x, y);
 		}
 		nuclearStructure.put("Helium", heliumStructure);
+		
+		
+		
+		
+		//Be-11
+		massNum = 11;
+		Vec2[] be11Structure = new Vec2[massNum];
+		for (int i = 0; i < massNum; i++) {
+			if (i < 3) {
+				column = 0;
+				row = i - 1;
+			} else if (i < 6) {
+				column = -1;
+				row = i - 4;
+			} else if (i < 9) {
+				column = 1;
+				row = (i - 5)%3-1;
+			} else if (i < 10) {
+				column = -2;
+				row = i - 9;
+			}
+			else	{
+				column = 2;
+				row = i-10;
+			}
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? -1f : -0.5f));
+			be11Structure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("Be-11", be11Structure);
+		
+		//B-11
+		massNum = 11;
+		Vec2[] b11Structure = new Vec2[massNum];
+		for (int i = 0; i < massNum; i++) {
+			if (i < 2) {
+				column = -2;
+				row = i - 1;
+			} else if (i < 5) {
+				column = 0;
+				row = i - 3;
+			} else if (i < 8) {
+				column = -1;
+				row = i - 6;
+			} else if (i < 11) {
+				column = 1;
+				row = (i - 7)%3-1;
+			}
+		
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? 1f : 0.5f));
+			b11Structure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("B-11", b11Structure);
+			
+		//C-12
+		massNum = 12;
+		Vec2[] c12Structure = new Vec2[massNum];
+		for (int i = 0; i < massNum; i++) {
+			if (i < 2) {
+				column = -2;
+				row = i - 0;
+			} else if (i < 5) {
+				column = -1;
+				row = i - 3;
+			} else if (i < 9) {
+				column = 0;
+				row = i - 6;
+			} else if (i < 12) {
+				column = 1;
+				row = i - 10;
+			}
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? -1f : -0.5f));
+			c12Structure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("C-12", c12Structure);
 		
 		// Carbon - 14
 		massNum = 14;
@@ -452,7 +694,137 @@ public class Unit9 extends UnitBase {
 			carbonStructure[i] = new Vec2(x, y);
 		}
 		nuclearStructure.put("Carbon", carbonStructure);
+		
+		//N-16
+		massNum = 16;
+		Vec2[] n16Structure = new Vec2[massNum];
+		for (int i = 0; i < massNum; i++) {
+			if (i < 3) {
+				column = 0;
+				row = i - 1;
+			} else if (i < 6) {
+				column = -1;
+				row = i - 4;
+			} else if (i < 9) {
+				column = -2;
+				row = i - 7;
+			} else if (i < 12) {
+				column = 1;
+				row = (i - 10);
+			}
+			else if(i<15) {
+				column = 2;
+				row = (i - 13) ;
+			}
+			else // 15
+			{
+				column = 3;
+				row = i - 15;
+			}
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? 0.5f : 0f));
+			n16Structure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("N-16", n16Structure);
+		
+		//O-16
+		massNum = 16;
+		Vec2[] o16Structure = new Vec2[massNum];
+		for (int i = 0; i < massNum; i++) {
+			if (i < 3) {
+				column = -1;
+				row = i - 1;
+			} else if (i < 6) {
+				column = -2;
+				row = i - 4;
+			} else if (i < 9) {
+				column = 1;
+				row = i - 7;
+			} else if (i < 12) {
+				column = 0;
+				row = (i - 10);
+			}
+			else if(i<13)
+			{
+				column = 3;
+				row = i-12;
+			}
+			else if(i<16) {
+				column = 2;
+				row = (i - 14) ;
+			}
+	
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? 0.5f : 0f));
+			o16Structure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("O-16", o16Structure);
 
+		//F-21
+		massNum = 21;
+		Vec2[] f21Structure = new Vec2[massNum];
+		for (int i = 0; i < massNum; i++) {
+			if (i < 4) {
+				column = -2;
+				row = i - 2;
+			} else if (i < 8) {
+				column = 0;
+				row = i - 6;
+			} else if (i < 12) {
+				column = 2;
+				row = i - 10;
+			} else if (i < 16) {
+				column = -1;
+				row = (i - 11)%4 -1 ;
+			}
+			else if(i<20) {
+				column = 1;
+				row = (i - 15)%4 -1 ;
+			}
+			else // 21
+			{
+				column = -3;
+				row = i - 20;
+			}
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? 1f : -0.5f));
+			f21Structure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("F-21", f21Structure);
+		
+		//Ne-21
+		massNum = 21;
+		Vec2[] ne21Structure = new Vec2[massNum];
+		for (int i = 0; i < massNum; i++) {
+			if (i < 3) {
+				column = -2;
+				row = i - 1;
+			} else if (i < 7) {
+				column = -1;
+				row = i - 4;
+			} else if (i < 11) {
+				column = 1;
+				row = i - 8;
+			} else if (i < 15) {
+				column = 0;
+				row = (i - 10)%4 -1 ;
+			}
+			else if(i<19) {
+				column = 2;
+				row = (i - 14 )%4 -1;
+			}
+			else // 21
+			{
+				column = 3;
+				row = i - 19;
+			}
+			x = width * column;
+			y = height * (row + (column % 2 == 0 ? 0f : -0.5f));
+			ne21Structure[i] = new Vec2(x, y);
+		}
+		nuclearStructure.put("Ne-21", ne21Structure);
+		
+		//Aluminum
 		massNum = 26;
 		Vec2[] aluminumStructure = new Vec2[massNum];
 		for (int i = 0; i < massNum; i++) {
@@ -482,6 +854,7 @@ public class Unit9 extends UnitBase {
 		}
 		nuclearStructure.put("Aluminum", aluminumStructure);
 
+		//Potassium
 		massNum = 40;
 		Vec2[] potassiumStructure = new Vec2[massNum];
 		for (int i = 0; i < massNum; i++) {
@@ -524,52 +897,58 @@ public class Unit9 extends UnitBase {
 		Vec2 [] cesium = new Vec2[0];
 		nuclearStructure.put("Cesium-137", cesium);
 		
-		massNum = 1;
-		Vec2 [] h1 = new Vec2[massNum];
-		h1[0] = new Vec2(0,0);
-		nuclearStructure.put("H-1", h1);
-		massNum = 2;
-		Vec2[] h2 = new Vec2[massNum];
-		h2[0] = new Vec2(width*0.5f,height*0.5f);
-		h2[1] = new Vec2(width*-0.5f,height*-0.5f);
-		nuclearStructure.put("H-2", h2);
+		Vec2 [] am241 = new Vec2[0];
+		nuclearStructure.put("Am-241", am241);
 		
-		massNum = 3;
-		Vec2[] he3 = new Vec2[massNum];
-		he3[0] = new Vec2(0,height*-1);
-		he3[1] = new Vec2(0,height);
-		he3[2] = new Vec2(width,0);
-		nuclearStructure.put("He-3", he3);
+		Vec2 [] np237 = new Vec2[0];
+		nuclearStructure .put("Np-237", np237);
 		
-		massNum = 4;
-		Vec2[] he4 = new Vec2[massNum];
-		he4[0] =  new Vec2(0,0);
-		he4[1] = new Vec2(width,height*-0.5f);
-		he4[2] = new Vec2(0,height);
-		he4[3] = new Vec2(width,height*0.5f);
-		nuclearStructure.put("He-4", he4);
+//		massNum = 1;
+//		Vec2 [] h1 = new Vec2[massNum];
+//		h1[0] = new Vec2(0,0);
+//		nuclearStructure.put("H-1", h1);
+//		massNum = 2;
+//		Vec2[] h2 = new Vec2[massNum];
+//		h2[0] = new Vec2(width*0.5f,height*0.5f);
+//		h2[1] = new Vec2(width*-0.5f,height*-0.5f);
+//		nuclearStructure.put("H-2", h2);
+//		
+//		massNum = 3;
+//		Vec2[] he3 = new Vec2[massNum];
+//		he3[0] = new Vec2(0,height*-1);
+//		he3[1] = new Vec2(0,height);
+//		he3[2] = new Vec2(width,0);
+//		nuclearStructure.put("He-3", he3);
+//		
+//		massNum = 4;
+//		Vec2[] he4 = new Vec2[massNum];
+//		he4[0] =  new Vec2(0,0);
+//		he4[1] = new Vec2(width,height*-0.5f);
+//		he4[2] = new Vec2(0,height);
+//		he4[3] = new Vec2(width,height*0.5f);
+//		nuclearStructure.put("He-4", he4);
 		
-		massNum = 8 ;
-		Vec2[] be8 = new Vec2[massNum];
-		for(int i = 0 ;i<massNum;i++)
-		{
-			if(i<2)
-			{
-				column = -1;
-				row = i-0;
-			}
-			else if(i<5)
-			{
-				column = 0 ;
-				row = i-3;
-			}
-			else if(i<8)
-			{
-				column = 1;
-				row = i - 6;
-			}
-		}
-		nuclearStructure.put("Be-8",be8);
+//		massNum = 8 ;
+//		Vec2[] be8 = new Vec2[massNum];
+//		for(int i = 0 ;i<massNum;i++)
+//		{
+//			if(i<2)
+//			{
+//				column = -1;
+//				row = i-0;
+//			}
+//			else if(i<5)
+//			{
+//				column = 0 ;
+//				row = i-3;
+//			}
+//			else if(i<8)
+//			{
+//				column = 1;
+//				row = i - 6;
+//			}
+//		}
+//		nuclearStructure.put("Be-8",be8);
 		
 	}
 	
@@ -580,7 +959,44 @@ public class Unit9 extends UnitBase {
 		{
 			this.sliderStrongForce.setEnabled(true);
 			this.sliderWeakForce.setEnabled(true);
-		btnShoot.setEnabled(true);
+			btnShoot.setEnabled(true);
+		}
+		
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
+		float w = p5Canvas.w;
+		float h = p5Canvas.h;
+		Vec2 pos = new Vec2();
+		Vec2 source = new Vec2();
+		Vec2 target = new Vec2();
+		Vec2 impulse = new Vec2();
+		
+		if(sim==3)
+		{
+			for(JButton btn: buttonRef)
+			{
+				btn.setEnabled(false);
+			}
+			for(Molecule mole: State.getMolecules())
+			{
+				pos.set(mole.getPositionInPixel()); 
+				//Check if on left half of canvas
+				if(this.areaBodyCheck(pos, new Vec2(0,0), new Vec2(w/2,h)))
+				{
+					source.set(box2d.coordPixelsToWorld(w, h));
+					target.set(mole.getPosition());
+					impulse = source.sub(target);
+					mole.applyLinearImpulse( impulse , mole.getPosition());
+				}
+				else //On the right half
+				{
+					source.set(box2d.coordPixelsToWorld(0, 0));
+					target.set(mole.getPosition());
+					impulse = source.sub(target);
+					mole.applyLinearImpulse( impulse, mole.getPosition());
+				}
+				
+			}
 		}
 	}
 
@@ -606,13 +1022,19 @@ public class Unit9 extends UnitBase {
 			resetRightPanel(sim,set);
 			break;
 		case 4:
+			resetRightPanel(sim,set);
 			break;
 		case 5:
+			resetRightPanel(sim,set);
 			break;
 		}
 	}
 
 	public void resetDynamicPanel(int sim, int set) {
+		
+		//No reset for sim 4
+		if(sim==4 || sim==5)
+			return;
 
 		Main main = p5Canvas.getMain();
 		// Reset dynamic panel
@@ -668,6 +1090,18 @@ public class Unit9 extends UnitBase {
 				btnMolecule.setIcon(new ImageIcon(Main.class
 						.getResource("/resources/compoundsPng50/" + fixedName
 								+ ".png")));
+				if(sim==3)
+				{
+					//btnMolecule.set
+					btnMolecule.setIcon(null);
+					btnMolecule.setText(fixedName);
+					Font f = btnMolecule.getFont();
+					Float s = f.getSize2D();
+					s += 4.0f; // six points bigger
+					btnMolecule.setFont(f.deriveFont(s));
+					//btnMolecule.setFont(new Font("Dialog", Font.PLAIN, 16));
+					lblMolecule.setText(" ");
+				}
 				btnMolecule.addActionListener(moleculeBtnListener);
 				buttonMap.put(btnMolecule, fixedName);
 				buttonRef.add(btnMolecule);
@@ -698,7 +1132,6 @@ public class Unit9 extends UnitBase {
 			panelSub.add(btnShoot,"cell 0 0 , align center");
 			panelSub.add(lblShoot,"cell 0 1 , align center");
 
-
 		}
 
 	}
@@ -720,8 +1153,12 @@ public class Unit9 extends UnitBase {
 		case 3:
 			break;
 		case 4:
+			main.rightPanel.add(main.lblOutput, "cell 0 1");
+			main.rightPanel.add(main.dashboard, "cell 0 2,growy");
 			break;
 		case 5:
+			main.rightPanel.add(main.lblOutput, "cell 0 1");
+			main.rightPanel.add(main.dashboard, "cell 0 2,growy");
 			break;
 		}
 
@@ -745,13 +1182,14 @@ public class Unit9 extends UnitBase {
 	 */
 	@Override
 	public void updateMolecules(int sim, int set) {
+		
 		boolean reactionHappened = false;
 		Simulation simulation = getSimulation(sim, set);
 
 		switch (sim) {
 		case 1:
 			if(set==1)
-			shakeMolecules(sim,set,0.15);
+			shakeMolecules(sim,set,0.1,6);
 			else if(set==2)
 				shakeMoleculesWithQuark(sim,set);
 			break;
@@ -760,19 +1198,49 @@ public class Unit9 extends UnitBase {
 				updateMoleculesSim2Set1(sim,set);
 			break;
 		case 3:
-
+				reactionSim3Set1(sim,set);
+				if(this.reactionHappened)
+					shakeMolecules(sim,set,0.1,6);
 			break;
 		case 4:
-
+			if(set==1)
+			{
+			shakeMolecules(sim,set,6,6);
+			reactionSim4Set1(sim,set);
+			}
+			else if(set==2)
+			{
+				reactionSim4Set2(sim,set);
+				if(!reactionHappened){
+					shakeMolecules(sim,set,0.1,6);
+				}
+				else{
+					shakeMolecules(sim,set,8,25);
+				}
+			}
+			else if (set==3)
+			{
+				reactionSim4Set2(sim,set);
+				shakeMolecules(sim,set,0.1,6);
+	
+				
+			}
 			break;
 		case 5:
+			shakeMolecules(sim,set,0.1,6);
+			if(!this.reactionHappened) {
+				if(set==1){
+					 this.reactionHappened = reactionSim5Set1(sim,set);
+				}
+				else if(set==2){
+					this.reactionHappened = reactionSim5Set2(sim,set);
+				}
+				else if(set==3){
+					this.reactionHappened = reactionSim5Set3(sim,set);
+				}
+			}
+			break;
 
-			break;
-		case 6:
-
-			break;
-		case 7:
-			break;
 
 		}
 		
@@ -780,8 +1248,627 @@ public class Unit9 extends UnitBase {
 
 	}
 	
+	
+	
+	private boolean reactionSim3Set1(int sim, int set) {
+		if(!p5Canvas.isSimStarted) //Reaction has not started yet
+			return false;
+		
+		if (p5Canvas.killingList.isEmpty())
+			return false;
+		if (p5Canvas.products != null && p5Canvas.products.size() > 0 ) {
+
+			boolean res;
+			//Get mid point of all the molecules in killing list
+			int killNum = p5Canvas.killingList.size();
+			Vec2 spawnPos = new Vec2(0,0);
+			Vec2 oldVelocity = p5Canvas.killingList.get(0).getLinearVelocity();
+
+			for(int i=0;i<killNum;i++)
+			{
+				spawnPos.addLocal(p5Canvas.killingList.get(i).getPositionInPixel());
+			}
+			spawnPos.mulLocal(1f/killNum);
+			float x_ = spawnPos .x;
+			float y_ = spawnPos.y;
+			float xIncre = 75;
+			float yIncre = 75;
+			
+			//Destroy all the molecules
+			p5Canvas.removeAllMolecules();
+			
+			Molecule mNew = null;
+			Molecule mNew2 = null;
+
+
+			Molecule newMole =  null;
+			String compoundName = null;
+			int protonNum = 0;
+			int neutronNum =0;
+			int len = 0;
+			boolean createProton = true;
+
+			 for (int m = 0; m < p5Canvas.products.size(); m++)  {
+				 compoundName = p5Canvas.products.get(m);
+				 Vec2[] structure = nuclearStructure.get(compoundName);
+				  len = structure.length;
+				 protonNum = nuclearInfo.getProtonNumByName(compoundName);
+				 neutronNum = nuclearInfo.getNeutronNumByName(compoundName);
+				 x_ +=  (m/2)*xIncre;
+				 y_ += (m%2)*yIncre;
+				if(len!=0)
+				{
+				for (int i = 0; i < len; i++) {
+					
+					if (protonNum == 0) // Only neutron left
+					{
+						createProton = false;
+					} else if (neutronNum == 0) // only proton left
+					{
+						createProton = true;
+					} else {
+						createProton = (i % 2 == 0);
+						if (createProton) {
+							// Mark i with proton
+							createProton = true;
+							--protonNum;
+						} else {
+							// Mark i with neutron
+							createProton = false;
+							--neutronNum;
+						}
+					}
+
+					// read preset position
+					Vec2 pos = structure[i];
+					String elementName = createProton ? protonName : neutronName;
+					//System.out.println(elementName);
+					newMole = new Molecule(x_ + pos.x, y_ + pos.y,
+							elementName, box2d,
+							p5Canvas, 0);
+
+					// newMole.setGravityScale(0f);			
+				
+				res = State.molecules.add(newMole);
+				float velocityX = 0;
+				float velocityY = 0;
+				newMole.setLinearVelocity(new Vec2(velocityX, velocityY));
+				if(len==1) //Add initial velocity for H-1
+					newMole.setLinearVelocity(oldVelocity);
+				//Set the state to gas so there is no gravitivity
+				newMole.setEnableAutoStateChange(false);
+				newMole.setState(mState.Gas);
+				//Set use png file when draw molecule
+				newMole.setImage(elementName);
+				}
+				
+					/* Add joint for solid molecules */
+						int index1 = 0;
+						Molecule m1 = null;
+		
+		
+						for ( int i = 0; i < len; i++) {
+		
+							/* For every molecule, create a anchor to fix its position */
+							index1 = i ;
+							m1 = State.molecules.get(index1);
+							Vec2 m1Pos = box2d.coordWorldToPixels(m1.getPosition());
+							Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
+									p5Canvas);
+							State.anchors.add(anchor);
+							joint2Elements(m1, anchor, jointLen, frequency, damp);
+						}
+					
+					
+				}
+			 }
+	
+			p5Canvas.products.clear();
+			p5Canvas.killingList.clear();
+			this.reactionHappened = true;
+			return true;
+		}
+
+		return false;		
+	}
+	
+	private boolean reactionSim4Set1(int sim, int set) {
+		if(!p5Canvas.isSimStarted) //Reaction has not started yet
+			return false;
+		
+		if (stepCount==reactStep) {
+			//Get mid point of all the molecules in killing list
+			Vec2 spawnPos = new Vec2(0,0);
+			ArrayList<String> products =  new ArrayList<String>();
+				products.add(new String("Np-237"));
+				products.add(new String("Alpha-Particle"));
+
+			for(Molecule mole: State.getMolecules())
+			{
+				spawnPos.addLocal(mole.getPositionInPixel());
+		
+			}
+			spawnPos.mulLocal(1f/State.getMoleculeNum());
+			float x_ = spawnPos.x;
+			float y_ = spawnPos.y;
+			float xIncre =  75;
+			float yIncre = 75;
+
+
+			//Destroy all the molecules
+			p5Canvas.removeAllMolecules();
+	
+
+			Molecule newMole =  null;
+			String compoundName = null;
+
+			 for (int m = 0; m < products.size(); m++)  {
+				 x_+= (m%2)*xIncre;
+				 y_+= (m/2) *yIncre;
+				 compoundName = products.get(m);
+					newMole = new Molecule(x_, y_, compoundName, box2d,
+							p5Canvas, 0);
+					State.molecules.add(newMole);
+
+					newMole.setEnableAutoStateChange(false);
+					newMole.setState(mState.Gas);
+					
+						newMole.setImage(compoundName);
+						if(compoundName.equals("Np-237"))
+						{
+						Vec2 m1Pos = box2d.coordWorldToPixels(newMole.getPosition());
+						Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
+								p5Canvas);
+						State.anchors.add(anchor);
+						joint2Elements(newMole, anchor, jointLen, frequency, damp);
+						}
+						else
+						{
+							newMole.setLinearVelocity(new Vec2(5, 5));
+						}
+					
+			 }
+			 
+				//Set up output
+				String element1 = new String("Np-237");
+				int protonNum = nuclearInfo.getProtonNumByName(element1);
+				int neutronNum = nuclearInfo.getNeutronNumByName(element1);
+				int massNum = nuclearInfo.getMassNumByName(element1);
+				int atomicNum = nuclearInfo.getAtomicNumByName(element1);
+	
+				lblElement1Value.setText(element1);
+				lblE1ProtonValue.setText(Integer.toString(protonNum));
+				lblE1NeutronValue.setText(Integer.toString(neutronNum));
+				lblE1MassValue.setText(Integer.toString(massNum));
+				lblE1AtomicValue.setText(Integer.toString(atomicNum));
+			 return true;
+	
+		}
+
+		return false;
+	}
+	
+	private boolean reactionSim4Set2(int sim, int set) {
+		if(!p5Canvas.isSimStarted) //Reaction has not started yet
+			return false;
+		
+		if (stepCount==reactStep) {
+			
+			Molecule oldMole = State.getMoleculeByIndex(0);
+			if(!oldMole.getName().equals("Neutron"))
+				oldMole = State.getMoleculeByIndex(1);
+			//Get mid point of all the molecules in killing list
+			Vec2 spawnPos = oldMole.getPositionInPixel();
+
+
+			//Destroy the old mole
+			oldMole.destroy();
+	
+			//Create a new molecule
+				 String compoundName = new String ("Proton");
+					Molecule newMole = new Molecule(spawnPos.x, spawnPos.y, compoundName, box2d,
+							p5Canvas, 0);
+					State.molecules.add(newMole);
+
+					newMole.setEnableAutoStateChange(false);
+					newMole.setState(mState.Gas);
+					
+						newMole.setImage(compoundName);
+						
+						Vec2 m1Pos = box2d.coordWorldToPixels(newMole.getPosition());
+						Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
+								p5Canvas);
+						State.anchors.add(anchor);
+						joint2Elements(newMole, anchor, jointLen, frequency, damp);
+						
+	
+					
+			 
+			 
+				//Set up output
+				String element1 = new String("He-3");
+				int protonNum = nuclearInfo.getProtonNumByName(element1);
+				int neutronNum = nuclearInfo.getNeutronNumByName(element1);
+				int massNum = nuclearInfo.getMassNumByName(element1);
+				int atomicNum = nuclearInfo.getAtomicNumByName(element1);
+	
+				lblElement1Value.setText(element1);
+				lblE1ProtonValue.setText(Integer.toString(protonNum));
+				lblE1NeutronValue.setText(Integer.toString(neutronNum));
+				lblE1MassValue.setText(Integer.toString(massNum));
+				lblE1AtomicValue.setText(Integer.toString(atomicNum));
+				
+				reactionHappened = true;
+			 return true;
+	
+		}
+
+		return false;
+	}
+	
+	private boolean reactionSim5Set1(int sim, int set) {
+		if(!p5Canvas.isSimStarted) //Reaction has not started yet
+			return false;
+		
+		//Radioactive Decay happend at 13.8 sec
+		if (p5Canvas.getMain().time==14) {
+			
+			//Get mid point of all the molecules in killing list
+			Vec2 spawnPos = new Vec2();
+			
+			for(Molecule mole: State.getMolecules())
+			{
+				spawnPos.addLocal(mole.getPositionInPixel());
+		
+			}
+			spawnPos.mulLocal(1f/State.getMoleculeNum());
+			float x_ = spawnPos.x;
+			float y_ = spawnPos.y;
+
+
+			//Destroy all the molecules
+			p5Canvas.removeAllMolecules();
+	
+			
+
+				 String compoundName = new String ("B-11");
+				 Vec2[] structure = nuclearStructure.get(compoundName);
+				  int len = structure.length;
+				int protonNum = nuclearInfo.getProtonNumByName(compoundName);
+				 int neutronNum = nuclearInfo.getNeutronNumByName(compoundName);
+				 boolean createProton = true;
+				 Molecule newMole = null;
+				 boolean res = false;
+				if(len!=0)
+				{
+				for (int i = 0; i < len; i++) {
+					
+					if (protonNum == 0) // Only neutron left
+					{
+						createProton = false;
+					} else if (neutronNum == 0) // only proton left
+					{
+						createProton = true;
+					} else {
+						createProton = (i % 2 == 0);
+						if (createProton) {
+							// Mark i with proton
+							createProton = true;
+							--protonNum;
+						} else {
+							// Mark i with neutron
+							createProton = false;
+							--neutronNum;
+						}
+					}
+
+					// read preset position
+					Vec2 pos = structure[i];
+					String elementName = createProton ? protonName : neutronName;
+					//System.out.println(elementName);
+					newMole = new Molecule(x_ + pos.x, y_ + pos.y,
+							elementName, box2d,
+							p5Canvas, 0);
+
+					// newMole.setGravityScale(0f);			
+				
+				res = State.molecules.add(newMole);
+				float velocityX = 0;
+				float velocityY = 0;
+				newMole.setLinearVelocity(new Vec2(velocityX, velocityY));
+				//Set the state to gas so there is no gravitivity
+				newMole.setEnableAutoStateChange(false);
+				newMole.setState(mState.Gas);
+				//Set use png file when draw molecule
+				newMole.setImage(elementName);
+				}
+				
+					/* Add joint for solid molecules */
+						int index1 = 0;
+						Molecule m1 = null;
+		
+		
+						for ( int i = 0; i < len; i++) {
+		
+							/* For every molecule, create a anchor to fix its position */
+							index1 = i ;
+							m1 = State.molecules.get(index1);
+							Vec2 m1Pos = box2d.coordWorldToPixels(m1.getPosition());
+							Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
+									p5Canvas);
+							State.anchors.add(anchor);
+							joint2Elements(m1, anchor, jointLen, frequency, damp);
+						}
+					
+					
+				}
+			 
+			 
+				//Set up output
+				String element1 = new String("B-11");
+				protonNum = nuclearInfo.getProtonNumByName(element1);
+				neutronNum = nuclearInfo.getNeutronNumByName(element1);
+				int massNum = nuclearInfo.getMassNumByName(element1);
+				int atomicNum = nuclearInfo.getAtomicNumByName(element1);
+	
+				lblElement1Value.setText(element1);
+				lblE1ProtonValue.setText(Integer.toString(protonNum));
+				lblE1NeutronValue.setText(Integer.toString(neutronNum));
+				lblE1MassValue.setText(Integer.toString(massNum));
+				lblE1AtomicValue.setText(Integer.toString(atomicNum));
+				lblE1MassValue.setText("0.5 grams");
+				
+				//reactionHappened = true;
+			 return true;
+	
+		}
+
+		return false;
+	}
+	
+	private boolean reactionSim5Set2(int sim, int set) {
+		if(!p5Canvas.isSimStarted) //Reaction has not started yet
+			return false;
+		
+		//Radioactive Decay happend at 13.8 sec
+		if (p5Canvas.getMain().time==4) {
+			
+			//Get mid point of all the molecules in killing list
+			Vec2 spawnPos = new Vec2();
+			
+			for(Molecule mole: State.getMolecules())
+			{
+				spawnPos.addLocal(mole.getPositionInPixel());
+		
+			}
+			spawnPos.mulLocal(1f/State.getMoleculeNum());
+			float x_ = spawnPos.x;
+			float y_ = spawnPos.y;
+
+
+			//Destroy all the molecules
+			p5Canvas.removeAllMolecules();
+	
+			
+
+				 String compoundName = new String ("Ne-21");
+				 Vec2[] structure = nuclearStructure.get(compoundName);
+				  int len = structure.length;
+				int protonNum = nuclearInfo.getProtonNumByName(compoundName);
+				 int neutronNum = nuclearInfo.getNeutronNumByName(compoundName);
+				 boolean createProton = true;
+				 Molecule newMole = null;
+				 boolean res = false;
+				if(len!=0)
+				{
+				for (int i = 0; i < len; i++) {
+					
+					if (protonNum == 0) // Only neutron left
+					{
+						createProton = false;
+					} else if (neutronNum == 0) // only proton left
+					{
+						createProton = true;
+					} else {
+						createProton = (i % 2 == 0);
+						if (createProton) {
+							// Mark i with proton
+							createProton = true;
+							--protonNum;
+						} else {
+							// Mark i with neutron
+							createProton = false;
+							--neutronNum;
+						}
+					}
+
+					// read preset position
+					Vec2 pos = structure[i];
+					String elementName = createProton ? protonName : neutronName;
+					//System.out.println(elementName);
+					newMole = new Molecule(x_ + pos.x, y_ + pos.y,
+							elementName, box2d,
+							p5Canvas, 0);
+
+					// newMole.setGravityScale(0f);			
+				
+				res = State.molecules.add(newMole);
+				float velocityX = 0;
+				float velocityY = 0;
+				newMole.setLinearVelocity(new Vec2(velocityX, velocityY));
+				//Set the state to gas so there is no gravitivity
+				newMole.setEnableAutoStateChange(false);
+				newMole.setState(mState.Gas);
+				//Set use png file when draw molecule
+				newMole.setImage(elementName);
+				}
+				
+					/* Add joint for solid molecules */
+						int index1 = 0;
+						Molecule m1 = null;
+		
+		
+						for ( int i = 0; i < len; i++) {
+		
+							/* For every molecule, create a anchor to fix its position */
+							index1 = i ;
+							m1 = State.molecules.get(index1);
+							Vec2 m1Pos = box2d.coordWorldToPixels(m1.getPosition());
+							Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
+									p5Canvas);
+							State.anchors.add(anchor);
+							joint2Elements(m1, anchor, jointLen, frequency, damp);
+						}
+					
+					
+				}
+			 
+			 
+				//Set up output
+				String element1 = new String("Ne-21");
+				protonNum = nuclearInfo.getProtonNumByName(element1);
+				neutronNum = nuclearInfo.getNeutronNumByName(element1);
+				int massNum = nuclearInfo.getMassNumByName(element1);
+				int atomicNum = nuclearInfo.getAtomicNumByName(element1);
+	
+				lblElement1Value.setText(element1);
+				lblE1ProtonValue.setText(Integer.toString(protonNum));
+				lblE1NeutronValue.setText(Integer.toString(neutronNum));
+				lblE1MassValue.setText(Integer.toString(massNum));
+				lblE1AtomicValue.setText(Integer.toString(atomicNum));
+				lblE1MassValue.setText("0.5 grams");
+				
+				//reactionHappened = true;
+			 return true;
+	
+		}
+
+		return false;
+	}
+	
+	private boolean reactionSim5Set3(int sim, int set) {
+		if(!p5Canvas.isSimStarted) //Reaction has not started yet
+			return false;
+		
+		//Radioactive Decay happend at 13.8 sec
+		if (p5Canvas.getMain().time==7) {
+			
+			//Get mid point of all the molecules in killing list
+			Vec2 spawnPos = new Vec2();
+			
+			for(Molecule mole: State.getMolecules())
+			{
+				spawnPos.addLocal(mole.getPositionInPixel());
+		
+			}
+			spawnPos.mulLocal(1f/State.getMoleculeNum());
+			float x_ = spawnPos.x;
+			float y_ = spawnPos.y;
+
+
+			//Destroy all the molecules
+			p5Canvas.removeAllMolecules();
+	
+			
+
+				 String compoundName = new String ("O-16");
+				 Vec2[] structure = nuclearStructure.get(compoundName);
+				  int len = structure.length;
+				int protonNum = nuclearInfo.getProtonNumByName(compoundName);
+				 int neutronNum = nuclearInfo.getNeutronNumByName(compoundName);
+				 boolean createProton = true;
+				 Molecule newMole = null;
+				 boolean res = false;
+				if(len!=0)
+				{
+				for (int i = 0; i < len; i++) {
+					
+					if (protonNum == 0) // Only neutron left
+					{
+						createProton = false;
+					} else if (neutronNum == 0) // only proton left
+					{
+						createProton = true;
+					} else {
+						createProton = (i % 2 == 0);
+						if (createProton) {
+							// Mark i with proton
+							createProton = true;
+							--protonNum;
+						} else {
+							// Mark i with neutron
+							createProton = false;
+							--neutronNum;
+						}
+					}
+
+					// read preset position
+					Vec2 pos = structure[i];
+					String elementName = createProton ? protonName : neutronName;
+					//System.out.println(elementName);
+					newMole = new Molecule(x_ + pos.x, y_ + pos.y,
+							elementName, box2d,
+							p5Canvas, 0);
+
+					// newMole.setGravityScale(0f);			
+				
+				res = State.molecules.add(newMole);
+				float velocityX = 0;
+				float velocityY = 0;
+				newMole.setLinearVelocity(new Vec2(velocityX, velocityY));
+				//Set the state to gas so there is no gravitivity
+				newMole.setEnableAutoStateChange(false);
+				newMole.setState(mState.Gas);
+				//Set use png file when draw molecule
+				newMole.setImage(elementName);
+				}
+				
+					/* Add joint for solid molecules */
+						int index1 = 0;
+						Molecule m1 = null;
+		
+		
+						for ( int i = 0; i < len; i++) {
+		
+							/* For every molecule, create a anchor to fix its position */
+							index1 = i ;
+							m1 = State.molecules.get(index1);
+							Vec2 m1Pos = box2d.coordWorldToPixels(m1.getPosition());
+							Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
+									p5Canvas);
+							State.anchors.add(anchor);
+							joint2Elements(m1, anchor, jointLen, frequency, damp);
+						}
+					
+					
+				}
+			 
+			 
+				//Set up output
+				String element1 = new String("O-16");
+				protonNum = nuclearInfo.getProtonNumByName(element1);
+				neutronNum = nuclearInfo.getNeutronNumByName(element1);
+				int massNum = nuclearInfo.getMassNumByName(element1);
+				int atomicNum = nuclearInfo.getAtomicNumByName(element1);
+	
+				lblElement1Value.setText(element1);
+				lblE1ProtonValue.setText(Integer.toString(protonNum));
+				lblE1NeutronValue.setText(Integer.toString(neutronNum));
+				lblE1MassValue.setText(Integer.toString(massNum));
+				lblE1AtomicValue.setText(Integer.toString(atomicNum));
+				lblE1MassValue.setText("0.5 grams");
+				
+				//reactionHappened = true;
+			 return true;
+	
+		}
+
+		return false;
+	}
+	
+
 	//Simulate molecule vibration
-	private void shakeMolecules(int sim, int set, double impulseValueMax)
+	private void shakeMolecules(int sim, int set, double impulseValueMax, double velocityLimit)
 	{
 		if(stepCount%shakeIteration !=0)
 			return;
@@ -805,6 +1892,8 @@ public class Unit9 extends UnitBase {
 		for(int i = 0; i<State.getMoleculeNum();i++)
 		{
 			Molecule mole = State.getMoleculeByIndex(i);
+			if(mole.compoundJoint.size()==0) //Do not shake molecule without joints
+				continue;
 			//Set up increment to make impulse different
 			impulseDirX = (impulseDirX+impulseDirXMax*i*increment)%impulseDirXMax;
 			impulseDirY = (impulseDirY+impulseDirYMax*i*increment)%impulseDirYMax;
@@ -820,7 +1909,7 @@ public class Unit9 extends UnitBase {
 				velocity = mole.getLinearVelocity();
 				float dot = Vec2.dot(velocity, jointVec);
 				float velocityNorm = MathFunction.norm(velocity);
-				if(velocityNorm>6)   //Velocity is perpendicular to the joint
+				if(velocityNorm>velocityLimit)   //Velocity is perpendicular to the joint
 				{	
 					impulse.set(MathFunction.normalizeForce(velocity).mulLocal((float)(-1*impulseValue)));          //Flip it
 				}
@@ -991,7 +2080,7 @@ public class Unit9 extends UnitBase {
 	{
 		if(!isHit)
 		{
-			this.shakeMolecules(sim, set,6);
+			this.shakeMolecules(sim, set,6,6);
 		}
 		else
 		{
@@ -1004,16 +2093,26 @@ public class Unit9 extends UnitBase {
 				mole.destroy();
 				
 				//Create two new nuclears
-				float x_ = 50;
+				float x_ = 75;
+				float y_ = 75;
+				Vec2 [] spawnPos = new Vec2[fissionElementNum];
+				spawnPos[0] = new Vec2(-x_,0);   //Position of Element 1
+				spawnPos[1] = new Vec2(0,y_);   //Position of Element 2
+				spawnPos[2] = new Vec2(-0.5f*x_,-y_); //Position of Electron 1
+				spawnPos[3] = new Vec2(0.5f*x_,-0.5f*y_);
+				spawnPos[4] = new Vec2(1.5f*x_,0);
+				
 				Random rand = new Random();
-				int fissionIndex = (sim-1)*2 + rand.nextInt(1);
+				int randInt = rand.nextInt(2);
+				//System.out.println(randInt);
+				int fissionIndex = (this.currentSimulationID)*2 + randInt;
 				String compoundName; 
 				Molecule newMole;
 				for(int i = 0 ;i<fissionElementNum;i++)
 				//Add impulse to them
 				{
 					compoundName = fissionProduction[fissionIndex][i];
-					newMole = new Molecule(posInPixel.x, posInPixel.y,
+					newMole = new Molecule(posInPixel.x+spawnPos[i].x, posInPixel.y+spawnPos[i].y,
 							compoundName, box2d,
 							p5Canvas, 0);
 
@@ -1023,6 +2122,11 @@ public class Unit9 extends UnitBase {
 					newMole.setState(mState.Gas);
 					//Set use png file when draw molecule
 					newMole.setImage(compoundName);
+					Vec2 impulse = new Vec2(spawnPos[i].mul(0.01f));
+					impulse.y*=-1;
+					if(i>=2)
+						impulse.mulLocal(0.1f);
+					newMole.applyLinearImpulse(impulse, newMole.getPosition());
 				}
 				//Set up output
 				String element1 = fissionProduction[fissionIndex][0];
@@ -1130,6 +2234,9 @@ public class Unit9 extends UnitBase {
 
 		}
 	}
+	
+	
+	
 
 	/*
 	 * (non-Javadoc)
@@ -1157,20 +2264,26 @@ public class Unit9 extends UnitBase {
 		interpolatorShow.setTargeting(false);
 		interpolatorShow.setAttraction(0.15f);
 		interpolatorShow.setDamping(0.2f);
-		currentSimulationID = -1;
+		currentSimulationID = 0;
 		isHit = false;
 		firstHit =false;
 		buttonMap.clear();
 		buttonRef.clear();
+		//fusionReactants.clear();
+		numSelected = 0;
+		stepCount=0;
 
 		p5Canvas.isBoundaryShow = false;
 		p5Canvas.setIfConstrainKE(false);
 
-		p5Canvas.getMain().boxMoleculeHiding.setEnabled(false);
-		p5Canvas.getMain().boxDisplayForce.setEnabled(false);
+		Main main = p5Canvas.getMain();
+		main.boxMoleculeHiding.setEnabled(false);
+		main.boxDisplayForce.setEnabled(false);
+		main.playBtn.setEnabled(false);
 		
 		 simStarted = false; //If play button is clicked
 		nuclearSelected = false; //If user has already click nuclear button
+		this.reactionHappened = false;
 
 		// Set up speed
 		setupSpeed();
@@ -1203,8 +2316,30 @@ public class Unit9 extends UnitBase {
 		case 3:
 			break;
 		case 4:
+		
+			main.playBtn.setEnabled(true);
+			int minStep = 70;
+			int maxStep = 100;
+			Random rand = new Random();
+			
+			reactStep = minStep + rand.nextInt(maxStep-minStep);
+			System.out.println("reactStep is "+reactStep);	
 			break;
+			
 		case 5:
+			main.playBtn.setEnabled(true);
+			if(set==1)
+			{
+				reactStep = 414;
+			}
+			else if (set==2)
+			{
+				
+			}
+			else if (set==3)
+			{
+				
+			}
 			break;
 		}
 
@@ -1241,6 +2376,11 @@ public class Unit9 extends UnitBase {
 
 		switch (sim) {
 		case 1:
+			lblMassValue.setText("");
+			lblNeutronValue.setText("");
+			lblProtonValue.setText("");
+			lblAtomicValue.setText("");
+			
 			dashboard.add(lblMassText, "cell 0 1, align right");
 			dashboard.add(lblMassValue, "cell 1 1, align left");
 			dashboard.add(lblNeutronText, "cell 0 2, align right");
@@ -1255,6 +2395,24 @@ public class Unit9 extends UnitBase {
 					"[]20[][][][]20[][][][][]20[][][][][]"));
 			dashboard.add(p5Canvas.getMain().lblElapsedTimeText, "flowx,cell 0 0,alignx right");
 			dashboard.add(p5Canvas.getMain().elapsedTime, "cell 1 0");
+			
+			lblMassValue.setText("");
+			lblNeutronValue.setText("");
+			lblProtonValue.setText("");
+			lblAtomicValue.setText("");
+			lblElement1Text.setText("Element1: ");
+			lblElement1Value.setText("");
+			lblE1MassValue.setText("");
+			lblE1NeutronValue.setText("");
+			lblE1ProtonValue.setText("");
+			lblE1AtomicValue.setText("");
+			lblElement2Text.setText("Element2: ");
+			lblElement2Value.setText("");
+			lblE2MassValue.setText("");
+			lblE2NeutronValue.setText("");
+			lblE2ProtonValue.setText("");
+			lblE2AtomicValue.setText("");
+
 			dashboard.add(lblMassText, "cell 0 1, align right");
 			dashboard.add(lblMassValue, "cell 1 1, align left");
 			dashboard.add(lblNeutronText, "cell 0 2, align right");
@@ -1288,28 +2446,86 @@ public class Unit9 extends UnitBase {
 			dashboard.add(lblE2AtomicValue, "cell 1 14, align left");
 			break;
 		case 3:
-			dashboard.add(lblProtonText, "cell 0 1, align right");
-			dashboard.add(lblProtonValue, "cell 1 1, align left");
-			dashboard.add(lblNeutronText, "cell 0 2, align right");
-			dashboard.add(lblNeutronValue, "cell 1 2,align left");
-			dashboard.add(lblElectronText, "cell 0 3, align right");
-			dashboard.add(lblElectronValue, "cell 1 3, align left");
+			dashboard.add(lblMassText, "cell 0 1, align right");
+			dashboard.add(lblMassValue, "cell 1 1, align left");
+			dashboard.add(lblProtonText, "cell 0 2, align right");
+			dashboard.add(lblProtonValue, "cell 1 2,align left");
+			dashboard.add(lblNeutronText, "cell 0 3, align right");
+			dashboard.add(lblNeutronValue, "cell 1 3, align left");
 			break;
 		case 4:
-			dashboard.add(lblProtonText, "cell 0 1, align right");
-			dashboard.add(lblProtonValue, "cell 1 1, align left");
-			dashboard.add(lblNeutronText, "cell 0 2, align right");
-			dashboard.add(lblNeutronValue, "cell 1 2,align left");
-			dashboard.add(lblElectronText, "cell 0 3, align right");
-			dashboard.add(lblElectronValue, "cell 1 3, align left");
+			
+			dashboard.add(lblElement1Text,"cell 0 1, align right");
+			dashboard.add(lblElement1Value,"cell 1 1, align left");
+			dashboard.add(lblE1MassText, "cell 0 2, align right");
+			dashboard.add(lblE1MassValue, "cell 1 2, align left");
+			dashboard.add(lblE1ProtonText, "cell 0 3, align right");
+			dashboard.add(lblE1ProtonValue, "cell 1 3,align left");
+			dashboard.add(lblE1NeutronText, "cell 0 4, align right");
+			dashboard.add(lblE1NeutronValue, "cell 1 4, align left");
+			
+			if(set==1){
+			lblElement1Text.setText("Element: ");
+			lblElement1Value.setText("Am-241");
+			lblE1MassValue.setText("241");
+			lblE1ProtonValue.setText("95");
+			lblE1NeutronValue.setText("146");
+			}
+			
+			if(set==2){
+			lblElement1Text.setText("Element: ");
+			lblElement1Value.setText("H-3");
+			lblE1MassValue.setText("3");
+			lblE1ProtonValue.setText("1");
+			lblE1NeutronValue.setText("2");
+			}
+			
+			if(set==3){
+			lblElement1Text.setText("Element: ");
+			lblElement1Value.setText("H-3");
+			lblE1MassValue.setText("3");
+			lblE1ProtonValue.setText("1");
+			lblE1NeutronValue.setText("2");
+			}
 			break;
 		case 5:
-			dashboard.add(lblProtonText, "cell 0 1, align right");
-			dashboard.add(lblProtonValue, "cell 1 1, align left");
-			dashboard.add(lblNeutronText, "cell 0 2, align right");
-			dashboard.add(lblNeutronValue, "cell 1 2,align left");
-			dashboard.add(lblElectronText, "cell 0 3, align right");
-			dashboard.add(lblElectronValue, "cell 1 3, align left");
+			dashboard.add(lblElement1Text,"cell 0 1, align right");
+			dashboard.add(lblElement1Value,"cell 1 1, align left");
+			dashboard.add(lblE1MassText, "cell 0 2, align right");
+			dashboard.add(lblE1MassValue, "cell 1 2, align left");
+			dashboard.add(lblE1ProtonText, "cell 0 3, align right");
+			dashboard.add(lblE1ProtonValue, "cell 1 3,align left");
+			dashboard.add(lblE1NeutronText, "cell 0 4, align right");
+			dashboard.add(lblE1NeutronValue, "cell 1 4, align left");
+			dashboard.add(lblE1MassText,"cell 0 5, align right");
+			dashboard.add(lblE1MassValue,"cell 1 5, align left");
+			
+			if(set==1){
+				lblElement1Text.setText("Element: ");
+				lblElement1Value.setText("Be-11");
+				lblE1MassValue.setText("11");
+				lblE1ProtonValue.setText("4");
+				lblE1NeutronValue.setText("7");
+				lblE1MassValue.setText("1 gram");
+			}
+			
+			else if(set==2){
+				lblElement1Text.setText("Element: ");
+				lblElement1Value.setText("F-21");
+				lblE1MassValue.setText("21");
+				lblE1ProtonValue.setText("9");
+				lblE1NeutronValue.setText("12");
+				lblE1MassValue.setText("1 gram");
+			}
+			
+			else if(set==3){
+				lblElement1Text.setText("Element: ");
+				lblElement1Value.setText("N-16");
+				lblE1MassValue.setText("16");
+				lblE1ProtonValue.setText("7");
+				lblE1NeutronValue.setText("9");
+				lblE1MassValue.setText("1 gram");
+			}
 			break;
 		}
 
@@ -1334,27 +2550,27 @@ public class Unit9 extends UnitBase {
 	@Override
 	public void updateOutput(int sim, int set) {
 
-		int protonNum = 0;
-		int neutronNum = 0;
-		int electronNum = 0;
-		int massNum = 0;
-		int atomicNum = 0;
-
-		// If any nuclear has been selected
-		if (currentSimulationID != -1) {
-
-			String name = IDMap[sim - 1].get(currentSimulationID);
-			protonNum = nuclearInfo.getProtonNumByName(name);
-			neutronNum = nuclearInfo.getNeutronNumByName(name);
-			electronNum = nuclearInfo.getElectronNumByName(name);
-			massNum = nuclearInfo.getMassNumByName(name);
-			atomicNum = nuclearInfo.getAtomicNumByName(name);
-		}
-		lblProtonValue.setText(Integer.toString(protonNum));
-		lblNeutronValue.setText(Integer.toString(neutronNum));
-		lblElectronValue.setText(Integer.toString(electronNum));
-		lblMassValue.setText(Integer.toString(massNum));
-		lblAtomicValue.setText(Integer.toString(atomicNum));
+//		int protonNum = 0;
+//		int neutronNum = 0;
+//		int electronNum = 0;
+//		int massNum = 0;
+//		int atomicNum = 0;
+//
+//		// If any nuclear has been selected
+//		if (currentSimulationID != -1) {
+//
+//			String name = IDMap[sim - 1].get(currentSimulationID);
+//			protonNum = nuclearInfo.getProtonNumByName(name);
+//			neutronNum = nuclearInfo.getNeutronNumByName(name);
+//			electronNum = nuclearInfo.getElectronNumByName(name);
+//			massNum = nuclearInfo.getMassNumByName(name);
+//			atomicNum = nuclearInfo.getAtomicNumByName(name);
+//		}
+//		lblProtonValue.setText(Integer.toString(protonNum));
+//		lblNeutronValue.setText(Integer.toString(neutronNum));
+//		lblElectronValue.setText(Integer.toString(electronNum));
+//		lblMassValue.setText(Integer.toString(massNum));
+//		lblAtomicValue.setText(Integer.toString(atomicNum));
 
 	}
 
@@ -1473,8 +2689,23 @@ public class Unit9 extends UnitBase {
 			int count) {
 		boolean res = true;
 
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
 		float x_ = p5Canvas.w / 2; // X Coordinate for a specific molecule
 		float y_ = p5Canvas.h / 2; // Y Coordinate for a specific molecule
+		
+		if(sim==3)
+		{
+			if(numSelected==1){  //Add at left half
+			x_ = p5Canvas.w/4;
+			y_ = p5Canvas.h/4;
+				
+			}
+			else if (numSelected==2){
+				x_ = p5Canvas.w/4*3;
+				y_ = p5Canvas.h/4*3;
+			}
+		}
 
 		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
 
@@ -1497,8 +2728,7 @@ public class Unit9 extends UnitBase {
 
 		boolean createProton = false; // If proton is going to be created
 		Vec2[] structure = nuclearStructure.get(compoundName);
-		int sim  = p5Canvas.getSim();
-		int set = p5Canvas.getSet();
+	
 		if(sim==1 && set==2)
 			structure = nuclearStructure.get("Helium-Quark");
 		int len = structure.length;
@@ -1549,25 +2779,27 @@ public class Unit9 extends UnitBase {
 			newMole.setState(mState.Gas);
 			//Set use png file when draw molecule
 			newMole.setImage(elementName);
+			newMole.setParentName(compoundName+"-"+(numSelected-1));
 			}
 			
-			/* Add joint for solid molecules */
-			//if (count > 1) 
-			
-				int index1 = 0;
-				Molecule m1 = null;
-
-
-				for ( int i = 0; i < len; i++) {
-
-					/* For every molecule, create a anchor to fix its position */
-					index1 = i + startIndex;
-					m1 = State.molecules.get(index1);
-					Vec2 m1Pos = box2d.coordWorldToPixels(m1.getPosition());
-					Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
-							p5Canvas);
-					State.anchors.add(anchor);
-					joint2Elements(m1, anchor, jointLen, frequency, damp);
+				/* Add joint for solid molecules */
+				//if (count > 1) 
+				if(sim!=3){
+					int index1 = 0;
+					Molecule m1 = null;
+	
+	
+					for ( int i = 0; i < len; i++) {
+	
+						/* For every molecule, create a anchor to fix its position */
+						index1 = i + startIndex;
+						m1 = State.molecules.get(index1);
+						Vec2 m1Pos = box2d.coordWorldToPixels(m1.getPosition());
+						Anchor anchor = new Anchor(m1Pos.x, m1Pos.y, box2d,
+								p5Canvas);
+						State.anchors.add(anchor);
+						joint2Elements(m1, anchor, jointLen, frequency, damp);
+					}
 				}
 				
 			}
@@ -1584,7 +2816,7 @@ public class Unit9 extends UnitBase {
 				newMole.setEnableAutoStateChange(false);
 				newMole.setState(mState.Gas);
 				
-				if(sim==2)
+				if(sim==2||sim==4)
 				{
 					newMole.setImage(compoundName);
 					Vec2 m1Pos = box2d.coordWorldToPixels(newMole.getPosition());
@@ -1598,16 +2830,101 @@ public class Unit9 extends UnitBase {
 		return res;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * simulations.UnitBase#beginReaction(org.jbox2d.dynamics.contacts.Contact)
+	/* (non-Javadoc)
+	 * @see simulations.UnitBase#beginReaction(org.jbox2d.dynamics.contacts.Contact)
 	 */
 	@Override
 	public void beginReaction(Contact c) {
-		// TODO Auto-generated method stub
+		// If there are some molecules have not been killed yet.
+		// We skip this collision
+		if (!p5Canvas.killingList.isEmpty())
+			return;
+		// Get our objects that reference these bodies
+		Object o1 = c.m_fixtureA.m_body.getUserData();
+		Object o2 = c.m_fixtureB.m_body.getUserData();
 
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
+
+		if (o1 == null || o2 == null)
+			return;
+		// TODO: Get reaction elements based on Simulation object parameter
+		String c1 = o1.getClass().getName();
+		String c2 = o2.getClass().getName();
+
+		// Make sure reaction only takes place between molecules or ions
+		if (c1.contains("Molecule") && c2.contains("Molecule")) {
+			Molecule m1 = (Molecule) o1;
+			Molecule m2 = (Molecule) o2;
+
+//			Vec2 speed1 = m1.getLinearVelocity();
+//			Vec2 speed2 = m2.getLinearVelocity();
+//			Vec2 speedDiff = speed1.sub(speed2);
+			
+			// Check if these two protons come from different nuclears
+			if (!m1.getParentName().equals(m2.getParentName())) 
+			{
+
+				ArrayList<String> reactants = new ArrayList<String>();
+				reactants.add(m1.getName());
+				reactants.add(m2.getName());
+				if (true) { /* TODO: Maybe there are some conditions */
+
+					p5Canvas.products = getReactionProducts(reactants, m1, m2);
+					if (p5Canvas.products != null
+							&& p5Canvas.products.size() > 0) {
+						/*
+						 * If there are some new stuff in newProducts, kill old
+						 * ones and add new ones
+						 */
+						p5Canvas.killingList.add(m1);
+						p5Canvas.killingList.add(m2);
+
+					}
+
+				}
+			}
+			
+
+		
+		}
+	}
+
+	private ArrayList<String> getReactionProducts(ArrayList<String> reactants,
+			Molecule m1, Molecule m2) {
+		ArrayList<String> products = new ArrayList<String>();
+		int sim = p5Canvas.getSim();
+		int set = p5Canvas.getSet();
+		
+		switch (sim) {
+		case 3:
+			
+	
+			if(set==1)
+			{
+				String pName1 = m1.getParentName();
+				String pName2 = m2.getParentName();
+				
+				if(pName1.contains("He-3")&& pName2.contains("He-3")  )
+				{
+					products.add("He-4");
+					products.add("H-1");
+					products.add("H-1");
+				}
+				else if(pName1.contains("He-4")&& pName2.contains("He-4") )
+				{
+					products.add("Be-8");
+				}
+				else if( (pName1.contains("He-4")&& pName2.contains("Be-8")) ||(pName2.contains("He-4")&& pName1.contains("Be-8")) )
+				{
+					products.add("C-12");
+				}
+			}
+	
+			break;	
+		}
+		
+			return products;
 	}
 
 	/*
@@ -1657,6 +2974,39 @@ public class Unit9 extends UnitBase {
 			nuclearList.put("Chlorine-45", chlorine45);
 			Nuclear Strontium = new Nuclear("Strontium-90",38,52,38);
 			nuclearList.put("Strontium-90", Strontium);
+			Nuclear h1 = new Nuclear("H-1",1,0,1);
+			nuclearList.put("H-1", h1);
+			Nuclear h2 = new Nuclear("H-2",1,1,1);
+			nuclearList.put("H-2", h2);
+			Nuclear h3 = new Nuclear("H-3",1,2,1);
+			nuclearList.put("H-3", h3);
+			Nuclear he3 = new Nuclear("He-3",2,1,2);
+			nuclearList.put("He-3", he3);
+			Nuclear he4 = new Nuclear("He-4",2,2,2);
+			nuclearList.put("He-4", he4);
+			Nuclear be8 = new Nuclear("Be-8",4,4,4);
+			nuclearList.put("Be-8", be8);
+			Nuclear be11 = new Nuclear("Be-11",4,7,4);
+			nuclearList.put("Be-11", be11);
+			Nuclear b11 = new Nuclear("B-11",5,6,5);
+			nuclearList.put("B-11", b11);
+			Nuclear c12 = new Nuclear("C-12",6,6,6);
+			nuclearList.put("C-12", c12);
+			Nuclear beta = new Nuclear("Beta",5,6,5);
+			nuclearList.put("Beta", beta);
+			Nuclear f21 = new Nuclear("F-21",9,21,9);
+			nuclearList.put("F-21",f21);
+			Nuclear ne21 = new Nuclear("Ne-21",10,11,10);
+			nuclearList.put("Ne-21",ne21);
+			Nuclear n16 = new Nuclear("N-16",7,9,7);
+			nuclearList.put("N-16",n16);
+			Nuclear o16 = new Nuclear("O-16",8,8,8);
+			nuclearList.put("O-16",o16);
+			Nuclear am241 = new Nuclear("Am-241",95,146,95);
+			nuclearList.put("Am-241", am241);
+			Nuclear np237 = new Nuclear("Np-237",93,144,93);
+			nuclearList.put("Np-237", np237);
+			
 			
 			
 		}

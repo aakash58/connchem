@@ -1086,7 +1086,17 @@ units:
     sets:
     - set: 1
       compounds:
-      - compound: "Water"
+      - compound: "Am-241"
+        qty: 1
+        cap: 1
+    - set: 2
+      compounds:
+      - compound: "H-3"
+        qty: 1
+        cap: 1
+    - set: 3
+      compounds:
+      - compound: "H-3"
         qty: 1
         cap: 1
   - sim: 5
@@ -1094,6 +1104,16 @@ units:
     sets:
     - set: 1
       compounds:
-      - compound: "Water"
+      - compound: "Be-11"
+        qty: 1
+        cap: 1
+    - set: 2
+      compounds:
+      - compound: "F-21"
+        qty: 1
+        cap: 1
+    - set: 3
+      compounds:
+      - compound: "N-16"
         qty: 1
         cap: 1
