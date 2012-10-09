@@ -862,8 +862,8 @@ public class Main {
 		//Re-add checkboxes to parent panel
 		checkBoxPanel.add(boxMoleculeHiding, BorderLayout.NORTH);
 		//checkBoxPanel.add(boxDisplayForce, BorderLayout.SOUTH);
-		checkBoxPanel.add(boxDisplayForce, BorderLayout.CENTER);
-		checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
+		checkBoxPanel.add(boxDisplayForce, BorderLayout.SOUTH);
+		//checkBoxPanel.add(boxDisplayJoint, BorderLayout.SOUTH);
 
 		p5Canvas.resetCheckboxPanel();
 //		if(p5Canvas.isSimSelected(4, 2))

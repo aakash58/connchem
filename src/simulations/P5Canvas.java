@@ -232,8 +232,10 @@ public class P5Canvas extends PApplet {
 			unitList.getUnit4().displayTrail();
 
 		// Draw all molecules
-		for (int i = 0; i < molecules.size(); i++) {
-			Molecule m = molecules.get(i);
+		for (int i = 0;i<State.getMoleculeNum();i++) {
+			Molecule m = State.getMoleculeByIndex(i);
+			if(m==null)
+				continue;
 			if (isHidingEnabled && isHidden) {
 				Vec2 p = box2d.coordWorldToPixels(m.getPosition());
 				if (xStart / canvasScale < p.x && p.x < mouseX / canvasScale
@@ -244,6 +246,12 @@ public class P5Canvas extends PApplet {
 					m.isHidden = false;
 			}
 			m.display();
+		}
+		
+		//Draw all ImageObjects
+		for(ImageObject io: State.getImageObjects())
+		{
+			io.display();
 		}
 
 		// Update anchors position
@@ -486,6 +494,7 @@ public class P5Canvas extends PApplet {
 		else killingList = new ArrayList<Molecule>();
 		removeAllMolecules();
 		removeAllAnchors();
+		removeAllImageObjects();
 
 		unit = getMain().getSelectedUnit();
 		sim = getMain().getSelectedSim();
@@ -591,6 +600,11 @@ public class P5Canvas extends PApplet {
 		anchors.clear();
 
 		isEnable = tmp;
+	}
+	// Remove existing Image Objects, called by reset()
+	public void removeAllImageObjects()
+	{
+		State.imageObjects.clear();
 	}
 	
 	

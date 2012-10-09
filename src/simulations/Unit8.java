@@ -529,7 +529,7 @@ public class Unit8 extends UnitBase {
 				float tran = (float)interpolatorShow.getValue()/100;
 				if(tran<0.01f)
 					tran = 0.0f;
-				System.out.println("Show trans is "+tran);
+				//System.out.println("Show trans is "+tran);
 
 				for(Molecule newMole:newMolecules)
 				{
@@ -542,7 +542,7 @@ public class Unit8 extends UnitBase {
 				float trans = (float)interpolatorHide.getValue()/100;
 				if(trans>0.98f)
 					trans=1.0f;
-				System.out.println("Hide trans is "+trans);
+				//System.out.println("Hide trans is "+trans);
 				first.setTransparent(trans);
 				second.setTransparent(trans);
 //				System.out.println("trans is "+trans);
