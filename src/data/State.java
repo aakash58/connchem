@@ -6,12 +6,14 @@ import java.util.HashMap;
 
 import simulations.models.Anchor;
 import simulations.models.Boundary;
+import simulations.models.ImageObject;
 import simulations.models.Molecule;
 
 public class State {
 	// An ArrayList of particles that will fall on the surface
 	public static ArrayList<Molecule> molecules = new ArrayList<Molecule>();
 	public static ArrayList<Anchor> anchors = new ArrayList<Anchor>();
+	public static ArrayList<ImageObject> imageObjects = new ArrayList<ImageObject>();
 	// A list we'll use to track fixed objects
 
 	public static HashMap<String,Integer> moleculesAdded = new HashMap<String,Integer>();
@@ -130,6 +132,11 @@ public class State {
 			}
 		}
 		return moles;
+	}
+	
+	public static ArrayList<ImageObject> getImageObjects()
+	{
+		return imageObjects;
 	}
 	
 	

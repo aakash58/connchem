@@ -737,6 +737,7 @@ public class Molecule {
 		}
 		else  //If using png file
 		{
+			p5Canvas.tint(255, (1-transparency)*255f);  // Apply transparency without changing color
 			p5Canvas.image(pngSource, pShapeW / -2, pShapeH / -2, pShapeW, pShapeH);
 		}
 	}
@@ -745,8 +746,8 @@ public class Molecule {
 	{
 		if(fixtures.size()>0)
 		{
-		int catergory = fixtures.get(0).getFilterData().categoryBits;
-		if(((catergory & Constants.MOLE_NOTBOUND_ID)==0) && catergory!=Constants.NOCOLLIDER)
+			int catergory = fixtures.get(0).getFilterData().categoryBits;
+			if(((catergory & Constants.MOLE_NOTBOUND_ID)==0) && catergory!=Constants.NOCOLLIDER)
 		{
 		/* If molecules go out of boundary, reset their position */
 		/* Top boundary check, top boundary has max y value */
