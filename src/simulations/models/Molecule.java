@@ -744,10 +744,12 @@ public class Molecule {
 	
 	private void boundaryCheck()
 	{
-		if(fixtures.size()>0)
+		if(fixtures.size()>0 && fixtures.get(0).getFilterData()!=null )
 		{
+			
 			int catergory = fixtures.get(0).getFilterData().categoryBits;
 			if(((catergory & Constants.MOLE_NOTBOUND_ID)==0) && catergory!=Constants.NOCOLLIDER)
+				
 		{
 		/* If molecules go out of boundary, reset their position */
 		/* Top boundary check, top boundary has max y value */

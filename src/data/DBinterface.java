@@ -41,10 +41,10 @@ public class DBinterface {
 				conn = DriverManager.getConnection("jdbc:sqlite:"+dbFile.getPath());
 			}
 			//******************************************************************************
+			*/
 			 
-			 */
 			
-	
+			
 			
 			//************* Debug Configuration, please comment this block before make a release version ***********
 			String dbPath = ClassLoader.getSystemResource("data/"+dbFileName).toString();

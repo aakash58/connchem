@@ -27,6 +27,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
+import org.jbox2d.dynamics.joints.ConstantVolumeJointDef;
 
 import data.State;
 import data.YAMLinterface;
@@ -135,6 +136,7 @@ public class Unit9 extends UnitBase {
 	private final int numSelectedMax = 2;
 	private boolean reactionHappened; // If fusion has happened in Sim 3
 	private int reactStep = -1; // When the radiation is going to happen
+	private ArrayList<ConstantVolumeJointDef> cvjdList = new ArrayList<ConstantVolumeJointDef>();
 	
 
 	// Joint parameters
@@ -320,7 +322,7 @@ public class Unit9 extends UnitBase {
 		lblE1AtomicValue = new JLabel("");
 		lblE2AtomicValue = new JLabel("");
 		lblMassText = new JLabel("Mass Number:");
-		lblE1MassText = new JLabel("Mass Number:");
+		lblE1MassText = new JLabel("Mass:");
 		lblE2MassText = new JLabel("Mass Number:");
 		lblMassValue = new JLabel("");
 		lblE1MassValue = new JLabel("");
@@ -547,11 +549,8 @@ public class Unit9 extends UnitBase {
 		// H-2
 		massNum = 2;
 		Vec2[] h2Structure = new Vec2[massNum];
-		// protonSize = Molecule.getShapeSize("Proton", p5Canvas);
-		// width = protonSize.x * (1+padding);
-		// height = protonSize.y * (1+padding);
 		h2Structure[0] = new Vec2(0, 0);
-		h2Structure[1] = new Vec2(width * 0.5f, height * -0.5f);
+		h2Structure[1] = new Vec2(width * 0.45f, height * -0.45f);
 		nuclearStructure.put("H-2", h2Structure);
 
 		massNum = 3;
@@ -571,7 +570,7 @@ public class Unit9 extends UnitBase {
 		massNum = 4;
 		Vec2[] he4Structure = new Vec2[massNum];
 		protonSize = Molecule.getShapeSize("Proton", p5Canvas);
-		padding = 0.2f;
+		padding = 0.02f;
 		width = protonSize.x * (1 + padding);
 		height = protonSize.y * (1 + padding);
 		for (int i = 0; i < massNum; i++) {
@@ -977,6 +976,7 @@ public class Unit9 extends UnitBase {
 		Vec2 source = new Vec2();
 		Vec2 target = new Vec2();
 		Vec2 impulse = new Vec2();
+		float impulseValue = 0.01f;
 
 		if (sim == 3) {
 			for (JButton btn : buttonRef) {
@@ -989,12 +989,14 @@ public class Unit9 extends UnitBase {
 					source.set(box2d.coordPixelsToWorld(w, h));
 					target.set(mole.getPosition());
 					impulse = source.sub(target);
+					impulse.mulLocal(impulseValue);
 					mole.applyLinearImpulse(impulse, mole.getPosition());
 				} else // On the right half
 				{
 					source.set(box2d.coordPixelsToWorld(0, 0));
 					target.set(mole.getPosition());
 					impulse = source.sub(target);
+					impulse.mulLocal(impulseValue);
 					mole.applyLinearImpulse(impulse, mole.getPosition());
 				}
 
@@ -1600,14 +1602,14 @@ public class Unit9 extends UnitBase {
 			Molecule beta = new Molecule(x_ + 120, y_ +100, betaName,
 					box2d, p5Canvas, 0);
 			res = State.molecules.add(beta);
-			float velocityX = 12;
-			float velocityY = -6;
-			beta.setLinearVelocity(new Vec2(velocityX, velocityY));
 			// Set the state to gas so there is no gravitivity
 			beta.setEnableAutoStateChange(false);
 			beta.setState(mState.Gas);
 			// Set use png file when draw molecule
 			beta.setImage(betaName);
+			float velocityX = 12;
+			float velocityY = -6;
+			beta.setLinearVelocity(new Vec2(velocityX, velocityY));
 
 			// Set up output
 			String element1 = new String("B-11");
@@ -2450,13 +2452,14 @@ public class Unit9 extends UnitBase {
 			lblNeutronValue.setText("");
 			lblProtonValue.setText("");
 			lblAtomicValue.setText("");
-			lblElement1Text.setText("Element1: ");
+			lblElement1Text.setText("Element1");
 			lblElement1Value.setText("");
+			lblE1MassText.setText("Mass Number: ");
 			lblE1MassValue.setText("");
 			lblE1NeutronValue.setText("");
 			lblE1ProtonValue.setText("");
 			lblE1AtomicValue.setText("");
-			lblElement2Text.setText("Element2: ");
+			lblElement2Text.setText("Element2");
 			lblElement2Value.setText("");
 			lblE2MassValue.setText("");
 			lblE2NeutronValue.setText("");
@@ -2473,7 +2476,7 @@ public class Unit9 extends UnitBase {
 			dashboard.add(lblAtomicValue, "cell 1 4, align left");
 
 			dashboard.add(lblElement1Text, "cell 0 5, align right");
-			dashboard.add(lblElement1Value, "cell 1 5, align left");
+			//dashboard.add(lblElement1Value, "cell 1 5, align left");
 
 			dashboard.add(lblE1MassText, "cell 0 6, align right");
 			dashboard.add(lblE1MassValue, "cell 1 6, align left");
@@ -2485,7 +2488,7 @@ public class Unit9 extends UnitBase {
 			dashboard.add(lblE1AtomicValue, "cell 1 9, align left");
 
 			dashboard.add(lblElement2Text, "cell 0 10, align right");
-			dashboard.add(lblElement2Value, "cell 1 10, align left");
+			//dashboard.add(lblElement2Value, "cell 1 10, align left");
 			dashboard.add(lblE2MassText, "cell 0 11, align right");
 			dashboard.add(lblE2MassValue, "cell 1 11, align left");
 			dashboard.add(lblE2NeutronText, "cell 0 12, align right");
@@ -2541,15 +2544,16 @@ public class Unit9 extends UnitBase {
 		case 5:
 			dashboard.add(lblElement1Text, "cell 0 1, align right");
 			dashboard.add(lblElement1Value, "cell 1 1, align left");
-			dashboard.add(lblE1MassText, "cell 0 2, align right");
-			dashboard.add(lblE1MassValue, "cell 1 2, align left");
-			dashboard.add(lblE1ProtonText, "cell 0 3, align right");
-			dashboard.add(lblE1ProtonValue, "cell 1 3,align left");
-			dashboard.add(lblE1NeutronText, "cell 0 4, align right");
-			dashboard.add(lblE1NeutronValue, "cell 1 4, align left");
-			dashboard.add(lblE1MassText, "cell 0 5, align right");
-			dashboard.add(lblE1MassValue, "cell 1 5, align left");
+			//dashboard.add(lblE1MassText, "cell 0 2, align right");
+			//dashboard.add(lblE1MassValue, "cell 1 2, align left");
+			dashboard.add(lblE1ProtonText, "cell 0 2, align right");
+			dashboard.add(lblE1ProtonValue, "cell 1 2,align left");
+			dashboard.add(lblE1NeutronText, "cell 0 3, align right");
+			dashboard.add(lblE1NeutronValue, "cell 1 3, align left");
+			dashboard.add(lblE1MassText, "cell 0 4, align right");
+			dashboard.add(lblE1MassValue, "cell 1 4, align left");
 
+			lblE1MassText.setText("Mass: ");
 			if (set == 1) {
 				lblElement1Text.setText("Element: ");
 				lblElement1Value.setText("Be-11");
@@ -2776,14 +2780,6 @@ public class Unit9 extends UnitBase {
 			}
 		}
 
-		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
-
-		float moleWidth = size.x;
-		float moleHeight = size.y;
-
-		float spacing = moleWidth;
-
-		boolean isClear = false;
 		int startIndex = State.molecules.size(); // Start index of this group in
 		// molecules arraylist
 
@@ -2848,7 +2844,7 @@ public class Unit9 extends UnitBase {
 							+ (numSelected - 1));
 				}
 
-				/* Add joint for solid molecules */
+				/* Add fixed joint for solid molecules */
 				// if (count > 1)
 				if (sim != 3) {
 					int index1 = 0;
@@ -2868,6 +2864,80 @@ public class Unit9 extends UnitBase {
 						State.anchors.add(anchor);
 						joint2Elements(m1, anchor, jointLen, frequency, damp);
 					}
+				}
+				else //Add joints in between protons and neutrons for sim 3
+				{
+					int index1 = 0;
+					int index2 = 0;
+					Molecule m1 = null;
+					Molecule m2 = null;
+					
+				    int length = 50;
+				    if(len==1)
+				    {
+				    	m1 = State.molecules.get(startIndex);
+				    	m1.setRadius(1.5f);
+				    }
+				    else if(len==2 || len==3) //H-2, H-3, He-4
+				    {
+				    	for(int i = 0; i<len; i++)
+				    	{
+				    		index1 = i+ startIndex;
+				    		m1 = State.molecules.get(index1);
+				    		for(int j = i+1; j<len; j++)
+				    		{
+				    			index2 = j+startIndex;
+				    			m2 = State.molecules.get(index2);
+				    			
+				    			joint2Elements(m1, m2, length, frequency, damp,false);
+				    		}
+				    		m1.setRadius(1.5f);
+				    	}
+				    }
+				    else if(len==4)  //He-4
+				    {
+				    	//length = 48;
+
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+0), State.getMoleculeByIndex(startIndex+1), length, frequency, damp,false);
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+0), State.getMoleculeByIndex(startIndex+2), length, frequency, damp,false);
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+0), State.getMoleculeByIndex(startIndex+3), length, frequency, damp,false);
+				    	
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+1), State.getMoleculeByIndex(startIndex+3), length, frequency, damp,false);
+				    	
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+2), State.getMoleculeByIndex(startIndex+3), length, frequency, damp,false);
+				    	
+				    }
+				    else if(len==8)  //Be-8
+				    {
+				    	for(int i = 0; i<len; i++)
+				    	{
+				    		index1 = i+ startIndex;
+				    		m1 = State.molecules.get(index1);
+				    		m1.setRadius(1.2f);
+				    	}
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+0), State.getMoleculeByIndex(startIndex+1), length, frequency, damp,false);
+//				    	joint2Elements(State.getMoleculeByIndex(startIndex+0), State.getMoleculeByIndex(startIndex+2), length, frequency, damp,false);
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+0), State.getMoleculeByIndex(startIndex+3), length, frequency, damp,false);
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+0), State.getMoleculeByIndex(startIndex+4), length, frequency, damp,false);
+				    	
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+1), State.getMoleculeByIndex(startIndex+4), length, frequency, damp,false);
+				    	
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+2), State.getMoleculeByIndex(startIndex+3), length, frequency, damp,false);
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+2), State.getMoleculeByIndex(startIndex+5), length, frequency, damp,false);
+				    	
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+3), State.getMoleculeByIndex(startIndex+4), length, frequency, damp,false);
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+3), State.getMoleculeByIndex(startIndex+5), length, frequency, damp,false);
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+3), State.getMoleculeByIndex(startIndex+6), length, frequency, damp,false);
+				    	
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+4), State.getMoleculeByIndex(startIndex+6), length, frequency, damp,false);
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+4), State.getMoleculeByIndex(startIndex+7), length, frequency, damp,false);
+				    	
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+5), State.getMoleculeByIndex(startIndex+6), length, frequency, damp,false);
+				    	
+				    	joint2Elements(State.getMoleculeByIndex(startIndex+6), State.getMoleculeByIndex(startIndex+7), length, frequency, damp,false);
+				    }
+					
+					
 				}
 
 			} else // There is no predefined structure. Load original SVG file
@@ -2968,8 +3038,12 @@ public class Unit9 extends UnitBase {
 			if (set == 1) {
 				String pName1 = m1.getParentName();
 				String pName2 = m2.getParentName();
+				
+				if (pName1.contains("H-1") && pName2.contains("H-2")) {
+					products.add("He-3");
+				}
 
-				if (pName1.contains("He-3") && pName2.contains("He-3")) {
+				else if (pName1.contains("He-3") && pName2.contains("He-3")) {
 					products.add("He-4");
 					products.add("H-1");
 					products.add("H-1");

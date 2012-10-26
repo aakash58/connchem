@@ -745,24 +745,33 @@ public abstract class UnitBase {
 
 	/******************************************************************
 	 * FUNCTION : joint2Element DESCRIPTION : Binding two elements together by
-	 * creating joints between them
+	 * creating joints between them. The joint has constant length if flag is false
 	 * 
 	 * 
 	 * INPUTS : index1(int), index2(int), m1(Molecule),
 	 * m2(Molecule),length(float),frequency(float) OUTPUTS: void
 	 *******************************************************************/
 	public void joint2Elements(Molecule m1, Molecule m2, float length,
-			float frequency, float damp) {
+			float frequency, float damp,boolean flag ) {
 
+		if(!flag)
+		{
+		    frequency = 0;
+		    damp = 1;
+		}
+		
 		DistanceJointWrap djRef = new DistanceJointWrap(m1.body, m2.body,
 				PBox2D.scalarPixelsToWorld(length), frequency, damp);
 		/* Save joint reference */
 		m1.compoundJoint.add(djRef);
 		m2.compoundJoint.add(djRef);
+		
 		/* Save the other element`s index */
 		// m1.compoundJointPair.add(m2);
 		// m2.compoundJointPair.add(m1);
 	}
+	
+	
 
 	protected void joint2Elements(Molecule m1, Anchor anchor, float jointLen,
 			float frequency, float damp) {
@@ -784,16 +793,16 @@ public abstract class UnitBase {
 	 *******************************************************************/
 	public void joint2Elements(Molecule m1, Molecule m2) {
 		float length = 2 * Molecule.clRadius;
-		joint2Elements(m1, m2, length, 5, 0.5f);
+		joint2Elements(m1, m2, length, 5, 0.5f,true);
 	}
 
 	public void joint2Elements(Molecule m1, Molecule m2, float length) {
-		joint2Elements(m1, m2, length, 5, 0.5f);
+		joint2Elements(m1, m2, length, 5, 0.5f,true);
 	}
 
 	public void joint2Elements(Molecule m1, Molecule m2, float length,
 			float frequency) {
-		joint2Elements(m1, m2, length, frequency, 0.5f);
+		joint2Elements(m1, m2, length, frequency, 0.5f,true);
 	}
 
 	/******************************************************************

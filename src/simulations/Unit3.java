@@ -563,33 +563,33 @@ public class Unit3 extends UnitBase {
 			if ((i + 1) % 3 != 0) {
 				m1 = State.molecules.get(startIndex + i);
 				m2 = State.molecules.get(startIndex + i + 1);
-				joint2Elements(m1, m2, jointLength, frequency, damp);
+				joint2Elements(m1, m2, jointLength, frequency, damp,true);
 			}
 		}
 		// Create joints in vertical direction
 		for (int i = 0; i < count / 2; i++) {
 			m1 = State.molecules.get(startIndex + i);
 			m2 = State.molecules.get(startIndex + i + 3);
-			joint2Elements(m1, m2, jointLength, frequency, damp);
+			joint2Elements(m1, m2, jointLength, frequency, damp,true);
 		}
 
 		// Create joints in diagonal direction
 		jointLength = (float) (Math.sqrt(2) * (moleHeight / 2 + moleWidth / 2));
 		m1 = State.molecules.get(startIndex + 0);
 		m2 = State.molecules.get(startIndex + 4);
-		joint2Elements(m1, m2, jointLength, frequency, damp);
+		joint2Elements(m1, m2, jointLength, frequency, damp,true);
 
 		m1 = State.molecules.get(startIndex + 1);
 		m2 = State.molecules.get(startIndex + 3);
-		joint2Elements(m1, m2, jointLength, frequency, damp);
+		joint2Elements(m1, m2, jointLength, frequency, damp,true);
 
 		m1 = State.molecules.get(startIndex + 1);
 		m2 = State.molecules.get(startIndex + 5);
-		joint2Elements(m1, m2, jointLength, frequency, damp);
+		joint2Elements(m1, m2, jointLength, frequency, damp,true);
 
 		m1 = State.molecules.get(startIndex + 2);
 		m2 = State.molecules.get(startIndex + 4);
-		joint2Elements(m1, m2, jointLength, frequency, damp);
+		joint2Elements(m1, m2, jointLength, frequency, damp,true);
 
 		return res;
 	}

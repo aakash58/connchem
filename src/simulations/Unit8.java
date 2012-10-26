@@ -167,8 +167,8 @@ public class Unit8 extends UnitBase {
 		simulations[8].setupElements(elements8, spawnStyles8);
 		
 		simulations[9] = new Simulation(unitNum, 3, 3);
-		String[] elements9 = { "Sodium-Ion","Hydroxide", "Water" };
-		SpawnStyle[] spawnStyles9 = { SpawnStyle.Solvent,SpawnStyle.Solvent,SpawnStyle.Solvent};
+		String[] elements9 = { "Sodium-Hydroxide", "Water" };
+		SpawnStyle[] spawnStyles9 = { SpawnStyle.Precipitation,SpawnStyle.Solvent};
 		simulations[9].setupElements(elements9, spawnStyles9);
 		
 		simulations[10] = new Simulation(unitNum, 3, 4);
@@ -218,7 +218,7 @@ public class Unit8 extends UnitBase {
 		ionHash.put("Cyanide", new String [] {"Cyanide","Cyanide"});
 		ionHash.put("Hydrogen-Bromide", new String [] {"Hydrogen-Bromide","Hydrogen-Bromide"});
 		ionHash.put("Boron-Trichloride", new String[] {"Boron-Trichloride","Boron-Trichloride"});
-		ionHash.put("Chlorine-Ion", new String [] {"Chlorine-Ion","Chlorine-Ion"});
+		ionHash.put("Chlorine-Ion", new String [] {"Chlorine-Ion","Chloride"});
 		
 		setMoleculeDensity();
 	}
@@ -320,6 +320,8 @@ public class Unit8 extends UnitBase {
 				reactionHappened = reactSim1Set1(simulation);
 			else if(set==2)
 				reactionHappened = reactSim3Set2(simulation);
+			else if( set==3)
+				reactionHappened = reactSim1Set2(simulation);
 			else if(set==4)
 				reactionHappened = reactSim3Set4(simulation);
 			break;
@@ -376,7 +378,7 @@ public class Unit8 extends UnitBase {
 		Molecule ammonia = State.getMoleculeByName(ionHash.get("Ammonia")[electronView]);
 		Molecule hydrogen = State.getMoleculeByName(ionHash.get("Hydrogen-Chloride")[electronView]);
 
-		updatePositionTwoMolcules(ammonia,hydrogen,"Ammonium","Chlorine-Ion");
+		updatePositionTwoMolcules(ammonia,hydrogen,"Ammonium","Chloride");
 		return true;
 	}
 	
@@ -386,7 +388,7 @@ public class Unit8 extends UnitBase {
 		Molecule cyanide = State.getMoleculeByName(ionHash.get("Cyanide")[electronView]);
 		Molecule hydrogen = State.getMoleculeByName(ionHash.get("Hydrogen-Bromide")[electronView]);
 
-		updatePositionTwoMolcules(cyanide,hydrogen,"Hydrogen-Cyanide","Bromine-Ion");
+		updatePositionTwoMolcules(cyanide,hydrogen,"Hydrogen-Cyanide","Bromide");
 		return true;
 	}
 	
@@ -505,13 +507,27 @@ public class Unit8 extends UnitBase {
 					 pos = pos2;
 					 angle = second.getAngle();
 				}
-
-				Molecule newMole = new Molecule(pos.x,pos.y,product[i],box2d,p5Canvas,angle);	
+				String compoundName = product[i];
+				String svgFileName = null;
+				if(electronView==1)  //Lewis Law
+				{
+					svgFileName = new String(compoundName+"-Dots");
+			
+				}
+				else  //Bronsted Law
+				{
+					svgFileName = new String(compoundName);
+				}
+				Molecule newMole = new Molecule(pos.x,pos.y,compoundName,box2d,p5Canvas,angle,svgFileName);	
 				newMole.setLinearVelocity(new Vec2(0, 0));
 				newMole.setEnableAutoStateChange(false);
 				newMole.setState(mState.Gas);
 				newMole.setTransparent(1.0f);
 				newMole.setFixtureCatergory(Constants.NOTMOLE_BOUND_ID, Constants.BOUNDARY_ID);
+				if(this.electronView==1)
+				{
+					newMole.setImage(compoundName+"-Dots");
+				}
 				State.molecules.add(newMole);
 				newMolecules.add(newMole);
 				isFading = true;
@@ -852,7 +868,7 @@ public class Unit8 extends UnitBase {
 			for( int i = 0;i<State.molecules.size();i++)
 			{
 				mole = State.molecules.get(i);
-				//Change tableindex of Sodium-Ion from "Sodium-Bicarbonate" to "Sodium-Acetate"
+				//Change tableindex of Chlorine-Ion from "Hydrochloric-Acid" to "Chloride"
 				if(mole.getName().equals("Chlorine-Ion")&&mole.getTableIndex()==p5Canvas.getTableView().getIndexByName("Hydrochloric-Acid")&&!chlorineChanged)
 				{ 
 					int tableIndex = p5Canvas.getTableView().getIndexByName("Chloride");
@@ -874,14 +890,15 @@ public class Unit8 extends UnitBase {
 
 			p5Canvas.products.clear();
 			p5Canvas.killingList.clear();
+			return true;
 		}
 		
-		int hydroniumNum = State.getMoleculeNumByName("Hydronium");
-		int hydrogenNum = State.getMoleculeNumByName("Hydrogen-Ion");
-		if((float)hydrogenNum/(hydrogenNum+hydroniumNum)<hydrogenIonRatio)  //If there are too many hydrogen-Ion
-		{
-			 return breakApartCompound(simulation);
-		}
+//		int hydroniumNum = State.getMoleculeNumByName("Hydronium");
+//		int hydrogenNum = State.getMoleculeNumByName("Hydrogen-Ion");
+//		if((float)hydrogenNum/(hydrogenNum+hydroniumNum)<hydrogenIonRatio)  //If there are too many hydrogen-Ion
+//		{
+//			 return breakApartCompound(simulation);
+//		}
 		return false;
 	}
 	
@@ -892,61 +909,64 @@ public class Unit8 extends UnitBase {
 		if(!p5Canvas.isSimStarted) //Reaction has not started yet
 			return false;
 		
-		float conHF = getConByName("Hydrogen-Fluoride");
-		float conH3O = getConByName("Hydronium");
-		float conF = getConByName("Fluoride");
-		float currentRatio = conH3O*conF/conHF;
+		int numHydronium  = State.getMoleculeNumByName("Hydronium");
 		
-		if (p5Canvas.killingList.isEmpty())
-			return false;
-		if (p5Canvas.products != null && p5Canvas.products.size() > 0 && currentRatio<keq) {
-
-			int numToKill = p5Canvas.killingList.size();
-			Molecule[] mOld = new Molecule[numToKill];
-			for (int i = 0; i < numToKill; i++)
-				mOld[i] = (Molecule) p5Canvas.killingList.get(i);
-			// Molecule m2 = (Molecule) p5Canvas.killingList.get(1);
-
-			Molecule mNew = null;
-			Molecule mNew2 = null;
-
-			// Actually there is only one reaction going in each frame
-			for (int i = 0; i < p5Canvas.products.size(); i++) {
-				Vec2 loc = mOld[0].getPosition();
-				float x1 = PBox2D.scalarWorldToPixels(loc.x);
-				float y1 = p5Canvas.h * p5Canvas.canvasScale
-						- PBox2D.scalarWorldToPixels(loc.y);
-				Vec2 newVec = new Vec2(x1, y1);
-				mNew = new Molecule(newVec.x, newVec.y,
-						p5Canvas.products.get(i), box2d, p5Canvas,
-						(float) (Math.PI / 2));
-				mNew.setRatioKE(1 / simulation.getSpeed());
-				State.molecules.add(mNew);
-
-				//Add upward velocity
-				Vec2 velocity = mOld[0].body.getLinearVelocity();
-				mNew.body.setLinearVelocity(velocity);
-
-			}
-			for (int i = 0; i < numToKill; i++)
-				mOld[i].destroy();
-			p5Canvas.products.clear();
-			p5Canvas.killingList.clear();
-			updateCompoundNumber(simulation);
-			return true;
-		}
-		// Break up Compound if there are too many, in order to keep equalibrium
-		if (curTime != oldTime) {
-			
-			if (currentRatio>keq) // If PCl5 is over numberred,break them up			
-				{
+		
+		if (!p5Canvas.killingList.isEmpty())
+		{
+			if (p5Canvas.products != null && p5Canvas.products.size() > 0 && numHydronium<=1 ) {
+	
 				Random rand = new Random();
-				if (rand.nextFloat() < breakProbability) {
-					 return breakApartCompound(simulation);
+				if (rand.nextFloat() <= reactProbability) {				
+					int numToKill = p5Canvas.killingList.size();
+					Molecule[] mOld = new Molecule[numToKill];
+					for (int i = 0; i < numToKill; i++)
+						mOld[i] = (Molecule) p5Canvas.killingList.get(i);
+					// Molecule m2 = (Molecule) p5Canvas.killingList.get(1);
+		
+					Molecule mNew = null;
+					Molecule mNew2 = null;
+		
+					// Actually there is only one reaction going in each frame
+					for (int i = 0; i < p5Canvas.products.size(); i++) {
+						Vec2 loc = mOld[0].getPosition();
+						float x1 = PBox2D.scalarWorldToPixels(loc.x);
+						float y1 = p5Canvas.h * p5Canvas.canvasScale
+								- PBox2D.scalarWorldToPixels(loc.y);
+						Vec2 newVec = new Vec2(x1, y1);
+						mNew = new Molecule(newVec.x, newVec.y,
+								p5Canvas.products.get(i), box2d, p5Canvas,
+								(float) (Math.PI / 2));
+						mNew.setRatioKE(1 / simulation.getSpeed());
+						State.molecules.add(mNew);
+		
+						//Add upward velocity
+						Vec2 velocity = mOld[0].body.getLinearVelocity();
+						mNew.body.setLinearVelocity(velocity);
+		
+					}
+					for (int i = 0; i < numToKill; i++)
+						mOld[i].destroy();
+					p5Canvas.products.clear();
+					p5Canvas.killingList.clear();
+					updateCompoundNumber(simulation);
+					return true;
+				}
+				else 
+				{
+					p5Canvas.products.clear();
+					p5Canvas.killingList.clear();
 				}
 			}
-			oldTime = curTime;
 		}
+		// Break up Compound if there are too many, in order to keep equalibrium
+			
+			if (numHydronium >1) // If PCl5 is over numberred,break them up			
+			{
+					 return breakApartCompound(simulation);
+				
+			}
+		
 		return false;
 	}
 	
@@ -1163,64 +1183,62 @@ public class Unit8 extends UnitBase {
 		if(!p5Canvas.isSimStarted) //Reaction has not started yet
 			return false;
 		
-		float conNH3 = getConByName("Ammonia");
-		float conNH4 = getConByName("Ammonium");
-		float conOH = getConByName("Hydroxide");
-		float currentRatio = conNH4*conOH/conNH3;
+		int numHydroxide = State.getMoleculeNumByName("Hydroxide");
 		
-		if (p5Canvas.killingList.isEmpty())
-			return false;
+		if (!p5Canvas.killingList.isEmpty())
+		{		
+		if (p5Canvas.products != null && p5Canvas.products.size() > 0 && numHydroxide <= 1 ) {
+			Random rand = new Random();
+			if (rand.nextFloat() <= reactProbability) {	
+						
+					int numToKill = p5Canvas.killingList.size();
+					Molecule[] mOld = new Molecule[numToKill];
+					for (int i = 0; i < numToKill; i++)
+						mOld[i] = (Molecule) p5Canvas.killingList.get(i);
+					// Molecule m2 = (Molecule) p5Canvas.killingList.get(1);
 		
-		if (p5Canvas.products != null && p5Canvas.products.size() > 0 && currentRatio<keq) {
-
-			int numToKill = p5Canvas.killingList.size();
-			Molecule[] mOld = new Molecule[numToKill];
-			for (int i = 0; i < numToKill; i++)
-				mOld[i] = (Molecule) p5Canvas.killingList.get(i);
-			// Molecule m2 = (Molecule) p5Canvas.killingList.get(1);
-
-			Molecule mNew = null;
-			Molecule mNew2 = null;
-
-			// Actually there is only one reaction going in each frame
-			for (int i = 0; i < p5Canvas.products.size(); i++) {
-				Vec2 loc = mOld[0].getPosition();
-				float x1 = PBox2D.scalarWorldToPixels(loc.x);
-				float y1 = p5Canvas.h * p5Canvas.canvasScale
-						- PBox2D.scalarWorldToPixels(loc.y);
-				Vec2 newVec = new Vec2(x1, y1);
-				mNew = new Molecule(newVec.x, newVec.y,
-						p5Canvas.products.get(i), box2d, p5Canvas,
-						(float) (Math.PI / 2));
-				mNew.setRatioKE(1 / simulation.getSpeed());
-				mNew.setFreezingPoint(0);
-				mNew.setBoillingPoint(100);
-				State.molecules.add(mNew);
-
-				//Add upward velocity
-				Vec2 velocity = mOld[0].body.getLinearVelocity();
-				mNew.body.setLinearVelocity(velocity);
-
+					Molecule mNew = null;
+					Molecule mNew2 = null;
+		
+					// Actually there is only one reaction going in each frame
+					for (int i = 0; i < p5Canvas.products.size(); i++) {
+						Vec2 loc = mOld[0].getPosition();
+						float x1 = PBox2D.scalarWorldToPixels(loc.x);
+						float y1 = p5Canvas.h * p5Canvas.canvasScale
+								- PBox2D.scalarWorldToPixels(loc.y);
+						Vec2 newVec = new Vec2(x1, y1);
+						mNew = new Molecule(newVec.x, newVec.y,
+								p5Canvas.products.get(i), box2d, p5Canvas,
+								(float) (Math.PI / 2));
+						mNew.setRatioKE(1 / simulation.getSpeed());
+						mNew.setFreezingPoint(0);
+						mNew.setBoillingPoint(100);
+						State.molecules.add(mNew);
+		
+						//Add upward velocity
+						Vec2 velocity = mOld[0].body.getLinearVelocity();
+						mNew.body.setLinearVelocity(velocity);
+		
+					}
+					for (int i = 0; i < numToKill; i++)
+						mOld[i].destroy();
+					p5Canvas.products.clear();
+					p5Canvas.killingList.clear();
+					updateCompoundNumber(simulation);
+					return true;
 			}
-			for (int i = 0; i < numToKill; i++)
-				mOld[i].destroy();
-			p5Canvas.products.clear();
-			p5Canvas.killingList.clear();
-			updateCompoundNumber(simulation);
-			return true;
+			else
+			{
+				p5Canvas.products.clear();
+				p5Canvas.killingList.clear();
+			}
 		}
 		
 		// Break up Compound if there are too many, in order to keep equalibrium
-		if (curTime != oldTime) {
-			
-			if (currentRatio>keq) // If PCl5 is over numberred,break them up			
-				{
-				Random rand = new Random();
-				if (rand.nextFloat() < breakProbability) {
-					 return breakApartCompound(simulation);
-				}
-			}
-			oldTime = curTime;
+		}
+		if (numHydroxide>1) // If PCl5 is over numberred,break them up			
+		{
+			return breakApartCompound(simulation);
 		}
 		return false;
 	}
@@ -1583,25 +1601,25 @@ public class Unit8 extends UnitBase {
 			{
 				second = State.getMoleculeByName(ionHash.get("Hydrogen-Chloride")[electronView]);
 				first  = State.getMoleculeByName(ionHash.get("Sodium-Hydroxide")[electronView]);
-				initializeTwoMolcules(first	, second,(float)Math.PI,0.55f);
+				initializeTwoMolcules(first	, second,(float)Math.PI,0f,0.7f);
 			}
 			else if(set==2)
 			{
 				first = State.getMoleculeByName(ionHash.get("Ammonia")[electronView]);
 				second  = State.getMoleculeByName(ionHash.get("Hydrogen-Chloride")[electronView]);
-				initializeTwoMolcules(first	, second,(float)0,0.7f);
+				initializeTwoMolcules(first	, second,(float)Math.PI/2,(float)Math.PI,0.75f);
 			}
 			else if(set==3)
 			{
 				first = State.getMoleculeByName(ionHash.get("Cyanide")[electronView]);
 				second  = State.getMoleculeByName(ionHash.get("Hydrogen-Bromide")[electronView]);
-				initializeTwoMolcules(first	, second,(float)0f,0.7f);
+				initializeTwoMolcules(first	, second,(float)Math.PI,(float)Math.PI,1.1f);
 			}
 			else if(set==4)
 			{
 				first = State.getMoleculeByName(ionHash.get("Boron-Trichloride")[electronView]);
 				second  = State.getMoleculeByName(ionHash.get("Chlorine-Ion")[electronView]);
-				initializeTwoMolcules(first	, second,(float)-Math.PI/2,0.7f);
+				initializeTwoMolcules(first	, second,(float)Math.PI/2,0, 0.5f);
 			}
 	
 			
@@ -1612,7 +1630,7 @@ public class Unit8 extends UnitBase {
 	//Initialize the interpolators for later molecule update
 	//The first one rotates and the second translate
 	//minRangeRatio means the ratio of minimum distance between the two molecules
-	private void initializeTwoMolcules(Molecule first, Molecule second, float angle,float minRangeRatio)
+	private void initializeTwoMolcules(Molecule first, Molecule second, float angle1,float angle2,float minRangeRatio)
 	{
 
 		Vec2 posFirst = first.getPositionInPixel();
@@ -1632,16 +1650,19 @@ public class Unit8 extends UnitBase {
 			{
 				//first = - theta
 				//second = PI - theta
-				angleFirst = -theta;
-				angleSecond = (float) (Math.PI - theta);
+				angleFirst = theta;
+				angleSecond = (float) (theta-Math.PI);
 			}
 			else // posFirst.y < posSecond
 			{
 				//first = theta
 				//second = PI + theta
-				angleFirst = theta;
-				angleSecond = (float) (Math.PI + theta);
+				angleFirst = -theta;
+				angleSecond = (float) (Math.PI - theta);
 			}
+			
+			angleFirst+=angle1;
+			angleSecond+=angle2;
 //			angleBetween+=Math.PI + angle; 
 //			if(angleBetween>Math.PI)
 //			{
@@ -1733,14 +1754,14 @@ public class Unit8 extends UnitBase {
 		case 1:
 			if(set==1)
 			{
-				reactProbability = 0.25f;
+				reactProbability = 0.5f;
 			}
 			break;
 		case 2:
 			p5Canvas.isBoundaryShow = false;
 			p5Canvas.setIfConstrainKE(false);
 			p5Canvas.setEnableDrag(false);  //Disable drag function
-			if(electronView==0)  //Bronsted Law
+			if(electronView==0)  //Bronsted Lowry Law
 			{
 				hasFading = true;
 				//Set up simulation
@@ -1751,7 +1772,7 @@ public class Unit8 extends UnitBase {
 			}
 			else  //Lewis Law
 			{
-				hasFading = false;
+				hasFading = true;
 				//Set up simulation
 				for(String name: ionHash.keySet())
 				{
@@ -1764,6 +1785,14 @@ public class Unit8 extends UnitBase {
 			main.btnLewis.setEnabled(true);
 			break;
 		case 3:
+			if(set==1)
+				reactProbability = 0.25f;
+			else if(set==2)
+				reactProbability = 0.025f;
+			else if(set==3)
+				;
+			else if(set==4)
+				reactProbability = 0.025f;
 			break;
 		case 4:
 			if(set==4)
@@ -2216,7 +2245,7 @@ public class Unit8 extends UnitBase {
 			else if(set==2)
 				computeForceSim3Set2();
 			else if(set==3)
-				;
+				computeForceSim1Set2();
 			else if(set==4)
 				;
 			computeForceTopBoundary();
@@ -2753,7 +2782,7 @@ public class Unit8 extends UnitBase {
 					Molecule mole = molecules.get(molecules.size() - 1);
 					float scale = 0.3f;
 //					mole.setReactive(false);
-					if(p5Canvas.getSim()==1 && p5Canvas.getSet()==2)
+					if(simulation.isSimSelected(unitNum, 1, 2)|| simulation.isSimSelected(unitNum, 3, 3))
 						mole.setReactive(false);
 					mole.setLinearVelocity(new Vec2(0, 0));
 					// Make water lighter;
@@ -2766,6 +2795,106 @@ public class Unit8 extends UnitBase {
 
 		return res;
 	}
+	
+	
+	protected boolean addPrecipitation(boolean isAppEnable,
+			String compoundName, int count, Simulation simulation, float angle) {
+		boolean res = true;
+
+		int numRow = (int) Math.ceil((float) count / 5); // number of row
+		int numCol = (int) Math.ceil((float) count / numRow); // number of
+																// column
+
+		Vec2 size = Molecule.getShapeSize(compoundName, p5Canvas);
+
+		float increX = p5Canvas.w / 16;
+		float offsetX = size.x / 2 + size.x / 6;
+		float centerX = p5Canvas.x + offsetX; // X coordinate around which we
+												// are going to add
+		// Ions, 50 is border width
+		float centerY = p5Canvas.y + p5Canvas.h - size.y * numRow
+				- p5Canvas.boundaries.difVolume; // Y coordinate around
+		// which we are going to
+		// add Ions
+
+		Vec2 topLeft = new Vec2(centerX - size.x / 2, centerY - size.y / 2);
+		if (compoundName.equals("Ammonium-Chloride")
+				|| compoundName.equals("Sodium-Carbonate"))
+			topLeft = new Vec2(centerX - size.x, centerY - size.y);
+		Vec2 botRight = new Vec2(centerX + numCol * (size.x), centerY + numRow
+				* size.y);
+
+		boolean isClear = false;
+
+		Vec2 molePos = new Vec2(0, 0); // Molecule position parameter
+		Vec2 molePosInPix = new Vec2(0, 0);
+
+		// Check if there are any molecules in add area. If yes, add molecules
+		// to another area.
+		while (!isClear) {
+
+			// Reset flag
+			isClear = true;
+
+			for (int k = 0; k < molecules.size(); k++) {
+
+				if (!((String) molecules.get(k).getName()).equals("Water")) {
+					molePos.set(molecules.get(k).getPosition());
+					molePosInPix.set(box2d.coordWorldToPixels(molePos));
+
+					if (areaBodyCheck(molePosInPix, topLeft, botRight)) {
+						isClear = false;
+						break;
+					}
+				}
+			}
+			if (!isClear) {
+				centerX += increX;
+				topLeft = new Vec2(centerX - size.x / 2, centerY - size.y / 2);
+				if (compoundName.equals("Ammonium-Chloride")
+						|| compoundName.equals("Sodium-Carbonate"))
+					topLeft = new Vec2(centerX, centerY);
+				botRight = new Vec2(centerX + numCol * (size.x), centerY
+						+ numRow * size.y);
+				// If we have gone through all available areas.
+				if (botRight.x > (p5Canvas.x + p5Canvas.w)) {
+					isClear = true; // Ready to jump out
+					res = false; // Set output bolean flag to false
+					// TO DO: Show tooltip on Add button when we cant add more
+					// compounds
+				}
+			}
+		}
+		if (res) // If there is enough space, add compounds
+		{
+			if (compoundName.equals("Sodium-Carbonate"))
+				angle = 0;
+			for (int i = 0; i < count; i++) {
+				float x, y;
+
+				int r = i % numRow;
+				x = centerX + (i / numRow) * (size.x);
+
+				y = centerY + (i % numRow) * size.y;
+
+				molecules.add(new Molecule(x, y, compoundName, box2d, p5Canvas,
+						angle));
+
+				// Set precipitation inreactive
+				// Precipitation will get dissolved first, and the ions
+				// generated are reactive
+				int index = molecules.size() - 1;
+				Molecule m = molecules.get(index);
+				m.setReactive(false);
+
+				res = true;
+			}
+		}
+
+		return res;
+
+	}
+	
 	
 	/******************************************************************
 	 * FUNCTION : addGasMolecule DESCRIPTION : Function to add gas molecules to
@@ -2829,16 +2958,8 @@ public class Unit8 extends UnitBase {
 				String svgFileName = null;
 				if(electronView==1)  //Lewis Law
 				{
-					if(compoundName.equals("Hydroxide")||compoundName.equals("Ammonia")||compoundName.equals("Cyanide")||compoundName.equals("Boron-Trichloride"))
-					{
-						svgFileName = new String(compoundName+"-Dots");
-					}
-					else if(compoundName.equals("Chlorine-Atom")&& p5Canvas.getSim()==2 && p5Canvas.getSet()==4)
-					{
-						svgFileName = new String("Chloride-Dots");
-					}
-					else
-						svgFileName = new String(compoundName);
+					svgFileName = new String(compoundName+"-Dots");
+			
 				}
 				else  //Bronsted Law
 				{
@@ -2852,7 +2973,13 @@ public class Unit8 extends UnitBase {
 				newMole.setLinearVelocity(new Vec2(velocityX, velocityY));
 				newMole.setEnableAutoStateChange(false);
 				newMole.setState(mState.Gas);
-				//newMole.setGravityScale(0f);
+
+				if(electronView==1)  //Lewis Law
+				{
+					newMole.setImage(compoundName+"-Dots");
+			
+				}
+
 			}
 
 		}
